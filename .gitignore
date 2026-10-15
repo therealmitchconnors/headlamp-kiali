@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tar.gz
+*.tsbuildinfo
+*.log
+.eslintcache
+.DS_Store
