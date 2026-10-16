@@ -1,0 +1,1676 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "routes": [
+    {
+      "id": "route:*",
+      "path": "*",
+      "element": "<WildcardRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 164
+    },
+    {
+      "id": "route:/applications",
+      "path": "/applications",
+      "element": "<AppListPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 128
+    },
+    {
+      "id": "route:/graph/namespaces",
+      "path": "/graph/namespaces",
+      "element": "<GraphPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 112
+    },
+    {
+      "id": "route:/graph/node/namespaces/:namespace/aggregates/:aggregate/:aggregateValue",
+      "path": "/graph/node/namespaces/:namespace/aggregates/:aggregate/:aggregateValue",
+      "element": "<GraphRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 92
+    },
+    {
+      "id": "route:/graph/node/namespaces/:namespace/applications/:app",
+      "path": "/graph/node/namespaces/:namespace/applications/:app",
+      "element": "<GraphRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 100
+    },
+    {
+      "id": "route:/graph/node/namespaces/:namespace/applications/:app/versions/:version",
+      "path": "/graph/node/namespaces/:namespace/applications/:app/versions/:version",
+      "element": "<GraphRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 96
+    },
+    {
+      "id": "route:/graph/node/namespaces/:namespace/services/:service",
+      "path": "/graph/node/namespaces/:namespace/services/:service",
+      "element": "<GraphRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 104
+    },
+    {
+      "id": "route:/graph/node/namespaces/:namespace/workloads/:workload",
+      "path": "/graph/node/namespaces/:namespace/workloads/:workload",
+      "element": "<GraphRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 108
+    },
+    {
+      "id": "route:/istio",
+      "path": "/istio",
+      "element": "<IstioConfigListPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 152
+    },
+    {
+      "id": "route:/istio/new/:objectGroup/:objectVersion/:objectKind",
+      "path": "/istio/new/:objectGroup/:objectVersion/:objectKind",
+      "element": "<IstioConfigNewRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 148
+    },
+    {
+      "id": "route:/mesh",
+      "path": "/mesh",
+      "element": "<MeshPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 160
+    },
+    {
+      "id": "route:/namespaces",
+      "path": "/namespaces",
+      "element": "<NamespacesPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 88
+    },
+    {
+      "id": "route:/namespaces/:namespace",
+      "path": "/namespaces/:namespace",
+      "element": "<NamespaceDetailsRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 144
+    },
+    {
+      "id": "route:/namespaces/:namespace/applications/:app",
+      "path": "/namespaces/:namespace/applications/:app",
+      "element": "<AppDetailsRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 132
+    },
+    {
+      "id": "route:/namespaces/:namespace/istio/:objectGroup/:objectVersion/:objectKind/:objectName",
+      "path": "/namespaces/:namespace/istio/:objectGroup/:objectVersion/:objectKind/:objectName",
+      "element": "<IstioConfigDetailsRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 120
+    },
+    {
+      "id": "route:/namespaces/:namespace/services/:service",
+      "path": "/namespaces/:namespace/services/:service",
+      "element": "<ServiceDetailsRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 116
+    },
+    {
+      "id": "route:/namespaces/:namespace/workloads/:workload",
+      "path": "/namespaces/:namespace/workloads/:workload",
+      "element": "<WorkloadDetailsRoute />",
+      "source": "frontend/src/routes.tsx",
+      "line": 140
+    },
+    {
+      "id": "route:/overview",
+      "path": "/overview",
+      "element": "<OverviewPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 84
+    },
+    {
+      "id": "route:/services",
+      "path": "/services",
+      "element": "<ServiceListPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 124
+    },
+    {
+      "id": "route:/tracing",
+      "path": "/tracing",
+      "element": "<></>",
+      "source": "frontend/src/routes.tsx",
+      "line": 156
+    },
+    {
+      "id": "route:/workloads",
+      "path": "/workloads",
+      "element": "<WorkloadListPage />",
+      "source": "frontend/src/routes.tsx",
+      "line": 136
+    }
+  ],
+  "declarations": [
+    {
+      "id": "contract:frontend/src/types/Graph.ts#BoxByType.APP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 220,
+      "symbol": "BoxByType.APP",
+      "definition": "APP = 'app'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#BoxByType.CLUSTER",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 221,
+      "symbol": "BoxByType.CLUSTER",
+      "definition": "CLUSTER = 'cluster'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#BoxByType.DATAPLANE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 222,
+      "symbol": "BoxByType.DATAPLANE",
+      "definition": "DATAPLANE = 'dataplane'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#BoxByType.NAMESPACE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 223,
+      "symbol": "BoxByType.NAMESPACE",
+      "definition": "NAMESPACE = 'namespace'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.grpc",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 522,
+      "symbol": "DecoratedGraphEdgeData.grpc",
+      "definition": "grpc: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.grpcErr",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 523,
+      "symbol": "DecoratedGraphEdgeData.grpcErr",
+      "definition": "grpcErr: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.grpcNoResponse",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 524,
+      "symbol": "DecoratedGraphEdgeData.grpcNoResponse",
+      "definition": "grpcNoResponse: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.grpcPercentErr",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 525,
+      "symbol": "DecoratedGraphEdgeData.grpcPercentErr",
+      "definition": "grpcPercentErr: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.grpcPercentReq",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 526,
+      "symbol": "DecoratedGraphEdgeData.grpcPercentReq",
+      "definition": "grpcPercentReq: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.hasTraffic",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 529,
+      "symbol": "DecoratedGraphEdgeData.hasTraffic",
+      "definition": "hasTraffic?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.healthStatus",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 531,
+      "symbol": "DecoratedGraphEdgeData.healthStatus",
+      "definition": "healthStatus?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.http",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 532,
+      "symbol": "DecoratedGraphEdgeData.http",
+      "definition": "http: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.http3xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 533,
+      "symbol": "DecoratedGraphEdgeData.http3xx",
+      "definition": "http3xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.http4xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 534,
+      "symbol": "DecoratedGraphEdgeData.http4xx",
+      "definition": "http4xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.http5xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 535,
+      "symbol": "DecoratedGraphEdgeData.http5xx",
+      "definition": "http5xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.httpNoResponse",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 536,
+      "symbol": "DecoratedGraphEdgeData.httpNoResponse",
+      "definition": "httpNoResponse: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.httpPercentErr",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 537,
+      "symbol": "DecoratedGraphEdgeData.httpPercentErr",
+      "definition": "httpPercentErr: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.httpPercentReq",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 538,
+      "symbol": "DecoratedGraphEdgeData.httpPercentReq",
+      "definition": "httpPercentReq: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.isMTLS",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 540,
+      "symbol": "DecoratedGraphEdgeData.isMTLS",
+      "definition": "isMTLS: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.protocol",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 541,
+      "symbol": "DecoratedGraphEdgeData.protocol",
+      "definition": "protocol: ValidProtocols;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.responses",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 544,
+      "symbol": "DecoratedGraphEdgeData.responses",
+      "definition": "responses: Responses;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.responseTime",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 543,
+      "symbol": "DecoratedGraphEdgeData.responseTime",
+      "definition": "responseTime: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.tcp",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 545,
+      "symbol": "DecoratedGraphEdgeData.tcp",
+      "definition": "tcp: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.throughput",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 547,
+      "symbol": "DecoratedGraphEdgeData.throughput",
+      "definition": "throughput: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeData.waypoint",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 549,
+      "symbol": "DecoratedGraphEdgeData.waypoint",
+      "definition": "waypoint?: WaypointEdge;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphEdgeWrapper.data",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 557,
+      "symbol": "DecoratedGraphEdgeWrapper.data",
+      "definition": "data: DecoratedGraphEdgeData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphElements.edges",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 561,
+      "symbol": "DecoratedGraphElements.edges",
+      "definition": "edges?: DecoratedGraphEdgeWrapper[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphElements.nodes",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 562,
+      "symbol": "DecoratedGraphElements.nodes",
+      "definition": "nodes?: DecoratedGraphNodeWrapper[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.grpcIn",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 494,
+      "symbol": "DecoratedGraphNodeData.grpcIn",
+      "definition": "grpcIn: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.grpcInErr",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 495,
+      "symbol": "DecoratedGraphNodeData.grpcInErr",
+      "definition": "grpcInErr: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.grpcInNoResponse",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 496,
+      "symbol": "DecoratedGraphNodeData.grpcInNoResponse",
+      "definition": "grpcInNoResponse: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.grpcOut",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 497,
+      "symbol": "DecoratedGraphNodeData.grpcOut",
+      "definition": "grpcOut: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.health",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 498,
+      "symbol": "DecoratedGraphNodeData.health",
+      "definition": "health: Health;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.healthStatus",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 499,
+      "symbol": "DecoratedGraphNodeData.healthStatus",
+      "definition": "healthStatus: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpIn",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 500,
+      "symbol": "DecoratedGraphNodeData.httpIn",
+      "definition": "httpIn: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpIn3xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 501,
+      "symbol": "DecoratedGraphNodeData.httpIn3xx",
+      "definition": "httpIn3xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpIn4xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 502,
+      "symbol": "DecoratedGraphNodeData.httpIn4xx",
+      "definition": "httpIn4xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpIn5xx",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 503,
+      "symbol": "DecoratedGraphNodeData.httpIn5xx",
+      "definition": "httpIn5xx: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpInNoResponse",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 504,
+      "symbol": "DecoratedGraphNodeData.httpInNoResponse",
+      "definition": "httpInNoResponse: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.httpOut",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 505,
+      "symbol": "DecoratedGraphNodeData.httpOut",
+      "definition": "httpOut: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.isIstio",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 507,
+      "symbol": "DecoratedGraphNodeData.isIstio",
+      "definition": "isIstio?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.rank",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 509,
+      "symbol": "DecoratedGraphNodeData.rank",
+      "definition": "rank?: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.tcpIn",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 510,
+      "symbol": "DecoratedGraphNodeData.tcpIn",
+      "definition": "tcpIn: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.tcpOut",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 511,
+      "symbol": "DecoratedGraphNodeData.tcpOut",
+      "definition": "tcpOut: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeData.traffic",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 512,
+      "symbol": "DecoratedGraphNodeData.traffic",
+      "definition": "traffic: never;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DecoratedGraphNodeWrapper.data",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 553,
+      "symbol": "DecoratedGraphNodeWrapper.data",
+      "definition": "data: DecoratedGraphNodeData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DestService.cluster",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 327,
+      "symbol": "DestService.cluster",
+      "definition": "cluster: string;",
+      "additionalLines": [
+        333
+      ]
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DestService.name",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 328,
+      "symbol": "DestService.name",
+      "definition": "name: string;",
+      "additionalLines": [
+        334
+      ]
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#DestService.namespace",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 329,
+      "symbol": "DestService.namespace",
+      "definition": "namespace: string;",
+      "additionalLines": [
+        335
+      ]
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.RESPONSE_TIME_AVERAGE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 41,
+      "symbol": "EdgeLabelMode.RESPONSE_TIME_AVERAGE",
+      "definition": "RESPONSE_TIME_AVERAGE = 'avg'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.RESPONSE_TIME_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 42,
+      "symbol": "EdgeLabelMode.RESPONSE_TIME_GROUP",
+      "definition": "RESPONSE_TIME_GROUP = 'responseTime'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.RESPONSE_TIME_P50",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 43,
+      "symbol": "EdgeLabelMode.RESPONSE_TIME_P50",
+      "definition": "RESPONSE_TIME_P50 = 'rt50'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.RESPONSE_TIME_P95",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 44,
+      "symbol": "EdgeLabelMode.RESPONSE_TIME_P95",
+      "definition": "RESPONSE_TIME_P95 = 'rt95'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.RESPONSE_TIME_P99",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 45,
+      "symbol": "EdgeLabelMode.RESPONSE_TIME_P99",
+      "definition": "RESPONSE_TIME_P99 = 'rt99'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.THROUGHPUT_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 46,
+      "symbol": "EdgeLabelMode.THROUGHPUT_GROUP",
+      "definition": "THROUGHPUT_GROUP = 'throughput'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.THROUGHPUT_REQUEST",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 47,
+      "symbol": "EdgeLabelMode.THROUGHPUT_REQUEST",
+      "definition": "THROUGHPUT_REQUEST = 'throughputRequest'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.THROUGHPUT_RESPONSE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 48,
+      "symbol": "EdgeLabelMode.THROUGHPUT_RESPONSE",
+      "definition": "THROUGHPUT_RESPONSE = 'throughputResponse'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.TRAFFIC_DISTRIBUTION",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 49,
+      "symbol": "EdgeLabelMode.TRAFFIC_DISTRIBUTION",
+      "definition": "TRAFFIC_DISTRIBUTION = 'trafficDistribution'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeLabelMode.TRAFFIC_RATE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 50,
+      "symbol": "EdgeLabelMode.TRAFFIC_RATE",
+      "definition": "TRAFFIC_RATE = 'trafficRate'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeMode.ALL",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 35,
+      "symbol": "EdgeMode.ALL",
+      "definition": "ALL = 'all'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeMode.NONE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 36,
+      "symbol": "EdgeMode.NONE",
+      "definition": "NONE = 'none'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#EdgeMode.UNHEALTHY",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 37,
+      "symbol": "EdgeMode.UNHEALTHY",
+      "definition": "UNHEALTHY = 'unhealthy'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#ExtInfo.name",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 340,
+      "symbol": "ExtInfo.name",
+      "definition": "name: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#ExtInfo.url",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 341,
+      "symbol": "ExtInfo.url",
+      "definition": "url?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#FocusNode.id",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 251,
+      "symbol": "FocusNode.id",
+      "definition": "id: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#FocusNode.isSelected",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 252,
+      "symbol": "FocusNode.isSelected",
+      "definition": "isSelected?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphDefinition.duration",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 486,
+      "symbol": "GraphDefinition.duration",
+      "definition": "duration: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphDefinition.elements",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 487,
+      "symbol": "GraphDefinition.elements",
+      "definition": "elements: GraphElements;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphDefinition.graphType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 488,
+      "symbol": "GraphDefinition.graphType",
+      "definition": "graphType: GraphType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphDefinition.timestamp",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 489,
+      "symbol": "GraphDefinition.timestamp",
+      "definition": "timestamp: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.destPrincipal",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 442,
+      "symbol": "GraphEdgeData.destPrincipal",
+      "definition": "destPrincipal?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.healthStatus",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 443,
+      "symbol": "GraphEdgeData.healthStatus",
+      "definition": "healthStatus?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.id",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 444,
+      "symbol": "GraphEdgeData.id",
+      "definition": "id: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.isMTLS",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 445,
+      "symbol": "GraphEdgeData.isMTLS",
+      "definition": "isMTLS?: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.responseTime",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 446,
+      "symbol": "GraphEdgeData.responseTime",
+      "definition": "responseTime?: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.source",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 447,
+      "symbol": "GraphEdgeData.source",
+      "definition": "source: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.sourcePrincipal",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 448,
+      "symbol": "GraphEdgeData.sourcePrincipal",
+      "definition": "sourcePrincipal?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.target",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 449,
+      "symbol": "GraphEdgeData.target",
+      "definition": "target: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeData.traffic",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 450,
+      "symbol": "GraphEdgeData.traffic",
+      "definition": "traffic?: ProtocolTraffic;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphEdgeWrapper.data",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 458,
+      "symbol": "GraphEdgeWrapper.data",
+      "definition": "data: GraphEdgeData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElements.edges",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 462,
+      "symbol": "GraphElements.edges",
+      "definition": "edges?: GraphEdgeWrapper[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElements.nodes",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 463,
+      "symbol": "GraphElements.nodes",
+      "definition": "nodes?: GraphNodeWrapper[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.ambientTraffic",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 467,
+      "symbol": "GraphElementsQuery.ambientTraffic",
+      "definition": "ambientTraffic?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.appenders",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 468,
+      "symbol": "GraphElementsQuery.appenders",
+      "definition": "appenders?: AppenderString;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.boxBy",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 469,
+      "symbol": "GraphElementsQuery.boxBy",
+      "definition": "boxBy?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.duration",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 470,
+      "symbol": "GraphElementsQuery.duration",
+      "definition": "duration?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.graphType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 471,
+      "symbol": "GraphElementsQuery.graphType",
+      "definition": "graphType?: GraphType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.includeIdleEdges",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 472,
+      "symbol": "GraphElementsQuery.includeIdleEdges",
+      "definition": "includeIdleEdges?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.injectServiceNodes",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 473,
+      "symbol": "GraphElementsQuery.injectServiceNodes",
+      "definition": "injectServiceNodes?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.namespaces",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 474,
+      "symbol": "GraphElementsQuery.namespaces",
+      "definition": "namespaces?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.queryTime",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 475,
+      "symbol": "GraphElementsQuery.queryTime",
+      "definition": "queryTime?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.rateGrpc",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 476,
+      "symbol": "GraphElementsQuery.rateGrpc",
+      "definition": "rateGrpc?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.rateHttp",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 477,
+      "symbol": "GraphElementsQuery.rateHttp",
+      "definition": "rateHttp?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.rateTcp",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 478,
+      "symbol": "GraphElementsQuery.rateTcp",
+      "definition": "rateTcp?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.refreshInterval",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 479,
+      "symbol": "GraphElementsQuery.refreshInterval",
+      "definition": "refreshInterval?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.responseTime",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 480,
+      "symbol": "GraphElementsQuery.responseTime",
+      "definition": "responseTime?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.throughputType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 481,
+      "symbol": "GraphElementsQuery.throughputType",
+      "definition": "throughputType?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphElementsQuery.waypoints",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 482,
+      "symbol": "GraphElementsQuery.waypoints",
+      "definition": "waypoints?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphLayout.BreadthFirst",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 206,
+      "symbol": "GraphLayout.BreadthFirst",
+      "definition": "BreadthFirst = 'breadthfirst'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphLayout.Concentric",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 207,
+      "symbol": "GraphLayout.Concentric",
+      "definition": "Concentric = 'concentric'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphLayout.Dagre",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 208,
+      "symbol": "GraphLayout.Dagre",
+      "definition": "Dagre = 'dagre'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphLayout.Grid",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 209,
+      "symbol": "GraphLayout.Grid",
+      "definition": "Grid = 'grid'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeAppHealth.requests",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 369,
+      "symbol": "GraphNodeAppHealth.requests",
+      "definition": "requests: GraphRequestsHealth;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeAppHealth.workloadStatuses",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 370,
+      "symbol": "GraphNodeAppHealth.workloadStatuses",
+      "definition": "workloadStatuses: GraphWorkloadStatus[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.aggregate",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 386,
+      "symbol": "GraphNodeData.aggregate",
+      "definition": "aggregate?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.aggregateValue",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 387,
+      "symbol": "GraphNodeData.aggregateValue",
+      "definition": "aggregateValue?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.app",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 388,
+      "symbol": "GraphNodeData.app",
+      "definition": "app?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.cluster",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 389,
+      "symbol": "GraphNodeData.cluster",
+      "definition": "cluster: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.destServices",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 390,
+      "symbol": "GraphNodeData.destServices",
+      "definition": "destServices?: DestService[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasCB",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 391,
+      "symbol": "GraphNodeData.hasCB",
+      "definition": "hasCB?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasFaultInjection",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 392,
+      "symbol": "GraphNodeData.hasFaultInjection",
+      "definition": "hasFaultInjection?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasIngressWaypoint",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 393,
+      "symbol": "GraphNodeData.hasIngressWaypoint",
+      "definition": "hasIngressWaypoint?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasMirroring",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 394,
+      "symbol": "GraphNodeData.hasMirroring",
+      "definition": "hasMirroring?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasRequestRouting",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 395,
+      "symbol": "GraphNodeData.hasRequestRouting",
+      "definition": "hasRequestRouting?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasRequestTimeout",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 396,
+      "symbol": "GraphNodeData.hasRequestTimeout",
+      "definition": "hasRequestTimeout?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasTCPTrafficShifting",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 397,
+      "symbol": "GraphNodeData.hasTCPTrafficShifting",
+      "definition": "hasTCPTrafficShifting?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasTrafficShifting",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 398,
+      "symbol": "GraphNodeData.hasTrafficShifting",
+      "definition": "hasTrafficShifting?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasVS",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 399,
+      "symbol": "GraphNodeData.hasVS",
+      "definition": "hasVS?: {\n    hostnames?: string[];\n  };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.hasWorkloadEntry",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 402,
+      "symbol": "GraphNodeData.hasWorkloadEntry",
+      "definition": "hasWorkloadEntry?: WEInfo[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.healthData",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 403,
+      "symbol": "GraphNodeData.healthData",
+      "definition": "healthData?: GraphNodeHealthData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.id",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 404,
+      "symbol": "GraphNodeData.id",
+      "definition": "id: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isAmbient",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 405,
+      "symbol": "GraphNodeData.isAmbient",
+      "definition": "isAmbient?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isBox",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 406,
+      "symbol": "GraphNodeData.isBox",
+      "definition": "isBox?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isDead",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 407,
+      "symbol": "GraphNodeData.isDead",
+      "definition": "isDead?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isExtension",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 408,
+      "symbol": "GraphNodeData.isExtension",
+      "definition": "isExtension?: ExtInfo;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isGateway",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 409,
+      "symbol": "GraphNodeData.isGateway",
+      "definition": "isGateway?: {\n    egressInfo?: {\n      hostnames?: string[];\n    };\n    gatewayAPIInfo?: {\n      hostnames?: string[];\n    };\n    ingressInfo?: {\n      hostnames?: string[];\n    };\n  };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isIdle",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 420,
+      "symbol": "GraphNodeData.isIdle",
+      "definition": "isIdle?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isInaccessible",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 421,
+      "symbol": "GraphNodeData.isInaccessible",
+      "definition": "isInaccessible?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isInjected",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 422,
+      "symbol": "GraphNodeData.isInjected",
+      "definition": "isInjected?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isK8sGatewayAPI",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 423,
+      "symbol": "GraphNodeData.isK8sGatewayAPI",
+      "definition": "isK8sGatewayAPI?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isMisconfigured",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 424,
+      "symbol": "GraphNodeData.isMisconfigured",
+      "definition": "isMisconfigured?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isOutOfMesh",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 425,
+      "symbol": "GraphNodeData.isOutOfMesh",
+      "definition": "isOutOfMesh?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isOutside",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 426,
+      "symbol": "GraphNodeData.isOutside",
+      "definition": "isOutside?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isRoot",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 427,
+      "symbol": "GraphNodeData.isRoot",
+      "definition": "isRoot?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isServiceEntry",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 428,
+      "symbol": "GraphNodeData.isServiceEntry",
+      "definition": "isServiceEntry?: SEInfo;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.isWaypoint",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 429,
+      "symbol": "GraphNodeData.isWaypoint",
+      "definition": "isWaypoint?: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.labels",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 430,
+      "symbol": "GraphNodeData.labels",
+      "definition": "labels?: { [key: string]: string };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.namespace",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 431,
+      "symbol": "GraphNodeData.namespace",
+      "definition": "namespace: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.nodeType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 432,
+      "symbol": "GraphNodeData.nodeType",
+      "definition": "nodeType: NodeType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.parent",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 433,
+      "symbol": "GraphNodeData.parent",
+      "definition": "parent?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.service",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 434,
+      "symbol": "GraphNodeData.service",
+      "definition": "service?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.traffic",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 435,
+      "symbol": "GraphNodeData.traffic",
+      "definition": "traffic?: ProtocolTraffic[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.version",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 436,
+      "symbol": "GraphNodeData.version",
+      "definition": "version?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeData.workload",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 437,
+      "symbol": "GraphNodeData.workload",
+      "definition": "workload?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeServiceHealth.requests",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 379,
+      "symbol": "GraphNodeServiceHealth.requests",
+      "definition": "requests: GraphRequestsHealth;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeWorkloadHealth.requests",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 374,
+      "symbol": "GraphNodeWorkloadHealth.requests",
+      "definition": "requests: GraphRequestsHealth;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeWorkloadHealth.workloadStatus",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 375,
+      "symbol": "GraphNodeWorkloadHealth.workloadStatus",
+      "definition": "workloadStatus: GraphWorkloadStatus;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphNodeWrapper.data",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 454,
+      "symbol": "GraphNodeWrapper.data",
+      "definition": "data: GraphNodeData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphRequestsHealth.healthAnnotations",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 355,
+      "symbol": "GraphRequestsHealth.healthAnnotations",
+      "definition": "healthAnnotations: { [idx: string]: string };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphRequestsHealth.inbound",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 356,
+      "symbol": "GraphRequestsHealth.inbound",
+      "definition": "inbound: { [idx: string]: { [idx: string]: number } };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphRequestsHealth.outbound",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 357,
+      "symbol": "GraphRequestsHealth.outbound",
+      "definition": "outbound: { [idx: string]: { [idx: string]: number } };"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphType.APP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 213,
+      "symbol": "GraphType.APP",
+      "definition": "APP = 'app'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphType.SERVICE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 214,
+      "symbol": "GraphType.SERVICE",
+      "definition": "SERVICE = 'service'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphType.VERSIONED_APP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 215,
+      "symbol": "GraphType.VERSIONED_APP",
+      "definition": "VERSIONED_APP = 'versionedApp'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphType.WORKLOAD",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 216,
+      "symbol": "GraphType.WORKLOAD",
+      "definition": "WORKLOAD = 'workload'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphWorkloadStatus.availableReplicas",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 361,
+      "symbol": "GraphWorkloadStatus.availableReplicas",
+      "definition": "availableReplicas: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphWorkloadStatus.currentReplicas",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 362,
+      "symbol": "GraphWorkloadStatus.currentReplicas",
+      "definition": "currentReplicas: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphWorkloadStatus.desiredReplicas",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 363,
+      "symbol": "GraphWorkloadStatus.desiredReplicas",
+      "definition": "desiredReplicas: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphWorkloadStatus.name",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 364,
+      "symbol": "GraphWorkloadStatus.name",
+      "definition": "name: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#GraphWorkloadStatus.syncedProxies",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 365,
+      "symbol": "GraphWorkloadStatus.syncedProxies",
+      "definition": "syncedProxies: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#LayoutType.Layout",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 199,
+      "symbol": "LayoutType.Layout",
+      "definition": "Layout = 'layout'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#LayoutType.LayoutNoFit",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 200,
+      "symbol": "LayoutType.LayoutNoFit",
+      "definition": "LayoutNoFit = 'layoutNoFit'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#LayoutType.Resize",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 201,
+      "symbol": "LayoutType.Resize",
+      "definition": "Resize = 'resize'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.aggregate",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 239,
+      "symbol": "NodeParamsType.aggregate",
+      "definition": "aggregate?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.aggregateValue",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 240,
+      "symbol": "NodeParamsType.aggregateValue",
+      "definition": "aggregateValue?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.app",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 241,
+      "symbol": "NodeParamsType.app",
+      "definition": "app: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.cluster",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 242,
+      "symbol": "NodeParamsType.cluster",
+      "definition": "cluster?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.namespace",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 243,
+      "symbol": "NodeParamsType.namespace",
+      "definition": "namespace: Namespace;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.nodeType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 244,
+      "symbol": "NodeParamsType.nodeType",
+      "definition": "nodeType: NodeType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.service",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 245,
+      "symbol": "NodeParamsType.service",
+      "definition": "service: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.version",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 246,
+      "symbol": "NodeParamsType.version",
+      "definition": "version?: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeParamsType.workload",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 247,
+      "symbol": "NodeParamsType.workload",
+      "definition": "workload: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.AGGREGATE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 227,
+      "symbol": "NodeType.AGGREGATE",
+      "definition": "AGGREGATE = 'aggregate'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.APP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 228,
+      "symbol": "NodeType.APP",
+      "definition": "APP = 'app'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.BOX",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 229,
+      "symbol": "NodeType.BOX",
+      "definition": "BOX = 'box'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.SERVICE",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 230,
+      "symbol": "NodeType.SERVICE",
+      "definition": "SERVICE = 'service'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.UNKNOWN",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 231,
+      "symbol": "NodeType.UNKNOWN",
+      "definition": "UNKNOWN = 'unknown'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#NodeType.WORKLOAD",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 232,
+      "symbol": "NodeType.WORKLOAD",
+      "definition": "WORKLOAD = 'workload'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#Protocol.GRPC",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 16,
+      "symbol": "Protocol.GRPC",
+      "definition": "GRPC = 'grpc'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#Protocol.HTTP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 17,
+      "symbol": "Protocol.HTTP",
+      "definition": "HTTP = 'http'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#Protocol.TCP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 18,
+      "symbol": "Protocol.TCP",
+      "definition": "TCP = 'tcp'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#RankMode.RANK_BY_INBOUND_EDGES",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 72,
+      "symbol": "RankMode.RANK_BY_INBOUND_EDGES",
+      "definition": "RANK_BY_INBOUND_EDGES = 'inboundEdges'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#RankMode.RANK_BY_OUTBOUND_EDGES",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 73,
+      "symbol": "RankMode.RANK_BY_OUTBOUND_EDGES",
+      "definition": "RANK_BY_OUTBOUND_EDGES = 'outboundEdges'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SEInfo.hosts",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 345,
+      "symbol": "SEInfo.hosts",
+      "definition": "hosts: string[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SEInfo.location",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 346,
+      "symbol": "SEInfo.location",
+      "definition": "location: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SEInfo.namespace",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 347,
+      "symbol": "SEInfo.namespace",
+      "definition": "namespace: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryData.summaryTarget",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 11,
+      "symbol": "SummaryData.summaryTarget",
+      "definition": "summaryTarget: GraphElement | Controller;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryData.summaryType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 12,
+      "symbol": "SummaryData.summaryType",
+      "definition": "summaryType: SummaryType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.data",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 22,
+      "symbol": "SummaryPanelPropType.data",
+      "definition": "data: SummaryData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.duration",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 23,
+      "symbol": "SummaryPanelPropType.duration",
+      "definition": "duration: DurationInSeconds;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.graphType",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 24,
+      "symbol": "SummaryPanelPropType.graphType",
+      "definition": "graphType: GraphType;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.injectServiceNodes",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 25,
+      "symbol": "SummaryPanelPropType.injectServiceNodes",
+      "definition": "injectServiceNodes: boolean;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.kiosk",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 26,
+      "symbol": "SummaryPanelPropType.kiosk",
+      "definition": "kiosk: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.namespaces",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 27,
+      "symbol": "SummaryPanelPropType.namespaces",
+      "definition": "namespaces: Namespace[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.queryTime",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 28,
+      "symbol": "SummaryPanelPropType.queryTime",
+      "definition": "queryTime: TimeInSeconds;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.rateInterval",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 29,
+      "symbol": "SummaryPanelPropType.rateInterval",
+      "definition": "rateInterval: string;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.step",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 30,
+      "symbol": "SummaryPanelPropType.step",
+      "definition": "step: number;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#SummaryPanelPropType.trafficRates",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 31,
+      "symbol": "SummaryPanelPropType.trafficRates",
+      "definition": "trafficRates: TrafficRate[];"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.AMBIENT_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 87,
+      "symbol": "TrafficRate.AMBIENT_GROUP",
+      "definition": "AMBIENT_GROUP = 'ambient'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.AMBIENT_TOTAL",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 86,
+      "symbol": "TrafficRate.AMBIENT_TOTAL",
+      "definition": "AMBIENT_TOTAL = 'ambientTotal'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.AMBIENT_WAYPOINT",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 88,
+      "symbol": "TrafficRate.AMBIENT_WAYPOINT",
+      "definition": "AMBIENT_WAYPOINT = 'ambientWaypoint'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.AMBIENT_ZTUNNEL",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 89,
+      "symbol": "TrafficRate.AMBIENT_ZTUNNEL",
+      "definition": "AMBIENT_ZTUNNEL = 'ambientZtunnel'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.GRPC_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 90,
+      "symbol": "TrafficRate.GRPC_GROUP",
+      "definition": "GRPC_GROUP = 'grpc'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.GRPC_RECEIVED",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 91,
+      "symbol": "TrafficRate.GRPC_RECEIVED",
+      "definition": "GRPC_RECEIVED = 'grpcReceived'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.GRPC_REQUEST",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 92,
+      "symbol": "TrafficRate.GRPC_REQUEST",
+      "definition": "GRPC_REQUEST = 'grpcRequest'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.GRPC_SENT",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 93,
+      "symbol": "TrafficRate.GRPC_SENT",
+      "definition": "GRPC_SENT = 'grpcSent'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.GRPC_TOTAL",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 94,
+      "symbol": "TrafficRate.GRPC_TOTAL",
+      "definition": "GRPC_TOTAL = 'grpcTotal'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.HTTP_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 95,
+      "symbol": "TrafficRate.HTTP_GROUP",
+      "definition": "HTTP_GROUP = 'http'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.HTTP_REQUEST",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 96,
+      "symbol": "TrafficRate.HTTP_REQUEST",
+      "definition": "HTTP_REQUEST = 'httpRequest'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.TCP_GROUP",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 97,
+      "symbol": "TrafficRate.TCP_GROUP",
+      "definition": "TCP_GROUP = 'tcp'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.TCP_RECEIVED",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 98,
+      "symbol": "TrafficRate.TCP_RECEIVED",
+      "definition": "TCP_RECEIVED = 'tcpReceived'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.TCP_SENT",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 99,
+      "symbol": "TrafficRate.TCP_SENT",
+      "definition": "TCP_SENT = 'tcpSent'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#TrafficRate.TCP_TOTAL",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 100,
+      "symbol": "TrafficRate.TCP_TOTAL",
+      "definition": "TCP_TOTAL = 'tcpTotal'"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#WaypointEdge.direction",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 516,
+      "symbol": "WaypointEdge.direction",
+      "definition": "direction: 'to' | 'from';"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#WaypointEdge.fromEdge",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 517,
+      "symbol": "WaypointEdge.fromEdge",
+      "definition": "fromEdge?: DecoratedGraphEdgeData;"
+    },
+    {
+      "id": "contract:frontend/src/types/Graph.ts#WEInfo.name",
+      "source": "frontend/src/types/Graph.ts",
+      "line": 351,
+      "symbol": "WEInfo.name",
+      "definition": "name: string;"
+    }
+  ]
+}

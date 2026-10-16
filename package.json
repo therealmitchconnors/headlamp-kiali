@@ -14,7 +14,8 @@
     "storybook": "headlamp-plugin storybook",
     "storybook-build": "headlamp-plugin storybook-build",
     "test": "headlamp-plugin test",
-    "i18n": "headlamp-plugin i18n"
+    "i18n": "headlamp-plugin i18n",
+    "parity:check": "node scripts/parity/check-catalog.mjs"
   },
   "keywords": [
     "headlamp",
@@ -37,5 +38,10 @@
   },
   "devDependencies": {
     "@kinvolk/headlamp-plugin": "^0.14.0"
+  },
+  "headlamp": {
+    "i18n": [
+      "en"
+    ]
   }
 }

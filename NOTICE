@@ -40,3 +40,15 @@ Submitted on behalf of a third-party: @calvin-puram
 Submitted on behalf of a third-party: @devjoes
 Submitted on behalf of a third-party: gaojinhua
 Submitted on behalf of a third-party: yuri.yin
+
+Kiali native-port material:
+The health primitives and generated parity evidence derive from Kiali v2.33.0,
+commit 0e8be887b8217bbcac5e3ae0bfcd258073949cca, licensed under Apache-2.0.
+Source: https://github.com/kiali/kiali
+Detailed source identities and reproduction instructions: test-files/README.md.
+
+Istio example manifests:
+Bookinfo and example Prometheus manifests are reproduced from Istio 1.30.6,
+commit b85dac9587f2f997151d205e069e4f4ff091c7c5, under Apache-2.0.
+Source: https://github.com/istio/istio
+Their original content is preserved; development overlays are separate files.

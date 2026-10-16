@@ -4,9 +4,29 @@ A Headlamp plugin for Kiali, scaffolded with
 `@kinvolk/headlamp-plugin@0.14.0` following the
 [Headlamp getting-started guide](https://headlamp.dev/docs/latest/development/plugins/getting-started/).
 
-This is the initial plugin scaffold: it adds **Kiali** to Headlamp's app bar.
-Kiali API integration, service-mesh views, and cluster installation are not implemented yet.
+The first native slice adds a **Kiali** sidebar with an overview, namespace and
+Service lists, workload-kind tabs, and per-cluster connection settings.
+Namespace filters and resource details reuse Headlamp's native components.
+The overview checks Istio API availability and an explicitly configured existing
+Prometheus Service through Headlamp's Kubernetes proxy.
+
+This is **not full Kiali parity**: application correlation, Istio configuration
+views/actions, traffic graphs, metric charts, mesh-health calculations and
+validation are still planned. The workload tabs currently cover Deployments,
+StatefulSets, DaemonSets, Jobs and CronJobs. Resource names open Headlamp's
+built-in detail view or drawer, not a Kiali-specific detail page.
+The initial browsing routes require one selected cluster and do not expose
+create/delete/bulk actions. Headlamp's own resource details keep their existing
+behavior.
+
+The plugin does not install cluster components. An optional, explicitly requested
+development setup runs managed Istio, Bookinfo and example Prometheus; see the
+[fixture guide](test-files/README.md#live-aks-automatic-setup).
 The repository root is the plugin directory.
+
+See [the parity ledger](docs/parity.md) for scope, implementation evidence and
+Desktop/web capability gaps, and [the fixture guide](test-files/README.md) for
+reproducible checks. Full parity is not claimed.
 
 ## Development
 
@@ -21,9 +41,12 @@ npm start
 The lockfile pins dependency versions and integrity hashes without hard-coding
 a registry mirror; `.npmrc` keeps it portable across npm registry configurations.
 
-`npm start` watches the source and builds into Headlamp's development-plugin
-directory. For a packaged Headlamp Desktop app, enable **Settings > Plugins >
-Plugin Development Mode**, then check the app bar for **Kiali**.
+`npm start` watches the source. The pinned 0.14.0 toolchain copies its output to
+Headlamp's normal `plugins/kiali` directory (on macOS,
+`~/Library/Application Support/Headlamp/plugins/kiali`), not `dev-plugins`.
+Follow the actual CLI output when using other toolchain versions; newer
+Headlamp development-directory flows may require Plugin Development Mode.
+The native slice has been loaded in Headlamp 0.35.0 Desktop and hosted-web mode.
 
 ```sh
 npm run tsc
@@ -34,9 +57,32 @@ npm run package
 
 The production build is written to `dist/main.js`; packaging creates a tarball
 for installation into Headlamp's plugins directory. The scaffold also provides
-formatting, Storybook, i18n, and Vitest commands in `package.json`; no tests have
-been authored yet. A successful build alone does not verify loading in Headlamp:
-check the app bar contribution and browser console in a running instance.
+formatting, Storybook, i18n, and Vitest commands in `package.json`.
+Run `npm run parity:check` and `CI=1 npm test` for the offline inventory and
+core-logic checks. A successful build alone does not verify loading in Headlamp:
+check the actual Kiali route and browser console in a running instance.
+
+## Using the native slice
+
+Select one cluster, then open **Kiali > Overview**. Istio API presence is reported
+separately from control-plane health: having the CRDs does not prove a healthy
+mesh. Resource browsing works without configuring Prometheus.
+
+Under **Kiali > Connection settings** (also available in Headlamp's plugin
+settings), select a cluster and enable an existing Prometheus Service connection.
+Enter its namespace, Service name, numeric or named port, and optional base path.
+Use **Check connection**, then **Save cluster settings**. Settings are stored per
+cluster in the current browser profile; the overview reacts to saved changes.
+No kubeconfig, tokens, external URL or other credentials are stored by this form.
+
+For the supplied demo, the endpoint is `istio-system/prometheus:9090`, with an
+empty base path. Missing, forbidden, unauthenticated and malformed responses are
+reported explicitly. Unknown configuration versions are not silently overwritten;
+resetting invalid Kiali settings requires confirmation.
+
+Use the native namespace selector to limit Services and Workloads to `bookinfo`.
+Workload-kind selection is kept in the URL. Replica counts are Kubernetes
+readiness only; they are not the ported Kiali mesh-health calculation.
 
 ## Agent skills
 

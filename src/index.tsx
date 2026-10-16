@@ -14,6 +14,40 @@
  * limitations under the License.
  */
 
-import { registerAppBarAction } from '@kinvolk/headlamp-plugin/lib';
+import {
+  registerPluginSettings,
+  registerRoute,
+  registerSidebarEntry,
+} from '@kinvolk/headlamp-plugin/lib';
+import Overview from './components/Overview';
+import { Namespaces, Services, Workloads } from './components/Resources';
+import Settings from './components/Settings';
 
-registerAppBarAction(<span>Kiali</span>);
+registerSidebarEntry({
+  name: 'kiali',
+  label: 'Kiali',
+  url: '/kiali/overview',
+  icon: 'mdi:graph-outline',
+});
+
+const pages = [
+  { name: 'overview', label: 'Overview', component: Overview },
+  { name: 'namespaces', label: 'Namespaces', component: Namespaces },
+  { name: 'services', label: 'Services', component: Services },
+  { name: 'workloads', label: 'Workloads', component: Workloads },
+  { name: 'settings', label: 'Connection settings', component: Settings },
+];
+
+for (const page of pages) {
+  const name = `kiali-${page.name}`;
+  registerSidebarEntry({ parent: 'kiali', name, label: page.label, url: `/kiali/${page.name}` });
+  registerRoute({
+    name,
+    path: `/kiali/${page.name}`,
+    sidebar: name,
+    exact: true,
+    component: page.component,
+  });
+}
+
+registerPluginSettings('kiali', Settings, false);

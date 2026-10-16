@@ -28,6 +28,14 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   `kubectl --context <context> ...` to changing the user's active context.
 - Shell working directories do not persist between tool calls. Run commands
   from the plugin root explicitly when needed.
+- The pinned 0.14.0 toolchain's `npm start` copies to Headlamp's normal
+  `plugins/<name>` directory, not `dev-plugins`. Follow the installed tool's
+  actual output; do not assume the upstream skill's installation path or
+  hand-create symlinks. Preserve an installed production package when stopping
+  a temporary verification watcher.
+- SDK declarations can be newer than the running host's resource helpers:
+  Headlamp 0.35.0's Service instances lack `getFormattedPorts`. Prefer stable
+  resource JSON fields where necessary, and verify new helper calls live.
 - `pr-triage` contains Headlamp-specific commit conventions. Consult this
   repository's actual history and contribution rules instead of assuming those
   conventions apply here.

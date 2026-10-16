@@ -1,0 +1,3645 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": [
+    {
+      "path": "models/health.go",
+      "blob": "d3df3111150fc1143c7678fdf73c3b898a0e0487"
+    },
+    {
+      "path": "models/health_status.go",
+      "blob": "1aab7bf024eac81f1e8093a85cbad040c4eb6f27"
+    }
+  ],
+  "merges": [
+    {
+      "expected": "Healthy",
+      "first": "Healthy",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Healthy",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "Healthy",
+      "second": "Failure"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Healthy",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "Healthy",
+      "first": "Healthy",
+      "second": "NA"
+    },
+    {
+      "expected": "Healthy",
+      "first": "Healthy",
+      "second": "Unknown"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Degraded",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Degraded",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "Degraded",
+      "second": "Failure"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Degraded",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Degraded",
+      "second": "NA"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Degraded",
+      "second": "Unknown"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "Failure"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "NA"
+    },
+    {
+      "expected": "Failure",
+      "first": "Failure",
+      "second": "Unknown"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Not Ready",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Not Ready",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "Not Ready",
+      "second": "Failure"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Not Ready",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Not Ready",
+      "second": "NA"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Not Ready",
+      "second": "Unknown"
+    },
+    {
+      "expected": "Healthy",
+      "first": "NA",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Degraded",
+      "first": "NA",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "NA",
+      "second": "Failure"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "NA",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "NA",
+      "first": "NA",
+      "second": "NA"
+    },
+    {
+      "expected": "Unknown",
+      "first": "NA",
+      "second": "Unknown"
+    },
+    {
+      "expected": "Healthy",
+      "first": "Unknown",
+      "second": "Healthy"
+    },
+    {
+      "expected": "Degraded",
+      "first": "Unknown",
+      "second": "Degraded"
+    },
+    {
+      "expected": "Failure",
+      "first": "Unknown",
+      "second": "Failure"
+    },
+    {
+      "expected": "Not Ready",
+      "first": "Unknown",
+      "second": "Not Ready"
+    },
+    {
+      "expected": "NA",
+      "first": "Unknown",
+      "second": "NA"
+    },
+    {
+      "expected": "Unknown",
+      "first": "Unknown",
+      "second": "Unknown"
+    }
+  ],
+  "priorities": [
+    {
+      "expected": 1,
+      "input": "Healthy"
+    },
+    {
+      "expected": 3,
+      "input": "Degraded"
+    },
+    {
+      "expected": 4,
+      "input": "Failure"
+    },
+    {
+      "expected": 2,
+      "input": "Not Ready"
+    },
+    {
+      "expected": 0,
+      "input": "NA"
+    },
+    {
+      "expected": 0,
+      "input": "Unknown"
+    }
+  ],
+  "requests": [
+    {
+      "expected": {
+        "errorRatio": -1,
+        "inbound": 0,
+        "outbound": 0,
+        "total": 0
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": null,
+        "outbound": null
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": -1,
+        "inbound": 0,
+        "outbound": 0,
+        "total": 0
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {},
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0,
+        "inbound": 100,
+        "outbound": 0,
+        "total": 100
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 100
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.1,
+        "inbound": 100,
+        "outbound": 0,
+        "total": 100
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 90,
+            "500": 10
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.2,
+        "inbound": 100,
+        "outbound": 0,
+        "total": 100
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 80,
+            "404": 20
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.2,
+        "inbound": 100,
+        "outbound": 0,
+        "total": 100
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 80,
+            "404": 10,
+            "503": 10
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.1,
+        "inbound": 10,
+        "outbound": 90,
+        "total": 100
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "500": 10
+          }
+        },
+        "outbound": {
+          "http": {
+            "200": 90
+          }
+        }
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": -1,
+        "inbound": 0,
+        "outbound": 0,
+        "total": 0
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 0,
+            "500": 0
+          }
+        },
+        "outbound": null
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0,
+        "inbound": 15,
+        "outbound": 0,
+        "total": 15
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "grpc": {
+            "0": 12,
+            "14": 3
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0,
+        "inbound": 10,
+        "outbound": 0,
+        "total": 10
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "tcp": {
+            "": 10
+          }
+        },
+        "outbound": {}
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.5,
+        "inbound": 1,
+        "outbound": 0.5,
+        "total": 1.5
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": {
+          "http": {
+            "200": 0.75,
+            "404": 0.25
+          }
+        },
+        "outbound": {
+          "http": {
+            "503": 0.5
+          }
+        }
+      }
+    },
+    {
+      "expected": {
+        "errorRatio": 0.2,
+        "inbound": 0,
+        "outbound": 5,
+        "total": 5
+      },
+      "input": {
+        "healthAnnotations": null,
+        "inbound": null,
+        "outbound": {
+          "grpc": {
+            "0": 3
+          },
+          "http": {
+            "200": 1,
+            "500": 1
+          }
+        }
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "expected": "NA",
+      "input": null
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Not Ready",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 0,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 1,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 3,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 0,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 1,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 3,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Failure",
+      "input": {
+        "availableReplicas": 0,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 1,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 3,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": -1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 0
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 1
+      }
+    },
+    {
+      "expected": "Degraded",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 3
+      }
+    },
+    {
+      "expected": "Healthy",
+      "input": {
+        "availableReplicas": 5,
+        "currentReplicas": 5,
+        "desiredReplicas": 5,
+        "name": "synthetic",
+        "syncedProxies": 5
+      }
+    }
+  ]
+}
