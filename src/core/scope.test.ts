@@ -1,6 +1,14 @@
-import { clusterScope, resourceKey } from './scope';
+import { clusterScope, namespaceScope, resourceKey } from './scope';
 
 describe('explicit cluster identity', () => {
+  it('requires a concrete valid namespace for correlation reads', () => {
+    expect(namespaceScope('alpha', 'bookinfo')).toEqual({
+      cluster: 'alpha',
+      namespace: 'bookinfo',
+    });
+    expect(() => namespaceScope('alpha', '../other')).toThrow('valid namespace');
+    expect(() => namespaceScope('alpha', '')).toThrow('valid namespace');
+  });
   it('does not infer a cluster or mutate kubeconfig', () => {
     expect(() => clusterScope('')).toThrow('A cluster must be selected');
     expect(() => clusterScope('  ')).toThrow();

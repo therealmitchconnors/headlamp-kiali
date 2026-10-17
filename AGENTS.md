@@ -2,6 +2,14 @@
 
 This file provides guidance for AI coding agents working on this Headlamp plugin.
 
+## Implementation Handoff
+
+Read [PLAN.md](PLAN.md) before continuing the native Kiali port. It records the
+current checkpoints, handoff work, completed milestones, remaining
+dependencies, next task, test environment and compatibility constraints.
+Keep it current alongside [docs/parity.md](docs/parity.md); do not assume access
+to the original agent's conversation, session files or task database.
+
 ## Kiali Project Skills
 
 The repository root is the Kiali plugin directory. Skills are in
@@ -36,6 +44,9 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - SDK declarations can be newer than the running host's resource helpers:
   Headlamp 0.35.0's Service instances lack `getFormattedPorts`. Prefer stable
   resource JSON fields where necessary, and verify new helper calls live.
+- Headlamp 0.35.0 also expects CommonComponents `Link.search` to be a string.
+  Serialize query parameters with URLSearchParams rather than passing the
+  object form accepted by newer SDK declarations.
 - `pr-triage` contains Headlamp-specific commit conventions. Consult this
   repository's actual history and contribution rules instead of assuming those
   conventions apply here.

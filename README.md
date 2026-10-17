@@ -4,14 +4,14 @@ A Headlamp plugin for Kiali, scaffolded with
 `@kinvolk/headlamp-plugin@0.14.0` following the
 [Headlamp getting-started guide](https://headlamp.dev/docs/latest/development/plugins/getting-started/).
 
-The first native slice adds a **Kiali** sidebar with an overview, namespace and
-Service lists, workload-kind tabs, and per-cluster connection settings.
+The native plugin adds a **Kiali** sidebar with an overview, Applications,
+namespace and Service lists, workload-kind tabs, and per-cluster settings.
 Namespace filters and resource details reuse Headlamp's native components.
 The overview checks Istio API availability and an explicitly configured existing
 Prometheus Service through Headlamp's Kubernetes proxy.
 
-This is **not full Kiali parity**: application correlation, Istio configuration
-views/actions, traffic graphs, metric charts, mesh-health calculations and
+This is **not full Kiali parity**: Istio configuration views/actions, traffic
+graphs, metric charts, mesh-health calculations and
 validation are still planned. The workload tabs currently cover Deployments,
 StatefulSets, DaemonSets, Jobs and CronJobs. Resource names open Headlamp's
 built-in detail view or drawer, not a Kiali-specific detail page.
@@ -24,7 +24,8 @@ development setup runs managed Istio, Bookinfo and example Prometheus; see the
 [fixture guide](test-files/README.md#live-aks-automatic-setup).
 The repository root is the plugin directory.
 
-See [the parity ledger](docs/parity.md) for scope, implementation evidence and
+See [PLAN.md](PLAN.md) for the current implementation roadmap and agent handoff,
+[the parity ledger](docs/parity.md) for scope, implementation evidence and
 Desktop/web capability gaps, and [the fixture guide](test-files/README.md) for
 reproducible checks. Full parity is not claimed.
 
@@ -83,6 +84,28 @@ resetting invalid Kiali settings requires confirmation.
 Use the native namespace selector to limit Services and Workloads to `bookinfo`.
 Workload-kind selection is kept in the URL. Replica counts are Kubernetes
 readiness only; they are not the ported Kiali mesh-health calculation.
+
+## Application relationships
+
+Open **Kiali > Applications** and select or enter one namespace. For `bookinfo`,
+the view groups the six Deployments into `details`, `productpage`, `ratings` and
+`reviews`. The reviews application links its three versions, matching Service,
+and three owned pods, including detection of native sidecars.
+
+Default application/version labels follow pinned Kiali precedence: canonical
+Istio labels, then `app.kubernetes.io` labels, then `app`/`version`. You can replace
+that order with a validated pair of label keys in per-cluster settings. Existing
+Prometheus settings are preserved. An empty label value is distinguished from a
+missing label instead of silently falling back.
+
+Relationships are computed from configuration and owner UIDs, not traffic.
+Owned ReplicaSets/Jobs are collapsed into observed parent controllers; unresolved
+owners are reported rather than matched by name. Selectorless Services do not
+select every pod. Reads are namespace-scoped, with three concurrent requests and
+a maximum of four 250-item pages per resource kind. Denials, malformed responses
+and truncated lists are explicit; incomplete counts are not presented as zero.
+Refresh is manual. Multi-namespace correlation, external workloads, WorkloadGroups
+and OpenShift-specific controllers remain outside this initial slice.
 
 ## Agent skills
 

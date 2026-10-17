@@ -185,4 +185,29 @@ describe('native per-cluster settings', () => {
     await user.click(screen.getByRole('button', { name: /^Reset$/ }));
     expect(state.stored).toEqual({ schemaVersion: 1, clusters: {} });
   });
+
+  it('saves custom application labels independently of a metrics connection', async () => {
+    render(<Settings />);
+    const user = userEvent.setup();
+    await user.click(screen.getByLabelText('Override application and version labels'));
+    const app = screen.getByLabelText(/Application label key/);
+    const version = screen.getByLabelText(/Version label key/);
+    await user.clear(app);
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.type(app, 'team/app');
+    await user.clear(version);
+    await user.type(version, 'team/version');
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    const saved = readConfig(state.stored);
+    expect(saved.valid).toBe(true);
+    if (saved.valid) {
+      expect(saved.config.clusters.alpha).toEqual({
+        prometheus: null,
+        appLabels: { app: 'team/app', version: 'team/version' },
+      });
+    }
+    expect(state.request).not.toHaveBeenCalled();
+  });
 });

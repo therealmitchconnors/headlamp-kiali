@@ -11,9 +11,10 @@ cluster installations or elevated credentials are introduced. AI/chat and
 offline/gather/import workflows are excluded by user decision. Login, cluster
 connections and application hosting remain Headlamp responsibilities.
 
-**The first native slice is implemented; this is not a completed port.** Kiali
-now has an overview, namespace/Service lists, workload-kind tabs and per-cluster
-settings. These routes were exercised against Bookinfo in both stock Headlamp
+**Native browsing and an initial correlation slice are implemented; this is not
+a completed port.** Kiali has an overview, Applications, namespace/Service lists,
+workload-kind tabs and per-cluster settings. The browsing routes were exercised
+against Bookinfo in both stock Headlamp
 0.35.0 Desktop and hosted-web mode. The original pure health primitives remain
 independently checked against Go, but are not yet integrated as mesh health.
 
@@ -26,7 +27,7 @@ independently checked against Go, but are not yet integrated as mesh health.
 | Reactive connection state | `hooks/useRequest.ts`, `data/requests.ts` | Desktop overview changed immediately when configuration was disabled or pointed at a missing Service, then recovered on restoration | Restricted-user scenarios remain fixture-tested, not live-tested with a second identity |
 | Namespaces | `components/Resources.tsx` | Native rows show Bookinfo's `asm-1-30` revision and Active phase | No namespace mesh-health summary or custom namespace actions |
 | Services | `components/Resources.tsx` | Namespace filter restricted rows to the four Bookinfo Services; ports rendered; name opened native Service details | Not Kiali's service correlation, health or configuration detail view |
-| Workloads | `components/Resources.tsx`, `core/readiness.ts` | Six Bookinfo Deployments show `1/1`; Jobs tab is honestly empty and retains kind/namespace in the URL | Five native controller tabs; no application grouping, standalone ReplicaSet/OpenShift extensions or custom Kiali details |
+| Workloads | `components/Resources.tsx`, `core/readiness.ts` | Six Bookinfo Deployments show `1/1`; Jobs tab is honestly empty and retains kind/namespace in the URL | Five native controller tabs; grouping now exists in the separate Applications view; OpenShift extensions and custom Kiali details remain planned |
 | Scope and errors | `core/scope.ts`, `data/requests.ts`, `hooks/useRequest.ts` | Explicit cluster requests; cancellation, late responses, malformed payloads, prototype-like cluster names and 401/403/404 classifications covered by tests | Multi-cluster browsing deliberately prompts for a single selection |
 
 The production package was built once and the same main.js hash was installed
@@ -85,7 +86,7 @@ All individual records are **planned**, in **both** host modes, unless an explic
 exception below says otherwise. Each category inherits its implementation task
 and acceptance obligation from this table. An unlisted record must not be treated
 as implemented. The catalogs themselves are not imported into the plugin bundle.
-The initial native slice above is an explicitly partial implementation of the
+The native slices described here are explicitly partial implementations of the
 larger Kiali families; it does not mark an entire upstream handler or family as
 verified-parity.
 
@@ -109,7 +110,7 @@ verified-parity.
 | Family / API path or source | Target module and native surface | Prerequisites | Current status, Desktop / web |
 | --- | --- | --- | --- |
 | Overview, namespaces, namespace info/updates | `src/components/Overview.tsx`, `Resources.tsx` | Resource access and scoped permissions | Partial read-only native slice / partial read-only native slice |
-| Apps, workloads, Services, pods | Native lists in `Resources.tsx`; correlation still planned | Typed resources and label/owner indexes | Partial native Services/workloads / partial native Services/workloads |
+| Apps, workloads, Services, pods | `Resources.tsx`, `Applications.tsx`, `core/correlation.ts` | Typed resources and label/owner indexes | Partial native browsing and scoped correlation / same |
 | Istio configuration, permissions and supported forms | `src/resources`, configuration views | API discovery and confirmed RBAC writes | Planned / planned |
 | Metrics, dashboards, statistics, overview rates/latency | `src/core/telemetry`, charts | Existing Prometheus-compatible endpoint | Planned / planned |
 | Health and annotations | `src/core/health.ts`, shared health presentation | Telemetry, normalized replica/proxy state | Partial core only / partial core only |
@@ -129,6 +130,61 @@ verified-parity.
 Source-unit inventories intentionally retain excluded source references so their
 absence is visible. A general endpoint such as `/api/config` may contain both
 in-scope and excluded settings; it is not blanket-excluded.
+
+## Application correlation slice
+
+The next step now supplies reusable scoped label postings, UID-based ownership,
+application/version grouping, Service-selector relationships and Kubernetes
+Service-host resolution in `src/core/labels.ts` and `src/core/correlation.ts`.
+`src/data/correlation.ts` decodes nine standard namespaced Kubernetes kinds and
+collects bounded, cancellable snapshots. It preserves per-kind completeness and
+errors instead of turning failed reads into empty datasets.
+
+`Kiali > Applications` is the first consumer. It operates on one explicitly
+selected namespace, supports application drill-down and native resource links,
+and distinguishes native-sidecar containers from ordinary sidecars. Per-cluster
+label overrides are validated and persisted alongside existing metrics settings.
+Profiles without the optional new field remain valid.
+
+Source-grounded behavior includes canonical/Kubernetes/legacy label precedence
+and the use of pod-template labels for replica controllers but controller
+metadata labels for Jobs/CronJobs. Empty preferred label values remain empty;
+they do not trigger a fallback. The independent label oracle executes 75 pinned
+Go cases. Service-selector matches are configuration relationships, not traffic.
+
+The Desktop Bookinfo check produced four applications. Reviews contains three
+Deployment versions, one selector-matching Service and three UID-owned pods,
+all detected as native sidecars. Custom label settings changed the grouping
+without overwriting Prometheus configuration, and the original settings were
+restored afterward.
+The same production package was also exercised in hosted-web mode: four
+application rows, numeric workload-count sorting, reviews drill-down, native
+resource links and three native-sidecar pod rows were confirmed. No plugin
+execution or component error remained. The host's previously recorded
+deprecated CRD-v1beta1 discovery 404 is still separate from these checks.
+
+Intentional bounds and remaining differences:
+
+- Supported sources are Deployments, StatefulSets, DaemonSets, ReplicaSets,
+  ReplicationControllers, Jobs, CronJobs, Pods and Services. WorkloadGroups,
+  external/registry workloads and OpenShift-specific controllers remain planned.
+- Reads use three concurrent workers, 250-item pages and a four-page limit per
+  kind. A limit, access failure or inconsistent pagination produces partial data.
+- Owner links require matching scoped UID, group, kind and name. Unknown parents
+  are not fabricated from a name; known child controllers can remain visible
+  with a warning. This is stricter than Kiali's name-based parent fallback.
+- A Service without a selector has no automatic pod/workload association here;
+  EndpointSlice/manual endpoint and ServiceEntry enrichment remains planned.
+- Kubernetes Service DNS forms are resolved only within the explicit cluster.
+  External and wildcard hosts remain unresolved for later configuration work.
+- Application counts are exact only for the supported, completely read snapshot
+  with resolved ownership. Multi-namespace/multi-cluster UI, live subscriptions
+  for derived data and the rest of Kiali application details remain planned.
+- This is not mesh health, traffic analysis or semantic Istio validation.
+
+The live test exposed another host/SDK mismatch: Headlamp 0.35.0 expects
+`Link.search` to be a string, despite newer declarations allowing an object.
+Application links now serialize their query parameters explicitly.
 
 ## Implemented pure-core evidence
 

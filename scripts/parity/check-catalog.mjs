@@ -4,8 +4,9 @@ import { readFile } from 'node:fs/promises';
 const upstream = JSON.parse(await readFile('test-files/parity/upstream.json', 'utf8'));
 const frontend = JSON.parse(await readFile('test-files/parity/frontend.json', 'utf8'));
 const health = JSON.parse(await readFile('test-files/parity/health-oracle.json', 'utf8'));
+const labels = JSON.parse(await readFile('test-files/correlation/label-oracle.json', 'utf8'));
 const commit = '0e8be887b8217bbcac5e3ae0bfcd258073949cca';
-for (const artifact of [upstream, frontend, health]) {
+for (const artifact of [upstream, frontend, health, labels]) {
   assert.equal(artifact.commit, commit);
   assert.equal(artifact.version, 'v2.33.0');
 }
@@ -79,6 +80,9 @@ assert.equal(health.priorities.length, 6);
 assert.equal(health.merges.length, 36);
 assert.equal(health.workloads.length, 321);
 assert.equal(health.requests.length, 12);
+assert.equal(labels.cases.length, 75);
+assert.equal(labels.sources['config/config.go'], 'fbde570684b760495782fce1df801d9c0046723e');
+assert.equal(Object.keys(labels.sources).length, 4);
 assert.equal(health.workloads[0].input, null);
 assert.equal(health.workloads[0].expected, 'NA');
 for (const fixture of health.workloads) {
@@ -95,5 +99,5 @@ for (const fixture of health.workloads) {
 }
 console.log(
   'Pinned inventory and oracle consistent: 508 sources, 616 inventory entries, ' +
-    '21 routes, 216 contract fields, 375 Go oracle cases.'
+    '21 routes, 216 contract fields, 375 health and 75 label Go oracle cases.'
 );

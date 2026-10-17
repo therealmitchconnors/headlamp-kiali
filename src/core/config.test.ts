@@ -71,6 +71,45 @@ describe('versioned, cluster-scoped configuration', () => {
       updateClusterConfig({ schemaVersion: 1, clusters: {} }, '', { prometheus: null })
     ).toThrow(ConfigurationError);
   });
+
+  it('accepts existing profiles and preserves label overrides when only metrics settings change', () => {
+    const old = { schemaVersion: 1, clusters: { alpha: { prometheus: endpoint } } };
+    expect(readConfig(old)).toEqual({ valid: true, config: old });
+    const config: KialiConfig = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: { prometheus: endpoint, appLabels: { app: 'team/app', version: 'team/version' } },
+      },
+    };
+    expect(
+      updateClusterConfig(config, 'alpha', { prometheus: null }).clusters.alpha.appLabels
+    ).toEqual({ app: 'team/app', version: 'team/version' });
+    expect(
+      updateClusterConfig(config, 'alpha', { prometheus: endpoint, appLabels: null }).clusters.alpha
+        .appLabels
+    ).toBeNull();
+  });
+
+  it('requires a complete, valid custom label pair without discarding other cluster data', () => {
+    for (const appLabels of [
+      { app: 'team/app' },
+      { app: '', version: 'version' },
+      { app: 'bad key', version: 'version' },
+    ]) {
+      expect(
+        readConfig({ schemaVersion: 1, clusters: { alpha: { prometheus: endpoint, appLabels } } })
+          .valid
+      ).toBe(false);
+    }
+    expect(
+      readConfig({
+        schemaVersion: 1,
+        clusters: {
+          alpha: { prometheus: endpoint, appLabels: { app: 'team/app', version: 'team/version' } },
+        },
+      }).valid
+    ).toBe(true);
+  });
 });
 
 describe('internal Service endpoint validation', () => {

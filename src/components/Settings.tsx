@@ -14,8 +14,10 @@ import {
   ConfigurationError,
   getClusterConfig,
   ServiceEndpoint,
+  validateAppLabels,
   validateServiceEndpoint,
 } from '../core/config';
+import { AppLabels } from '../core/labels';
 import { clusterScope } from '../core/scope';
 import { inspectPrometheus } from '../data/requests';
 import { useRequest } from '../hooks/useRequest';
@@ -48,17 +50,23 @@ function ConnectionCheck({ cluster, endpoint }: { cluster: string; endpoint: Ser
 function ClusterSettingsForm({
   cluster,
   initialEndpoint,
+  initialLabels,
 }: {
   cluster: string;
   initialEndpoint: ServiceEndpoint | null;
+  initialLabels?: AppLabels | null;
 }) {
   const { t } = useTranslation();
   const [enabled, setEnabled] = useState(initialEndpoint !== null);
   const [draft, setDraft] = useState(initialEndpoint ?? EMPTY_ENDPOINT);
+  const [customLabels, setCustomLabels] = useState(!!initialLabels);
+  const [labelDraft, setLabelDraft] = useState(initialLabels ?? { app: 'app', version: 'version' });
   const [feedback, setFeedback] = useState<{ error: boolean; message: string }>();
   const [check, setCheck] = useState<{ endpoint: ServiceEndpoint; attempt: number }>();
   let endpoint: ServiceEndpoint | null = null;
-  let validation: string | undefined;
+  let endpointValidation: string | undefined;
+  let labelValidation: string | undefined;
+  let appLabels: AppLabels | null = null;
   if (enabled) {
     try {
       endpoint = validateServiceEndpoint(draft);
@@ -66,9 +74,18 @@ function ClusterSettingsForm({
       if (!(error instanceof ConfigurationError)) {
         throw error;
       }
-      validation = error.message;
+      endpointValidation = error.message;
     }
   }
+  if (customLabels) {
+    try {
+      appLabels = validateAppLabels(labelDraft);
+    } catch (error) {
+      if (!(error instanceof ConfigurationError)) throw error;
+      labelValidation = error.message;
+    }
+  }
+  const validation = endpointValidation ?? labelValidation;
 
   function change(field: keyof ServiceEndpoint, value: string) {
     setDraft(current => ({ ...current, [field]: value }));
@@ -82,7 +99,7 @@ function ClusterSettingsForm({
       return;
     }
     try {
-      saveClusterConfig(cluster, { prometheus: endpoint });
+      saveClusterConfig(cluster, { prometheus: endpoint, appLabels });
       setFeedback({ error: false, message: t('Settings saved for {{cluster}}.', { cluster }) });
     } catch (error) {
       setFeedback({
@@ -141,6 +158,45 @@ function ClusterSettingsForm({
           />
         </>
       )}
+      <FormControlLabel
+        label={t('Override application and version labels')}
+        control={
+          <Switch
+            checked={customLabels}
+            onChange={event => {
+              setCustomLabels(event.target.checked);
+              setFeedback(undefined);
+            }}
+          />
+        }
+      />
+      <Typography variant="body2">
+        {t(
+          'By default, canonical Istio labels take precedence over app.kubernetes.io labels, then app and version. Overrides replace this fallback order.'
+        )}
+      </Typography>
+      {customLabels && (
+        <>
+          <TextField
+            label={t('Application label key')}
+            value={labelDraft.app}
+            required
+            onChange={event => {
+              setLabelDraft(current => ({ ...current, app: event.target.value }));
+              setFeedback(undefined);
+            }}
+          />
+          <TextField
+            label={t('Version label key')}
+            value={labelDraft.version}
+            required
+            onChange={event => {
+              setLabelDraft(current => ({ ...current, version: event.target.value }));
+              setFeedback(undefined);
+            }}
+          />
+        </>
+      )}
       {validation && (
         <Alert severity="warning">
           {t('Invalid settings: {{message}}', { message: validation })}
@@ -152,7 +208,7 @@ function ClusterSettingsForm({
         </Button>
         <Button
           variant="outlined"
-          disabled={!enabled || !!validation}
+          disabled={!enabled || !!endpointValidation}
           onClick={() => {
             if (endpoint) {
               setCheck(current => ({ endpoint, attempt: (current?.attempt ?? 0) + 1 }));
@@ -230,6 +286,7 @@ export default function Settings() {
                 key={activeCluster}
                 cluster={activeCluster}
                 initialEndpoint={getClusterConfig(state.config, activeCluster).prometheus}
+                initialLabels={getClusterConfig(state.config, activeCluster).appLabels}
               />
             ) : (
               <Alert severity="info">{t('Select a cluster before editing its settings.')}</Alert>

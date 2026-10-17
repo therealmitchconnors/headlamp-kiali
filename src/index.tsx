@@ -19,6 +19,7 @@ import {
   registerRoute,
   registerSidebarEntry,
 } from '@kinvolk/headlamp-plugin/lib';
+import Applications from './components/Applications';
 import Overview from './components/Overview';
 import { Namespaces, Services, Workloads } from './components/Resources';
 import Settings from './components/Settings';
@@ -32,6 +33,7 @@ registerSidebarEntry({
 
 const pages = [
   { name: 'overview', label: 'Overview', component: Overview },
+  { name: 'applications', label: 'Applications', component: Applications },
   { name: 'namespaces', label: 'Namespaces', component: Namespaces },
   { name: 'services', label: 'Services', component: Services },
   { name: 'workloads', label: 'Workloads', component: Workloads },

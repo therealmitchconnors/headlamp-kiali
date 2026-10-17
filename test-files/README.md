@@ -203,6 +203,51 @@ These run alongside the upstream health oracle in the existing Vitest command.
 See the parity ledger for the separate live Desktop/web evidence and host
 limitations; unit results alone do not establish runtime parity.
 
+## Correlation fixtures and label oracle
+
+`correlation/label-oracle.json` contains 75 cases independently executed against
+the original Kiali label-priority methods and their initialization block. It
+covers every combination of default label presence, empty values, custom pairs,
+and the upstream fallback behavior when only one override is set. The settings
+UI deliberately requires a complete valid override pair.
+
+Regenerate or check it using the same pinned checkout:
+
+```sh
+node scripts/parity/correlation-oracle.mjs --source /path/to/kiali
+node scripts/parity/correlation-oracle.mjs --source /path/to/kiali --check
+```
+
+The generator verifies all source Git blob hashes before executing copied
+standard-library-only Go code. Its additional source references are:
+
+| Source | Git blob |
+| --- | --- |
+| `config/config.go` | `fbde570684b760495782fce1df801d9c0046723e` |
+| `models/workload.go` | `8070c2c4423dee1ef6629e94ffd299e57c03c843` |
+| `business/apps.go` | `9c2d919d2629fefb5d2719fcc6212a91fb55731c` |
+| `kubernetes/filters.go` | `1f5c24f5819ff1e633f848d1534b6f29ba53ca2a` |
+
+Only label resolution is executed by that Go oracle. Ownership, Service
+association and UI behavior have separate synthetic tests and live Bookinfo
+evidence; they are not claimed to have a complete upstream differential oracle.
+
+| Correlation scenario | Expected behavior |
+| --- | --- |
+| Bookinfo-shaped controller/ReplicaSet/pod chain | Four applications; reviews has three versions, one Service and three pods |
+| Same names/UIDs in different scopes | No cross-cluster or cross-namespace association |
+| Stale, missing, mismatched or cyclic owner references | Explicit uncertainty; no name-only ownership fallback |
+| Empty Service selector | No automatic workload/pod association |
+| Metadata labels differ from template labels | Template labels for replica controllers; metadata labels for Jobs/CronJobs, matching pinned Kiali behavior |
+| Native `istio-proxy` init container | Counted as a native sidecar only with `restartPolicy: Always` |
+| Failed or capped paginated read | Earlier data retained with incomplete status, not an empty successful list |
+| Labels changed in settings | Recomputed application groups without losing the metrics endpoint |
+
+The live Bookinfo view was checked through the actual Desktop UI. A temporary
+valid-but-absent label override yielded six unlabelled workloads; restoring the
+original configuration restored the four applications. No cluster objects were
+changed for these checks.
+
 ## Reproduce the pinned evidence
 
 Use a local checkout of public `kiali/kiali` at

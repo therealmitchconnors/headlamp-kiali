@@ -1,4 +1,5 @@
-import { isRecord } from './object';
+import { AppLabels, isLabelKey } from './labels';
+import { isDnsLabel, isRecord } from './object';
 
 export interface ServiceEndpoint {
   namespace: string;
@@ -9,6 +10,7 @@ export interface ServiceEndpoint {
 
 export interface ClusterConfig {
   prometheus: ServiceEndpoint | null;
+  appLabels?: AppLabels | null;
 }
 
 export interface KialiConfig {
@@ -27,14 +29,20 @@ function rejectUnknownFields(value: Record<string, unknown>, fields: string[]) {
 }
 
 function name(value: unknown, field: string): string {
-  if (
-    typeof value !== 'string' ||
-    value.length > 63 ||
-    !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(value)
-  ) {
+  if (!isDnsLabel(value)) {
     throw new ConfigurationError(`${field} must be a Kubernetes DNS label`);
   }
   return value;
+}
+
+export function validateAppLabels(value: unknown): AppLabels {
+  if (!isRecord(value) || !isLabelKey(value.app) || !isLabelKey(value.version)) {
+    throw new ConfigurationError(
+      'Application and version label keys must both be valid Kubernetes label keys'
+    );
+  }
+  rejectUnknownFields(value, ['app', 'version']);
+  return { app: value.app, version: value.version };
 }
 
 export function validateServiceEndpoint(value: unknown): ServiceEndpoint {
@@ -93,10 +101,21 @@ export function readConfig(value: unknown): ConfigResult {
       if (!cluster.trim() || !isRecord(settings)) {
         throw new ConfigurationError('Each cluster must have a configuration object');
       }
-      rejectUnknownFields(settings, ['prometheus']);
+      rejectUnknownFields(settings, ['prometheus', 'appLabels']);
       const prometheus =
         settings.prometheus === null ? null : validateServiceEndpoint(settings.prometheus);
-      return [cluster, { prometheus }] as const;
+      return [
+        cluster,
+        {
+          prometheus,
+          ...(settings.appLabels === undefined
+            ? {}
+            : {
+                appLabels:
+                  settings.appLabels === null ? null : validateAppLabels(settings.appLabels),
+              }),
+        },
+      ] as const;
     });
     return {
       valid: true,
@@ -129,8 +148,14 @@ export function updateClusterConfig(
     clusters: {
       ...config.clusters,
       [cluster]: {
+        ...getClusterConfig(config, cluster),
         prometheus:
           settings.prometheus === null ? null : validateServiceEndpoint(settings.prometheus),
+        ...(settings.appLabels === undefined
+          ? {}
+          : {
+              appLabels: settings.appLabels === null ? null : validateAppLabels(settings.appLabels),
+            }),
       },
     },
   };

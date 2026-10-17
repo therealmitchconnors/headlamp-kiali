@@ -9,16 +9,18 @@ import { RequestState } from '../hooks/useRequest';
 export default function RequestStatus<T>({
   state,
   children,
+  loadingLabel,
 }: {
   state: RequestState<T>;
   children: (data: T) => ReactNode;
+  loadingLabel?: string;
 }) {
   const { t } = useTranslation();
   if (state.status === 'loading') {
     return (
       <Stack direction="row" spacing={1} alignItems="center" role="status">
-        <CircularProgress size={20} aria-label={t('Checking connection')} />
-        <Typography>{t('Checking connection...')}</Typography>
+        <CircularProgress size={20} aria-label={loadingLabel ?? t('Checking connection')} />
+        <Typography>{loadingLabel ?? t('Checking connection...')}</Typography>
       </Stack>
     );
   }

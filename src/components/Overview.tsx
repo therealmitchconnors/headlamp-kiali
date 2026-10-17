@@ -89,11 +89,12 @@ function ClusterOverview({ cluster }: { cluster: string }) {
           <Typography>{t('Cluster: {{cluster}}', { cluster })}</Typography>
           <Alert severity="info">
             {t(
-              'This native slice provides resource browsing and connection checks. Traffic graphs, mesh health, validation and configuration workflows are not implemented yet.'
+              'This native slice provides resource browsing, application relationships and connection checks. Traffic graphs, mesh health, validation and configuration workflows are not implemented yet.'
             )}
           </Alert>
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
             <Link routeName="kiali-namespaces">{t('Namespaces')}</Link>
+            <Link routeName="kiali-applications">{t('Applications')}</Link>
             <Link routeName="kiali-services">{t('Services')}</Link>
             <Link routeName="kiali-workloads">{t('Workloads')}</Link>
             <Link routeName="kiali-settings">{t('Connection settings')}</Link>

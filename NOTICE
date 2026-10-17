@@ -42,7 +42,8 @@ Submitted on behalf of a third-party: gaojinhua
 Submitted on behalf of a third-party: yuri.yin
 
 Kiali native-port material:
-The health primitives and generated parity evidence derive from Kiali v2.33.0,
+The health primitives, application-label behavior, correlation references and
+generated parity evidence derive from Kiali v2.33.0,
 commit 0e8be887b8217bbcac5e3ae0bfcd258073949cca, licensed under Apache-2.0.
 Source: https://github.com/kiali/kiali
 Detailed source identities and reproduction instructions: test-files/README.md.

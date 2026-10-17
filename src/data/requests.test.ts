@@ -20,7 +20,9 @@ const endpoint = {
   basePath: '/metrics',
 };
 
-beforeEach(() => vi.mocked(ApiProxy.request).mockReset());
+beforeEach(() => {
+  vi.mocked(ApiProxy.request).mockReset();
+});
 
 describe('Headlamp request boundary', () => {
   it('binds every read to its captured cluster and signal without authentication side effects', async () => {

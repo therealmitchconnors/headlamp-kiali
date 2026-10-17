@@ -1,0 +1,1728 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "config/config.go": "fbde570684b760495782fce1df801d9c0046723e",
+    "models/workload.go": "8070c2c4423dee1ef6629e94ffd299e57c03c843",
+    "business/apps.go": "9c2d919d2629fefb5d2719fcc6212a91fb55731c",
+    "kubernetes/filters.go": "1f5c24f5819ff1e633f848d1534b6f29ba53ca2a"
+  },
+  "executed": [
+    "Config.GetAppLabelName",
+    "Config.GetVersionLabelName",
+    "label initialization block"
+  ],
+  "cases": [
+    {
+      "expected": {
+        "app": null,
+        "version": null
+      },
+      "input": {
+        "labels": {},
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app": "value-2"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "version",
+          "value": "value-5"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "app.kubernetes.io/version",
+          "value": "value-4"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app",
+          "value": "value-2"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "app.kubernetes.io/name",
+          "value": "value-1"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": ""
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": ""
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": ""
+        },
+        "override": {
+          "app": "",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "team/app",
+          "value": "custom"
+        },
+        "version": {
+          "key": "team/version",
+          "value": "v2"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "team/app": "custom",
+          "team/version": "v2",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "team/app",
+          "version": "team/version"
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "team/app": "custom",
+          "team/version": "v2",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "team/app",
+          "version": ""
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "service.istio.io/canonical-name",
+          "value": "value-0"
+        },
+        "version": {
+          "key": "service.istio.io/canonical-revision",
+          "value": "value-3"
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "team/app": "custom",
+          "team/version": "v2",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "",
+          "version": "team/version"
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": null,
+        "version": null
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "team/app",
+          "version": "team/version"
+        }
+      }
+    },
+    {
+      "expected": {
+        "app": {
+          "key": "team/app",
+          "value": ""
+        },
+        "version": {
+          "key": "team/version",
+          "value": ""
+        }
+      },
+      "input": {
+        "labels": {
+          "app": "value-2",
+          "app.kubernetes.io/name": "value-1",
+          "app.kubernetes.io/version": "value-4",
+          "service.istio.io/canonical-name": "value-0",
+          "service.istio.io/canonical-revision": "value-3",
+          "team/app": "",
+          "team/version": "",
+          "version": "value-5"
+        },
+        "override": {
+          "app": "team/app",
+          "version": "team/version"
+        }
+      }
+    }
+  ]
+}

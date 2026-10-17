@@ -1,7 +1,17 @@
+import { isDnsLabel } from './object';
+
 export interface ClusterScope {
   readonly cluster: string;
 }
 
+export interface NamespaceScope extends ClusterScope {
+  readonly namespace: string;
+}
+
+export function namespaceScope(cluster: string, namespace: string): NamespaceScope {
+  if (!isDnsLabel(namespace)) throw new Error('A valid namespace must be selected');
+  return Object.freeze({ ...clusterScope(cluster), namespace });
+}
 export interface ResourceIdentity extends ClusterScope {
   readonly group: string;
   readonly kind: string;
