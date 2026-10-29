@@ -980,6 +980,32 @@ occurred. Positive custom histogram samples were synthetic.
 Gates pass **19,400 tests in 153 files**; source-oracle totals stay 17,449 and
 finding coverage stays 38 bounded codes.
 
+### Explicit dashboard equality filters
+
+The native query now accepts up to ten `labelsFilters` entries, corresponding
+to the pinned dashboard query's equality-filter role. Names must already be
+valid Prometheus identifiers; unlike upstream's name sanitization, invalid
+names are rejected instead of silently changed. Values are bounded literal
+strings, with empty equality's missing-label semantics disclosed. Namespace,
+configured metric-cluster and `__name__` selectors cannot be replaced.
+The source scope remains explicit, but label filters are not an authorization
+boundary or proof that a metric represents a Kubernetes object.
+
+Filters are cloned with each submission and shown separately from draft edits.
+They are not persisted in ConfigStore or navigation URLs. Raw, rate and every
+histogram summary use the same captured filters. The shared range serializer
+now rejects **more than 16 KiB of encoded query parameters before transport**;
+exact-boundary and Unicode-expansion tests supplement the existing raw-query
+and sample limits. Histogram expansion is checked before any job starts.
+
+Three hosted groups issued eight intercepted GETs for mixed raw/rate/histogram
+charts. They verified literal quote/backslash values, empty values, captured
+draft independence, protected-scope collisions, invalid key/type/Unicode,
+ten-label/encoded-size bounds and a corrected retry. No cluster reads beyond
+the fixture metrics, writes, or persisted filter drafts were introduced.
+This is native/contract evidence, not an additional independent Go oracle.
+Gates pass **19,404 tests in 153 files**.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

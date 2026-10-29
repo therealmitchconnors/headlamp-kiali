@@ -187,6 +187,34 @@ it('captures histogram summaries, permits signed observations and isolates a qua
   expect(result.charts[3].read).toMatchObject({ ok: false, error: { kind: 'forbidden' } });
   expect(ApiProxy.request).toHaveBeenCalledTimes(5);
 });
+it('captures label filters and rejects oversized encoded expressions before any transport', async () => {
+  const input = query();
+  input.dashboard.items = input.dashboard.items.slice(0, 1);
+  input.labelsFilters = { job: 'captured', container: '' };
+  vi.mocked(ApiProxy.request).mockResolvedValue(matrix());
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.labelsFilters.job = 'changed';
+  const result = await pending;
+  expect(result.query.labelsFilters).toEqual({ container: '', job: 'captured' });
+  const expression = new URL(
+    String(vi.mocked(ApiProxy.request).mock.calls[0][0]),
+    'http://example.test'
+  ).searchParams.get('query');
+  expect(expression).toContain('container="",job="captured"');
+  vi.mocked(ApiProxy.request).mockReset();
+  input.labelsFilters = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [`key${i}`, '\u00e9'.repeat(1024)])
+  );
+  await expect(
+    loadCustomDashboard({ cluster: 'alpha' }, provider, input, new AbortController().signal)
+  ).rejects.toThrow('16 KiB');
+  expect(ApiProxy.request).not.toHaveBeenCalled();
+});
 it('rejects histogram expansion overflow before transport and caps a cancelled queue', async () => {
   const input = query();
   input.dashboard.items.forEach(item => {

@@ -1,5 +1,5 @@
 import { useTranslation } from '@kinvolk/headlamp-plugin/lib';
-import { Link, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { Link, SectionBox, SimpleTable } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -12,7 +12,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { getClusterConfig, ServiceEndpoint } from '../core/config';
-import { customDashboardJobs, CustomDashboardQuery } from '../core/customDashboards';
+import {
+  customDashboardJobs,
+  CustomDashboardQuery,
+  dashboardLabelFilters,
+} from '../core/customDashboards';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { clusterScope } from '../core/scope';
 import { loadCustomDashboard } from '../data/customDashboards';
@@ -56,9 +60,25 @@ function DashboardResults({
                   value: data.query.metricCluster,
                 })
               : t(
-                  'No metric cluster selector was sent. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
+                  'No dedicated metric-cluster selector was configured. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
                 )}
           </Alert>
+          {!!Object.keys(data.query.labelsFilters ?? {}).length && (
+            <details>
+              <summary>{t('Show captured dashboard label filters')}</summary>
+              <SimpleTable
+                data={Object.entries(data.query.labelsFilters ?? {})}
+                columns={[
+                  { label: t('Metric label'), getter: ([key]: [string, string]) => key },
+                  {
+                    label: t('Literal value'),
+                    getter: ([, value]: [string, string]) =>
+                      value === '' ? t('Empty; also matches an omitted label') : value,
+                  },
+                ]}
+              />
+            </details>
+          )}
           {data.charts.map(({ key, chart, read, summary }) => {
             const title = summary
               ? t('{{chart}} - {{summary}}', { chart: chart.name, summary: summaryNames[summary] })
@@ -118,6 +138,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   );
   const [minutes, setMinutes] = useState<CustomDashboardQuery['minutes']>(15);
   const [summaries, setSummaries] = useState<HistogramSummary[]>(['avg', 'p95']);
+  const [filterText, setFilterText] = useState('{}');
   const [current, setCurrent] = useState(true);
   const [endTime, setEndTime] = useState('');
   const [acknowledged, setAcknowledged] = useState<string>();
@@ -210,6 +231,18 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                   ))}
                 </TextField>
               </Stack>
+              <TextField
+                label={t('Additional metric labels (JSON)')}
+                multiline
+                minRows={2}
+                maxRows={6}
+                value={filterText}
+                onChange={event => setFilterText(event.target.value)}
+                inputProps={{ maxLength: 16384 }}
+                helperText={t(
+                  'Optional exact equality filters, for example {"job":"my-runtime"}. Up to 10 labels; namespace and configured metric-cluster labels cannot be replaced. Empty values also match missing labels. These drafts are captured only when loading and are not saved to settings or navigation URLs.'
+                )}
+              />
               {hasHistograms && (
                 <Stack spacing={1}>
                   <Typography>
@@ -288,6 +321,11 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                       clusterLabel: definition.clusterLabel,
                       singleClusterConfirmed: acknowledged === binding,
                       dashboard: structuredClone(dashboard),
+                      labelsFilters: dashboardLabelFilters(
+                        JSON.parse(filterText),
+                        definition.namespaceLabel,
+                        definition.clusterLabel
+                      ),
                       ...(hasHistograms ? { histogramSummaries: [...summaries] } : {}),
                     };
                     customDashboardJobs(next);

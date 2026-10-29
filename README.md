@@ -790,6 +790,16 @@ samples; the pinned zero default means one. Overflow/underflow is an error,
 not a zero substitution. All matching series are aggregated; duplicate scrapes
 and metric-specific dimensions are not deduplicated.
 
+**Additional metric labels (JSON)** supplies up to ten exact equality filters,
+for example `{"job":"my-runtime","container":"reviews"}`. Values are literal
+strings; empty equality also matches an omitted label under Prometheus
+semantics. Required namespace and configured metric-cluster labels cannot be
+overridden, and invalid label names are rejected rather than renamed. These
+are query filters, not authorization controls. Drafts are neither saved to
+settings nor included in navigation URLs; the submitted filter map is shown
+with the captured result. Encoded query parameters are capped at 16 KiB before
+any request, including after histogram expansion.
+
 Set `dataType` to **`histogram`** for classic `_sum`/`_count`/`_bucket` metric
 families, using the base metric name. Choose Average/P50/P90/P95/P99 in the
 dashboard view; Average and P95 are the initial view selection. Averages use

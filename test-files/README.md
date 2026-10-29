@@ -813,6 +813,16 @@ intercepted GETs with concurrency three. Re-run both native Istio histograms
 and raw/rate dashboard fixtures; this reuses the existing 180-case histogram
 oracle without claiming new independently executed source cases.
 
+Custom dashboard equality-filter tests cover raw/rate/histogram query paths.
+Submit literal quote/backslash and empty values, then edit the draft and
+inspect the unchanged captured filter table. Attempt to override namespace/
+cluster/metric-name selectors, submit malformed values or Unicode, eleven
+keys, and ten 1,024-character Unicode values whose encoding exceeds 16 KiB.
+None may issue a query. A corrected retry must replace the capture.
+The hosted fixture observed eight GETs across three groups, with no writes
+or filters saved to settings/navigation. Core tests cover exactly 16,384
+encoded parameter characters and the first over-limit character.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

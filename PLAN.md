@@ -268,7 +268,12 @@ dashboards and integration/live/Desktop closure remain substantial work.
   13 intercepted reads verified all summaries, per-summary failure, captured
   drafts and exact eight-request expansion bounds. Prior raw/rate and Istio
   histogram runtime regressions passed.
-- **19,400 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
+- Custom dashboards now capture up to ten exact additional metric-label filters
+  without allowing namespace/cluster scope replacement or persisting drafts.
+  Three hosted groups/eight intercepted GETs covered literal/empty values,
+  rejected scope overrides and invalid/oversized inputs, and corrected retry.
+  Shared range reads now enforce a 16 KiB encoded query-parameter budget.
+- **19,404 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
   Comparison metrics reject unexpected aggregation labels and mixed times.
   Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
   queries, 228 WorkloadEntry
@@ -294,7 +299,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `461ab72f858f53c33f8d6a899706255da880f315e78320d34aba1e7155aa0078`.
+  `169e7db469206e8c5b8413679665b67083198add889ba970c8bd7f6ff425da0c`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are

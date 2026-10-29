@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -24,6 +24,25 @@ vi.mock('./MetricChart', () => ({
   ),
 }));
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
+  SimpleTable: <T,>({
+    data,
+    columns,
+  }: {
+    data: T[];
+    columns: { label: string; getter: (row: T) => ReactNode }[];
+  }) => (
+    <table>
+      <tbody>
+        {data.map((row, i) => (
+          <tr key={i}>
+            {columns.map(column => (
+              <td key={column.label}>{column.getter(row)}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
   SectionBox: ({ title, children }: { title: string; children: ReactNode }) => (
     <section>
       <h2>{title}</h2>
@@ -195,6 +214,30 @@ it('shows missing configuration and per-chart failure rather than an empty succe
   await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
   await screen.findByText('Dashboard read denied');
   expect(screen.queryAllByRole('img')).toHaveLength(0);
+});
+it('captures draft equality filters and blocks scope replacement before a read', async () => {
+  open();
+  const user = userEvent.setup();
+  const field = screen.getByLabelText('Additional metric labels (JSON)');
+  fireEvent.change(field, { target: { value: '{"namespace":"other"}' } });
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(
+    screen.getByText(
+      'Additional dashboard filters cannot replace the namespace or metric-cluster scope'
+    )
+  ).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  fireEvent.change(field, { target: { value: '{"job":"runtime","container":""}' } });
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  expect(vi.mocked(loadCustomDashboard).mock.calls[0][2].labelsFilters).toEqual({
+    container: '',
+    job: 'runtime',
+  });
+  expect(screen.getByText('Show captured dashboard label filters')).toBeDefined();
+  fireEvent.change(field, { target: { value: '{}' } });
+  expect(vi.mocked(loadCustomDashboard).mock.calls[0][2].labelsFilters?.job).toBe('runtime');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
 });
 it('captures histogram summary selection and rejects empty selections without replay', async () => {
   const changed = structuredClone(configured);

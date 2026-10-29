@@ -1,5 +1,5 @@
 import { histogramExpressions, HistogramSummary } from './histograms';
-import { MetricTimeRange, validateMetricTimeRange } from './metricRanges';
+import { metricRangeParameters, MetricTimeRange, validateMetricTimeRange } from './metricRanges';
 import { isDnsLabel, isRecord } from './object';
 import { metricSelector } from './telemetry';
 
@@ -29,6 +29,7 @@ export interface CustomDashboardQuery extends MetricTimeRange {
   clusterLabel: string | null;
   dashboard: CustomDashboard;
   histogramSummaries?: HistogramSummary[];
+  labelsFilters?: Record<string, string>;
 }
 export interface CustomDashboardJob {
   key: string;
@@ -148,9 +149,11 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
     );
   }
   const dashboard = validateCustomDashboard(query.dashboard);
+  const additional = dashboardLabelFilters(query.labelsFilters, namespaceLabel, clusterLabel);
   const labels = {
     [namespaceLabel]: query.namespace,
     ...(clusterLabel ? { [clusterLabel]: query.metricCluster } : {}),
+    ...additional,
   };
   const selector = `{${metricSelector(labels)}}`;
   const jobs = dashboard.items.flatMap<CustomDashboardJob>(({ chart }, index) =>
@@ -180,5 +183,36 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
     throw new Error(
       'Custom dashboards support at most 8 metric queries after expanding histogram summaries; reduce charts or selected summaries'
     );
+  jobs.forEach(job => metricRangeParameters(query, job.expression));
   return jobs;
+}
+
+export function dashboardLabelFilters(
+  value: unknown,
+  namespaceLabel: string,
+  clusterLabel: string | null
+): Record<string, string> {
+  if (value === undefined) return {};
+  if (!isRecord(value) || Object.keys(value).length > 10)
+    throw new Error('Dashboard filters require an object with at most 10 equality labels');
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([key, value]): [string, string] => {
+        dashboardLabel(key);
+        if (key === namespaceLabel || key === clusterLabel)
+          throw new Error(
+            'Additional dashboard filters cannot replace the namespace or metric-cluster scope'
+          );
+        if (
+          typeof value !== 'string' ||
+          value.length > 1024 ||
+          /[\u0000-\u001f\u007f\ud800-\udfff]/u.test(value)
+        )
+          throw new Error(
+            'Dashboard label values must be strings of at most 1024 characters without controls or unpaired surrogates'
+          );
+        return [key, value];
+      })
+  );
 }

@@ -5,6 +5,7 @@ import {
   validateCustomDashboard,
   validateCustomDashboardSettings,
 } from './customDashboards';
+import { metricRangeParameters } from './metricRanges';
 const oracle: {
   cases: {
     input: {
@@ -201,4 +202,52 @@ it('bounds expanded queries, not just chart count, and rejects unsupported summa
       items: [{ chart: { ...chart, dataType: 'histogram', aggregator: 'max' } }],
     })
   ).toThrow('sum aggregation');
+});
+it('adds literal equality filters consistently without replacing mandatory scope', () => {
+  const input = query();
+  input.labelsFilters = { job: 'runtime"\\job', empty: '' };
+  const job = customDashboardJobs(input)[0];
+  expect(job.expression).toBe(
+    'sum(container_memory_working_set_bytes{namespace="bookinfo",cluster="east",empty="",job="runtime\\"\\\\job"})'
+  );
+  input.dashboard.items[0].chart.dataType = 'rate';
+  expect(customDashboardJobs(input)[0].expression).toContain('empty="",job="runtime\\"\\\\job"');
+  input.dashboard.items[0].chart.dataType = 'histogram';
+  expect(
+    customDashboardJobs(input).every(job =>
+      job.expression.includes('empty="",job="runtime\\"\\\\job"')
+    )
+  ).toBe(true);
+  for (const key of ['namespace', 'cluster']) {
+    input.labelsFilters = { [key]: 'other' };
+    expect(() => customDashboardJobs(input)).toThrow('cannot replace');
+  }
+  for (const invalid of [
+    { __name__: 'other' },
+    { 'bad-label': 'x' },
+    { job: 1 },
+    { job: '\ud800' },
+    { job: 'line\nbreak' },
+    { job: 'x'.repeat(1025) },
+    [],
+  ]) {
+    Object.assign(input, { labelsFilters: invalid });
+    expect(() => customDashboardJobs(input)).toThrow();
+  }
+});
+it('enforces exact equality-filter count and encoded query parameter limits', () => {
+  const input = query();
+  input.labelsFilters = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [`key${i}`, 'value'])
+  );
+  expect(customDashboardJobs(input)).toHaveLength(1);
+  input.labelsFilters.extra = 'value';
+  expect(() => customDashboardJobs(input)).toThrow('10 equality labels');
+  input.labelsFilters = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [`key${i}`, '\u00e9'.repeat(1024)])
+  );
+  expect(() => customDashboardJobs(input)).toThrow('16 KiB');
+  const overhead = metricRangeParameters(input, 'x').toString().length - 1;
+  expect(metricRangeParameters(input, 'x'.repeat(16384 - overhead)).toString()).toHaveLength(16384);
+  expect(() => metricRangeParameters(input, 'x'.repeat(16385 - overhead))).toThrow('16 KiB');
 });

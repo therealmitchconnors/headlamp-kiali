@@ -19,6 +19,20 @@ export function validateMetricRange(query: TrafficQuery) {
   trafficMetricLabels(query);
   validateMetricTimeRange(query);
 }
+export function metricRangeParameters(query: MetricTimeRange, expression: string): URLSearchParams {
+  validateMetricTimeRange(query);
+  if (typeof expression !== 'string' || !expression)
+    throw new Error('A metric range query expression is required');
+  const parameters = new URLSearchParams({
+    query: expression,
+    start: String(query.end - query.minutes * 60),
+    end: String(query.end),
+    step: '15',
+  });
+  if (parameters.toString().length > 16384)
+    throw new Error('Encoded metric query parameters exceed 16 KiB');
+  return parameters;
+}
 
 export function decodeAggregatedRange(
   response: unknown,

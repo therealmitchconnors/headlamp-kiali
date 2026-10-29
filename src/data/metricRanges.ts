@@ -1,5 +1,9 @@
 import { ServiceEndpoint, validateServiceEndpoint } from '../core/config';
-import { MetricTimeRange, validateMetricTimeRange } from '../core/metricRanges';
+import {
+  metricRangeParameters,
+  MetricTimeRange,
+  validateMetricTimeRange,
+} from '../core/metricRanges';
 import { isRecord } from '../core/object';
 import { ClusterScope, clusterScope } from '../core/scope';
 import { MetricResult } from '../core/telemetry';
@@ -40,7 +44,10 @@ export async function loadMetricRanges<Query extends MetricTimeRange, Key extend
     new Set(jobs.map(job => job.key)).size !== jobs.length
   )
     throw new Error('Range reads require 1 to 8 distinct bounded metric queries');
-  const queries = jobs.map(job => ({ ...job }));
+  const queries = jobs.map(job => ({
+    ...job,
+    parameters: metricRangeParameters(captured, job.expression).toString(),
+  }));
   const capturedScope = clusterScope(scope.cluster);
   const path = serviceProxyPath(validateServiceEndpoint(endpoint), '/api/v1/query_range');
   return withDiagnosticDeadline(signal, timeoutMessage, async requestSignal => {
@@ -53,13 +60,11 @@ export async function loadMetricRanges<Query extends MetricTimeRange, Key extend
         const item = queries[index];
         let read: MetricRead;
         try {
-          const params = new URLSearchParams({
-            query: item.expression,
-            start: String(captured.end - captured.minutes * 60),
-            end: String(captured.end),
-            step: '15',
-          });
-          const response = await readCluster(capturedScope, `${path}?${params}`, requestSignal);
+          const response = await readCluster(
+            capturedScope,
+            `${path}?${item.parameters}`,
+            requestSignal
+          );
           requestSignal.throwIfAborted();
           try {
             read = { ok: true, result: decode(response, captured, item.key) };
