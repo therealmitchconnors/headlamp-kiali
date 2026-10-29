@@ -387,6 +387,14 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
           <Link routeName="kiali-settings" params={{ cluster }}>
             {t('Configure dashboard definitions')}
           </Link>
+          {!!catalog?.disabled.length && (
+            <Alert severity="info">
+              {t(
+                'Saved disable declarations: {{names}}. These names are excluded from the effective catalog; dependent includes must be updated explicitly.',
+                { names: catalog.disabled.join(', ') }
+              )}
+            </Alert>
+          )}
           {definition?.includeBuiltins && (
             <Alert severity="info">
               {t(
@@ -425,7 +433,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                 >
                   {catalog.templates.map(item => (
                     <MenuItem key={item.name} value={item.name}>
-                      {item.title}
+                      {item.title || item.name}
                       {catalog.origins.get(item.name) === 'builtin' ? t(' (built-in)') : ''}
                     </MenuItem>
                   ))}

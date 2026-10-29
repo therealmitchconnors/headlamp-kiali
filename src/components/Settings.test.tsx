@@ -96,6 +96,31 @@ async function fillEndpoint() {
 }
 
 describe('native per-cluster settings', () => {
+  it('preserves a name-only disable declaration without erasing its intent or touching the cluster', async () => {
+    render(<Settings />);
+    fireEvent.change(screen.getByLabelText('Custom aggregate dashboards (JSON)'), {
+      target: {
+        value: JSON.stringify({
+          namespaceLabel: 'namespace',
+          clusterLabel: 'cluster',
+          includeBuiltins: true,
+          dashboards: [{ name: 'go' }],
+        }),
+      },
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: {
+          customDashboards: {
+            includeBuiltins: true,
+            dashboards: [{ name: 'go', title: '', items: [] }],
+          },
+        },
+      },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+  });
   it('opts into the pinned catalog per cluster without copying definitions or contacting Kubernetes', async () => {
     state.stored = {
       schemaVersion: 1,

@@ -795,6 +795,15 @@ into the saved user array. Dropdowns and captured references disclose their sour
 Scope labels, metric-cluster identity/acknowledgment and explicit loading remain
 required; enabling the catalog does not prove those metrics are available.
 
+A saved declaration such as `{"name":"go","items":[]}` disables that name.
+Missing/null items also mean an empty list; an absent or Go-whitespace-only
+`discoverOn` makes the empty definition a disable declaration. It remains saved
+and consumes the normal user-definition budget but is excluded from selection
+and discovery. Dependent includes fail explicitly instead of resurrecting the
+bundled template. Remove the declaration to restore the bundled default, or
+replace it with an active definition. A nonempty `discoverOn` with no items is
+discovery-only, not disabled; it cannot load charts.
+
 For several metrics on the same chart, replace `metricName` with a `metrics`
 list of `{"metricName":"used_bytes","displayName":"Used"}` entries. A nonempty
 list takes precedence over the legacy single field; an empty/absent list uses

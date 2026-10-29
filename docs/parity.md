@@ -1323,8 +1323,8 @@ Saved-user limits remain twenty templates and 64 KiB. The bundled twenty-one
 templates have their own 64 KiB guard; combining them permits at most 41 effective
 templates and 128 KiB. Eight source items per template yield a conservative 328
 resolved-chart bound. Request, sample, series and explicit chart-selection limits
-are unchanged. Whole-catalog opt-out and name overrides are supported; per-template
-disable declarations, automatic app discovery and annotation overlays remain open.
+are unchanged. Whole-catalog opt-out, name overrides and the disable declarations
+below are supported; automatic app discovery and annotation overlays remain open.
 
 Five hosted groups issued eight intercepted metric GETs and two discovery GETs.
 They verified opt-in save/hard reload with an empty saved-user array, all 21
@@ -1335,6 +1335,30 @@ or replaying requests. Saved-only selection regressions passed. The increment
 passed **442 focused tests in 11 files**, type/lint/i18n/build/package gates and
 the offline catalog check. All new positive samples were synthetic; settings/
 handlers were restored, with no cluster writes. Original-Go evidence stays 17,620.
+
+### Per-template disable declarations
+
+The pinned `AddMonitoringDashboards` keeps a definition only if trimmed
+`discoverOn` is nonempty or items exist. Saved empty/name-only declarations now
+preserve that rule: missing/null items normalize to an empty list, and bounded
+Go-whitespace-only discovery values normalize to absent. Empty metadata can omit
+its title; active chart definitions still require a nonblank title. Unsupported
+fields and malformed metadata remain errors even on disabled entries.
+
+The effective catalog removes disabled names only after applying user-name
+precedence, so a bundled template cannot silently reappear. The source declaration
+remains in settings and counts toward its existing limits. Disabled names are
+disclosed, dependent includes fail explicitly, and disabling is not a Kubernetes
+mutation. A discovery-only definition is retained and displayed with its name
+when no title exists, but loading it reports that no charts exist rather than
+returning a misleading empty chart result.
+
+Four hosted groups/six metric GETs/one discovery GET verified name-only
+save/reload, disabled-builtin exclusion, dependent-include failure, named
+discovery-only entries, removal/restoration and an explained disabled-only
+catalog. The increment passed **409 focused tests in eight files**, type/lint/
+i18n/build/package and catalog checks. Responses were synthetic, settings/
+handlers were restored, and no Kubernetes writes occurred.
 
 ## Additional traffic counter signals
 

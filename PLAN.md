@@ -329,7 +329,14 @@ dashboards and integration/live/Desktop closure remain substantial work.
   two discovery GETs verified opt-in persistence, Go charts, source provenance,
   bounded Thorntail composition, overrides/discovery and opt-out. Saved-only
   selection regressions passed; no Kubernetes writes occurred.
-- Latest catalog increment: **442 focused tests in 11 files**, plus
+- Per-template disable declarations now preserve name-only/empty definitions
+  while excluding their names from effective loading and discovery. Four hosted
+  groups/six metric GETs/one discovery GET verified persistence, broken-include
+  errors without fallback, discovery-only entries, restored bundled dependencies
+  and disabled-only catalogs. No Kubernetes writes occurred.
+- Latest disabling increment: **409 focused tests in eight files**, plus
+  type/lint/i18n/build/package, catalog-check and hosted gates passed.
+  Previous catalog increment: **442 focused tests in 11 files**, plus
   type/lint/i18n/build/package, offline catalog checksum and hosted checks passed.
   Previous chart-selection increment: **412 focused tests in nine files**, plus
   type/lint/i18n/build/package and hosted checks passed.
@@ -373,7 +380,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `93f0ccb484b416e5641e5a7d81c43f32cba0a7b9c6997cbb31e58039648e2fc8`.
+  `ffc561059736071e9184bfb8cd018bf36a8135312c9947cdf816aa7b3b142d9b`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1033,13 +1040,16 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is per-template disabling, automatic application
+The dashboard continuation is automatic application
 discovery and namespace/workload annotation overrides. Built-in definitions and explicit saved-template
 discovery, composition and label grouping are implemented for their documented
 bounded subsets. Literal includes are now preserved in settings for discovery;
 composition still trims them. App auto-discovery depends on explicit Pod
 annotations, complete workload attribution and configured application-label
 selectors.
+Per-template disabling is implemented: empty items and a Go-trimmed empty
+discoverOn remove a name after override precedence. Declaration records remain
+saved, and dependent includes fail rather than reviving a bundled default.
 
 The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`

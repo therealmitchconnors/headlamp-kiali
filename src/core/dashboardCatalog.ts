@@ -2,6 +2,7 @@ import rawCatalog from './builtinDashboards.json?raw';
 import {
   CustomDashboardSettings,
   CustomDashboardTemplate,
+  isDashboardDisabled,
   validateCustomDashboardSettings,
   validateCustomDashboardTemplate,
   validateDashboardCatalog,
@@ -35,6 +36,7 @@ export function builtinDashboardTemplates(): CustomDashboardTemplate[] {
 export function effectiveDashboardCatalog(settings: CustomDashboardSettings): {
   templates: CustomDashboardTemplate[];
   origins: ReadonlyMap<string, DashboardOrigin>;
+  disabled: string[];
 } {
   const saved = validateCustomDashboardSettings(settings);
   const customNames = new Set(saved.dashboards.map(template => template.name));
@@ -48,5 +50,6 @@ export function effectiveDashboardCatalog(settings: CustomDashboardSettings): {
       customNames.has(template.name) ? 'custom' : 'builtin',
     ])
   );
-  return { templates, origins };
+  const disabled = saved.dashboards.filter(isDashboardDisabled).map(template => template.name);
+  return { templates, origins, disabled };
 }

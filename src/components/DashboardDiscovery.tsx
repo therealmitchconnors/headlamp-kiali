@@ -77,7 +77,7 @@ export default function DashboardDiscovery({
                     data={runtime.dashboards}
                     columns={[
                       { label: t('Template'), getter: item => item.name },
-                      { label: t('Title'), getter: item => item.title },
+                      { label: t('Title'), getter: item => item.title || t('Title not specified') },
                       { label: t('Discovery metric'), getter: item => item.discoverOn },
                       {
                         label: t('Definition source'),

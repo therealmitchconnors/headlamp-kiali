@@ -979,6 +979,15 @@ saved-only selection regressions passing. Core tests resolve every template and
 build queries for every chart, check the exact capture hash, copy isolation and
 separate user/effective budgets. New samples were synthetic; no writes occurred.
 
+For disable declarations, save a name-only `go` declaration alongside a parent
+including `go` and a discovery-only metadata entry. Reload and verify Go is not
+selectable/discoverable, the parent fails explicitly without provider calls,
+and the title-less discovery-only entry is named but cannot load charts.
+Remove the disable declaration and explicitly load the parent: the original
+six Go charts should return. A custom-only disabled catalog must stay explained
+and issue no reads. Four hosted groups observed six metric GETs and one
+discovery GET, with no writes or retained fixture settings.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

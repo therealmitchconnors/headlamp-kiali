@@ -543,6 +543,11 @@ function ClusterSettingsForm({
           'Use namespaceLabel, clusterLabel, dashboards and optional includeBuiltins. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Automatic app discovery, sorting and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
         )}
       />
+      <Typography variant="body2">
+        {t(
+          'To disable a template by name, save a declaration such as {"name":"go","items":[]} with no discoverOn metric. This removes that name from the effective catalog, not from Kubernetes. A nonempty discoverOn with no items remains discovery-only and cannot load charts. Remove or replace the declaration to restore the template.'
+        )}
+      </Typography>
       {validation && (
         <Alert severity="warning">
           {t('Invalid settings: {{message}}', { message: validation })}

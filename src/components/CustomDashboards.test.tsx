@@ -769,3 +769,22 @@ it('offers opted-in builtins without copying them into saved definitions and cap
   expect(signal.aborted).toBe(true);
   expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
 });
+it('discloses saved disable declarations and never offers disabled templates for loading', async () => {
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates(
+      [
+        { name: 'go', title: '', items: [] },
+        { name: 'only-metadata', title: '', discoverOn: 'metadata_info', items: [] },
+      ],
+      true
+    )
+  );
+  open();
+  expect(screen.getByText(/Saved disable declarations: go/)).toBeDefined();
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  expect(screen.queryByRole('option', { name: 'Go Metrics (built-in)' })).toBeNull();
+  await userEvent.click(screen.getByRole('option', { name: 'only-metadata' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(screen.getByText('Dashboard template has no charts to load')).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+});

@@ -101,13 +101,28 @@ export function dashboardLabel(value: unknown): string {
     throw new Error('Dashboard scope labels must be Prometheus label names other than __name__');
   return name;
 }
-function dashboardHeader(value: unknown, maximum: number = 8) {
+function dashboardHeader(value: unknown, maximum: number = 8, allowEmpty = false) {
   if (!isRecord(value)) throw new Error('A custom dashboard must be an object');
   keys(value, ['name', 'title', 'runtime', 'discoverOn', 'items'], 'Custom dashboard');
   const name = text(value.name, 128, 'Dashboard name');
   if (/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.exec(name)?.[0] !== name)
     throw new Error('Dashboard names require letters, digits, dot, underscore or hyphen');
-  const title = text(value.title, 256, 'Dashboard title');
+  const rawItems =
+    allowEmpty && (value.items === undefined || value.items === null) ? [] : value.items;
+  if (!Array.isArray(rawItems) || (!allowEmpty && !rawItems.length) || rawItems.length > maximum)
+    throw new Error(
+      maximum === 8
+        ? allowEmpty
+          ? 'Dashboard definitions support at most 8 source items'
+          : 'Dashboard definitions require 1 to 8 source items'
+        : 'Resolved dashboards require 1 to 328 charts'
+    );
+  const title =
+    allowEmpty &&
+    rawItems.length === 0 &&
+    (value.title === undefined || value.title === null || value.title === '')
+      ? ''
+      : text(value.title, 256, 'Dashboard title');
   const runtime =
     value.runtime === undefined || value.runtime === null || value.runtime === ''
       ? undefined
@@ -115,20 +130,18 @@ function dashboardHeader(value: unknown, maximum: number = 8) {
   if (runtime && /[\ud800-\udfff]/u.test(runtime))
     throw new Error('Dashboard runtime cannot contain unpaired surrogates');
   const discoverOn =
-    value.discoverOn === undefined || value.discoverOn === null || value.discoverOn === ''
+    value.discoverOn === undefined ||
+    value.discoverOn === null ||
+    (typeof value.discoverOn === 'string' &&
+      value.discoverOn.length <= 256 &&
+      trimGoSpace(value.discoverOn) === '')
       ? undefined
       : metricName(value.discoverOn);
   const metadata = {
     ...(runtime !== undefined ? { runtime } : {}),
     ...(discoverOn !== undefined ? { discoverOn } : {}),
   };
-  if (!Array.isArray(value.items) || !value.items.length || value.items.length > maximum)
-    throw new Error(
-      maximum === 8
-        ? 'Dashboard definitions require 1 to 8 source items'
-        : 'Resolved dashboards require 1 to 328 charts'
-    );
-  return { name, title, metadata, rawItems: value.items };
+  return { name, title, metadata, rawItems };
 }
 export function validateCustomDashboard(value: unknown): CustomDashboard {
   return validateChartDashboard(value, 8);
@@ -248,7 +261,7 @@ function dashboardReference(
   };
 }
 export function validateCustomDashboardTemplate(value: unknown): CustomDashboardTemplate {
-  const { name, title, metadata, rawItems } = dashboardHeader(value);
+  const { name, title, metadata, rawItems } = dashboardHeader(value, 8, true);
   const names = new Set<string>();
   const items = rawItems.map(item => {
     if (!isRecord(item)) throw new Error('Dashboard items must be objects');
@@ -267,6 +280,9 @@ export function validateCustomDashboardTemplate(value: unknown): CustomDashboard
     return { ...(reference ? { include: reference.original } : {}), ...(chart ? { chart } : {}) };
   });
   return { name, title, ...metadata, items };
+}
+export function isDashboardDisabled(template: CustomDashboardTemplate): boolean {
+  return template.items.length === 0 && trimGoSpace(template.discoverOn ?? '') === '';
 }
 function dashboardTemplates(value: unknown, bundled = false): CustomDashboardTemplate[] {
   if (!Array.isArray(value) || value.length > (bundled ? MAX_EFFECTIVE_DASHBOARD_TEMPLATES : 20))
@@ -290,7 +306,7 @@ function dashboardTemplates(value: unknown, bundled = false): CustomDashboardTem
   return dashboards;
 }
 export function validateDashboardCatalog(value: unknown): CustomDashboardTemplate[] {
-  return dashboardTemplates(value, true);
+  return dashboardTemplates(value, true).filter(template => !isDashboardDisabled(template));
 }
 export function resolveCustomDashboard(
   templates: readonly CustomDashboardTemplate[],
@@ -325,6 +341,7 @@ export function resolveCustomDashboard(
     return charts;
   };
   const items = resolve(selected);
+  if (!items.length) throw new Error('Dashboard template has no charts to load');
   const template = catalog.get(selected);
   if (!template) throw new Error('Selected dashboard is unavailable');
   return {
