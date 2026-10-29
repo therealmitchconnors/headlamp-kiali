@@ -1323,8 +1323,8 @@ Saved-user limits remain twenty templates and 64 KiB. The bundled twenty-one
 templates have their own 64 KiB guard; combining them permits at most 41 effective
 templates and 128 KiB. Eight source items per template yield a conservative 328
 resolved-chart bound. Request, sample, series and explicit chart-selection limits
-are unchanged. Whole-catalog opt-out, name overrides and the disable declarations
-below are supported; automatic app discovery and annotation overlays remain open.
+are unchanged. Whole-catalog opt-out, name overrides, disable declarations and the
+explicit annotation overlays below are supported; automatic app discovery remains open.
 
 Five hosted groups issued eight intercepted metric GETs and two discovery GETs.
 They verified opt-in save/hard reload with an empty saved-user array, all 21
@@ -1359,6 +1359,48 @@ discovery-only entries, removal/restoration and an explained disabled-only
 catalog. The increment passed **409 focused tests in eight files**, type/lint/
 i18n/build/package and catalog checks. Responses were synthetic, settings/
 handlers were restored, and no Kubernetes writes occurred.
+
+### Captured namespace/workload annotation overlays
+
+The explicit annotation reader applies the pinned order: base saved/bundled
+catalog, Namespace annotation declarations, then optional workload declarations.
+Same-layer repeated names use the last declaration; later definitions can disable
+or re-enable names. Existing effective 41-template/128 KiB limits apply after
+every layer rather than being raised for each extra source.
+
+The parser reads only `dashboards.kiali.io/templates`, with 64 KiB text/UTF-8
+and normalized bounds, twenty declarations, 8,192 structural nodes and depth 16.
+It uses the safe YAML JSON schema, rejects aliases/cycles and sanitizes parser
+errors so annotation excerpts are not echoed. A present null/empty document is
+rejected instead of reproducing the source's nil-list catalog clearing; `[]`
+explicitly means no overrides. Unsupported schema fields remain errors.
+
+Resource kind/API version/name/namespace, UID and resourceVersion are validated
+before applying evidence. Deployment/DaemonSet/StatefulSet/ReplicaSet/
+ReplicationController choose non-null pod-template annotations, including an
+empty map, otherwise resource annotations. Pod, Job and CronJob use their own
+metadata: the pinned Job/CronJob parsers deliberately do not use pod templates.
+Custom-controller and VM annotation sources remain unsupported.
+
+At most two public Headlamp reads share a captured fifteen-second deadline.
+Failure of either source returns no effective overlay, never a partial success
+or automatic fallback. The UI binds readiness to cluster, namespace, base settings
+and the explicit resource request. Edits/reloads invalidate applied data and
+block metric/discovery reads until a new capture succeeds; disabling annotation
+usage is an explicit return to base definitions. Captured chart/discovery queries
+retain source UID/version evidence and definition origins. These are separate
+snapshots, not an atomic multi-resource read or telemetry ownership proof.
+
+Five hosted groups issued 15 intercepted resource GETs and six metric GETs,
+verifying namespace/workload precedence, Deployment empty-template masking,
+Job own metadata, captured origins/UIDs/versions, denial/malformed/later-failure
+blocking, sanitized parser errors, namespace-return non-resurrection and explicit
+opt-out. The final timeout measured **15,103 ms** (15,544 ms in the initial run).
+A separate unintercepted read captured actual `Namespace/bookinfo` and
+`Deployment/reviews-v1` evidence; no fixture annotation was applied. Bundled
+catalog regressions passed. Gates passed **366 focused tests in eight files**
+plus a final 27-test UI rerun, type/lint/i18n/build/package/catalog checks.
+Settings and handlers were restored with no Kubernetes writes.
 
 ## Additional traffic counter signals
 

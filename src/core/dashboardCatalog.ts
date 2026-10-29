@@ -14,7 +14,12 @@ export const BUILTIN_DASHBOARD_SOURCE = {
   commit: '0e8be887b8217bbcac5e3ae0bfcd258073949cca',
   blob: 'cbbc6cd2ac7834b117fb11e61af613d92016b30f',
 } as const;
-export type DashboardOrigin = 'builtin' | 'custom';
+export type DashboardOrigin = 'builtin' | 'custom' | 'namespace' | 'workload';
+export interface DashboardCatalog {
+  templates: CustomDashboardTemplate[];
+  origins: ReadonlyMap<string, DashboardOrigin>;
+  disabled: string[];
+}
 
 export function builtinDashboardTemplates(): CustomDashboardTemplate[] {
   const document: unknown = JSON.parse(rawCatalog);
@@ -33,11 +38,7 @@ export function builtinDashboardTemplates(): CustomDashboardTemplate[] {
   return validateDashboardCatalog(templates);
 }
 
-export function effectiveDashboardCatalog(settings: CustomDashboardSettings): {
-  templates: CustomDashboardTemplate[];
-  origins: ReadonlyMap<string, DashboardOrigin>;
-  disabled: string[];
-} {
+export function effectiveDashboardCatalog(settings: CustomDashboardSettings): DashboardCatalog {
   const saved = validateCustomDashboardSettings(settings);
   const customNames = new Set(saved.dashboards.map(template => template.name));
   const bundled = saved.includeBuiltins

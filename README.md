@@ -804,6 +804,30 @@ bundled template. Remove the declaration to restore the bundled default, or
 replace it with an active definition. A nonempty `discoverOn` with no items is
 discovery-only, not disabled; it cannot load charts.
 
+**Use namespace/workload dashboard annotations for this view** enables explicit
+reads of `dashboards.kiali.io/templates`. Enter **Dashboard namespace**, optionally
+choose a supported workload kind/name, then **Read dashboard annotation overrides**.
+The selected Headlamp identity reads the Namespace first and workload second;
+namespace definitions override saved/bundled names, then workload definitions
+apply last. UID/resourceVersion and the exact annotation location are displayed.
+No resource is written, and snapshots are not live watches or proof of metric
+origin.
+
+Deployment, DaemonSet, StatefulSet, ReplicaSet and ReplicationController use a
+non-null pod-template annotation map—even an empty map—before resource metadata.
+Pod, Job and CronJob use their own metadata, matching the pinned workload caller.
+Custom controllers and WorkloadGroups are not selected here. The Kubernetes
+annotation namespace is the same literal value as Dashboard namespace; this does
+not prove that telemetry with that label came from that resource.
+
+Annotation YAML must be a list of at most 20 supported definitions within 64 KiB.
+Aliases/cycles, excessive structure, multiple documents and malformed data fail
+explicitly. Use `[]` for no overrides: a present empty/null document is an error,
+not an inferred deletion or fallback. Existing effective catalog and query limits
+remain in force. Denial, parse failures, namespace/target edits and reloads block
+chart loading/discovery until a current capture succeeds; explicitly turn off
+annotation usage to return to saved/bundled definitions.
+
 For several metrics on the same chart, replace `metricName` with a `metrics`
 list of `{"metricName":"used_bytes","displayName":"Used"}` entries. A nonempty
 list takes precedence over the legacy single field; an empty/absent list uses
@@ -966,8 +990,7 @@ the draft selection. Only selected charts receive query-specific grouping and
 histogram-summary expansion; declarations are still validated as a whole.
 
 This is **not full custom-dashboard parity**: sorting, native histograms,
-automatic application/runtime discovery, namespace/workload annotation
-overrides and Grafana/Perses links remain unsupported. Unsupported fields are
+automatic application/runtime discovery and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget
 scenarios were fixture-backed.

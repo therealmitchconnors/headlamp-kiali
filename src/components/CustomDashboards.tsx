@@ -19,6 +19,7 @@ import {
   customDashboardJobs,
   CustomDashboardQuery,
   CustomDashboardScopeQuery,
+  CustomDashboardSettings,
   dashboardLabelFilters,
   resolveCustomDashboard,
 } from '../core/customDashboards';
@@ -32,6 +33,7 @@ import { loadCustomDashboard } from '../data/customDashboards';
 import { useRequest } from '../hooks/useRequest';
 import { useTelemetryQuery } from '../hooks/useTelemetryQuery';
 import ClusterScope from './ClusterScope';
+import DashboardAnnotations, { DashboardAnnotationState } from './DashboardAnnotations';
 import DashboardDiscovery from './DashboardDiscovery';
 import DashboardValueFilters from './DashboardValueFilters';
 import MetricChart from './MetricChart';
@@ -120,6 +122,10 @@ function DashboardResults({
                             ? t('Bundled Kiali template')
                             : item.origin === 'custom'
                             ? t('Saved custom definition')
+                            : item.origin === 'namespace'
+                            ? t('Namespace annotation')
+                            : item.origin === 'workload'
+                            ? t('Workload annotation')
                             : t('Source not captured'),
                       },
                     ]}
@@ -295,12 +301,20 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   const { t } = useTranslation();
   const config = useKialiConfig();
   const settings = config.valid ? getClusterConfig(config.config, cluster) : undefined;
-  const definition = settings?.customDashboards;
-  let catalog: ReturnType<typeof effectiveDashboardCatalog> | undefined;
+  const [annotationEnabled, setAnnotationEnabled] = useState(false);
+  const [annotationState, setAnnotationState] = useState<DashboardAnnotationState>();
+  const annotationDefaults: CustomDashboardSettings = {
+    namespaceLabel: 'namespace',
+    clusterLabel: 'cluster',
+    dashboards: [],
+  };
+  const definition =
+    settings?.customDashboards ?? (annotationEnabled ? annotationDefaults : undefined);
+  let baseCatalog: ReturnType<typeof effectiveDashboardCatalog> | undefined;
   let catalogError: string | undefined;
   if (definition) {
     try {
-      catalog = effectiveDashboardCatalog(definition);
+      baseCatalog = effectiveDashboardCatalog(definition);
     } catch (error) {
       catalogError = error instanceof Error ? error.message : t('Dashboard catalog is unavailable');
     }
@@ -316,12 +330,22 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   const [endTime, setEndTime] = useState('');
   const [acknowledged, setAcknowledged] = useState<string>();
   const [error, setError] = useState('');
+  const annotationBinding = JSON.stringify([cluster, namespace, definition]);
+  useEffect(() => setAnnotationState(undefined), [annotationBinding]);
+  const annotations = annotationState?.binding === annotationBinding ? annotationState : undefined;
+  const annotationBlocked = annotationEnabled && annotations?.status !== 'ready';
+  const catalog = annotationEnabled
+    ? annotations?.status === 'ready'
+      ? annotations.data.catalog
+      : undefined
+    : baseCatalog;
   const binding = JSON.stringify([
     cluster,
     settings?.prometheus,
     settings?.telemetryCluster,
     definition,
     definition?.includeBuiltins ? BUILTIN_DASHBOARD_SOURCE : null,
+    annotationEnabled ? [annotationBinding, annotations?.attempt, annotations?.status] : null,
   ]);
   useEffect(() => setError(''), [binding]);
   const { identity, setIdentity, query, setQuery, capturedSettings } =
@@ -373,6 +397,9 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         definition.namespaceLabel,
         definition.clusterLabel
       ),
+      ...(annotationEnabled && annotations?.status === 'ready'
+        ? { annotationSources: structuredClone(annotations.data.sources) }
+        : {}),
     };
   };
   return (
@@ -381,18 +408,49 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This native dashboard view supports saved and opted-in bundled templates, includes, named metrics on raw/rate charts and classic histogram summaries, with optional groupLabels. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Metrics aggregate within their selected groups; different metrics and groups are compared, not added together. Duplicate scrapes are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Grouped responses and chart panels are limited to eight series; overflow is an error, not truncation. Missing samples are not zero or healthy. Native histograms, automatic application discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports saved, bundled and explicitly captured annotation templates, includes, named metrics on raw/rate charts and classic histogram summaries, with optional groupLabels. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Metrics aggregate within their selected groups; different metrics and groups are compared, not added together. Duplicate scrapes are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Grouped responses and chart panels are limited to eight series; overflow is an error, not truncation. Missing samples are not zero or healthy. Native histograms, automatic application discovery and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>
             {t('Configure dashboard definitions')}
           </Link>
+          {definition && (
+            <TextField
+              label={t('Dashboard namespace')}
+              sx={{ minWidth: 220 }}
+              value={namespace}
+              onChange={event => setNamespace(event.target.value)}
+              helperText={t('Metric namespace label: {{label}}', {
+                label: definition.namespaceLabel,
+              })}
+            />
+          )}
+          {config.valid && (
+            <DashboardAnnotations
+              key={annotationBinding}
+              cluster={cluster}
+              namespace={namespace}
+              binding={annotationBinding}
+              settings={definition ?? annotationDefaults}
+              enabled={annotationEnabled}
+              onEnabled={enabled => {
+                setAnnotationEnabled(enabled);
+                setAnnotationState(undefined);
+              }}
+              onState={setAnnotationState}
+            />
+          )}
           {!!catalog?.disabled.length && (
             <Alert severity="info">
-              {t(
-                'Saved disable declarations: {{names}}. These names are excluded from the effective catalog; dependent includes must be updated explicitly.',
-                { names: catalog.disabled.join(', ') }
-              )}
+              {annotationEnabled
+                ? t(
+                    'Disabled dashboard names after annotation overrides: {{names}}. Dependent includes must be updated explicitly.',
+                    { names: catalog.disabled.join(', ') }
+                  )
+                : t(
+                    'Saved disable declarations: {{names}}. These names are excluded from the effective catalog; dependent includes must be updated explicitly.',
+                    { names: catalog.disabled.join(', ') }
+                  )}
             </Alert>
           )}
           {definition?.includeBuiltins && (
@@ -410,6 +468,12 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
             <Alert severity="error">{config.message}</Alert>
           ) : catalogError ? (
             <Alert severity="error">{catalogError}</Alert>
+          ) : annotationBlocked ? (
+            <Alert severity="info">
+              {t(
+                'Chart loading and discovery are blocked until current annotation sources are captured successfully. Read the sources again or turn off annotation overrides explicitly.'
+              )}
+            </Alert>
           ) : !catalog?.templates.length ? (
             <Alert severity="info">
               {t('No custom aggregate dashboards are configured for this cluster.')}
@@ -438,15 +502,6 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                     </MenuItem>
                   ))}
                 </TextField>
-                <TextField
-                  label={t('Dashboard namespace')}
-                  sx={{ minWidth: 220 }}
-                  value={namespace}
-                  onChange={event => setNamespace(event.target.value)}
-                  helperText={t('Metric namespace label: {{label}}', {
-                    label: definition.namespaceLabel,
-                  })}
-                />
                 {definition.clusterLabel && (
                   <TextField
                     label={t('Dashboard metric cluster value')}

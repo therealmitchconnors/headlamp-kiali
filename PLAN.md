@@ -334,7 +334,16 @@ dashboards and integration/live/Desktop closure remain substantial work.
   groups/six metric GETs/one discovery GET verified persistence, broken-include
   errors without fallback, discovery-only entries, restored bundled dependencies
   and disabled-only catalogs. No Kubernetes writes occurred.
-- Latest disabling increment: **409 focused tests in eight files**, plus
+- Explicit Namespace/workload annotation overlays now capture validated resource
+  identity, UID/version and source location, apply namespace then workload
+  precedence, and block metric/discovery reads on stale or failed evidence.
+  Five hosted groups/15 resource GETs/six metric GETs verified template-map
+  masking, Job metadata, sanitized errors, no fallback/resurrection and a
+  15,103 ms deadline/retry. Real Bookinfo Namespace and reviews-v1 Deployment
+  reads also passed without interception. No cluster writes occurred.
+- Latest annotation increment: **366 focused tests in eight files**, plus a
+  final 27-test UI rerun, type/lint/i18n/build/package/catalog and hosted checks.
+  Previous disabling increment: **409 focused tests in eight files**, plus
   type/lint/i18n/build/package, catalog-check and hosted gates passed.
   Previous catalog increment: **442 focused tests in 11 files**, plus
   type/lint/i18n/build/package, offline catalog checksum and hosted checks passed.
@@ -380,7 +389,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `ffc561059736071e9184bfb8cd018bf36a8135312c9947cdf816aa7b3b142d9b`.
+  `ed3ef974830bd8f6747ce6935ed63a7622fb8925e206f4a2f3089256329a3668`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1040,8 +1049,9 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is automatic application
-discovery and namespace/workload annotation overrides. Built-in definitions and explicit saved-template
+The dashboard continuation is application/workload integration and automatic
+discovery. Explicit Namespace/workload annotation overrides are now implemented
+for supported Kubernetes kinds, without writes or silent fallback. Built-in definitions and explicit saved-template
 discovery, composition and label grouping are implemented for their documented
 bounded subsets. Literal includes are now preserved in settings for discovery;
 composition still trims them. App auto-discovery depends on explicit Pod
@@ -1050,6 +1060,11 @@ selectors.
 Per-template disabling is implemented: empty items and a Go-trimmed empty
 discoverOn remove a name after override precedence. Declaration records remain
 saved, and dependent includes fail rather than reviving a bundled default.
+Annotation reads are ephemeral and explicit. Namespace definitions apply before
+workload definitions; Pod/Job/CronJob use resource metadata, while supported
+controllers prefer every non-null pod-template annotation map (including empty).
+The UI invalidates source captures on target/settings changes and does not
+resurrect them on return. Custom-controller/VM annotation sources remain open.
 
 The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`

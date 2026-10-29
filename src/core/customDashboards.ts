@@ -4,6 +4,7 @@ import {
   dashboardByLabels,
   validateDashboardAggregations,
 } from './dashboardAggregations';
+import type { DashboardAnnotationSource } from './dashboardAnnotations';
 import { trimGoSpace } from './goStrings';
 import { histogramExpressions, HistogramSummary } from './histograms';
 import { metricGroupLabels } from './metricGroups';
@@ -54,13 +55,18 @@ export interface CustomDashboardScopeQuery extends MetricTimeRange {
   namespaceLabel: string;
   clusterLabel: string | null;
   labelsFilters?: Record<string, string>;
+  annotationSources?: DashboardAnnotationSource[];
 }
 export interface CustomDashboardQuery extends CustomDashboardScopeQuery {
   dashboard: CustomDashboard;
   chartNames?: string[];
   byLabels?: string[];
   histogramSummaries?: HistogramSummary[];
-  templateReferences?: { name: string; title: string; origin?: 'builtin' | 'custom' }[];
+  templateReferences?: {
+    name: string;
+    title: string;
+    origin?: 'builtin' | 'custom' | 'namespace' | 'workload';
+  }[];
 }
 export interface CustomDashboardJob {
   key: string;

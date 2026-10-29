@@ -4,8 +4,14 @@ import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { customDashboardJobs, CustomDashboardTemplate } from '../core/customDashboards';
+import {
+  applyDashboardAnnotationLayer,
+  parseDashboardAnnotation,
+} from '../core/dashboardAnnotations';
+import { effectiveDashboardCatalog } from '../core/dashboardCatalog';
 import { decodeDashboardDiscovery } from '../core/dashboardDiscovery';
 import { loadCustomDashboard } from '../data/customDashboards';
+import { loadDashboardAnnotations } from '../data/dashboardAnnotations';
 import { discoverCustomDashboards } from '../data/dashboardDiscovery';
 import CustomDashboards from './CustomDashboards';
 
@@ -19,6 +25,7 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
 vi.mock('../config', () => ({ useKialiConfig: vi.fn() }));
 vi.mock('../data/customDashboards', () => ({ loadCustomDashboard: vi.fn() }));
 vi.mock('../data/dashboardDiscovery', () => ({ discoverCustomDashboards: vi.fn() }));
+vi.mock('../data/dashboardAnnotations', () => ({ loadDashboardAnnotations: vi.fn() }));
 vi.mock('./MetricChart', () => ({
   default: ({ title, unit }: { title: string; unit: string }) => (
     <div role="img" aria-label={title}>
@@ -99,6 +106,7 @@ const configured = {
   },
 };
 beforeEach(() => {
+  vi.mocked(loadDashboardAnnotations).mockReset();
   vi.mocked(discoverCustomDashboards).mockReset();
   vi.mocked(useKialiConfig).mockReturnValue(configured);
   vi.mocked(loadCustomDashboard)
@@ -786,5 +794,97 @@ it('discloses saved disable declarations and never offers disabled templates for
   await userEvent.click(screen.getByRole('option', { name: 'only-metadata' }));
   await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
   expect(screen.getByText('Dashboard template has no charts to load')).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+});
+it('applies only current captured annotation sources and requires an explicit reload after namespace changes', async () => {
+  vi.mocked(loadDashboardAnnotations).mockImplementation(async (scope, settings, target) => ({
+    cluster: scope.cluster,
+    settings,
+    target,
+    catalog: applyDashboardAnnotationLayer(
+      effectiveDashboardCatalog(settings),
+      parseDashboardAnnotation(
+        JSON.stringify([
+          {
+            name: 'runtime',
+            title: 'Annotated runtime',
+            items: [
+              {
+                chart: { name: 'Annotated chart', metricName: 'annotated_metric', dataType: 'raw' },
+              },
+            ],
+          },
+        ])
+      ),
+      'namespace'
+    ),
+    sources: [
+      {
+        kind: 'Namespace',
+        name: target.namespace,
+        namespace: target.namespace,
+        uid: 'ns-captured',
+        resourceVersion: '7',
+        location: 'resource',
+        annotationPresent: true,
+        definitions: ['runtime'],
+      },
+    ],
+  }));
+  open();
+  await userEvent.click(
+    screen.getByRole('checkbox', {
+      name: 'Use namespace/workload dashboard annotations for this view',
+    })
+  );
+  expect(screen.queryByRole('button', { name: 'Load custom dashboard' })).toBeNull();
+  expect(loadDashboardAnnotations).not.toHaveBeenCalled();
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Read dashboard annotation overrides' })
+  );
+  await screen.findByText('ns-captured');
+  await screen.findByRole('button', { name: 'Load custom dashboard' });
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Annotated chart' });
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  const signal = vi.mocked(loadDashboardAnnotations).mock.calls[0][3];
+  expect(captured.templateReferences?.[0].origin).toBe('namespace');
+  expect(captured.annotationSources?.[0].uid).toBe('ns-captured');
+  fireEvent.change(screen.getByLabelText('Dashboard namespace'), { target: { value: 'other' } });
+  expect(screen.queryByRole('img', { name: 'Annotated chart' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Load custom dashboard' })).toBeNull();
+  expect(loadDashboardAnnotations).toHaveBeenCalledTimes(1);
+  expect(signal.aborted).toBe(true);
+  expect(captured.namespace).toBe('bookinfo');
+  fireEvent.change(screen.getByLabelText('Dashboard namespace'), { target: { value: 'bookinfo' } });
+  expect(screen.queryByRole('button', { name: 'Load custom dashboard' })).toBeNull();
+  expect(loadDashboardAnnotations).toHaveBeenCalledTimes(1);
+  fireEvent.change(screen.getByLabelText('Dashboard namespace'), { target: { value: 'other' } });
+  await userEvent.click(
+    screen.getByRole('checkbox', {
+      name: 'Use namespace/workload dashboard annotations for this view',
+    })
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  expect(vi.mocked(loadCustomDashboard).mock.calls[1][2].namespace).toBe('other');
+  expect(vi.mocked(loadCustomDashboard).mock.calls[1][2].annotationSources).toBeUndefined();
+});
+it('does not fall back to saved templates after denied annotation reads', async () => {
+  vi.mocked(loadDashboardAnnotations).mockRejectedValue({
+    status: 403,
+    message: 'Namespace denied',
+  });
+  open();
+  await userEvent.click(
+    screen.getByRole('checkbox', {
+      name: 'Use namespace/workload dashboard annotations for this view',
+    })
+  );
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Read dashboard annotation overrides' })
+  );
+  await screen.findByText('Access denied: Namespace denied');
+  expect(screen.queryByRole('button', { name: 'Load custom dashboard' })).toBeNull();
   expect(loadCustomDashboard).not.toHaveBeenCalled();
 });

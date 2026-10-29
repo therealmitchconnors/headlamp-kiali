@@ -143,6 +143,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   generalize the usual Kubernetes empty-selector-matches-all rule here, treat
   WorkloadEntries as Pods, or use these links as complete workload/account
   validation context or evidence of VM health.
+- Dashboard annotation sources follow the pinned workload caller, not a generic
+  pod-template rule: supported Deployment/DaemonSet/StatefulSet/ReplicaSet/
+  ReplicationController models prefer every non-null template annotation map,
+  even empty. Pod, Job and CronJob use resource metadata. Failed/stale override
+  reads must block metrics rather than fall back to base definitions.
 - VM application correlation follows the first matching WorkloadEntry's
   `spec.labels` in captured list order, otherwise group selector labels only
   after a complete entry read. Preserve group UID/resourceVersion separately

@@ -988,6 +988,21 @@ six Go charts should return. A custom-only disabled catalog must stay explained
 and issue no reads. Four hosted groups observed six metric GETs and one
 discovery GET, with no writes or retained fixture settings.
 
+For annotation overlays, intercept only owned Namespace/workload GETs and a
+dedicated fixture metric endpoint. Supply a Namespace override, a Deployment
+pod-template override and a conflicting controller annotation. Read explicitly
+and inspect UID/version/location evidence before loading metrics. Empty template
+annotations must mask controller annotations; Job/CronJob use their own metadata.
+
+Reject denied Namespace/workload reads, malformed YAML, aliases, wrong resource
+identity and excess budgets without falling back to base or a partial layer.
+Keep parser errors free of source excerpts. Change the namespace and return:
+old evidence must not resurrect. Test the shared fifteen-second deadline,
+corrected retry and explicit annotation opt-out. Five hosted groups observed
+15 resource GETs, six metric GETs and 15,103..15,544 ms timeouts across runs.
+Actual Bookinfo Namespace/reviews-v1 Deployment reads also passed without
+interception. No annotation or other resource was written to Kubernetes.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

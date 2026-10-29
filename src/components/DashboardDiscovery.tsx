@@ -89,6 +89,10 @@ export default function DashboardDiscovery({
                             ? t('Bundled Kiali template')
                             : origin === 'custom'
                             ? t('Saved custom definition')
+                            : origin === 'namespace'
+                            ? t('Namespace annotation')
+                            : origin === 'workload'
+                            ? t('Workload annotation')
                             : t('Source not captured');
                         },
                       },
