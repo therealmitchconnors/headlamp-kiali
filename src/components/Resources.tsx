@@ -1,5 +1,6 @@
 import { K8s, useTranslation } from '@kinvolk/headlamp-plugin/lib';
 import {
+  Link,
   ResourceListView,
   SectionBox,
   StatusLabel,
@@ -68,6 +69,41 @@ export function Services() {
             'namespace',
             { id: 'type', label: t('Type'), getValue: item => item.spec.type },
             { id: 'cluster-ip', label: t('Cluster IP'), getValue: item => item.spec.clusterIP },
+            {
+              id: 'health',
+              label: t('Request health'),
+              getValue: () => t('Inspect health'),
+              render: item => (
+                <Link
+                  routeName="kiali-health"
+                  activeCluster={scope.cluster}
+                  search={new URLSearchParams({
+                    kind: 'Service',
+                    namespace: item.metadata.namespace ?? '',
+                    name: item.metadata.name,
+                  }).toString()}
+                >
+                  {t('Inspect health')}
+                </Link>
+              ),
+            },
+            {
+              id: 'create-routing',
+              label: t('Traffic configuration'),
+              getValue: () => t('Create traffic routing'),
+              render: item => (
+                <Link
+                  routeName="kiali-service-traffic"
+                  activeCluster={scope.cluster}
+                  search={new URLSearchParams({
+                    namespace: item.metadata.namespace ?? '',
+                    service: item.metadata.name,
+                  }).toString()}
+                >
+                  {t('Create traffic routing')}
+                </Link>
+              ),
+            },
             {
               id: 'ports',
               label: t('Ports'),
@@ -170,6 +206,23 @@ export function Workloads() {
                 'namespace',
                 ...(choice.replicas
                   ? [
+                      {
+                        id: 'health',
+                        label: t('Request health'),
+                        getValue: () => t('Inspect health'),
+                        render: (item: InstanceType<KubeObjectClass>) => (
+                          <Link
+                            routeName="kiali-health"
+                            search={new URLSearchParams({
+                              kind: item.kind,
+                              namespace: item.metadata.namespace ?? '',
+                              name: item.metadata.name,
+                            }).toString()}
+                          >
+                            {t('Inspect health')}
+                          </Link>
+                        ),
+                      },
                       {
                         id: 'readiness',
                         label: t('Ready replicas'),

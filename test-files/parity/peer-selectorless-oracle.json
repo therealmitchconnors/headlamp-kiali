@@ -1,0 +1,6758 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "business/checkers/common/multi_match_selector_checker.go": "3240a2bcb2b74fb589768c3dd06e8c959fdab99d",
+    "business/checkers/peer_authentication_checker.go": "d4ba5a8ac74729061f72400d0fd8ab61c29ec472",
+    "models/istio_validation.go": "d13e0b576e9392cb7e19578c05a07f2641efc054",
+    "business/istio_validations.go": "ef416a10be244b84b86e017203b4e76869ae1889"
+  },
+  "cases": [
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": null
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": null
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {}
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "b",
+            "namespace": "other",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": ""
+                }
+              }
+            }
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {
+                "matchLabels": {
+                  "app": "reviews"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "c",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1,
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0,
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0,
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "c",
+            "namespace": "bookinfo",
+            "spec": {
+              "selector": {}
+            }
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1,
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0,
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0,
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "c",
+            "namespace": "root",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "c",
+            "namespace": "root",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "same",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "same",
+            "namespace": "root",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "same",
+            "namespace": "root",
+            "spec": {}
+          },
+          {
+            "name": "same",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "root",
+            "spec": {}
+          },
+          {
+            "name": "c",
+            "namespace": "root",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [],
+          "checks": []
+        },
+        {
+          "references": [
+            2
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "input": {
+        "records": [
+          {
+            "name": "c",
+            "namespace": "root",
+            "spec": {}
+          },
+          {
+            "name": "b",
+            "namespace": "root",
+            "spec": {}
+          },
+          {
+            "name": "a",
+            "namespace": "bookinfo",
+            "spec": {}
+          }
+        ]
+      },
+      "expected": [
+        {
+          "references": [
+            1
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [
+            0
+          ],
+          "checks": [
+            {
+              "Code": "KIA0002",
+              "Message": "More than one selector-less object in the same namespace",
+              "Severity": "error",
+              "Path": "spec/selector"
+            }
+          ]
+        },
+        {
+          "references": [],
+          "checks": []
+        }
+      ]
+    }
+  ]
+}

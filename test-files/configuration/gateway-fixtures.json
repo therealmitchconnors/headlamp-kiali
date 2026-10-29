@@ -1,0 +1,152 @@
+{
+  "gatewayClass": {
+    "apiVersion": "gateway.networking.k8s.io/v1",
+    "kind": "GatewayClass",
+    "metadata": {
+      "name": "example-gateway",
+      "uid": "class-uid",
+      "creationTimestamp": "2026-10-27T00:00:00Z",
+      "resourceVersion": "1",
+      "generation": 1
+    },
+    "spec": {
+      "controllerName": "example.test/gateway-controller",
+      "description": "Synthetic fixture; never applied"
+    },
+    "status": {
+      "conditions": [
+        {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Accepted",
+          "message": "Synthetic controller acceptance",
+          "observedGeneration": 1,
+          "lastTransitionTime": "2026-10-27T00:00:00Z"
+        }
+      ]
+    }
+  },
+  "gateway": {
+    "apiVersion": "gateway.networking.k8s.io/v1",
+    "kind": "Gateway",
+    "metadata": {
+      "name": "public",
+      "namespace": "edge",
+      "uid": "gateway-uid",
+      "creationTimestamp": "2026-10-27T00:00:00Z",
+      "resourceVersion": "1",
+      "generation": 1
+    },
+    "spec": {
+      "gatewayClassName": "example-gateway",
+      "listeners": [
+        {
+          "name": "https",
+          "protocol": "HTTPS",
+          "port": 443,
+          "tls": { "mode": "Terminate", "certificateRefs": [{ "name": "example-certificate" }] }
+        }
+      ]
+    },
+    "status": {
+      "addresses": [{ "type": "IPAddress", "value": "192.0.2.1" }],
+      "conditions": [
+        {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Programmed",
+          "message": "Synthetic programmed gateway",
+          "observedGeneration": 1,
+          "lastTransitionTime": "2026-10-27T00:00:00Z"
+        }
+      ],
+      "listeners": [
+        {
+          "name": "https",
+          "attachedRoutes": 1,
+          "supportedKinds": [{ "group": "gateway.networking.k8s.io", "kind": "HTTPRoute" }],
+          "conditions": [
+            {
+              "type": "Accepted",
+              "status": "True",
+              "reason": "Accepted",
+              "message": "Synthetic listener",
+              "observedGeneration": 1,
+              "lastTransitionTime": "2026-10-27T00:00:00Z"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "httpRoute": {
+    "apiVersion": "gateway.networking.k8s.io/v1",
+    "kind": "HTTPRoute",
+    "metadata": {
+      "name": "reviews",
+      "namespace": "bookinfo",
+      "uid": "route-uid",
+      "creationTimestamp": "2026-10-27T00:00:00Z",
+      "resourceVersion": "1",
+      "generation": 1
+    },
+    "spec": {
+      "hostnames": ["reviews.example.test"],
+      "parentRefs": [{ "name": "public", "namespace": "edge", "sectionName": "https" }],
+      "rules": [
+        {
+          "matches": [{ "path": { "type": "PathPrefix", "value": "/" } }],
+          "backendRefs": [{ "name": "reviews", "port": 9080, "weight": 100 }],
+          "filters": [
+            {
+              "type": "RequestMirror",
+              "requestMirror": {
+                "backendRef": { "name": "shadow", "namespace": "preview", "port": 9080 },
+                "percent": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "status": {
+      "parents": [
+        {
+          "parentRef": { "name": "public", "namespace": "edge", "sectionName": "https" },
+          "controllerName": "example.test/gateway-controller",
+          "conditions": [
+            {
+              "type": "Accepted",
+              "status": "False",
+              "reason": "NotAllowedByListeners",
+              "message": "Synthetic cross-namespace denial",
+              "observedGeneration": 1,
+              "lastTransitionTime": "2026-10-27T00:00:00Z"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "inferencePool": {
+    "apiVersion": "inference.networking.k8s.io/v1",
+    "kind": "InferencePool",
+    "metadata": {
+      "name": "inference",
+      "namespace": "bookinfo",
+      "uid": "pool-uid",
+      "creationTimestamp": "2026-10-27T00:00:00Z",
+      "resourceVersion": "1"
+    },
+    "spec": {
+      "selector": { "matchLabels": { "app": "model-server" } },
+      "targetPorts": [{ "number": 8000 }],
+      "endpointPickerRef": {
+        "name": "picker",
+        "port": { "number": 9002 },
+        "failureMode": "FailClose"
+      },
+      "appProtocol": "kubernetes.io/h2c"
+    }
+  }
+}

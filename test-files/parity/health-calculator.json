@@ -1,0 +1,7735 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "business/health_calculator.go": "e1deff9aa9d01e57ff610b0d74d5a514a30d5fe9",
+    "business/health_config.go": "ee85266b1b06e5b2d2e1c3f6efd93853da63c680",
+    "config/config.go": "fbde570684b760495782fce1df801d9c0046723e",
+    "models/health_status.go": "1aab7bf024eac81f1e8093a85cbad040c4eb6f27",
+    "models/health.go": "d3df3111150fc1143c7678fdf73c3b898a0e0487"
+  },
+  "cases": [
+    {
+      "expected": {
+        "errorRatio": 0,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "503": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "503": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "503": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "503": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "503": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "503": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "503": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "503": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "404": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "404": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "404": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "404": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "404": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "404": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "404": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "404": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "14": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "14": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "14": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "14": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "14": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "14": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "14": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "14": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 100,
+              "16": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.999,
+              "16": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99.9,
+              "16": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 99,
+              "16": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 95,
+              "16": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 90,
+              "16": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 80,
+              "16": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "grpc": {
+              "0": 0,
+              "16": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 100,
+              "-": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.999,
+              "-": 0.001
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.001,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99.9,
+              "-": 0.1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 0.1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 99,
+              "-": 1
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 1,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 95,
+              "-": 5
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 5,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 90,
+              "-": 10
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 10,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 80,
+              "-": 20
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 20,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "outbound": {
+            "http": {
+              "200": 0,
+              "-": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 2,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": ""
+        }
+      },
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "5xx,2,5,http,inbound"
+        }
+      },
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "4xx,10,20,http,inbound;5xx,0,10,http,outbound"
+        }
+      },
+      "expected": {
+        "errorRatio": 0,
+        "status": "Healthy",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "bad"
+        }
+      },
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 2
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "5xx,10,1,http,inbound"
+        }
+      },
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 2
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "5xx,0.1,0.3,http,inbound"
+        }
+      },
+      "expected": {
+        "errorRatio": 3,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        },
+        "annotations": {
+          "health.kiali.io/rate": "[,0,10,http,inbound"
+        }
+      },
+      "expected": {
+        "errorRatio": 100,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 1
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "app",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "workload",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "Failure",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {},
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 0
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 0
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          null
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "bookinfo",
+        "name": "reviews",
+        "requests": {
+          "inbound": {
+            "tcp": {
+              "": 100
+            }
+          }
+        },
+        "workloadStatuses": [
+          {
+            "desiredReplicas": 2,
+            "currentReplicas": 2,
+            "availableReplicas": 0,
+            "syncedProxies": 2
+          }
+        ]
+      },
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "production",
+        "name": "critical-reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        }
+      },
+      "rules": [],
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "production",
+        "name": "critical-reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        }
+      },
+      "rules": [
+        {
+          "namespace": "production",
+          "kind": "service",
+          "name": "critical-.*",
+          "tolerance": [
+            {
+              "code": "5xx",
+              "degraded": 1,
+              "failure": 5,
+              "protocol": "http",
+              "direction": "inbound"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "production",
+        "name": "critical-reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        }
+      },
+      "rules": [
+        {
+          "namespace": "other",
+          "tolerance": [
+            {
+              "code": "5xx",
+              "degraded": 1,
+              "failure": 5,
+              "protocol": "http",
+              "direction": "inbound"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "production",
+        "name": "critical-reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        }
+      },
+      "rules": [
+        {
+          "namespace": "[",
+          "tolerance": [
+            {
+              "code": "5xx",
+              "degraded": 1,
+              "failure": 5,
+              "protocol": "http",
+              "direction": "inbound"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorRatio": 3,
+        "status": "Degraded",
+        "totalRequestRate": 100
+      },
+      "warningCount": 1
+    },
+    {
+      "input": {
+        "kind": "service",
+        "namespace": "production",
+        "name": "critical-reviews",
+        "requests": {
+          "inbound": {
+            "http": {
+              "200": 97,
+              "503": 3
+            }
+          }
+        }
+      },
+      "rules": [
+        {
+          "tolerance": [
+            {
+              "code": "4xx",
+              "degraded": 1,
+              "failure": 5,
+              "protocol": "http",
+              "direction": "outbound"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorRatio": -1,
+        "status": "NA",
+        "totalRequestRate": 100
+      },
+      "warningCount": 0
+    }
+  ]
+}

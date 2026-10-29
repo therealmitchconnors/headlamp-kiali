@@ -1,0 +1,3710 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "util/healthutil/health_util.go": "dfe83f57c9876b1a7b01479c93da9e272565029a",
+    "models/workload.go": "8070c2c4423dee1ef6629e94ffd299e57c03c843"
+  },
+  "cases": [
+    {
+      "input": {
+        "annotations": {},
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {},
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": ""
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "0"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "1"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "f"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "F"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "t"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "T"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "false"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "FALSE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "False"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TRUE"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {}
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "True"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "TrUe"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "yes"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": " true"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true "
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {}
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "Unknown"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "true"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": ""
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "healthy",
+              "status": "True"
+            },
+            {
+              "type": "Healthy",
+              "status": "False"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "annotations": {
+          "proxy.istio.io/health-checks-enabled": "true\n"
+        },
+        "status": {
+          "conditions": [
+            {
+              "type": "Ready",
+              "status": "False"
+            },
+            {
+              "type": "Healthy",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "expected": true
+    }
+  ]
+}

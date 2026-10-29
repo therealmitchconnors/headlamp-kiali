@@ -1,8 +1,17 @@
 import { CorrelationKind, CorrelationResource, OwnerReference } from '../core/correlation';
 import { Labels } from '../core/labels';
 import { isRecord } from '../core/object';
-import { NamespaceScope } from '../core/scope';
-import { InvalidResponseError, readCluster, ReadFailure, readFailure } from './requests';
+import { NamespaceScope, namespaceScope } from '../core/scope';
+import { observedPodAccount } from '../core/workloadAccounts';
+import { isHealthWorkloadKind, workloadHealthResource } from '../core/workloadHealth';
+import {
+  InvalidResponseError,
+  readCluster,
+  ReadFailure,
+  readFailure,
+  withDiagnosticDeadline,
+} from './requests';
+import { readVirtualWorkloadSource, VIRTUAL_WORKLOAD_SOURCE } from './virtualWorkloads';
 
 export interface CorrelationSource {
   kind: CorrelationKind;
@@ -30,6 +39,7 @@ export interface SourceSnapshot {
   resourceVersion?: string;
   error?: ReadFailure;
   limited?: boolean;
+  notServed?: boolean;
 }
 
 export interface CorrelationSnapshot {
@@ -128,6 +138,7 @@ export function decodeCorrelationResource(
     );
   }
   const objectLabels = labels(value.metadata.labels);
+  const name = requiredString(value.metadata.name, 'resource name');
   let workloadLabels = objectLabels;
   if (
     ['Deployment', 'ReplicaSet', 'StatefulSet', 'DaemonSet', 'ReplicationController'].includes(
@@ -146,13 +157,28 @@ export function decodeCorrelationResource(
       workloadLabels = labels(isRecord(metadata) ? metadata.labels : undefined);
     }
   }
+  let health: CorrelationResource['health'];
+  if (isHealthWorkloadKind(source.kind)) {
+    try {
+      const { replicas, stale } = workloadHealthResource(
+        { ...value, kind: source.kind, apiVersion: source.apiVersion },
+        { kind: source.kind, namespace: scope.namespace, name }
+      );
+      health = { ok: true, value: { replicas, stale } };
+    } catch (error) {
+      health = {
+        ok: false,
+        message: error instanceof Error ? error.message : 'Invalid workload health state',
+      };
+    }
+  }
   return {
     identity: {
       cluster: scope.cluster,
       namespace: scope.namespace,
       group: source.group,
       kind: source.kind,
-      name: requiredString(value.metadata.name, 'resource name'),
+      name,
       uid: requiredString(value.metadata.uid, 'resource UID'),
     },
     labels: objectLabels,
@@ -160,6 +186,11 @@ export function decodeCorrelationResource(
     owners: owners(value.metadata.ownerReferences),
     serviceSelector: source.kind === 'Service' ? labels(value.spec.selector) : null,
     proxyMode: source.kind === 'Pod' ? proxyMode(value.spec) : 'none',
+    ...(source.kind === 'Pod' ? { podAccount: observedPodAccount(value.spec) } : {}),
+    ...(typeof value.metadata.resourceVersion === 'string'
+      ? { resourceVersion: value.metadata.resourceVersion }
+      : {}),
+    ...(health ? { health } : {}),
   };
 }
 
@@ -223,17 +254,35 @@ export async function loadCorrelationSnapshot(
   scope: NamespaceScope,
   signal: AbortSignal
 ): Promise<CorrelationSnapshot> {
+  const captured = namespaceScope(scope.cluster, scope.namespace);
+  return withDiagnosticDeadline(
+    signal,
+    'Namespace correlation exceeded 15 seconds',
+    requestSignal => collectCorrelationSnapshot(captured, requestSignal)
+  );
+}
+
+async function collectCorrelationSnapshot(
+  scope: NamespaceScope,
+  signal: AbortSignal
+): Promise<CorrelationSnapshot> {
+  const requested = [...CORRELATION_SOURCES, VIRTUAL_WORKLOAD_SOURCE];
   const results = new Map<CorrelationKind, SourceSnapshot>();
   let next = 0;
   async function worker() {
-    while (next < CORRELATION_SOURCES.length) {
+    while (next < requested.length) {
       signal.throwIfAborted();
-      const source = CORRELATION_SOURCES[next++];
-      results.set(source.kind, await readCorrelationSource(scope, source, signal));
+      const source = requested[next++];
+      results.set(
+        source.kind,
+        source.kind === 'WorkloadGroup'
+          ? await readVirtualWorkloadSource(scope, signal)
+          : await readCorrelationSource(scope, source, signal)
+      );
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-  const sources = CORRELATION_SOURCES.map(source => {
+  const sources = requested.map(source => {
     const result = results.get(source.kind);
     if (!result) throw new Error('Correlation source was not collected');
     return result;

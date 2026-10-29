@@ -1,0 +1,1429 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "models/istio_validation.go": "d13e0b576e9392cb7e19578c05a07f2641efc054"
+  },
+  "cases": [
+    {
+      "input": {
+        "annotations": null
+      },
+      "expected": {
+        "present": false,
+        "all": false,
+        "codes": [],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {}
+      },
+      "expected": {
+        "present": false,
+        "all": false,
+        "codes": [],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "unrelated": "value"
+        }
+      },
+      "expected": {
+        "present": false,
+        "all": false,
+        "codes": [],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": ""
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA1107,GWAPI"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA1107",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": false,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004,KIA0004"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004,,GWAPI"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": ","
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "",
+          ""
+        ],
+        "ignored": {
+          "": true,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 , KIA1107 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "KIA1107"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "kia0004"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "kia0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004\nmiddle"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004\nmiddle"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004,"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          ""
+        ],
+        "ignored": {
+          "": true,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "﻿"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "﻿"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "᠎"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "᠎"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\t\t"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\tKIA0004\t"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\tKIA0004,GWAPI\t"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\n\n"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\nKIA0004\n"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\nKIA0004,GWAPI\n"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\u000b\u000b"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\u000bKIA0004\u000b"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\u000bKIA0004,GWAPI\u000b"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\f\f"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\fKIA0004\f"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\fKIA0004,GWAPI\f"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\r\r"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\rKIA0004\r"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "\rKIA0004,GWAPI\r"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": ""
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "KIA0004,GWAPI"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "  "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004 "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": " KIA0004,GWAPI "
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "　　"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": true,
+        "codes": [],
+        "ignored": {
+          "": true,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": true
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "　KIA0004　"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "　KIA0004,GWAPI　"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "KIA0004",
+          "GWAPI"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": true,
+          "KIA0004": true,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "﻿﻿"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "﻿﻿"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "﻿KIA0004﻿"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "﻿KIA0004﻿"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "﻿KIA0004,GWAPI﻿"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "﻿KIA0004",
+          "GWAPI﻿"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "᠎᠎"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "᠎᠎"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "᠎KIA0004᠎"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "᠎KIA0004᠎"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    },
+    {
+      "input": {
+        "annotations": {
+          "kiali.io/ignore-validations": "᠎KIA0004,GWAPI᠎"
+        }
+      },
+      "expected": {
+        "present": true,
+        "all": false,
+        "codes": [
+          "᠎KIA0004",
+          "GWAPI᠎"
+        ],
+        "ignored": {
+          "": false,
+          "GWAPI": false,
+          "KIA0004": false,
+          "KIA1107": false
+        }
+      }
+    }
+  ]
+}

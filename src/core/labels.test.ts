@@ -2,7 +2,9 @@ import oracleText from '../../test-files/correlation/label-oracle.json?raw';
 import {
   AppLabels,
   applicationLabels,
+  decodeLabelSelector,
   isLabelKey,
+  isLabelValue,
   labelIndex,
   Labels,
   matchesSelector,
@@ -99,4 +101,37 @@ describe('Kubernetes label selectors and scoped postings', () => {
       expect(isLabelKey(key)).toBe(false);
     }
   );
+  it.each(['app\n', 'example.com\n/app', 'example.com/app\r\n', 'a'.repeat(318)])(
+    'rejects non-whole or oversized keys %j',
+    key => {
+      expect(isLabelKey(key)).toBe(false);
+    }
+  );
+  it.each(['bad value', '*', 'trailing\n', 'x'.repeat(64), '\u4e00'])(
+    'rejects invalid label selector values %j',
+    value => {
+      expect(isLabelValue(value)).toBe(false);
+      expect(() => decodeLabelSelector({ matchLabels: { team: value } })).toThrow();
+      expect(() =>
+        decodeLabelSelector({
+          matchExpressions: [{ key: 'team', operator: 'In', values: [value] }],
+        })
+      ).toThrow();
+    }
+  );
+  it('retains valid empty values and nil existence-value lists', () => {
+    expect(isLabelValue('')).toBe(true);
+    expect(isLabelValue('a'.repeat(63))).toBe(true);
+    expect(matchesSelector({ team: '' }, decodeLabelSelector({ matchLabels: { team: '' } }))).toBe(
+      true
+    );
+    expect(
+      matchesSelector(
+        { team: '' },
+        decodeLabelSelector({
+          matchExpressions: [{ key: 'team', operator: 'Exists', values: null }],
+        })
+      )
+    ).toBe(true);
+  });
 });

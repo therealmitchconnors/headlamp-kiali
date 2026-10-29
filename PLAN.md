@@ -4,9 +4,394 @@ This is the current, repository-local plan. It supersedes the earlier
 session-local planning notes and does not require access to a Copilot session
 database, conversation, or private artifact directory.
 
-**The port is partial.** Native browsing, scoped settings and the first
-application-correlation slice work. Most Istio-specific views, mutations,
-telemetry, graph and analysis features remain to be implemented.
+**The port is partial.** Native browsing, scoped settings and application
+correlation work. An additional increment implements 14 Istio configuration
+models/views, confirmed configuration CRUD, limited checks, traffic charts
+and a basic observed-request graph. Configuration now also includes nine
+Gateway API/inference kinds from pinned upstream schemas. The subsequent health increment adds a
+Go-oracle-backed calculator, per-cluster tolerances and workload health.
+Hosted live Bookinfo request/latency charts, traffic graph and workload health
+are verified. Native Jaeger/Tempo HTTP trace browsing is implemented with
+hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
+Read-only pod logs and bounded native Envoy server/configuration snapshots are
+also implemented and verified against live Bookinfo in hosted Headlamp.
+
+### Resume status — 2026-10-29
+
+The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
+PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
+event/link/instrumentation attribute filters, and graph namespace annotations
+are now packaged after hosted verification. No cluster policies or tracing providers were installed.
+This checkpoint consolidates the native port work after `6753f8e`. The user has
+requested commits and pushes at verified checkpoints; use the branch history
+to identify the current checkpoint rather than assuming `6753f8e` contains it.
+The VM workload-correlation increment is packaged after local and hosted
+verification. Matching-entry probe evidence has also passed local/hosted checks,
+with disabled-check assumptions explicitly distinguished from reported status.
+No VM was deployed.
+Positive Pod-account provenance now appears in Applications through captured
+UID owner chains. Missing account fields remain unavailable and no
+account-absence checker or authorization principal is inferred.
+
+**Prometheus recurrence, 2026-10-29:** the existing Pod again reached its 1 GiB
+cap during TSDB compaction (156 OOM restarts before mitigation). Under the
+user's earlier conditional authorization, a UID-guarded `pods/resize` patch
+raised only its server memory limit to **2 GiB** and request to **1 GiB** after
+server dry-run. CPU/reloader resources stayed unchanged. The same Pod UID
+`7c99cc2a-6da4-4815-8141-e3f73e083926` became ready, completed backlog compaction
+and WAL checkpointing, and remained at 157 restarts during observation.
+Memory samples ranged from 849 to 1,142 MiB; historical TSDB data from
+2026-10-27T16:20:46Z remained queryable. Actual stock hosted Headlamp also
+confirmed Prometheus 3.10.0 reachability after recovery, without intercepted
+responses. No Pod deletion or second TSDB reset occurred.
+
+**Deployment template remains 256 MiB/1 GiB.** Updating its `Recreate` template
+would replace the Pod and discard `emptyDir` history, so it was deliberately
+not rolled out or paused. The in-place allocation persists for the current Pod,
+but a future replacement needs the higher budget reapplied. A lasting workload
+template update requires an approved storage/rollout decision; do not silently
+discard data to make the template match.
+
+The current full-parity estimate is **approximately 55%, with roughly +/-10
+percentage points of uncertainty**. This is an engineering estimate across the
+remaining feature families, not a measured catalog coverage score or a claim
+that test counts imply parity. Advanced graphs, full workload/capability
+provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
+dashboards and integration/live/Desktop closure remain substantial work.
+
+### Latest verified checkpoint
+
+- 23 schema-derived configuration kinds and **38 bounded finding codes**.
+  An activation audit removed unintended ServiceEntry KIA0601 enforcement:
+  the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
+  Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
+  export/import scope, UID/spec freshness and related-configuration inspection.
+  DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
+  non-local mTLS default exceptions and scoped related-rule links.
+  KIA0204 adds source-bound TLS override patterns with top-level/port-level
+  presence semantics and an explicit distinction from observed encryption.
+  Sidecar KIA1006 now uses explicitly resolved per-namespace root configuration,
+  independent of import-source reads; absent/empty selectors need no discovery.
+  KIA1004 adds an export-aware Service registry and scoped egress lookup with
+  unknown-visibility deferral, source-compatible host rules and precise paths.
+  VirtualService KIA1101 now reuses the registry for HTTP/TCP/TLS destinations,
+  with source-backed outbound-policy defaults/classification and immutable
+  resource/source capture. Mesh inventory exposes declared outbound modes.
+  PeerAuthentication KIA0401/KIA0501/KIA0505/KIA0506 now preserve selector
+  presence, top-level TLS and input-order semantics with scoped rule evidence.
+  Resolved missing roots use the observed controller namespace, with explicit
+  provenance across Sidecar, mesh and configured-mTLS consumers.
+  DestinationRule KIA0205–KIA0208 add the counterpart peer-policy checks, with
+  selected-rule freshness and security-group links to observed peer policies.
+- Native Envoy/pod diagnostics, fixture-backed ztunnel inspection, expanded
+  trace metadata and explicit UID-verified trace-to-Pod links.
+- Separate traffic topology page with workload/application/versioned-application/
+  Service projections, captured historical windows, request/byte/message units,
+  local filtering and edge metadata. Source/destination reporters are explicit,
+  not combined; Service adjacency is marked as derived.
+- Exact trace string-tag filters, historical search end time, a 24-hour range
+  option and a captured 15-second search deadline are also implemented.
+  Six hosted intercepted scenarios passed and tracing fixture settings were
+  restored durably; actual providers remain unavailable.
+- On-demand Jaeger/Tempo service and operation pickers now retain manual input,
+  captured scope/time, local filtering and pagination. Six hosted scenarios
+  intercepted eight name GETs; picking names submitted no trace search or write.
+- Native circuit-breaker editing and optional Service-create settings now share
+  pure proposals and the guarded mutation path. Unrelated policy/override fields
+  are preserved; setting the threshold explicitly migrates the deprecated alias.
+- Native load-balancing/affinity editing and optional Service-create settings
+  now preserve unrelated policy metadata and explicitly replace incompatible
+  strategy fields through the same guarded mutation path.
+- Native HTTP mirroring now supports guarded existing-route edits and observed
+  shadow-only Service versions, with independent percentages and explicit
+  duplication warnings. Forwarding weights are never silently redistributed.
+- Explicit outbound TLS controls now support top-level DestinationRule modes
+  and proxy-container file references, plus optional Service creation. They
+  never infer changes from mesh status; incompatible credentials are explicitly
+  replaced, and subset/port overrides are preserved.
+- Service routing creation now supports explicit TCP rules with selected-port
+  scope, shared policy composition and rejection of incompatible HTTP drafts.
+- Service creation also composes optional HTTP timeout/retry/fault settings with
+  weighted/mirrored routes. Groups are excluded by default, incompatible TCP
+  drafts are rejected and impact warnings persist through confirmation.
+- Guarded HTTP route reordering now preserves complete forwarding/redirect/
+  delegate objects and rejects definitely unconditional rules before later
+  rules, without claiming complete reachability analysis.
+- Service creation now supports bounded HTTP request conditions with the pinned
+  header-AND/non-header-OR grouping, RE2 validation and port constraints on every
+  alternative. Review clarifies that these are not access controls and that
+  unmatched/default traffic can still reach a mirrored version normally.
+- Existing HTTP alternatives now support granular condition edits without
+  flattening compound scope restrictions. Shared empty-alternative guards
+  recognize metadata and protobuf-default fields instead of treating them as
+  real predicates.
+- Tempo searches now support bounded typed/scoped attribute comparisons and
+  regexes, exact integer literals and captured filter displays. Connection
+  changes invalidate submitted searches rather than replaying them elsewhere.
+- Missing/null and present/non-null Tempo predicates now have explicit controls,
+  canonical empty input state and distinct captured displays.
+- Gateway API class registry settings and KIA1504 now preserve configured/
+  discovered/default provenance and defer unresolved mesh-wide conditional
+  defaults. Denied or incomplete discovery is never converted to absence.
+- Explicit saved Istio telemetry identities now feed metrics, topology and
+  workload/Application/Service health forms. Submitted settings are captured
+  to prevent reference-driven refetches and cross-endpoint query replay.
+- Native cluster comparison now captures 1..8 explicit contexts, preserves
+  per-source errors and uses a three-worker queue with per-target deadlines.
+  Metrics retain provider/identity provenance without sums or membership guesses.
+- Graph inspection now offers explicit current-resource candidates through
+  unique captured/saved telemetry mappings, with no historical UID or traffic
+  origin claim. Ambiguous names, ownership and incomplete reads remain errors.
+- Guarded inbound mTLS editing now preserves PeerAuthentication selectors and
+  workload-port overrides, with explicit modes/inheritance and broad-scope
+  impact warnings retained during confirmation.
+- HTTPRoute/GRPCRoute backend weight editing now uses relative Gateway API
+  ratios/defaults, preserving parent/backend references, filters and matches.
+- Gateway collision checks now include KIA1501/KIA1502 with source-exact
+  literal/nil/name-exclusion semantics, selected-object freshness and group-safe
+  related-reference links.
+- Configuration context reads now capture scope/spec/settings and stop after
+  15 seconds, with linked cancellation and no late/retained findings after
+  timeout. Hosted delay testing measured 15,051 ms and verified retry/denial.
+- Exported metric/workload/entity-health readers now capture all inputs and
+  share a 15-second whole-read deadline. Four hosted paths measured
+  15,054..15,092 ms and verified explicit retry without healthy fallbacks.
+- Native traffic histograms now expose duration/request/response-size averages
+  and P50/P90/P95/P99 with captured historical scope, explicit units, bounded
+  matrices, three workers and a 15-second deadline. Hosted real duration reads
+  returned no finite samples; successful byte charts, gaps, isolated points,
+  zero and independent failures were verified through interception, not live data.
+- Tempo now has separate bounded span name/status-message/duration/status/kind
+  predicates. Exact nanosecond serialization, enum/operator guards, immutable
+  capture and provider-change behavior passed five hosted fixture scenario
+  groups with three intercepted GETs. No live tracing provider was installed.
+- Literal Tempo attribute/tag keys now support bounded punctuation, embedded
+  spaces and Unicode with complete-name quoting and explicit scope. Five hosted
+  fixture groups verified escaping, captured identities, control/duplicate
+  rejection and unchanged Jaeger JSON tags using two intercepted search GETs.
+- Trace detail and connection probes now capture provider/endpoint/cluster and
+  share the linked 15-second deadline. Hosted timeout/retry/denial checks
+  intercepted six reads; observed UI times were 15,119/15,440 ms, including
+  action/navigation overhead. No timeout becomes an empty trace or valid probe.
+- AuthorizationPolicy KIA0104 now preserves Host-header exemptions, internal
+  name lookup and per-kind registry export filtering, including autogenerated
+  VirtualService exclusion. Twelve hosted cases used synthetic selected policies
+  with real Bookinfo evidence or intercepted registries; no policy was written.
+  Namespace-first pruning avoids irrelevant registry reads and method checks
+  remain independent. Gateway collision explanations were also corrected and
+  checked in eleven hosted scenarios without unrelated TLS findings.
+- WorkloadGroup details now offer bounded, captured WorkloadEntry spec-label
+  matching and UID-bearing links, with empty-selector exclusion. The structural
+  Map uses the same scoped matcher and includes target nodes. Eleven hosted
+  scenarios covered actual empty inventory, synthetic matches, failures/budgets,
+  15,111..15,121 ms timeout/retry checks, Conditions-last layout and a drawn Map connection.
+  No VM resources were installed. Stock 0.35 omits edge captions and has unnamed
+  source-picker checkboxes; those host limitations remain documented.
+- Canonical outbound Envoy names now offer explicit current-Service candidate
+  lookups with validated UID/port evidence, captured bindings and a deadline.
+  Eight hosted scenario groups used one real proxy stream and ten Service GETs,
+  including live Bookinfo details and intercepted failures. The 15,535 ms
+  timeout/retry and native Service drawer were verified without proxy refetch.
+  These links do not establish historical identity, routing or traffic origin.
+- Canonical DestinationRule/VirtualService metadata references now support
+  explicit current-object lookup and group-safe detail navigation, with separate
+  observed/current API versions, strict UID/version guards and a deadline.
+  Twelve hosted fixture cases covered eleven object GETs, four authorized
+  forwarding negotiations and a 15,052 ms timeout/retry. All configuration
+  payloads were intercepted; no objects or SDK globals were changed.
+- Additional traffic signals now cover throughput, gRPC messages and four TCP
+  rates, with explicit raw names and pinned direction compensation. Shared
+  scalar reads preserve histogram behavior. Hosted checks observed actual
+  zero throughput, bounded synthetic rates/errors, concurrency three and a
+  15,056..15,070 ms timeouts and the unchanged legacy panel disclosure;
+  no traffic generator or cluster write was used.
+- VirtualService KIA1106 now preserves literal gateway grouping, normalized
+  host buckets, namespace wildcards and duplicate self-contributions. Export
+  defaults and namespace-wide Sidecar imports select whole objects; UID/spec
+  changes and incomplete context defer checks. Sixteen hosted fixture scenarios
+  covered scoped related links, real mesh defaults, denial, exclusions and a
+  15,132 ms deadline/retry. All VirtualServices/Sidecars were intercepted; the
+  live VirtualService list was empty. Eleven Gateway regression scenarios passed.
+- Istio Gateway KIA0301 now preserves selector/port grouping, target-namespace
+  prefixes, pinned hostname matching and ordered path/object-reference behavior.
+  The per-cluster bare-wildcard toggle defaults off and is captured with checks.
+  Twenty-two hosted scenarios passed with 23 intercepted Gateway-list GETs,
+  a 15,391 ms deadline, retry, saved-setting hard reload and stale-result rejection.
+  Eleven Gateway API and sixteen VirtualService scenarios passed again.
+- PeerAuthentication KIA0002 now checks same-namespace selectorless policy
+  conflicts, distinct from mTLS-pattern empty-selector exclusions and KIA0003.
+  Complete policy identity and resolved namespace evidence are required.
+  Eighteen hosted cases observed 17 intercepted policy lists and a 15,401 ms
+  timeout/retry; nineteen prior mTLS/root-fallback cases passed again.
+- Trace search now includes whole-trace duration and reported root span/service
+  intrinsic filters alongside the existing five span fields. Scope remains
+  explicit in queries and captured rows; exact duration/quoting/limit behavior
+  is shared. Five hosted scenario groups exercised all eight fields with three
+  intercepted searches, historical capture, provider invalidation and denial/retry.
+  No live provider matching is claimed.
+- Event/link/instrumentation attribute scopes now share typed filtering,
+  exact literals, nil predicates and bounded captured reads. Five hosted
+  groups covered the three scopes/five scalar types, mixed trace intrinsics,
+  stale draft/provider isolation and denial/retry, with no writes.
+- Traffic graph nodes now show consistent selected/outside/unknown namespace
+  annotations in diagrams, tables and keyboard inspection. Name-only comparison
+  remains distinct from cluster membership, RBAC and current object existence.
+  Four hosted groups/three intercepted metric GETs covered all projections,
+  local filtering, scope invalidation/resubmission and denial.
+- WorkloadGroup-backed VM workloads now join application and current-resource
+  correlation through complete, discovered same-namespace entry evidence.
+  First-matching-entry label precedence retains separate group/entry UIDs;
+  no Pods, replica health or safe per-entry traffic versions are inferred.
+  Shared correlation captures scope and has a 15-second deadline. Sixteen
+  hosted groups observed real Bookinfo plus 34 intercepted VM-list GETs, one
+  synthetic graph query and a 15,658 ms timeout/retry. No VM was deployed.
+- Matching WorkloadEntries now expose source-backed probe evidence, separating
+  reported conditions from disabled/unrecognized-annotation assumptions. Three
+  hosted groups/five intercepted lists covered all branches, first-condition
+  order, stale timestamps, malformed fields, partial/denied reads and retry.
+  VM replica health remains unassessed; no live VM probe was performed.
+- Captured Pod service-account observations now appear per workload and per Pod,
+  bound to existing scoped UID ownership. Six hosted cases covered real Bookinfo
+  accounts and missing/malformed/denied/owner-mismatch behavior with no
+  ServiceAccount-object reads or writes. Complete account-principal validation
+  remains open.
+- Native custom aggregate dashboards now support bounded saved raw/rate chart
+  definitions, explicit namespace/metric-cluster scoping, captured history,
+  signed gauges, unit scaling, independent chart errors and shared read limits.
+  Five hosted groups observed 27 intercepted reads, concurrency three and a
+  15,549 ms timeout; actual Bookinfo memory-metric aggregation returned 61
+  finite nonzero samples. Full custom dashboard/discovery/annotation/Grafana/
+  Perses parity remains open.
+- **19,394 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
+  Comparison metrics reject unexpected aggregation labels and mixed times.
+  Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
+  queries, 228 WorkloadEntry
+  health and 96 VM-label selection,
+  176 selectorless
+  PeerAuthentication, 328 Istio Gateway,
+  400 VirtualService
+  host-conflict, 108 traffic-signal and 960 authorization
+  host/visibility cases, 180 histogram-query and 508 Gateway
+  collision and 64 class membership cases, 1,728 graph
+  identities, 398 ServiceEntry groups, 1,087 DestinationRule pairs, 1,800 TLS
+  patterns, 72 root-selector, 288 egress/registry, 576 VirtualService registry and
+  348 PeerAuthentication, 984 counterpart-policy and 72 exclusion cases. The related-reference
+  dialog also passed focused scope/keyboard/live-load checks.
+- Configured namespace discovery now evaluates bounded selectors, retains
+  own/root namespace exceptions and gates configuration defaults/mTLS without
+  claiming actual injection or health. Shared label-selector validation now
+  rejects partial keys and invalid values. Five hosted selector cases, real
+  unrestricted/root contexts and matching-scope policy reads passed.
+- Validation exclusions now have a guarded annotation-only editor with
+  restore/selective/all modes, immutable review, explicit confirmation,
+  UID/version/acknowledgement checks and scope-change cancellation. Seven
+  hosted interception cases passed; all permission reviews and PUTs were
+  intercepted. No exclusion was written to the live cluster.
+- Current `kiali-0.1.0.tar.gz` SHA-256:
+  `850389dfdb542dfd3ef4cd5a909b8e0cec7230003f6d0716c73f912c16dccac8`.
+- This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
+  live routing/policy fixture or logging mutation was applied in these increments.
+  Prometheus's latest state and the in-place memory/template distinction are
+  recorded in the resume section above; earlier zero-restart checks are historical.
+- Full parity is still open. Desktop debugging is unavailable; control-plane
+  sync returned 401; representative live routing needs approval; tracing and
+  ztunnel success evidence remains synthetic.
+- Nine hosted Sidecar scenarios passed, using real managed root configuration
+  for root/non-root cases and intercepted Sidecar objects. No objects were
+  applied. All interceptors were removed and settings stayed durably unchanged.
+  The isolated hosted helper is stopped at each published checkpoint and port
+  4487 checked closed. Generated translation backups were removed from source,
+  dist and staging, and the packaged member list was verified exactly.
+  Each direct fixture run closed its owned isolated browser.
+  Owned scratch through HTTP creation was archived outside the worktree;
+  subsequent routing/tracing, presence-filter and Gateway/multi-context scratch
+  and validation/telemetry deadline, histogram, tracing-search, authorization-host
+  WorkloadGroup relationship, proxy Service/configuration candidate, traffic-signal
+  VirtualService/Istio Gateway conflict, selectorless policy, trace-wide intrinsic
+  metadata-scope, graph namespace-annotation, VM correlation, probe/account evidence
+  and custom dashboard scratch is also
+  archived outside the worktree. Session-local Playwright tooling was
+  used for fixture execution without changing production dependencies.
+  Tracing remains durably disabled and no fixture endpoint is retained.
+  The normal Desktop plugin installation was not overwritten; recheck targets
+  before use.
+- Fourteen egress-registry scenarios also passed, including real Bookinfo
+  registry reads, export overrides/defaults, ServiceEntry scope, denial and null
+  listener indexes. No fixtures were applied; DNS settings were restored.
+- Fourteen VirtualService scenarios and the configured-mode inventory passed.
+  Only `ALLOW_ANY` lowers missing-destination severity in the pinned Kiali
+  classifier; the supported dynamic-DNS mode remains an error, not a claim that
+  actual traffic is blocked. No cluster object was changed.
+- Nineteen PeerAuthentication/root-fallback scenarios passed, with intercepted
+  policies and no writes. Missing raw roots are no longer deferred when a
+  resolved configuration and observed controller namespace supply the pinned
+  fallback; denied or ambiguous sources remain unavailable.
+- Twenty-two counterpart policy scenarios passed, including scope/order,
+  captured UID/spec freshness, denied reads and security-group related links.
+  No policies were applied; DNS settings were restored.
+- Eight circuit-breaker scenarios passed, including Service-driven creation.
+  Ten specification requests and thirteen permission reviews were intercepted.
+  No live configuration changed; the actual read-only proposal and preserved
+  overrides were inspected, and DNS settings were restored.
+- Eight load-balancing scenarios passed, including strategy replacement and
+  combined Service creation. Sixteen specification requests and sixteen
+  permission reviews were intercepted; no live configuration changed.
+- Ten mirroring scenarios passed, including failure guards and real read-only
+  Service evidence. Thirteen specification requests and fifteen permission
+  reviews were intercepted; no mirrored traffic was generated. Settings were
+  restored durably and all handlers removed. Desktop remains unavailable.
+- Twelve outbound TLS scenarios passed with nineteen specification requests and
+  twenty-one permission reviews intercepted. No TLS policy or credential was
+  installed; settings were restored and handlers removed.
+- Four TCP creation scenarios passed with eight specification requests and nine
+  permission reviews intercepted. No resources, settings or traffic changed.
+- Four HTTP policy creation scenarios passed with eight specification requests
+  and nine permission reviews intercepted. Rendered read-only proposals and
+  conflict/denial paths were checked; no settings or live traffic changed.
+- Six route-order scenarios passed with four specification requests and six
+  permission reviews intercepted. No real routes were changed.
+- Four request-matching scenarios passed with twelve specification requests and
+  thirteen permission reviews intercepted. No resources or settings changed.
+- Nine existing-condition scenarios passed with eight specification requests
+  and ten permission reviews intercepted. No live configuration changed.
+- Six typed Tempo checks intercepted four GETs. Invalid types/regex/keys,
+  integer limits, connection changes, Jaeger incompatibility and denial were
+  exercised. Tracing was restored durably; no provider was installed.
+- A presence-filter check intercepted one GET and verified missing/null versus
+  present/non-null behavior in the native query UI. Tracing was restored durably.
+- The user was unavailable when asked to authorize isolated live tests in
+  `mitch-auto/kiali-verification`; this is not approval. That namespace was
+  not created. Continue source-backed implementation and intercepted checks.
+- KIA1504 now uses the configured/discovered registry, not GatewayClass object existence.
+  Pinned `cache/cache.go` resolves configured classes first, then discovered
+  classes with an equality-label selector or the exact `istio.io` controller
+  prefix rule. Fallback adds `istio`/`istio-remote`, conditionally
+  `istio-east-west` for multiple configured mesh clients and `istio-waypoint`
+  for ambient in any configured cluster. Headlamp context count or only the
+  selected cluster's ambient flag cannot substitute for that mesh-wide context.
+- Sixteen registry scenarios verified settings save/reload and source/failure
+  handling with twenty-two intercepted class lists and zero live writes.
+  Settings were restored. The isolated hosted helper was subsequently stopped
+  and port 4487 checked closed after the dependent increments.
+- Seven identity scenarios covered all query consumers, save/reload and missing
+  mappings. Twenty-three provider reads were intercepted, including the
+  overview connection probe; no live writes occurred and settings were restored.
+- Three comparison scenario groups covered eight synthetic contexts, with
+  thirty-five intercepted GETs and measured concurrency of three. Host config
+  was only intercepted, not edited. All temporary settings/handlers were removed.
+- Seven graph-resource scenarios exercised real Bookinfo current candidates
+  and negative fixtures, issuing fifty-four namespace reads without writes.
+  Settings were restored and current UID disclosures inspected.
+- Eleven inbound mTLS cases intercepted thirteen specification requests and
+  fifteen permission reviews, including failure guards. No live policy changed.
+- Seven Gateway-weight cases intercepted five specification requests and seven
+  permission reviews. No Gateway API or resources were installed or modified.
+- Eleven Gateway-collision cases intercepted eleven lists, including failure
+  and suppression guards. Related references were inspected; no live writes.
+- A context-deadline scenario intercepted three Namespace reads, measured the
+  timeout and verified explicit retry plus clearing of old findings on denial.
+- Four telemetry/health deadline cases intercepted eighteen metric reads.
+  Bookinfo evidence stayed read-only and temporary settings were restored.
 
 ## Start here
 
@@ -16,9 +401,10 @@ telemetry, graph and analysis features remain to be implemented.
    Ensure the checkout includes the correlation and handoff checkpoint below.
 3. Preserve the existing correlation implementation. Review it before extending
    it; do not regenerate the plugin scaffold.
-4. Continue with **`config-views`**, beginning with a small coherent Istio
-   configuration slice such as VirtualService and DestinationRule. `telemetry`
-   is also dependency-ready, but configuration views are the next priority.
+4. Read the current increment and verification boundaries below. Continue the
+   remaining cross-resource validation, effective mesh configuration and
+   health/query semantics; do not rebuild the now-present models or trace
+   browser, or mistake fixture verification for full live parity.
 5. Update this plan and the parity ledger as work lands. A completed foundation
    milestone is not a claim of full parity for its broader feature family.
 
@@ -29,17 +415,377 @@ telemetry, graph and analysis features remain to be implemented.
 | `06162d2` | Initial Kiali scaffold and extracted agent skills; scaffolding only |
 | `739260f` | Native resource browsing, scoped settings, parity infrastructure and reproducible development fixtures |
 | Correlation and handoff checkpoint after `739260f` | Application correlation, Applications list/detail UI, label settings, tests, oracle, related documentation and this plan |
+| Native port checkpoint after `6753f8e` | 23 configuration models, guarded CRUD, thirty-eight bounded finding codes, host/health/mTLS/import/local-check/proxy/policy/graph/grouping/registry oracles, mesh inventory, entity health, charts/histograms/graph/custom aggregate dashboards, native tracing, guided routing, VM/Pod account evidence and read-only diagnostics/current-resource candidates |
 
 At handoff the branch is `therealmitchconnors-kiali-plugin`.
-The correlation implementation and this plan are committed together in a
-checkpoint after `739260f`. Use the tip of this feature branch (or a later
-checkpoint) when handing off to VS Code agents. Simply checking out `739260f`
-elsewhere will not include the new Applications implementation or this plan.
+The original correlation/handoff checkpoint is `6753f8e`; the subsequent native
+port checkpoint includes the configuration/telemetry/diagnostic/VM/dashboard
+increments described here. Simply checking out `6753f8e` elsewhere does not
+include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
+
+## Current increment and evidence boundary
+
+- `src/resources/` contains 14 typed models generated from sanitized live Istio
+  CRD schemas. Discovery uses public API discovery rather than requiring CRD-read
+  permissions, distinguishes forbidden/absent/unsupported, and selects versions
+  without mutating shared model metadata.
+- Nine Gateway/inference models complete the pinned configuration-kind inventory:
+  GatewayClass, Gateway, HTTPRoute, GRPCRoute, TCPRoute, TLSRoute, UDPRoute,
+  ReferenceGrant and InferencePool. Their schemas match Kiali's actual dependency
+  versions (Gateway API 1.6.0, inference-extension 1.5.0), not the earlier 1.4
+  exploratory reference. These APIs are absent in the live test cluster.
+  Generation covers spec/status and all served pinned versions, group-safe
+  routes and cluster-scoped GatewayClass operations.
+- Root, parent and listener conditions are grouped last without dropping other
+  status fields. GatewayClass and Gateway printer columns support safe
+  condition filters and wildcard paths. Named parent/backend/mirror/certificate/
+  grant/picker references preserve API groups; links do not prove permission.
+  All 23 kinds have opt-in Map sources. Service-reference edges and the later
+  WorkloadGroup entry associations are wired; other edge families remain open.
+  The expanded hosted Map filter shows all kinds, distinct Gateway labels and
+  real icons for the nine new leaves.
+- Configuration lists preserve printer columns and add useful summaries.
+  Detail sections render every supplied spec/status field with nested native
+  tables, preserve zero/false/unknown extension fields, show explicit references,
+  and place Conditions last before Events. Multiline text uses read-only Monaco.
+- Create, edit-specification and delete controls use SelfSubjectAccessReview,
+  server dry-run, explicit confirmation, current UID/resourceVersion checks and
+  delete preconditions. Edits preserve other object fields. No blind write retry
+  or automatic rollback exists. Browser mutation checks intercepted all writes;
+  no operation was applied to the live mesh.
+- An initial guided traffic-weight workflow edits one existing VirtualService
+  HTTP/TCP/TLS route, requiring integer percentages totaling 100 and preserving
+  every other field. It reuses the guarded review path and captures the original
+  API object when opening, not after editing. Limits are 100 routes/20
+  destinations. A separate Service workflow now creates namespace-local
+  DestinationRule/VirtualService proposals from observed versions, with
+  guarded two-step execution and per-object partial outcomes. Existing-resource
+  wizard editing and advanced routing controls remain.
+- Existing HTTP forwarding routes now have keep/set/remove timeout, retry,
+  fixed-delay and HTTP-abort controls. They preserve unrelated fields and
+  use immutable current/proposed JSON review through the existing guarded
+  update path. Bounds and fault/timing incompatibilities are explicit.
+- Mesh inventory discovers local `app=istiod` controllers, namespace labels,
+  revision tags and standard/shared configuration fields. It preserves unknown
+  values and uses label hints rather than claiming actual injection or security.
+  Selected shared/local fields merge without runtime defaults; mounted files,
+  external config clusters and full ProxyConfig/extension merging remain open.
+- Configured mTLS has a reusable pinned composition engine with 2,600 independent
+  Go cases and a namespace-wide consumer using an explicit controller. It
+  suppresses output on partial policy reads, conflicts and unsupported contexts.
+  Configured status is kept separate from observed encryption/security.
+- Traffic metrics now also show destination-reported HTTP/gRPC connection
+  security labels and shares. Missing labels stay unknown; zero/non-finite
+  observations do not produce a security verdict. Real Bookinfo traffic
+  reported `mutual_tls`; TCP/ambient and per-edge security enrichment remain.
+- Tracing adds optional per-cluster Jaeger/Tempo HTTP query endpoints, connection
+  probes, service/operation/duration/error searches, trace deep links and native
+  span timing/attributes/events/reference inspection. Nanoseconds and OTLP int64
+  values remain exact; decoders enforce bounded inputs and identity consistency.
+  Settings/check cancellation, same-ID retry, navigation and stale-response
+  isolation have regression tests. Hosted success paths used synthetic browser
+  interception; the real absent-Service failure was also checked. No tracing
+  provider was installed. Auxiliary metadata is now projected as described
+  below; graph/workload correlation, broader filters, authenticated/tenant
+  transports and new Desktop checks remain.
+- Bounded checks now cover KIA1104, KIA1105, KIA0004, KIA0005, KIA1107,
+  KIA1102, KIA1108, KIA0101, KIA0102, KIA1702, KIA1401, KIA1402, KIA1503 and
+  KIA1601, with ignore-annotation handling and incomplete-context reporting.
+  Host normalization has 627 independent pinned-Go cases. Host-alias/subset
+  checks require an explicit per-cluster DNS identity suffix. Namespace-wide
+  Sidecar imports now have 760 independent Go import/export cases, with root
+  fallback, local precedence, exclusions and conservative conflict handling.
+  DestinationRule exports use resolved per-source-namespace mesh defaults;
+  incomplete sources or ambiguous control planes defer affected checks.
+  These do not provide a validity verdict or the full Kiali validation suite.
+- HTTPRoute/GRPCRoute Gateway parents and Service parents/backends/mirrors now
+  have bounded checks. Gateway sharing uses namespace label selectors.
+  ReferenceGrant matching deliberately enforces groups and optional target
+  names that the pinned helper omits. Missing grants differ from unreadable
+  grants; unsupported kinds and attachment/port/controller status remain open.
+- Local checks add KIA1007 omitted outbound mode and GWAPI
+  condition findings. Port/condition helpers have 564 independent Go cases.
+  The consumer requires current observed generations and fixes nested listener
+  field paths; explicit native JSON modes are not made ambiguous by Go defaults.
+- Traffic metrics use an explicitly entered telemetry cluster label, one
+  reporter, five-minute rates and fixed query end time. The initial charts show
+  HTTP/gRPC request rate/basic error percentage, p95 duration and TCP throughput.
+  A keyboard-operable workload graph and equivalent table show positive observed
+  request edges. This is not the full Kiali graph/health/query implementation.
+- The full health matcher/calculator has 271 independent pinned-Go oracle cases.
+  Custom cluster rules and resource annotations use bounded RE2 matching.
+  The workload adapter supports five replica-controller kinds, refuses
+  combined health on missing/stale/partial inputs, and explicitly excludes proxy
+  synchronization, ambient and security assessment. Application and Service
+  consumers now reuse the calculator: Applications combine correlated top-level
+  controller snapshots and explicit canonical-service metrics; Services use
+  inbound requests and Service annotations. Inbound reporter combination now
+  has 372 independent Go cases and an explicit UI mode; no-response/gRPC
+  normalization is shared. Unknown-cluster/external/query defaults and
+  proxy/ambient behavior remain open.
+- The grouped structural Map source has 23 opt-in leaf sources with icons.
+  Service-reference targets are included even when only Kiali sources are
+  enabled; WorkloadGroup spec-label matches also include WorkloadEntry targets.
+  These edges are configuration associations, not ownership or measured traffic.
+- Pod diagnostics includes regular/init/ephemeral container inventory, native
+  sidecars and explicit current/previous log snapshots (1,000 lines, 24-hour
+  lookback, 256 KiB and 15 seconds). Pod UID/restarts are checked before/after.
+  Raw Headlamp requests need `Accept: */*` on the test cluster; exclusive
+  `text/plain` caused HTTP 406. Logs are not stored in plugin settings.
+- Native Envoy diagnostics uses public `ApiProxy.stream`, Kubernetes v4
+  WebSocket forwarding to port 15000, and only fixed GETs for `/server_info`
+  and `/config_dump`. No local listener, exec, token creation, bridge or
+  cluster installation is needed. It has bounded HTTP framing/JSON decoding,
+  before/after UID/restart checks and a 15-second overall deadline. Server
+  information is capped at 256 KiB and configuration at 4 MiB.
+  Cluster/route/listener entries retain static/active/warming/draining states,
+  unknown fields and distinct indexed entries for repeated/unnamed resources.
+  Selected entries open read-only JSON; bootstrap/secrets/endpoints are not
+  displayed. These are observations, not validity, synchronization or health.
+- Actual live schemas/discovery and empty configuration lists were verified in
+  stock hosted Headlamp. Populated detail, code-block, confirmation, validation,
+  chart and graph success paths were verified with explicitly intercepted browser
+  fixtures. Graph node selection works by keyboard. Unit tests cover failures,
+  conflicts, bounds, partial visibility and source reproducibility.
+- No new config resources were seeded: VirtualService/DestinationRule lists
+  remain empty. Desktop CDP is currently unavailable. The earlier Prometheus demo
+  was OOMKilled/crash-looping, and its real failure was shown correctly by the UI.
+  Subsequently, the user explicitly authorized discarding its historical TSDB
+  data. Only the exact Prometheus pod was replaced with a UID-preconditioned
+  delete, clearing its emptyDir; the replacement is ready and all six Bookinfo
+  scrape targets report up. Limits, configuration and cluster policies were not
+  changed. The 1 GiB limit remains a recurrence risk. The latest user instruction
+  permits a memory-limit increase if Prometheus becomes problematic again.
+- Bounded fresh Bookinfo traffic subsequently proved real hosted request/latency
+  charts, six request edges and healthy reviews-v1 replica/request health.
+  The exact telemetry cluster label is `Kubernetes`. Custom thresholds persisted
+  after reload and changed the result; defaults were restored. Prometheus still
+  had zero restarts, so its resources were not changed. No mesh configuration
+  writes or new CRD installs were performed.
+- These are not grounds for claiming full parity. Obtain approval before
+  seeding representative CRs or unrelated installs, and have the user relaunch
+  Desktop debugging for the remaining Desktop checks.
 
 The production plugin was installed in the local Headlamp Desktop profile.
 That installation is outside Git; source changes still need a build/deployment.
 Temporary development watchers and hosted-web verification servers were stopped.
 Do not assume a live debug target or test service is still available: recheck it.
+
+Tracing regression checkpoint: 4,308 tests in 44 files passed, alongside
+type-check, lint, resource generation, parity consistency, i18n, build and
+packaging. Final trace identity/semantic-heading adjustments also passed the
+focused suites, type-check and lint. The final production bundle loaded in
+hosted Headlamp; its console had only the known host CRD-v1beta1 discovery 404.
+The generated `kiali-0.1.0.tar.gz` includes LICENSE, NOTICE and English locale
+assets (SHA-256 `fbeef3159e1890f9c3a8b52c75a02d22a9578cd70c705de8d1b9537404c041e4`).
+This generated package is not committed; rebuild it from source when moving
+environments. Desktop CDP remained unavailable on port 9222.
+
+The subsequent Sidecar/export increment passed 5,082 tests in 45 files,
+type-check/lint, oracle regeneration and parity checks. Its production bundle
+was loaded in hosted Headlamp. Eight intercepted scenarios verified private/
+public exports, root exclusion/local override, conflicts, mesh export defaults,
+configuration denial and KIA0005; real namespace/controller/config reads supplied
+the remaining context. No cluster writes occurred, and temporary DNS settings
+were restored. The previous tracing tarball predates this increment; refresh
+the package at the next checkpoint. The isolated hosted server may be running
+while later validation work continues; recheck it rather than assuming it stopped.
+
+The Gateway-reference follow-up passed 5,104 tests in 47 files and the normal
+type/lint/schema/parity/build gates. Nine hosted scenarios verified HTTP/gRPC
+parents, namespace sharing, strict ReferenceGrant identity, denials and malformed
+selectors with intercepted Gateway resources plus real Service/Namespace reads.
+The actual absent-HTTPRoute state returned after interception was removed.
+No Gateway API or resources were installed. Source-informed tests are not a
+full independent Gateway checker oracle.
+
+The Application/Service health follow-up passed the 5,124-test, 50-file full
+suite and normal gates; a final additional zero-rate UI regression also passed
+with type/lint/build checks. Hosted real data proved positive request health,
+missing-telemetry suppression and zero-rate replica-only labeling.
+The refreshed `kiali-0.1.0.tar.gz` includes these increments and licenses,
+SHA-256 `ce292034220e549fff753d84ee1af1c302793509a179c68ee268717a86588d6c`.
+The isolated hosted server remains available for continuing work; the normal
+Desktop plugin installation was not overwritten.
+
+The reporter-combination checkpoint passed 5,505 tests in 51 files,
+type/lint/schema/parity checks and oracle regeneration. Combined-mode health
+loaded against real Bookinfo for Service, Application and workload subjects.
+Intercepted error-only cases separately verified source-only errors, gRPC
+no-response precedence and missing-reporter suppression. The current package
+SHA-256 is `5f9e2700b2be1736251a0f25e1fe5bd55e03b465a854ac164b70e6558e2d128b`;
+it supersedes the earlier package hashes above. Full port work remains open.
+
+The Service traffic creation checkpoint passed 5,520 tests in 55 files and
+type/lint/schema/parity/build/package gates. Real source discovery and fully
+intercepted success/partial/stale write paths loaded in hosted Headlamp; actual
+bookinfo VirtualService/DestinationRule lists remained empty. Readable immutable
+JSON review replaced the initial nested-table preview. The latest package hash
+is `f6f21edeb8901c5b909e35500692be319665633656e3ac578a6b36e1dff544c0`.
+
+The HTTP behavior checkpoint passed 5,543 tests in 56 files plus the normal
+type/lint/schema/parity/build/package gates. Intercepted hosted updates proved
+timeout/retry edits, explicit timing removal before delay/abort faults, unrelated
+field preservation and stale-version rejection. No live fault was applied.
+The latest package SHA-256 is
+`0823bed4b84bd33bc08bf62f4eae42b046af8954663ec1b1712a5e75f8088683`.
+
+The local-check checkpoint passed 6,114 tests in 57 files, including 564 new
+original-Go port/condition cases. Hosted fixtures verified KIA0601, KIA1007,
+current Gateway/listener warnings and stale-condition deferral without writes.
+The later activation audit removed ServiceEntry KIA0601 enforcement because
+the pinned caller does not run that helper. Current behavior and coverage are
+recorded at the top of this plan. This historical package SHA-256 was
+`67598d383459fbecb94e46feffa4612ed60d4715ab6b64c4f7ab315e5f215bd7`.
+Real routing/controller enforcement still requires separately approved fixture
+application; no approval for new live routing or fault changes is assumed.
+The user was unavailable when asked to authorize temporary bookinfo routing
+fixtures. That was not approval: continue read-only development and intercepted
+write checks. Live fixture application/cleanup remains blocked pending permission.
+
+The read-only diagnostics checkpoint passed **6,191 tests in 64 files** plus
+type/lint/schema/parity/i18n/build/package gates. Real hosted Bookinfo checks
+loaded native-sidecar logs, Envoy LIVE server state and 88 configuration entries.
+One GET was sent per forwarding stream, and observed streams closed after reads.
+Synthetic browser checks covered repeated/unnamed entries, selected JSON,
+HTTP 403, oversize responses and replacement reads; real data was restored.
+The current package SHA-256 is
+`874b1aa4375fd4ff03dec9b103c55cbb8ac2fcd1d5a9b7e807b3478174773910`.
+Prometheus still had zero restarts; its memory limit was not changed.
+Desktop verification, upstream proxy summaries, synchronization, ztunnel and
+confirmed logging controls remain open. Older hosts can assign a socket after
+`stream().cancel()`; the adapter observes the public handle for 15 seconds and
+closes late frames without sending. Setup that hangs beyond that window without
+any subsequent frame cannot be fully reclaimed through the stock public API;
+this is an explicit host-lifecycle limitation, not a proven cancellation guarantee.
+
+The proxy-detail expansion passed **7,279 tests in 66 files**. It adds
+1,063 independent original-Go cases for cluster names/ports/metadata, protocol
+classification, preferred-domain selection and xDS nonce comparison. Cluster
+inspection now uses the configured service DNS suffix without guessing one;
+changes update the selected summary without another network read. Ports retain
+exact decimal text. Route inspection retains all match fields/actions (including
+redirect/direct-response/passthrough), and listener inspection preserves default
+chains, complete constraints and recognized destinations. Full entry JSON remains
+available when a summary is unsupported or malformed.
+
+Real hosted checks exercised cluster summaries both with and without explicit
+DNS identity, and route/filter-chain inspection with read-only Monaco details.
+Temporary browser DNS settings were restored. The latest package SHA-256 is
+`b0c91ce20a7629ef9f8dfa2946ff1becf2025f5ae9cbdc40742eb814f8c78d96`.
+No new cluster resource was created or changed.
+
+The managed control plane advertises `http-debug=8080`. A read-only
+`/debug/syncz` request through Headlamp's public Pod proxy returned HTTP 401,
+while an ordinary read of that same control-plane Pod succeeded. No token,
+service account, exec or alternative authorization path was attempted.
+The pure xDS comparator is **not wired into health or presented as live sync
+evidence**. Live control-plane sync remains blocked on a supported authorized
+endpoint; anonymous Envoy admin access does not solve this boundary.
+
+The Istio Gateway reference follow-up passed **7,300 tests in 68 files** and
+normal type/lint/schema/parity/i18n/build/package gates. KIA1102/KIA1108 now
+cover top-level and HTTP/TCP/TLS match references. Current namespace and explicit
+namespace/name references need no DNS assumption; legacy dotted names do.
+The reader keeps Istio Gateways separate from Gateway API Gateways and requires
+complete evidence before asserting absence. Native behavior fixes nested field
+paths, evaluates all matches after an earlier failure and accepts dotted names
+in explicit namespace/name references without a legacy-style warning.
+Five hosted fixture scenarios covered missing/found/denied/legacy/dotted-name
+cases; all interceptions were removed and no resource was written.
+The latest package SHA-256 is
+`69e3c6bdb2753211717fd58aaa7153579bf5baf036d2f165afdd336541716787`.
+
+The AuthorizationPolicy pattern follow-up passed **7,614 tests in 70 files**
+plus normal type/lint/schema/parity/i18n/build/package gates. KIA0101 checks
+positive namespace patterns against complete namespace evidence; KIA0102 checks
+HTTP methods locally even if namespace reads fail. The two primitive matchers
+have 296 independent original-Go cases, including wildcard ordering, Unicode
+whitespace and simple-case behavior. Five hosted read-only fixture scenarios
+covered findings, valid patterns, denied namespace evidence, method-only reads
+and suppression. No policy was installed or changed.
+The latest package SHA-256 is
+`1f69232276bd1b4fcc554265e6fd528f094e50c3b4e9a31c99e5e4e659afe63d`.
+Prometheus remained ready with zero restarts; resources were left unchanged.
+These checks do not evaluate principals, negative patterns, trust domains,
+traffic authorization or effective allow/deny decisions.
+
+The ztunnel configuration increment passed **7,637 tests in 71 files** and
+normal type/lint/schema/parity/i18n/build/package gates. Proxy diagnostics now
+has an explicit Envoy/ztunnel format choice. The ztunnel path reuses the fixed
+read-only `/config_dump` request on port 15000, the 4 MiB/15-second bounds and
+the exact selected container's before/after restart checks. Native service and
+workload tables retain reported identities, waypoints, missing-versus-empty
+endpoint evidence, local filtering and selected raw fields without inferring
+Kubernetes links or mesh health. Top-level certificate/policy bodies are omitted
+from the rendered projection.
+
+Hosted checks used the committed synthetic fixture and verified actual table/
+Monaco rendering, false/zero fields, endpoint counters and no filter refetch.
+A real Envoy response was also rejected under ztunnel format rather than
+displaying a fabricated empty ztunnel result. No ztunnel deployment was detected
+by the `app=ztunnel` DaemonSet query, and none was installed. Live ztunnel,
+Desktop, ambient metrics/enrollment and identity mapping remain open.
+The latest package SHA-256 is
+`c743acbcd5ddf3e88943309768fbbf22ed55d0e89f30d904d083e79ae369fcd1`.
+
+The trace-metadata increment passed **7,673 tests in 72 files** and normal
+type/lint/schema/parity/i18n/build/package gates. It preserves Jaeger sampling/
+debug/firehose flags, OTLP sampling and known/unknown remote-context flags,
+trace state, status messages/codes, resource/scope schema URLs, instrumentation
+attributes and dropped counts, event drops and link attributes. Exact int64
+values and explicit empty/zero/false metadata remain distinct from absence.
+Unknown status codes stay unassessed. Strict integer/ID matching rejects trailing
+newlines, ambiguous OTLP aliases fail explicitly, and a 10,000-record per-trace
+budget bounds aggregate batch/scope/span/event/link decoding.
+
+Hosted Tempo/Jaeger fixtures verified selected-span metadata, accessible link
+dialogs and exact scope/link attributes. A screenshot caught a transition in
+progress; settled opacity/background checks confirmed the actual dialog is
+opaque and readable. Settings/interceptions were restored and no tracing backend
+was installed. Desktop debugging was rechecked and remained unavailable on 9222.
+The latest package SHA-256 is
+`2cd3db98d130a9c917534e82c5491ffff0f703de787fc20c1b6335d26d6cf826`.
+
+The reported-Pod correlation increment passed **7,700 tests in 75 files** and
+normal type/lint/schema/parity/i18n/build/package gates. Complete, unambiguous
+namespace/name/UID attributes enable an explicit current-cluster verification;
+only exact UID equality produces native Pod/diagnostic links. Service names
+and reported cluster labels are not selectors. Missing/conflicting evidence,
+UID mismatch and denied/deleted Pods never become name-only links. The shared
+15-second diagnostic deadline now rejects even when an SDK request ignores
+abort, while preventing subsequent requests and stale UI results.
+
+Hosted checks used synthetic trace attributes plus a real Bookinfo Pod GET for
+success/mismatch cases, and an intercepted 403 for denial. Missing/conflicting
+references made no Pod request. The normal live Envoy read still worked after
+the shared-deadline refactor. A host ConfigStore persistence race was found in
+the test harness: reload before the 500 ms debounce could retain an earlier
+fixture endpoint. Owned fixture settings were cleared, and subsequent setup/
+cleanup explicitly waited for Kiali's persisted settings to match its public
+ConfigStore value. Tracing is disabled in both memory and persisted test-profile
+settings; no test provider or cluster resource was installed.
+The latest package SHA-256 is
+`a77fd1febf985a1cda15a61a45e45e75cff80ef3bba772fc12d8c043aa62ccf6`.
+Prometheus remained ready with zero restarts. Broader workload/service/graph
+correlation and historical identity resolution remain open.
+
+The WorkloadGroup label-conflict increment passed **7,716 tests in 77 files**
+plus normal gates. KIA1702 reads only the selected namespace's WorkloadGroups,
+requires complete bounded evidence, and rechecks the selected name/UID and
+labels against that snapshot. It compares exact key/value sets independent of
+ordering, distinguishes absent metadata from present empty labels, and defers
+on replacement, changed labels, malformed peers or scope mismatch.
+Eight hosted intercepted scenarios verified conflicts, distinct labels, denial,
+stale UID/labels, cross-namespace responses, suppression and absent metadata.
+No WorkloadGroup was created. The latest package hash is shown at the top.
+
+Two related dependencies were inspected but deliberately not replaced with
+weaker checks: upstream KIA1701 uses service-account identities derived from
+observed workloads, not a Kubernetes ServiceAccount existence list; KIA1504 uses
+Kiali's configured/discovered/fallback GatewayClass registry, not merely API
+object existence. Registry membership is now implemented above, while its
+conditional mesh-wide defaults and full workload provenance remain open.
 
 ## Confirmed product decisions
 
@@ -75,7 +821,9 @@ Do not assume a live debug target or test service is still available: recheck it
 - Host exercised so far: stock Headlamp **0.35.0**, Desktop and hosted-web mode.
 - The upstream source inventories cover 508 source blobs, 616 inventory records,
   21 frontend routes and 216 distinct contract fields.
-- Independent Go oracles cover 375 health-model cases and 75 label-resolution
+- Independent Go oracles cover 375 health-model, 271 health-calculator, 627 host,
+  2,600 configured-mTLS, 760 import/export, 372 reporter, 564 local-check,
+  1,063 proxy-summary, 296 authorization-pattern and 75 label-resolution
   cases. These are developer-only tools, not a runtime dependency.
 - Source and tests are authoritative. Upstream architecture documents are useful
   navigation aids, not substitutes for reading behavior.
@@ -84,14 +832,24 @@ Do not assume a live debug target or test service is still available: recheck it
 
 | Surface | Current implementation | Important limit |
 | --- | --- | --- |
-| Kiali navigation | Overview, Applications, Namespaces, Services, Workloads, Connection settings | No links to unimplemented features |
+| Kiali navigation | Overview, Applications, Mesh inventory, mTLS configuration, Traces, Mesh configuration, Traffic metrics/signals/histograms/graph, Custom aggregate dashboards, Cluster comparison, Health, Pod diagnostics, Namespaces, Services, Workloads, Connection settings | No links to unimplemented features; custom dashboards are a bounded raw/rate subset |
 | Overview | Istio API discovery and existing Prometheus Service connectivity | API presence is not mesh/control-plane health |
 | Native resource browsing | Namespace/Service tables; Deployment, StatefulSet, DaemonSet, Job and CronJob tabs | No plugin list mutations; details delegate to Headlamp |
-| Settings | Validated version-1 ConfigStore data keyed by cluster; Service endpoint and optional app/version label pair | Browser-profile-local; no credentials or external URLs stored |
+| Settings | Version-1 cluster ConfigStore: Prometheus/tracing Service endpoints, app/version labels, health rules and explicit service DNS suffix | Browser-profile-local; unknown DNS suffix remains unset; no credentials |
 | Scoped reads | Explicit cluster, namespace validation, abort propagation, structured failures, stale-response suppression | No persistent derived-data cache |
 | Applications | List/detail grouping, versions, related Services, owned pods and native-sidecar detection | One cluster and one explicitly selected namespace |
 | Correlation core | Scoped label postings, selectors, UID owner chains, de-duplication, Service-host resolution | Configuration relationships, not measured traffic |
-| Health core | Ported low-level health model primitives | Not the complete HealthCalculator, and not integrated as mesh health |
+| Health | Pinned calculator/reporter combination, cluster rules, five-kind workloads, correlated Applications and inbound-only Services | No proxy/ambient/security assessment; unknown-cluster/external and complete query coverage remain |
+| Mesh inventory and configured mTLS | Local discovery, selected config merge and namespace-wide policy indicator | Label hints/configuration only; not full effective/observed mesh security |
+| Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
+| WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
+| Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
+| Initial checks | Thirty-eight bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; dormant CRD port checks excluded; attachment/port/per-workload/registry/security context remains incomplete |
+| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
+| Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
+| Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
+| Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
+| Pod/proxy diagnostics | Container inventory, bounded logs, Envoy inspection, current-Service/configuration candidates and explicitly selected ztunnel registry tables | Envoy/Service hosted-live; configuration/ztunnel positives fixture-backed; broader metadata formats, authorized sync, ambient metrics, logging controls and Desktop remain |
 | Parity evidence | Source inventories, reproducible generators, synthetic fixtures and live Bookinfo checks | Inventoried does not mean implemented |
 
 ### Application semantics to preserve
@@ -111,12 +869,12 @@ Do not assume a live debug target or test service is still available: recheck it
   `restartPolicy: Always`. Container presence does not prove proxy health.
 - Snapshot reads cover nine namespaced kinds: Deployments, StatefulSets,
   DaemonSets, ReplicaSets, ReplicationControllers, Jobs, CronJobs, Pods and Services.
-- Reads use three workers and at most four 250-item pages per kind. Limits,
+  A discovered WorkloadGroup/WorkloadEntry source now supplies VM label provenance.
+- Reads use three workers, a shared 15-second deadline and at most four 250-item pages per kind. Limits,
   permission failures, malformed responses and inconsistent pagination are
   reported as incomplete; incomplete zero counts are shown as unavailable.
-- Derived application refresh is manual. External/registry workloads,
-  WorkloadGroups, OpenShift-specific controllers and multi-namespace UI are not
-  yet included.
+- Derived application refresh is manual. Arbitrary custom/external/registry
+  workloads, OpenShift-specific controllers and multi-namespace UI remain incomplete.
 
 ## Repository map
 
@@ -124,10 +882,12 @@ Do not assume a live debug target or test service is still available: recheck it
 | --- | --- |
 | `src/index.tsx` | Registration only, with `kiali-` names and `/kiali/...` paths |
 | `src/config.ts`, `src/core/config.ts` | ConfigStore integration, schema validation and cluster-specific merging |
+| `src/core/tracing.ts`, `src/data/tracing.ts`, `src/components/Traces.tsx` | Bounded HTTP tracing normalization, scoped reads and native search/detail |
 | `src/core/scope.ts`, `object.ts` | Explicit scope, identity and shared guards |
 | `src/core/labels.ts`, `correlation.ts` | Pure selector, label, owner and application relationship logic |
 | `src/core/health.ts`, `readiness.ts` | Separate Kiali health primitives and Kubernetes readiness |
 | `src/data/requests.ts`, `correlation.ts` | Headlamp transport adapters, response validation and bounded snapshots |
+| `src/{core,data}/diagnostics.ts`, `core/proxyHttp.ts`, `core/proxyConfig.ts`, `data/proxyAdmin.ts` | Bounded pod logs and native WebSocket Envoy observations |
 | `src/hooks/useRequest.ts` | Scope/key-bound asynchronous state and cancellation |
 | `src/components/` | Current native views and settings |
 | `locales/en/translation.json` | Extracted nonempty English strings |
@@ -135,7 +895,10 @@ Do not assume a live debug target or test service is still available: recheck it
 | `test-files/parity/`, `test-files/correlation/` | Committed synthetic evidence; no production credentials |
 | `test-files/deploy/` | Pinned Bookinfo/Prometheus examples and local Kustomize overlays |
 | `docs/parity.md` | Feature evidence, partial coverage, limitations and provenance |
-| `src/resources/`, `src/mapView.tsx` | Planned next surfaces; not implemented yet |
+| `src/resources/`, `src/mapView.tsx` | Generated Istio models and structural configuration topology |
+| `scripts/generate-resources.mjs`, `test-files/configuration/` | Sanitized live schemas, deterministic model generation and synthetic configuration fixtures |
+| `src/core/telemetry.ts`, `trafficGraph.ts`, `validation.ts` | Initial query/response/graph/checker core |
+| `src/data/mutations.ts`, `telemetry.ts`, `configuration.ts` | Guarded configuration changes, metric reads and API discovery |
 | `docs/OVERVIEW.md` | Planned permanent coverage/screenshot document; not implemented yet |
 
 Keep pure core logic independent of React and transport. Keep adapters explicit,
@@ -161,21 +924,21 @@ the authority for individual behavior and platform claims.
 | `resource-access` | Done, initial | Typed built-in SDK models and explicit ApiProxy adapters; new CRD models belong to `config-views` | `shared-context` |
 | `resource-views` | Done, initial | Native read-only lists, readiness and native detail links | `resource-access` |
 | `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
-| `config-views` | **Partial / open; next** | Applications consumer exists; implement typed Istio/Gateway models, list/detail coverage, references and structural Map integration | `resource-views`, `correlation` |
-| `safe-mutations` | Pending | Confirmed RBAC-aware CRUD and supported workload/namespace/Service actions | `config-views` |
-| `basic-validation` | Pending | Checker contracts and useful reference/selector checks with upstream codes | `config-views` |
-| `telemetry` | Pending; ready | Prometheus query/result core and basic charts; connection checks alone are not this milestone | `resource-views`, `correlation` |
-| `health` | Partial / open | Complete thresholds, annotations, protocols, aggregation and UI beyond the existing primitives | `telemetry` |
-| `basic-graph` | Pending | Deterministic observed single-cluster traffic graph | `telemetry`, `correlation`, `stock-host-spikes` |
-| `mesh-security` | Pending | Control-plane/revision/network discovery and configured/observed security analysis | `correlation`, `config-views`, `telemetry` |
-| `full-validation` | Pending | Complete every scoped checker/code and incremental evaluation | `basic-validation`, `mesh-security` |
-| `basic-wizards` | Pending | Reviewed traffic-shifting change sets | `safe-mutations`, `basic-validation` |
-| `full-wizards` | Pending | All scoped forms, routing, faults, retries, policies and deletion workflows | `basic-wizards`, `full-validation` |
-| `diagnostics` | Pending | Logs, proxy synchronization/configuration, ztunnel and logging controls where stock transport permits | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
-| `integrations` | Pending | Dashboard families, tracing and Grafana/Perses integration | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
-| `multi-cluster` | Pending | Cluster-group fan-out, telemetry identity mapping, provenance and partial visibility | `config-views`, `telemetry`, `mesh-security` |
-| `advanced-graph` | Pending | All graph modes/options, appenders, ambient behavior and interactions | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
-| `runtime-hardening` | Pending | Measured query/memory/concurrency/rendering budgets and both-mode resilience | `advanced-graph`, `diagnostics`, `full-wizards` |
+| `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
+| `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
+| `basic-validation` | Partial / open | Thirty-five bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
+| `telemetry` | Partial / open | Initial charts, eight additional rate families and scoped duration/size histograms implemented; complete upstream query/default/dashboard coverage remains | `resource-views`, `correlation` |
+| `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
+| `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
+| `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
+| `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
+| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
+| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
+| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
+| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
+| `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
+| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
+| `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
 | `parity-release` | Pending | Close the ledger, verify live, document and package with explicit remaining gaps | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster` |
 
 The optional verification setup is also complete: managed Istio installation,
@@ -183,27 +946,123 @@ Bookinfo/example Prometheus deployment, real metric verification and a supplied
 Desktop debug target. These are development-environment milestones, not product
 installation requirements.
 
-## Immediate next task: configuration views
+## Immediate next task: complete reusable validation and mesh context
 
-1. Review the new correlation code and its limits before building on it.
-2. Read the focused `.github/skills/define-resource/SKILL.md`,
-   `add-list-view/SKILL.md` and `add-detail-view/SKILL.md`. Do not launch the whole
-   operator-installing `create-crd-plugin` workflow for this native port.
-3. Inspect the chosen cluster's discovery and CRD schemas, served versions,
-   printer columns and real instances. Do not infer field shapes from memory.
-4. Deliver a small initial pair, such as VirtualService and DestinationRule,
-   using typed KubeObject models under `src/resources/`. Normalize served-version
-   differences through typed getters.
-5. Register lists and plugin-owned detail routes under the existing Kiali parent.
-   Render meaningful spec/status groups, related references, and Conditions last
-   before Events where applicable. Record deliberate field omissions.
-6. Reuse the selector, owner, identity and Service-host helpers when appropriate,
-   but do not coerce CRDs into the existing nine-kind Kubernetes DTO union.
-7. Add structural Map sources and real icons through public `registerMapSource`
-   and `registerKindIcon` APIs. Structural edges are not observed traffic edges.
-8. Test absent APIs, installed-but-empty resources, forbidden access, optional
-   fields, versions and links; then verify actual loading and rendering in both
-   host modes. Do not enable custom mutation controls before `safe-mutations`.
+1. Extend remaining configuration checkers and Gateway listener/port/controller
+   semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar
+   import/export visibility now exist. Preserve strict group/name grants and
+   conservative source boundaries; partial context must defer absence claims.
+   The reusable Service host registry now preserves namespace export annotations
+   and defaults. VirtualService destination checks, AuthorizationPolicy host
+   registry/exemptions and outbound-policy severity are wired; preserve each
+   caller's export filtering for remaining destination/policy checker families.
+   KIA1701 WorkloadGroup service accounts require complete workload-attributed
+   Pod-account evidence: neither ServiceAccount object existence nor raw Pod
+   presence reproduces the pinned input. VM WorkloadEntry accounts are separate.
+   Do not add a shortcut absence checker while that workload boundary is missing.
+2. Resolve remaining effective mesh configuration sources before extending
+   configured mTLS to workloads, ports and subsets. Preserve the distinction
+   between configuration, observed connection security and proxy synchronization.
+3. Complete health query coverage and supported workload variants.
+   Application/Service consumers are now wired. Extend service-driven traffic
+   workflows using existing correlation and guarded mutation adapters.
+   Multi-object proposals require per-object outcomes; no blind retry or rollback.
+4. Continue tracing workload/graph correlations and remaining
+   event/link/remaining intrinsic and cross-span filters. Trace-wide root/duration
+   intrinsics and event/link/instrumentation attribute scopes are now implemented.
+   Literal attribute names,
+   typed attribute comparisons,
+   span name/status-message/duration/status/kind predicates and bounded RE2 are
+   implemented. On-demand service/operation discovery is now implemented,
+   using Jaeger name APIs and Tempo typed tag values rather than component status.
+   Span/scope/link metadata and explicit UID-verified Pod references now exist.
+   Bounded exact string tags and current/historical search controls also exist.
+   Backend service names are not automatically Kubernetes identities.
+   Existing HTTP search/detail needs no reimplementation. Live-provider success
+   requires an existing backend or separately approved test infrastructure.
+   The traffic graph now has its own verified bounded projection/query surface;
+   preserve its explicit single-reporter limitation and do not infer Kubernetes
+   identity, resource health or policy enforcement from metric labels.
+5. Preserve all 23 generated models and checksum-bound schema captures. Read
+   the focused skills for any new resource/detail/settings work rather than
+   invoking the whole operator-installing build workflow.
+6. Extend the now-proven read-only Envoy transport and cluster/route/listener
+   inspection beyond current Service and canonical DestinationRule/VirtualService
+   candidate links, while keeping authorized sync evidence separate.
+   The managed Istiod Pod-proxy `/debug/syncz` endpoint returned 401; do not
+   create credentials or work around that authentication boundary.
+   Do not infer synchronization from admin HTTP success, server LIVE state,
+   an active configuration or an injected container. Preserve unnamed/repeated
+   resources rather than imposing Kubernetes-like name uniqueness.
+7. Recheck hosted and Desktop availability, run relevant regression gates and
+   verify actual rendering. Keep remaining diagnostics/multi-cluster/dashboard
+   transport gaps explicit; no bridge or cluster install to conceal them.
+
+### Recent verification details
+
+The latest hosted checks verified all nine real absent-API banners and synthetic
+GatewayClass/Gateway/HTTPRoute/InferencePool details. A browser-intercepted
+GatewayClass create exercised SSAR, dry-run and final confirmation without a
+namespace in any request. All writes were intercepted; no Gateway CRD or resource
+was applied. Native links, named controls and Conditions-before-Events were
+inspected, with no plugin execution failure. The first fixture attempt blocked
+the host's read-only SelfSubjectRulesReview and triggered its login screen;
+the corrected fixture explicitly supplies that review and does not change
+cluster RBAC.
+
+The host/reference follow-up was also loaded in hosted Headlamp: synthetic
+VirtualService input against real namespace/empty DestinationRule/Sidecar lists
+produced KIA1107; an intercepted matching subset removed it; intercepted Sidecar
+403 deferred it. Unknown DNS identity deferred checks without guessing.
+Gateway listener and ReferenceGrant namespace fixtures produced KIA1503 and
+KIA1601 with correct error severity/paths. No resource was written. Actual
+NamespaceList items omit type metadata; the decoder now inherits validated
+envelope type while rejecting conflicting item types. This has a regression test.
+
+The traffic-weight editor was verified on an intercepted VirtualService in the
+same stock hosted instance: an invalid total blocked review; a 50/50 to 80/20
+proposal preserved matches, mirror, timeout, headers, ports and metadata; dry-run
+preceded explicit confirmation; a subsequent changed resourceVersion blocked
+another write. All PUTs were intercepted. Without a real watch event, the host
+cache retained the old display, so configuration actions now expose an explicit
+Reload page fallback rather than relying on private cache APIs.
+
+Mesh inventory was verified against real managed Istio: `istiod-asm-1-30` in
+`aks-istio-system`, 2/2 available replicas, `CLUSTER_ID=Kubernetes`, controller
+image `mcr.microsoft.com/oss/v2/istio/pilot:v1.30.5-3`, configured root namespace
+`aks-istio-system`, trust domain `cluster.local`, and injector DNS suffix
+`cluster.local`. Bookinfo matched the revision label. The Deployment references
+`istio-shared-configmap-asm-1-30`, which actually returns 404; this remains a
+visible optional-source warning. An intercepted shared source verified local
+precedence, alias union and explicit false; an intercepted denial blocked the
+projection. No ConfigMap or webhook was written and no Secret was read.
+
+The configured-mTLS page was exercised using real Bookinfo/controller/config/
+policy reads and correctly reported UNSET with an explicitly labeled automatic
+mTLS default. Intercepted root STRICT policy, denied DestinationRules and
+conflicting root policies verified inherited/unknown/conflict handling. The
+final view was restored to real data, with no policy writes. Empty selectors
+are normalized as namespace-wide in this consumer, and conflicts block rather
+than arbitrarily selecting the first policy; these are deliberate safeguards
+beyond the pinned low-level helper behavior.
+
+Native tracing was exercised in stock hosted Headlamp with intercepted Jaeger
+and Tempo responses: capability probes, search, span details/parents, relative
+timing, exact nanoseconds/int64 values, saved settings, reloadable deep links,
+same-ID retries, 404 and 403 handling. All tracing success reads were intercepted;
+the real missing-Service check returned 404. Request captures confirmed explicit
+cluster paths and `Accept: application/json`, with no plugin execution failure.
+Temporary tracing settings were disabled again and handlers removed. Unit tests
+also cover cancellation, late responses, duplicates, cycles, bounds, unsafe
+numbers, timestamp overflow and malformed/error-bearing responses.
+
+Application/Service health was subsequently exercised against real Bookinfo
+after 36 bounded productpage GETs. Service `reviews` had healthy inbound requests;
+application `reviews` had healthy replica/request health with three 1/1/1
+Deployments. Canonical telemetry identity was entered explicitly. An absent
+telemetry cluster suppressed health. Application and Service list/detail links
+retained exact target names/namespaces. No response fixture or resource mutation
+was used, and Prometheus had zero restarts before these reads.
 
 Bookinfo's current fixtures primarily provide Kubernetes objects. Do not assume
 representative VirtualService/DestinationRule instances are present. If seeding
@@ -276,8 +1135,9 @@ substitute for meaningful detail presentation.
 - Port supported pod logs, proxy synchronization, Envoy listener/cluster/route
   inspection, ztunnel configuration and confirmed logging controls.
 - Complete resource/control-plane/ztunnel/custom dashboards.
-- Add Jaeger/Tempo trace/span search, details, normalization, workload correlation
-  and graph overlays; Grafana/Perses discovery and dashboard links.
+- Extend the implemented Jaeger/Tempo HTTP trace/span search, details and
+  normalization with workload correlation and graph overlays; add
+  Grafana/Perses discovery and dashboard links.
 - Use existing HTTP equivalents where they provide the same behavior.
   A deep link alone is not integrated-tracing parity, and browser fetch is not
   a substitute for native gRPC.
@@ -313,7 +1173,7 @@ Last verified local setup:
 | Item | Value / behavior |
 | --- | --- |
 | Kubernetes context | `mitch-auto`; verify it still exists and is the intended target |
-| AKS | Automatic, Kubernetes 1.35 |
+| AKS | Automatic; latest hosted discovery reports Kubernetes 1.36.4 |
 | Istio | Managed `asm-1-30`, CNI chaining, control plane in `aks-istio-system` |
 | Bookinfo | Six injected deployments in `bookinfo` |
 | Prometheus | Example Prometheus 3.10.0 in `istio-system`, Service port 9090 |
@@ -359,9 +1219,10 @@ Do not hand-create symlinks to paper over a plugin load failure.
 
 ## Checks and evidence
 
-Last code validation before this documentation handoff: **581 Vitest tests**,
+Latest code validation: **649 Vitest tests**,
 TypeScript, lint, production build, packaging and parity consistency passed.
 Both health and label oracle regeneration checks reproduced the committed outputs.
+The new resource schema generator also passes `npm run resources:check`.
 This is historical evidence; rerun the relevant checks after code changes.
 
 ```sh
@@ -369,6 +1230,7 @@ npm run tsc
 npm run lint
 CI=1 npm test
 npm run parity:check
+npm run resources:check
 npm run build
 npm run package
 ```

@@ -1,5 +1,5 @@
 import { K8s, useTranslation } from '@kinvolk/headlamp-plugin/lib';
-import { SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { Link, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import Alert from '@mui/material/Alert';
 import { ReactNode } from 'react';
 import { ClusterScope as Scope, clusterScope } from '../core/scope';
@@ -13,7 +13,10 @@ export default function ClusterScope({ children }: { children: (scope: Scope) =>
         <Alert severity="info">
           {clusters.length === 0
             ? t('Select a cluster to use Kiali.')
-            : t('This initial Kiali view supports one cluster at a time. Select a single cluster.')}
+            : t(
+                'This Kiali view supports one cluster at a time. Select a single cluster or use the read-only cluster comparison.'
+              )}
+          {clusters.length > 1 && <Link routeName="kiali-clusters">{t('Cluster comparison')}</Link>}
         </Alert>
       </SectionBox>
     );

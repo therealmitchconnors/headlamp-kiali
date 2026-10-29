@@ -42,14 +42,96 @@ Submitted on behalf of a third-party: gaojinhua
 Submitted on behalf of a third-party: yuri.yin
 
 Kiali native-port material:
-The health primitives, application-label behavior, correlation references and
+The health primitives/calculator, host resolution, Sidecar import/export scope,
+root-selector and egress checks, namespace-aware Service registry,
+VirtualService destination checks, host-conflict grouping and outbound-policy defaults,
+PeerAuthentication pattern checks and resolved mesh-root behavior,
+selectorless PeerAuthentication namespace grouping,
+DestinationRule peer-policy checks and namespace/root filtering,
+Gateway API class registry and membership checks,
+Gateway API listener/address collision checks and validation merging,
+Istio Gateway selector/port/hostname conflict checks and wildcard settings,
+configured mTLS composition,
+application-label behavior, Gateway route checks, AuthorizationPolicy pattern
+and host-registry checks with namespace export filtering,
+WorkloadGroup-to-WorkloadEntry label-selector relationships,
+WorkloadGroup application-label selection and VM correlation provenance,
+Pod-attributed service-account observations without principal or permission inference,
+WorkloadEntry probe-condition interpretation with explicit disabled-check assumptions,
+validation-exclusion parsing, ServiceEntry/DestinationRule conflict grouping,
+proxy summaries and observed-name Service/configuration-candidate lookup,
+traffic graph identities/projections and namespace-name membership, traffic histogram query construction,
+counter metric definitions and rate-query construction,
+custom aggregate dashboard raw/rate query shapes and unit-scale defaults,
+Service traffic-generation shapes/defaults,
+TCP traffic-shifting wizard generation,
+circuit-breaker wizard capabilities,
+load-balancing and affinity wizard capabilities,
+HTTP mirroring wizard shapes and shadow-only forwarding behavior,
+outbound TLS mode and file-reference wizard capabilities,
+inbound PeerAuthentication mTLS wizard mode controls,
+Gateway HTTP/gRPC backend traffic-weight controls,
+HTTP timeout/retry/fault creation shapes,
+HTTP request-route ordering behavior,
+HTTP request-condition fields and AND/OR grouping,
+granular HTTP condition preservation and empty-alternative guards,
+tracing HTTP models, correlation references and
 generated parity evidence derive from Kiali v2.33.0,
 commit 0e8be887b8217bbcac5e3ae0bfcd258073949cca, licensed under Apache-2.0.
 Source: https://github.com/kiali/kiali
 Detailed source identities and reproduction instructions: test-files/README.md.
+
+Tempo query interoperability:
+Typed span/resource/event/link/instrumentation attribute, literal-name and
+span/trace-intrinsic query construction follows the public TraceQL HTTP/language
+contract. Parser and operator behavior was inspected at Tempo commit
+afbbb308bbad6caa74fe33f4f122aff6275974f8. No Tempo server code is bundled.
+Documentation: https://grafana.com/docs/tempo/latest/traceql/construct-traceql-queries/
 
 Istio example manifests:
 Bookinfo and example Prometheus manifests are reproduced from Istio 1.30.6,
 commit b85dac9587f2f997151d205e069e4f4ff091c7c5, under Apache-2.0.
 Source: https://github.com/istio/istio
 Their original content is preserved; development overlays are separate files.
+
+Istio resource models:
+The schema-derived TypeScript models are generated from sanitized Istio CRD
+spec/status schemas captured from the managed asm-1-30 verification environment.
+The source schema snapshot and SHA-256 provenance are in
+test-files/configuration/schemas.json and the generated source headers.
+
+Gateway API and inference-extension resource models:
+Schema-derived types include Apache-2.0 material from kubernetes-sigs/gateway-api
+v1.6.0 (89b3b0c3fa63f9342f43ba0fb2cf93d6aab53af7) and
+kubernetes-sigs/gateway-api-inference-extension v1.5.0
+(df9f8909fe06fe2dfd4a6fc0bd0c01a0acabf849).
+Per-file Git blob identities are recorded in
+test-files/configuration/gateway-schemas.json.
+
+RE2JS 2.8.8 (bundled linear-time regular expression engine):
+Source: https://github.com/le0pard/re2js
+js-yaml 4.3.2 (bundled YAML parser):
+Source: https://github.com/nodeca/js-yaml
+Both are distributed under the following MIT license.
+MIT License
+
+Copyright (c) 2023 Oleksii Vasyliev
+Copyright (C) 2011-2015 by Vitaly Puzrin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

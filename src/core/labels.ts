@@ -33,11 +33,14 @@ export const VERSION_LABELS = [
 const owns = (labels: Labels, key: string) => Object.prototype.hasOwnProperty.call(labels, key);
 
 export function isLabelKey(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== 'string' || value.length > 317) return false;
   const parts = value.split('/');
   if (parts.length > 2) return false;
   const label = parts[parts.length - 1];
-  if (label.length > 63 || !/^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$/.test(label)) {
+  if (
+    label.length > 63 ||
+    /^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$/.exec(label)?.[0] !== label
+  ) {
     return false;
   }
   return (
@@ -45,7 +48,17 @@ export function isLabelKey(value: unknown): value is string {
     (parts[0].length <= 253 &&
       parts[0]
         .split('.')
-        .every(part => part.length <= 63 && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(part)))
+        .every(
+          part => part.length <= 63 && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.exec(part)?.[0] === part
+        ))
+  );
+}
+
+export function isLabelValue(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length <= 63 &&
+    (value === '' || /^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$/.exec(value)?.[0] === value)
   );
 }
 
@@ -65,12 +78,12 @@ export function applicationLabels(labels: Labels, override?: AppLabels | null) {
 
 function validateSelector(selector: LabelSelector) {
   for (const [key, value] of Object.entries(selector.matchLabels ?? {})) {
-    if (!isLabelKey(key) || typeof value !== 'string') throw new Error('Invalid equality selector');
+    if (!isLabelKey(key) || !isLabelValue(value)) throw new Error('Invalid equality selector');
   }
   for (const expression of selector.matchExpressions ?? []) {
     if (!isLabelKey(expression.key)) throw new Error('Invalid selector key');
     const values = expression.values ?? [];
-    if (values.some(value => typeof value !== 'string')) throw new Error('Invalid selector values');
+    if (values.some(value => !isLabelValue(value))) throw new Error('Invalid selector values');
     switch (expression.operator) {
       case 'In':
       case 'NotIn':
@@ -84,6 +97,51 @@ function validateSelector(selector: LabelSelector) {
         throw new Error('Unsupported label selector operator');
     }
   }
+}
+
+export function decodeLabelSelector(value: unknown): LabelSelector {
+  if (!isRecord(value)) throw new Error('Invalid label selector');
+  const fields = value;
+  if (Object.keys(fields).some(key => key !== 'matchLabels' && key !== 'matchExpressions'))
+    throw new Error('Unsupported label selector field');
+  const labels = fields.matchLabels ?? {};
+  const expressions = fields.matchExpressions ?? [];
+  if (
+    !isRecord(labels) ||
+    Object.keys(labels).length > 100 ||
+    Object.values(labels).some(value => typeof value !== 'string') ||
+    !Array.isArray(expressions) ||
+    expressions.length > 100
+  )
+    throw new Error('Invalid or oversized label selector');
+  const selector: LabelSelector = {
+    matchLabels: Object.fromEntries(
+      Object.entries(labels).map(([key, value]) => [key, String(value)])
+    ),
+    matchExpressions: expressions.map((expression: unknown) => {
+      if (!isRecord(expression)) throw new Error('Invalid selector expression');
+      const { key, operator } = expression;
+      const values = expression.values ?? [];
+      if (
+        typeof key !== 'string' ||
+        !Array.isArray(values) ||
+        values.length > 100 ||
+        values.some(value => typeof value !== 'string') ||
+        Object.keys(expression).some(field => !['key', 'operator', 'values'].includes(field))
+      )
+        throw new Error('Invalid selector expression fields');
+      if (
+        operator !== 'In' &&
+        operator !== 'NotIn' &&
+        operator !== 'Exists' &&
+        operator !== 'DoesNotExist'
+      )
+        throw new Error('Unsupported selector operator');
+      return { key, operator, values: values.map(value => String(value)) };
+    }),
+  };
+  validateSelector(selector);
+  return selector;
 }
 
 function matchesValidatedSelector(labels: Labels, selector: LabelSelector): boolean {
@@ -141,3 +199,4 @@ export function labelIndex<T extends LabeledResource>(
     },
   };
 }
+import { isRecord } from './object';

@@ -1,0 +1,2251 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "models/workload.go": "8070c2c4423dee1ef6629e94ffd299e57c03c843",
+    "kubernetes/filters.go": "1f5c24f5819ff1e633f848d1534b6f29ba53ca2a",
+    "business/workloads.go": "e0b704c0b299d19b50fbe9ae1d19cab1272a15cc"
+  },
+  "cases": [
+    {
+      "input": {
+        "selector": null,
+        "entries": []
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": []
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": null,
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": []
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": []
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {},
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {},
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 2,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v2"
+        },
+        "count": 2,
+        "first": "two"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "service.istio.io/canonical-name": "canonical",
+          "version": "v2"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "service.istio.io/canonical-name": "canonical",
+          "version": "v2"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "",
+          "zone": ""
+        },
+        "count": 2,
+        "first": "blank"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 2,
+        "first": "missing"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "v1"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "service.istio.io/canonical-name": "canonical",
+          "version": "v2"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "service.istio.io/canonical-name": "canonical",
+          "version": "v2"
+        },
+        "count": 1,
+        "first": "one"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical",
+          "service.istio.io/canonical-revision": "v3"
+        },
+        "count": 1,
+        "first": "canonical"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "service.istio.io/canonical-name": "canonical"
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "service.istio.io/canonical-name": "canonical",
+          "service.istio.io/canonical-revision": "v3"
+        },
+        "count": 1,
+        "first": "canonical"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": []
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "empty",
+            "labels": null
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          },
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "two",
+            "labels": {
+              "app": "vm",
+              "version": "v2"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v1"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          },
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "one",
+            "labels": {
+              "app": "vm",
+              "version": "v2",
+              "service.istio.io/canonical-name": "canonical"
+            }
+          },
+          {
+            "name": "other",
+            "labels": {
+              "app": "other"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          },
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "",
+          "zone": ""
+        },
+        "count": 1,
+        "first": "blank"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "missing",
+            "labels": {
+              "app": "vm"
+            }
+          },
+          {
+            "name": "blank",
+            "labels": {
+              "app": "vm",
+              "version": "",
+              "zone": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "app": "vm",
+          "version": "",
+          "zone": ""
+        },
+        "count": 1,
+        "first": "blank"
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    },
+    {
+      "input": {
+        "selector": {
+          "zone": ""
+        },
+        "entries": [
+          {
+            "name": "canonical",
+            "labels": {
+              "service.istio.io/canonical-name": "canonical",
+              "service.istio.io/canonical-revision": "v3"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "zone": ""
+        },
+        "count": 0,
+        "first": ""
+      }
+    }
+  ]
+}

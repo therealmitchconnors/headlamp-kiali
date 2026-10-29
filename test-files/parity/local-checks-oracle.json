@@ -1,0 +1,7546 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "kubernetes/istio.go": "c574a501bb73e9c479c4e5e4e07d87220325d6d3",
+    "business/checkers/k8sgateways/status_checker.go": "03323c9cf6179f3c173327951a096286293a8b26"
+  },
+  "cases": [
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": ""
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "HTTP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "http"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "HTTP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "http"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-api",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "HTTP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "http"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http-",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "HTTP",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "api-http",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "HTTP2"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "http2",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "GRPC"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "grpc-web",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "tcp",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "custom",
+        "protocol": "custom"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "HTTPS"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "MONGO"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "mongo-db",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "HTTP"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "http"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "HTTP2"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "HTTPS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "GRPC"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "GRPC-WEB"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "TCP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "UDP"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "MONGO"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "port",
+        "name": "https-api",
+        "protocol": "custom"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Accepted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Programmed",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Ready",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": true,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Scheduled",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "ResolvedRefs",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Conflicted",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": true
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Detached",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "True",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "False",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Invalid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "Pending",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenersNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "ListenerSetsNotValid",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "AddressNotAssigned",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Invalid configuration"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Address Pending for gateway"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    },
+    {
+      "input": {
+        "operation": "condition",
+        "condition": {
+          "type": "Vendor",
+          "status": "Unknown",
+          "reason": "NoResources",
+          "message": "Waiting"
+        }
+      },
+      "expected": {
+        "gateway": false,
+        "listener": false
+      }
+    }
+  ]
+}

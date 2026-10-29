@@ -8,7 +8,10 @@ import {
   readCorrelationSource,
 } from './correlation';
 
-vi.mock('@kinvolk/headlamp-plugin/lib', () => ({ ApiProxy: { request: vi.fn() } }));
+vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
+  ApiProxy: { request: vi.fn() },
+  K8s: { cluster: { KubeObject: class {} } },
+}));
 
 const scope = namespaceScope('alpha', 'bookinfo');
 const source = (kind: string) => CORRELATION_SOURCES.find(source => source.kind === kind)!;
@@ -41,6 +44,32 @@ beforeEach(() => {
 });
 
 describe('normalized correlation resources', () => {
+  it('captures account names only from the actual Pod spec without defaulting missing or malformed names', () => {
+    const raw = {
+      ...object('Pod'),
+      spec: { containers: [{ name: 'app' }], serviceAccountName: 'observed-account' },
+    };
+    const resource = decodeCorrelationResource(raw, source('Pod'), scope);
+    raw.spec.serviceAccountName = 'changed';
+    expect(resource.podAccount).toEqual({ ok: true, name: 'observed-account' });
+    expect(
+      decodeCorrelationResource(
+        { ...raw, spec: { containers: [{ name: 'app' }] } },
+        source('Pod'),
+        scope
+      ).podAccount
+    ).toMatchObject({ ok: false, message: expect.stringContaining('no default') });
+    expect(
+      decodeCorrelationResource(
+        { ...raw, spec: { containers: [{ name: 'app' }], serviceAccountName: 1 } },
+        source('Pod'),
+        scope
+      ).podAccount
+    ).toMatchObject({ ok: false, message: expect.stringContaining('malformed') });
+    expect(
+      decodeCorrelationResource(object('Deployment'), source('Deployment'), scope).podAccount
+    ).toBeUndefined();
+  });
   it('fills kind identity from the list contract when item TypeMeta is omitted', () => {
     const item = object('Deployment');
     const decoded = decodeCorrelationResource(
@@ -203,6 +232,10 @@ describe('bounded, partial-aware snapshot reads', () => {
     vi.mocked(ApiProxy.request).mockImplementation(async path => {
       active++;
       maximum = Math.max(maximum, active);
+      if (path === '/apis/networking.istio.io') {
+        active--;
+        throw { status: 404, message: 'Not installed' };
+      }
       const entry = CORRELATION_SOURCES.find(source =>
         String(path).includes(`/${source.plural}?`)
       )!;
@@ -213,8 +246,11 @@ describe('bounded, partial-aware snapshot reads', () => {
     });
     const result = await loadCorrelationSnapshot(scope, new AbortController().signal);
     expect(maximum).toBeLessThanOrEqual(3);
-    expect(result.sources).toHaveLength(9);
-    expect(result.sources.filter(source => source.complete)).toHaveLength(8);
+    expect(result.sources).toHaveLength(10);
+    expect(result.sources.filter(source => source.complete)).toHaveLength(9);
+    expect(result.sources.find(source => source.source.kind === 'WorkloadGroup')?.notServed).toBe(
+      true
+    );
     expect(result.complete).toBe(false);
     expect(result.sources.find(source => source.source.kind === 'Service')?.error?.kind).toBe(
       'forbidden'
@@ -234,6 +270,7 @@ describe('bounded, partial-aware snapshot reads', () => {
         })
     );
     const result = loadCorrelationSnapshot(scope, controller.signal);
+    await vi.waitFor(() => expect(ApiProxy.request).toHaveBeenCalledTimes(3));
     controller.abort();
     await expect(result).rejects.toThrow();
     lateResponses.forEach(resolve => resolve({}));

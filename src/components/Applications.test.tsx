@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { Link as RouterLink, MemoryRouter } from 'react-router-dom';
 import { readConfig } from '../core/config';
 import { CorrelationKind, CorrelationResource } from '../core/correlation';
+import { virtualWorkloadResources } from '../core/virtualWorkloads';
 import type { CorrelationSnapshot } from '../data/correlation';
 import Applications from './Applications';
 
@@ -37,10 +38,14 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   Link: ({
     routeName,
     search,
+    params,
+    activeCluster,
     children,
   }: {
     routeName: string;
     search?: string;
+    params?: { cluster?: string; namespace?: string; name?: string };
+    activeCluster?: string;
     children: ReactNode;
   }) => {
     expect(search === undefined || typeof search === 'string').toBe(true);
@@ -51,7 +56,9 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
         {children}
       </RouterLink>
     ) : (
-      <span>{children}</span>
+      <a href={routeName} data-cluster={params?.cluster ?? activeCluster}>
+        {children}
+      </a>
     );
   },
   SimpleTable: <T,>({
@@ -103,6 +110,7 @@ function fixture(partial = false, emptyLabel = false): CorrelationSnapshot {
       serviceSelector: kind === 'Service' ? { app: 'reviews' } : null,
       owners: [],
       proxyMode: kind === 'Pod' ? 'native-sidecar' : 'none',
+      ...(kind === 'Pod' ? { podAccount: { ok: true as const, name: 'bookinfo-reviews' } } : {}),
     };
   }
   const deployment = resource('Deployment', 'reviews-v1');
@@ -170,7 +178,71 @@ it('renders a logical application and drills into workloads, selectors and nativ
   expect(screen.getByText('reviews-v1')).toBeDefined();
   expect(screen.getByText('reviews-pod')).toBeDefined();
   expect(screen.getByText('Native sidecar')).toBeDefined();
+  expect(screen.getByText('bookinfo-reviews (attributed Pods: 1)')).toBeDefined();
+  expect(screen.getByText('bookinfo-reviews')).toBeDefined();
+  expect(screen.getByText(/do not prove ServiceAccount existence/)).toBeDefined();
   expect(state.load).toHaveBeenCalledTimes(1);
+});
+
+it('renders VM label provenance and group/entry links without treating entries as Pods', async () => {
+  const base = fixture();
+  const resources = virtualWorkloadResources(
+    base.scope,
+    [
+      {
+        name: 'vm-group',
+        namespace: 'bookinfo',
+        uid: 'group-uid',
+        resourceVersion: 'group-version',
+        labels: { app: 'metadata-app' },
+        selector: { app: 'vm' },
+      },
+    ],
+    [
+      {
+        name: 'entry-one',
+        namespace: 'bookinfo',
+        uid: 'entry-uid',
+        resourceVersion: 'entry-version',
+        labels: { app: 'vm', version: 'v1' },
+      },
+    ]
+  );
+  state.load.mockResolvedValue({ ...base, resources: [...base.resources, ...resources] });
+  open('?namespace=bookinfo&application=vm');
+  await screen.findByText('Application: vm');
+  expect(screen.getByRole('link', { name: 'vm-group' }).getAttribute('href')).toBe(
+    'kiali-config-workload-group-detail'
+  );
+  expect(screen.getByRole('link', { name: 'vm-group' }).getAttribute('data-cluster')).toBe('alpha');
+  expect(screen.getByRole('link', { name: 'entry-one' }).getAttribute('href')).toBe(
+    'kiali-config-workload-entry-detail'
+  );
+  expect(screen.getByRole('link', { name: 'entry-one' }).getAttribute('data-cluster')).toBe(
+    'alpha'
+  );
+  expect(screen.getByText('First matching WorkloadEntry specification')).toBeDefined();
+  expect(
+    screen.getByText(/Observed UID: entry-uid; resource version: entry-version/)
+  ).toBeDefined();
+  expect(screen.getByText(/1 selector-matched entries; not a VM readiness count/)).toBeDefined();
+  expect(screen.getByText('No owned pods were found.')).toBeDefined();
+  expect(screen.queryByText('Sidecar')).toBeNull();
+  expect(screen.getByText('VM entry accounts are not Pod account evidence')).toBeDefined();
+});
+it('shows missing Pod accounts without replacing them with default', async () => {
+  const data = fixture();
+  const pod = data.resources.find(item => item.identity.kind === 'Pod')!;
+  pod.podAccount = {
+    ok: false,
+    message: 'Pod service account name was not reported; no default was inferred',
+  };
+  state.load.mockResolvedValue(data);
+  open('?namespace=bookinfo&application=reviews');
+  await screen.findByText('Application: reviews');
+  expect(screen.getByText('1 Pod account observations unavailable')).toBeDefined();
+  expect(screen.queryByText('default')).toBeNull();
+  expect(screen.getAllByText(/no default was inferred/)).toHaveLength(2);
 });
 
 it('keeps missing Service permissions visible instead of claiming zero Services', async () => {

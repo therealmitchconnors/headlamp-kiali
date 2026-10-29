@@ -1,5 +1,6 @@
 import { AppLabels, applicationLabels, labelIndex, Labels, LabelValue } from './labels';
 import { ResourceIdentity, resourceKey } from './scope';
+import type { WorkloadHealthResource } from './workloadHealth';
 
 export type CorrelationKind =
   | 'Deployment'
@@ -10,6 +11,7 @@ export type CorrelationKind =
   | 'Job'
   | 'CronJob'
   | 'Pod'
+  | 'WorkloadGroup'
   | 'Service';
 
 export interface OwnerReference {
@@ -27,6 +29,16 @@ export interface CorrelationResource {
   owners: readonly OwnerReference[];
   serviceSelector: Labels | null;
   proxyMode: 'sidecar' | 'native-sidecar' | 'none';
+  resourceVersion?: string;
+  podAccount?: { ok: true; name: string } | { ok: false; message: string };
+  virtualMachine?: {
+    labelSource: 'group' | 'entry';
+    matchingEntries: number;
+    entry?: { name: string; uid: string; resourceVersion: string };
+  };
+  health?:
+    | { ok: true; value: Pick<WorkloadHealthResource, 'replicas' | 'stale'> }
+    | { ok: false; message: string };
 }
 
 export interface CorrelatedWorkload {
@@ -141,7 +153,7 @@ export function correlateResources(
         resolved = null;
         break;
       }
-      if (parent.identity.kind === 'Service') {
+      if (parent.identity.kind === 'Service' || parent.identity.kind === 'WorkloadGroup') {
         issue(current, 'unsupported-owner');
         resolved = null;
         break;

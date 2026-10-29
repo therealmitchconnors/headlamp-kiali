@@ -15,7 +15,9 @@
     "storybook-build": "headlamp-plugin storybook-build",
     "test": "headlamp-plugin test",
     "i18n": "headlamp-plugin i18n",
-    "parity:check": "node scripts/parity/check-catalog.mjs"
+    "parity:check": "node scripts/parity/check-catalog.mjs",
+    "resources:generate": "node scripts/generate-resources.mjs",
+    "resources:check": "node scripts/generate-resources.mjs --check"
   },
   "keywords": [
     "headlamp",
@@ -39,7 +41,15 @@
   "devDependencies": {
     "@kinvolk/headlamp-plugin": "^0.14.0"
   },
+  "dependencies": {
+    "js-yaml": "4.3.2",
+    "re2js": "2.8.8"
+  },
   "headlamp": {
+    "extraDist": {
+      "LICENSE": "LICENSE",
+      "NOTICE": "NOTICE"
+    },
     "i18n": [
       "en"
     ]

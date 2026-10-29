@@ -1,0 +1,2407 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "business/checkers/authorization/namespace_method_checker.go": "004170c8ad7e4c2d32f7ac7f5e647f24540d383e",
+    "models/namespace.go": "0f5b43473ce9fe7f7de6592d405d9997515278da",
+    "util/httputil/http_util.go": "1eec05f92b34b45f492ce4de77b8df52a29586af"
+  },
+  "cases": [
+    {
+      "input": {
+        "operation": "method",
+        "value": "GET"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "get"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tGET\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Get"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "G*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*T"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "GE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ET"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "GET*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*GET"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "HEAD"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "head"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tHEAD\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Head"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "H*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*D"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "HE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*AD"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "HEA*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*EAD"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "HEAD*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*HEAD"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "POST"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "post"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tPOST\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Post"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "P*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*T"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PO*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ST"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "POS*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*OST"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "POST*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*POST"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PUT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "put"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tPUT\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Put"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "P*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*T"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PU*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*UT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PUT*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*PUT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PATCH"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "patch"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tPATCH\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Patch"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "P*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*H"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PA*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*CH"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PAT*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*TCH"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PATC*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ATCH"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "PATCH*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*PATCH"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DELETE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "delete"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tDELETE\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Delete"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "D*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*E"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*TE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DEL*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ETE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DELE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*LETE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DELET*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ELETE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "DELETE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*DELETE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONNECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "connect"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tCONNECT\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Connect"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "C*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*T"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CO*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*CT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CON*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONN*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*NECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONNE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*NNECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONNEC*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ONNECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONNECT*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*CONNECT"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPTIONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "options"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tOPTIONS\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Options"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "O*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*S"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OP*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*NS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPT*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPTI*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*IONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPTIO*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*TIONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPTION*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*PTIONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "OPTIONS*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*OPTIONS"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "TRACE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "trace"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tTRACE\r\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "Trace"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "T*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*E"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "TR*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*CE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "TRA*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ACE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "TRAC*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*RACE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "TRACE*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*TRACE"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": ""
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "**"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*GET*"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "G*T"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CUSTOM"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "grpc.Service/Method"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "/grpc.Service/Method"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "CONNECTX"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "G E T"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "get\nx"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "﻿GET"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "GET"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "*ﬅ"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "poſt"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "optıons"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tGET\t"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\tBAD\t"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\nGET\n"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\nBAD\n"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\rGET\r"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "\rBAD\r"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "GET"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "BAD"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " GET "
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": " BAD "
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "　GET　"
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "　BAD　"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "﻿GET﻿"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "﻿BAD﻿"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "᠎GET᠎"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "method",
+        "value": "᠎BAD᠎"
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": []
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": [
+          "bookinfo"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": [
+          "bookinfo",
+          "other"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": [
+          ""
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": [
+          "book*"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*info",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*book*",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book**",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**info",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*missing",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "missing*",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": " Book*",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "bookinfo ",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "Bookinfo",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*系统",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": true
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "book*info",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "**",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "other",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    },
+    {
+      "input": {
+        "operation": "namespace",
+        "value": "*other",
+        "namespaces": [
+          "bookinfo",
+          "系统"
+        ]
+      },
+      "expected": false
+    }
+  ]
+}

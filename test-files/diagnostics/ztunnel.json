@@ -1,0 +1,77 @@
+{
+  "config": {
+    "clusterId": "mesh-a",
+    "clusterDomain": "example.test",
+    "network": "",
+    "localNode": "node-a",
+    "dnsResolverOpts": { "timeout": 5.25, "use_hosts_file": false }
+  },
+  "certificates": [
+    {
+      "identity": "spiffe://example.test/ns/bookinfo/sa/reviews",
+      "state": "Available",
+      "certChain": [{ "pem": "SYNTHETIC-CERTIFICATE-NOT-FOR-DISPLAY" }]
+    }
+  ],
+  "policies": [{ "name": "SYNTHETIC-POLICY-BODY-NOT-FOR-DISPLAY", "action": "ALLOW" }],
+  "services": [
+    {
+      "name": "reviews",
+      "namespace": "bookinfo",
+      "hostname": "reviews.bookinfo.svc.example.test",
+      "vips": ["network-a/192.0.2.1"],
+      "ports": { "9080": 9080 },
+      "waypoint": { "destination": "bookinfo/waypoint.example.test", "hboneMtlsPort": 15008 },
+      "endpoints": {
+        "mesh-a//Pod/bookinfo/reviews-a": {
+          "status": "Healthy",
+          "workloadUid": "mesh-a//Pod/bookinfo/reviews-a",
+          "port": { "9080": 9080 }
+        },
+        "mesh-b//Pod/remote/reviews-b": {
+          "status": "Unknown",
+          "workloadUid": "mesh-b//Pod/remote/reviews-b"
+        }
+      }
+    },
+    {
+      "name": "external",
+      "namespace": "",
+      "vips": [],
+      "endpoints": {},
+      "futureField": { "enabled": false, "count": 0 }
+    },
+    { "name": "missing-evidence", "namespace": "bookinfo" }
+  ],
+  "workloads": [
+    {
+      "uid": "mesh-a//Pod/bookinfo/reviews-a",
+      "name": "reviews-a",
+      "namespace": "bookinfo",
+      "workloadName": "reviews-v1",
+      "workloadType": "deployment",
+      "canonicalName": "reviews",
+      "canonicalRevision": "v1",
+      "clusterId": "mesh-a",
+      "node": "node-a",
+      "protocol": "HBONE",
+      "status": "Healthy",
+      "workloadIps": ["192.0.2.10"],
+      "serviceAccount": "reviews",
+      "trustDomain": "example.test",
+      "services": ["bookinfo/reviews.bookinfo.svc.example.test"],
+      "waypoint": { "destination": "bookinfo/waypoint.example.test", "hboneMtlsPort": 15008 }
+    },
+    {
+      "uid": "mesh-b//Pod/remote/ratings-b",
+      "name": "ratings-b",
+      "namespace": "remote",
+      "clusterId": "mesh-b",
+      "node": "node-b",
+      "protocol": "TCP",
+      "status": "Unhealthy",
+      "workloadIps": ["2001:db8::1"]
+    },
+    {}
+  ]
+}

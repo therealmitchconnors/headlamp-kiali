@@ -1,0 +1,2620 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "prometheus/metrics.go": "941c8de27de564abace6ee0cf717c6b2fb8a1d01",
+    "business/metrics_definitions.go": "2d9c32a25b1769e44ce927db14e75f7e544544f5"
+  },
+  "cases": [
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "response_throughput"
+        ]
+      },
+      "expected": [
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "grpc_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_sent"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_received"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_opened"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "input": {
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000,
+        "signals": [
+          "request_throughput",
+          "response_throughput",
+          "grpc_sent",
+          "grpc_received",
+          "tcp_sent",
+          "tcp_received",
+          "tcp_opened",
+          "tcp_closed"
+        ]
+      },
+      "expected": [
+        {
+          "key": "request_throughput",
+          "metric": "istio_request_bytes_sum",
+          "expression": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "response_throughput",
+          "metric": "istio_response_bytes_sum",
+          "expression": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_sent",
+          "metric": "istio_request_messages_total",
+          "expression": "sum(rate(istio_request_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "grpc_received",
+          "metric": "istio_response_messages_total",
+          "expression": "sum(rate(istio_response_messages_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_sent",
+          "metric": "istio_tcp_received_bytes_total",
+          "expression": "sum(rate(istio_tcp_received_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_received",
+          "metric": "istio_tcp_sent_bytes_total",
+          "expression": "sum(rate(istio_tcp_sent_bytes_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_opened",
+          "metric": "istio_tcp_connections_opened_total",
+          "expression": "sum(rate(istio_tcp_connections_opened_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        },
+        {
+          "key": "tcp_closed",
+          "metric": "istio_tcp_connections_closed_total",
+          "expression": "sum(rate(istio_tcp_connections_closed_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+        }
+      ]
+    }
+  ]
+}

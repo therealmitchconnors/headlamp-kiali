@@ -4,7 +4,9 @@ import {
   KialiConfig,
   readConfig,
   updateClusterConfig,
+  validateIdentityDomain,
   validateServiceEndpoint,
+  validateTracingConfig,
 } from './config';
 
 const endpoint = {
@@ -15,6 +17,76 @@ const endpoint = {
 };
 
 describe('versioned, cluster-scoped configuration', () => {
+  it('validates, clones and preserves per-cluster custom dashboard definitions', () => {
+    const definitions = {
+      namespaceLabel: 'namespace',
+      clusterLabel: 'cluster',
+      dashboards: [
+        {
+          name: 'test',
+          title: 'Test',
+          items: [
+            {
+              chart: {
+                name: 'Memory',
+                metricName: 'memory_bytes',
+                unit: 'bytes',
+                dataType: 'raw' as const,
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const source: KialiConfig = { schemaVersion: 1, clusters: { beta: { prometheus: null } } };
+    const updated = updateClusterConfig(source, 'alpha', {
+      prometheus: null,
+      customDashboards: definitions,
+    });
+    definitions.dashboards[0].title = 'mutated';
+    expect(updated.clusters.alpha.customDashboards?.dashboards[0].title).toBe('Test');
+    expect(readConfig(updated).valid).toBe(true);
+    expect(
+      updateClusterConfig(updated, 'alpha', { prometheus: endpoint }).clusters.alpha
+        .customDashboards
+    ).toEqual(updated.clusters.alpha.customDashboards);
+    expect(updated.clusters.beta).toEqual({ prometheus: null });
+    expect(
+      readConfig({
+        schemaVersion: 1,
+        clusters: {
+          alpha: {
+            prometheus: null,
+            customDashboards: { ...definitions, credentials: 'not-allowed' },
+          },
+        },
+      }).valid
+    ).toBe(false);
+  });
+  it('round-trips an optional boolean wildcard Gateway setting without changing another cluster', () => {
+    const config: KialiConfig = { schemaVersion: 1, clusters: { beta: { prometheus: null } } };
+    const next = updateClusterConfig(config, 'alpha', {
+      prometheus: null,
+      skipWildcardGatewayHosts: true,
+    });
+    expect(readConfig(next)).toEqual({ valid: true, config: next });
+    expect(next.clusters.beta).toEqual(config.clusters.beta);
+    expect(
+      updateClusterConfig(next, 'alpha', { prometheus: null }).clusters.alpha
+        .skipWildcardGatewayHosts
+    ).toBe(true);
+    expect(
+      updateClusterConfig(next, 'alpha', { prometheus: null, skipWildcardGatewayHosts: false })
+        .clusters.alpha.skipWildcardGatewayHosts
+    ).toBe(false);
+    for (const value of [null, 1, 'true', [], {}])
+      expect(
+        readConfig({
+          schemaVersion: 1,
+          clusters: { alpha: { prometheus: null, skipWildcardGatewayHosts: value } },
+        }).valid
+      ).toBe(false);
+  });
   it('defaults only an absent configuration', () => {
     expect(readConfig(undefined)).toEqual({
       valid: true,
@@ -110,9 +182,41 @@ describe('versioned, cluster-scoped configuration', () => {
       }).valid
     ).toBe(true);
   });
+
+  it('preserves independent health rules and rejects invalid stored patterns', () => {
+    const config: KialiConfig = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: {
+          prometheus: endpoint,
+          healthRates: [{ name: 'reviews.*', tolerance: [] }],
+        },
+      },
+    };
+    expect(
+      updateClusterConfig(config, 'alpha', { prometheus: null }).clusters.alpha.healthRates
+    ).toEqual(config.clusters.alpha.healthRates);
+    expect(
+      readConfig({
+        schemaVersion: 1,
+        clusters: {
+          alpha: {
+            prometheus: endpoint,
+            healthRates: [{ name: '[', tolerance: [] }],
+          },
+        },
+      }).valid
+    ).toBe(false);
+  });
 });
 
 describe('internal Service endpoint validation', () => {
+  it('rejects trailing newlines in registry domains and Service identities', () => {
+    expect(() => validateIdentityDomain('svc.cluster.local\n')).toThrow();
+    expect(() => validateServiceEndpoint({ ...endpoint, namespace: 'istio-system\n' })).toThrow();
+    expect(() => validateServiceEndpoint({ ...endpoint, service: 'prometheus\n' })).toThrow();
+  });
+
   it('normalizes port numbers and an optional base path', () => {
     expect(
       validateServiceEndpoint({ ...endpoint, port: '09090', basePath: '/prometheus/' })
@@ -121,6 +225,7 @@ describe('internal Service endpoint validation', () => {
       port: '9090',
       basePath: '/prometheus',
     });
+
     expect(validateServiceEndpoint({ ...endpoint, port: 'http', basePath: '/' }).basePath).toBe('');
   });
 
@@ -142,5 +247,63 @@ describe('internal Service endpoint validation', () => {
     { basePath: '/a\\b' },
   ])('rejects unsafe or invalid endpoint fields %j', changes => {
     expect(() => validateServiceEndpoint({ ...endpoint, ...changes })).toThrow(ConfigurationError);
+  });
+});
+
+describe('explicit service DNS identity domain', () => {
+  it('keeps an unknown domain unknown and preserves a configured value across other updates', () => {
+    const config: KialiConfig = {
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: endpoint, identityDomain: 'svc.mesh.example' } },
+    };
+    expect(readConfig(config)).toEqual({ valid: true, config });
+    expect(
+      updateClusterConfig(config, 'alpha', { prometheus: null }).clusters.alpha.identityDomain
+    ).toBe('svc.mesh.example');
+    expect(
+      getClusterConfig({ schemaVersion: 1, clusters: {} }, 'alpha').identityDomain
+    ).toBeUndefined();
+  });
+
+  describe('optional tracing settings', () => {
+    it('round-trips an independent provider while keeping older profiles and other settings', () => {
+      const config: KialiConfig = {
+        schemaVersion: 1,
+        clusters: { alpha: { prometheus: endpoint, tracing: { provider: 'tempo', endpoint } } },
+      };
+      expect(readConfig(config)).toEqual({ valid: true, config });
+      expect(
+        updateClusterConfig(config, 'alpha', { prometheus: null }).clusters.alpha.tracing
+      ).toEqual(config.clusters.alpha.tracing);
+      expect(
+        updateClusterConfig(config, 'alpha', { prometheus: endpoint, tracing: null }).clusters.alpha
+          .tracing
+      ).toBeNull();
+    });
+    it.each([
+      { provider: 'unknown', endpoint },
+      { provider: 'tempo', endpoint, headers: { 'X-Scope-OrgID': 'tenant' } },
+      { provider: 'jaeger', endpoint: { ...endpoint, token: 'not-stored' } },
+      { provider: 'jaeger', endpoint: { ...endpoint, basePath: 'https://external.test' } },
+    ])('rejects unsupported providers, credentials and external endpoints %#', value => {
+      expect(() => validateTracingConfig(value)).toThrow(ConfigurationError);
+      expect(
+        readConfig({
+          schemaVersion: 1,
+          clusters: { alpha: { prometheus: null, tracing: value } },
+        }).valid
+      ).toBe(false);
+    });
+  });
+  it.each([
+    '',
+    '../default',
+    'https://cluster.local',
+    'svc.cluster.local.',
+    'UPPER',
+    'bad name',
+    123,
+  ])('rejects invalid domain %j', value => {
+    expect(() => validateIdentityDomain(value)).toThrow(ConfigurationError);
   });
 });

@@ -47,6 +47,59 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - Headlamp 0.35.0 also expects CommonComponents `Link.search` to be a string.
   Serialize query parameters with URLSearchParams rather than passing the
   object form accepted by newer SDK declarations.
+- `Link.activeCluster` preserves the currently selected cluster group. For
+  navigation from a multi-context comparison to a single-cluster Kiali page,
+  pass `params={{ cluster: target }}` instead; otherwise the link can retain
+  extra contexts and land on the single-cluster guard.
+- ConfigStore persistence is debounced (500 ms in the pinned toolchain).
+  A "Settings saved" message is not a storage-flush signal. In browser tests,
+  wait until the stored `pluginConfigs.kiali` matches the public
+  `new pluginLib.ConfigStore('kiali').get()` value before a hard reload,
+  including after restoring test settings. Inspect only Kiali's slice; do not
+  modify private Redux state or leave an intercepted fixture endpoint enabled.
+- MUI dialogs can be visible while their fade transition is still running.
+  Wait for dialog/ancestor opacity to reach 1, or disable screenshot animations,
+  before diagnosing a transparent dialog from an image.
+- Headlamp 0.35's native Map source picker populates asynchronously. Wait for
+  Custom Resources before selecting the Kiali group; otherwise source indexes
+  can shift. Click a leaf checkbox and wait for its checked state rather than
+  assuming an immediate update; close both nested popovers before graph actions.
+  Its edge renderer does not display captions despite newer SDK `label` types.
+  Horizontal SVG paths can have zero-height boxes: verify connected path geometry
+  and computed stroke/opacity after layout, plus the screenshot. The host's
+  unnamed source-picker checkboxes remain an accessibility limitation.
+- Monaco reviews load asynchronously. Before capturing them, wait for the
+  expected editor text and `document.fonts.ready`, not just the dialog title
+  or dry-run success message. Check the review's read-only state as well.
+- For raw Pod logs, use public `ApiProxy.request` with `isJSON: false` and
+  `Accept: */*`, then bound the returned Response stream. An exclusive
+  `Accept: text/plain` produced HTTP 406 on the verification cluster even though
+  the successful response is plaintext.
+- Do not include an unstable translation function in an async loader's
+  dependency list merely to format result text. Translate stored failure data
+  during rendering; otherwise rerenders can continuously restart requests.
+- `src/resources/schema-types.ts`, the per-kind resource classes and registry
+  are generated from `test-files/configuration/schemas.json` and
+  `gateway-schemas.json`. Gateway schemas are pinned upstream sources matching
+  Kiali's dependencies, not captured from an installed Gateway API. Use
+  `npm run resources:generate` / `resources:check`; do not hand-edit them.
+- Configuration identities include API group and scope. Istio Gateway and Gateway
+  API Gateway have distinct classes/routes. GatewayClass is cluster-scoped:
+  no namespace in its route, object metadata, API path or authorization review.
+- Kubernetes typed-list items can omit `kind` and `apiVersion`. Infer them only
+  from a validated list envelope; reject conflicting values when present.
+  The reference-validation live check caught this on NamespaceList responses.
+- Remounting DetailsGrid does not necessarily invalidate Headlamp's object cache.
+  Intercepted writes have no real watch events; use the explicit Reload page
+  action when checking their changed data. Do not reach into private query
+  caches or bundle a second React Query instance to force updates.
+- Mutation dialogs capture a structured clone of the original API object on
+  opening. Keep this snapshot immutable; never read a newer resourceVersion
+  from a live resource after the user has edited an older specification.
+- Create SelfSubjectAccessReviews intentionally omit `resourceAttributes.name`.
+  Browser mutation fixtures should recognize the captured group/resource/
+  namespace/create scope while separately restricting every intercepted write
+  to owned fixture names. Do not send live writes to work around a fixture guard.
 - `pr-triage` contains Headlamp-specific commit conventions. Consult this
   repository's actual history and contribution rules instead of assuming those
   conventions apply here.
@@ -63,6 +116,51 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   A deep import can type-check but resolve to an undefined Headlamp global at
   runtime. Verify new runtime imports by loading the plugin in Headlamp.
 - Translate user-facing prose and give interactive controls accessible names.
+- Verify the pinned caller pipeline before enabling a checker, not only its
+  helper tests. ServiceEntry and Istio Gateway port-name helpers exist upstream
+  but are not enabled by their checkers; do not turn dormant helpers into findings.
+- PeerAuthentication checkers exclude every non-null selector, including an
+  empty selector. The separate namespace mTLS indicator normalizes empty
+  selectors differently. Preserve each caller's semantics.
+- The preceding exclusion applies to PeerAuthentication mTLS-pattern checkers,
+  not generic KIA0002 selectorless grouping: absent/null/empty selectors all
+  participate in the latter. It compares same-namespace policies, regardless of
+  mode, and is distinct from workload-overlap KIA0003. RequestAuthentication
+  disables both generic multi-match checks in the pinned caller.
+- VirtualService KIA1106 imports whole objects when any host matches the
+  namespace-wide Sidecar scope, then counts all hosts. Gateway strings remain
+  literal: omitted gateways use `no-gateway`, not `mesh`. Duplicate hosts or
+  gateways can flag a single object with no peer references. Do not normalize
+  these away or generalize its namespace wildcard buckets into DNS glob matching.
+- WorkloadGroup entry relationships compare `spec.metadata.labels` to
+  WorkloadEntry `spec.labels`, not object metadata or template labels.
+  Pinned `FilterWorkloadEntriesBySelector` excludes empty selectors. Do not
+  generalize the usual Kubernetes empty-selector-matches-all rule here, treat
+  WorkloadEntries as Pods, or use these links as complete workload/account
+  validation context or evidence of VM health.
+- VM application correlation follows the first matching WorkloadEntry's
+  `spec.labels` in captured list order, otherwise group selector labels only
+  after a complete entry read. Preserve group UID/resourceVersion separately
+  from entry label provenance. Entries are not Pods or ready replicas; VM
+  application health and Service routing remain unsupported until their
+  respective evidence pipelines are implemented.
+- Pinned `buildHTTPMatchRequest` groups headers into one AND alternative, but
+  emits URI/scheme/method/authority conditions as separate OR alternatives.
+  Do not silently reinterpret the wizard's flat condition list as all-AND.
+  An HTTP delegate with no parent match list is not necessarily a catch-all;
+  its target may add conditions.
+- HTTP match `name`, `ignoreUriCase` and `statPrefix` are not predicates.
+  Zero ports, empty scopes/maps/lists and ignored `headers` keys can also leave
+  an alternative unconditional. Preserve other fields when editing a condition;
+  never turn removal of its final predicate into an implicit catch-all.
+- Gateway API collision checks compare exact host/port/protocol and explicit
+  address-type/value pairs. The pinned checker excludes equal Gateway names
+  even across namespaces; do not silently replace that with UID-based exclusion
+  or add wildcard/default-type matching.
+- A resolved configuration with no root namespace uses the observed controller
+  namespace, following pinned Kiali discovery. Keep that provenance separate
+  from raw configuration; never apply this fallback to denied, missing,
+  ambiguous or unsupported configuration sources.
 - Keep toolchain-owned build configuration intact. Use existing npm scripts.
 - Type-check, lint, and build changes. Before claiming runtime behavior works,
   check the actual contribution and browser console in Headlamp; a successful

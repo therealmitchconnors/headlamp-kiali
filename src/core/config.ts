@@ -1,5 +1,8 @@
+import { CustomDashboardSettings, validateCustomDashboardSettings } from './customDashboards';
+import { GatewayClassSettings, validateGatewayClassSettings } from './gatewayClassRegistry';
+import { HealthRateRule, validateHealthRules } from './healthCalculator';
 import { AppLabels, isLabelKey } from './labels';
-import { isDnsLabel, isRecord } from './object';
+import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 
 export interface ServiceEndpoint {
   namespace: string;
@@ -7,10 +10,21 @@ export interface ServiceEndpoint {
   port: string;
   basePath: string;
 }
+export interface TracingConfig {
+  provider: 'jaeger' | 'tempo';
+  endpoint: ServiceEndpoint;
+}
 
 export interface ClusterConfig {
   prometheus: ServiceEndpoint | null;
   appLabels?: AppLabels | null;
+  healthRates?: HealthRateRule[];
+  identityDomain?: string | null;
+  tracing?: TracingConfig | null;
+  gatewayClasses?: GatewayClassSettings;
+  telemetryCluster?: string | null;
+  skipWildcardGatewayHosts?: boolean;
+  customDashboards?: CustomDashboardSettings;
 }
 
 export interface KialiConfig {
@@ -21,6 +35,48 @@ export interface KialiConfig {
 export type ConfigResult = { valid: true; config: KialiConfig } | { valid: false; message: string };
 
 export class ConfigurationError extends Error {}
+
+function wildcardGatewaySetting(value: unknown): boolean {
+  if (typeof value !== 'boolean')
+    throw new ConfigurationError('Skip wildcard Gateway hosts must be a boolean');
+  return value;
+}
+function customDashboardsSetting(value: unknown): CustomDashboardSettings {
+  try {
+    return validateCustomDashboardSettings(value);
+  } catch (error) {
+    throw new ConfigurationError(
+      error instanceof Error ? error.message : 'Invalid custom dashboard settings'
+    );
+  }
+}
+
+export function validateTelemetryCluster(value: unknown): string {
+  if (
+    typeof value !== 'string' ||
+    !value ||
+    value.length > 256 ||
+    value.trim() !== value ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  )
+    throw new ConfigurationError(
+      'Metric cluster label must contain 1 to 256 characters without surrounding whitespace or control characters'
+    );
+  return value;
+}
+
+export function validateIdentityDomain(value: unknown): string {
+  if (!isDnsSubdomain(value))
+    throw new ConfigurationError('Service DNS identity domain must be a DNS subdomain');
+  return value;
+}
+
+export function validateTracingConfig(value: unknown): TracingConfig {
+  if (!isRecord(value) || (value.provider !== 'jaeger' && value.provider !== 'tempo'))
+    throw new ConfigurationError('Select a supported tracing provider');
+  rejectUnknownFields(value, ['provider', 'endpoint']);
+  return { provider: value.provider, endpoint: validateServiceEndpoint(value.endpoint) };
+}
 
 function rejectUnknownFields(value: Record<string, unknown>, fields: string[]) {
   if (Object.keys(value).some(field => !fields.includes(field))) {
@@ -47,7 +103,7 @@ export function validateAppLabels(value: unknown): AppLabels {
 
 export function validateServiceEndpoint(value: unknown): ServiceEndpoint {
   if (!isRecord(value)) {
-    throw new ConfigurationError('Metrics endpoint must be a Service reference');
+    throw new ConfigurationError('Endpoint must be a Service reference');
   }
   rejectUnknownFields(value, ['namespace', 'service', 'port', 'basePath']);
   const namespace = name(value.namespace, 'Namespace');
@@ -101,13 +157,58 @@ export function readConfig(value: unknown): ConfigResult {
       if (!cluster.trim() || !isRecord(settings)) {
         throw new ConfigurationError('Each cluster must have a configuration object');
       }
-      rejectUnknownFields(settings, ['prometheus', 'appLabels']);
+      rejectUnknownFields(settings, [
+        'prometheus',
+        'appLabels',
+        'healthRates',
+        'identityDomain',
+        'tracing',
+        'gatewayClasses',
+        'telemetryCluster',
+        'skipWildcardGatewayHosts',
+        'customDashboards',
+      ]);
       const prometheus =
         settings.prometheus === null ? null : validateServiceEndpoint(settings.prometheus);
       return [
         cluster,
         {
           prometheus,
+          ...(settings.customDashboards === undefined
+            ? {}
+            : { customDashboards: customDashboardsSetting(settings.customDashboards) }),
+          ...(settings.skipWildcardGatewayHosts === undefined
+            ? {}
+            : {
+                skipWildcardGatewayHosts: wildcardGatewaySetting(settings.skipWildcardGatewayHosts),
+              }),
+          ...(settings.telemetryCluster === undefined
+            ? {}
+            : {
+                telemetryCluster:
+                  settings.telemetryCluster === null
+                    ? null
+                    : validateTelemetryCluster(settings.telemetryCluster),
+              }),
+          ...(settings.gatewayClasses === undefined
+            ? {}
+            : { gatewayClasses: configuredGatewayClasses(settings.gatewayClasses) }),
+          ...(settings.tracing === undefined
+            ? {}
+            : {
+                tracing: settings.tracing === null ? null : validateTracingConfig(settings.tracing),
+              }),
+          ...(settings.identityDomain === undefined
+            ? {}
+            : {
+                identityDomain:
+                  settings.identityDomain === null
+                    ? null
+                    : validateIdentityDomain(settings.identityDomain),
+              }),
+          ...(settings.healthRates === undefined
+            ? {}
+            : { healthRates: configuredHealthRules(settings.healthRates) }),
           ...(settings.appLabels === undefined
             ? {}
             : {
@@ -149,8 +250,43 @@ export function updateClusterConfig(
       ...config.clusters,
       [cluster]: {
         ...getClusterConfig(config, cluster),
+        ...(settings.customDashboards === undefined
+          ? {}
+          : { customDashboards: customDashboardsSetting(settings.customDashboards) }),
+        ...(settings.skipWildcardGatewayHosts === undefined
+          ? {}
+          : {
+              skipWildcardGatewayHosts: wildcardGatewaySetting(settings.skipWildcardGatewayHosts),
+            }),
+        ...(settings.telemetryCluster === undefined
+          ? {}
+          : {
+              telemetryCluster:
+                settings.telemetryCluster === null
+                  ? null
+                  : validateTelemetryCluster(settings.telemetryCluster),
+            }),
+        ...(settings.gatewayClasses === undefined
+          ? {}
+          : { gatewayClasses: configuredGatewayClasses(settings.gatewayClasses) }),
         prometheus:
           settings.prometheus === null ? null : validateServiceEndpoint(settings.prometheus),
+        ...(settings.tracing === undefined
+          ? {}
+          : {
+              tracing: settings.tracing === null ? null : validateTracingConfig(settings.tracing),
+            }),
+        ...(settings.identityDomain === undefined
+          ? {}
+          : {
+              identityDomain:
+                settings.identityDomain === null
+                  ? null
+                  : validateIdentityDomain(settings.identityDomain),
+            }),
+        ...(settings.healthRates === undefined
+          ? {}
+          : { healthRates: configuredHealthRules(settings.healthRates) }),
         ...(settings.appLabels === undefined
           ? {}
           : {
@@ -159,4 +295,22 @@ export function updateClusterConfig(
       },
     },
   };
+}
+
+function configuredHealthRules(value: unknown): HealthRateRule[] {
+  try {
+    return validateHealthRules(value);
+  } catch (error) {
+    throw new ConfigurationError(error instanceof Error ? error.message : 'Invalid health rules');
+  }
+}
+
+function configuredGatewayClasses(value: unknown): GatewayClassSettings {
+  try {
+    return validateGatewayClassSettings(value);
+  } catch (error) {
+    throw new ConfigurationError(
+      error instanceof Error ? error.message : 'Invalid Gateway class settings'
+    );
+  }
 }

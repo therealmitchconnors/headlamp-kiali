@@ -1,0 +1,1271 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "business/checkers/k8sgateways/gatewayclass_checker.go": "48ad008a33df77598f509706ac9491fd58fcab27",
+    "business/checkers/k8sgateway_checker.go": "325feda97b07a084ddc33b8c0372bec3de078d7e",
+    "cache/cache.go": "b3bc1b4280ab51d78efbd1be2fdebfbe2774f09b",
+    "models/istio_validation.go": "d13e0b576e9392cb7e19578c05a07f2641efc054"
+  },
+  "cases": [
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-remote",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-east-west",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "istio-waypoint",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "custom",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "other",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "missing",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": []
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio"
+          },
+          {
+            "name": "istio-remote",
+            "className": "istio-remote"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "istio-east-west"
+          },
+          {
+            "name": "istio-waypoint",
+            "className": "istio-waypoint"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "class.with.dots"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "custom"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    },
+    {
+      "input": {
+        "gatewayClassName": "class.with.dots",
+        "classes": [
+          {
+            "name": "Display 0",
+            "className": "other"
+          },
+          {
+            "name": "custom",
+            "className": "custom"
+          },
+          {
+            "name": "Display 2",
+            "className": "istio"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "code": "KIA1504",
+          "message": "Gateway API Class not found in Kiali configuration",
+          "severity": "error",
+          "path": "spec/gatewayClassName"
+        }
+      ]
+    }
+  ]
+}

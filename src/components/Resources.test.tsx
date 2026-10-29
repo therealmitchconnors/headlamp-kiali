@@ -40,6 +40,9 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
+  Link: ({ routeName, children }: { routeName: string; children: ReactNode }) => (
+    <a href={routeName}>{children}</a>
+  ),
   SectionBox: ({ children }: { children: ReactNode }) => <section>{children}</section>,
   StatusLabel: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   ResourceListView: <T,>({
@@ -92,4 +95,7 @@ it('does not silently pick one member of a selected cluster group', () => {
   render(<Services />);
   expect(screen.getByText(/supports one cluster at a time/)).toBeDefined();
   expect(screen.queryByText('9080/TCP')).toBeNull();
+  expect(screen.getByRole('link', { name: 'Cluster comparison' }).getAttribute('href')).toBe(
+    'kiali-clusters'
+  );
 });

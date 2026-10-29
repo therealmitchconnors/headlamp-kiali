@@ -1,0 +1,162 @@
+{
+  "jaeger": {
+    "data": [
+      {
+        "traceID": "00000000000000000000000000000001",
+        "warnings": ["Synthetic fixture; not a live trace"],
+        "processes": {
+          "p1": {
+            "serviceName": "productpage",
+            "tags": [{ "key": "k8s.namespace.name", "type": "string", "value": "bookinfo" }]
+          },
+          "p2": { "serviceName": "reviews", "tags": [] }
+        },
+        "spans": [
+          {
+            "traceID": "00000000000000000000000000000001",
+            "spanID": "0000000000000001",
+            "flags": 0,
+            "operationName": "GET /productpage",
+            "startTime": 1700000000000000,
+            "duration": 1000,
+            "processID": "p1",
+            "references": [],
+            "tags": [
+              { "key": "error", "type": "bool", "value": false },
+              { "key": "zero", "type": "int64", "value": 0 }
+            ],
+            "logs": [],
+            "warnings": []
+          },
+          {
+            "traceID": "00000000000000000000000000000001",
+            "spanID": "0000000000000002",
+            "flags": 3,
+            "operationName": "GET /reviews",
+            "startTime": 1700000000000100,
+            "duration": 400,
+            "processID": "p2",
+            "references": [
+              {
+                "refType": "CHILD_OF",
+                "traceID": "00000000000000000000000000000001",
+                "spanID": "0000000000000001"
+              }
+            ],
+            "tags": [{ "key": "error", "type": "bool", "value": true }],
+            "logs": [
+              {
+                "timestamp": 1700000000000150,
+                "fields": [{ "key": "event", "value": "synthetic failure" }]
+              }
+            ],
+            "warnings": []
+          }
+        ]
+      }
+    ],
+    "errors": null
+  },
+  "tempoSearch": {
+    "traces": [
+      {
+        "traceID": "00000000000000000000000000000001",
+        "rootServiceName": "reviews",
+        "rootTraceName": "review operation",
+        "startTimeUnixNano": "1700000000000000001",
+        "durationMs": 1,
+        "spanSets": [{ "matched": 2, "spans": [] }]
+      }
+    ],
+    "metrics": {}
+  },
+  "tempoTrace": {
+    "batches": [
+      {
+        "resource": {
+          "attributes": [
+            { "key": "service.name", "value": { "stringValue": "reviews" } },
+            { "key": "exact.counter", "value": { "intValue": "9007199254740993" } }
+          ],
+          "droppedAttributesCount": 0
+        },
+        "schemaUrl": "https://opentelemetry.io/schemas/1.26.0",
+        "scopeSpans": [
+          {
+            "scope": {
+              "name": "synthetic",
+              "version": "1.0",
+              "attributes": [
+                { "key": "scope.enabled", "value": { "boolValue": false } },
+                { "key": "scope.counter", "value": { "intValue": "9007199254740993" } }
+              ],
+              "droppedAttributesCount": 1
+            },
+            "schemaUrl": "https://opentelemetry.io/schemas/1.25.0",
+            "spans": [
+              {
+                "traceId": "AAAAAAAAAAAAAAAAAAAAAQ==",
+                "spanId": "AAAAAAAAAAE=",
+                "flags": 0,
+                "traceState": "",
+                "droppedAttributesCount": 0,
+                "droppedEventsCount": 0,
+                "droppedLinksCount": 0,
+                "parentSpanId": "",
+                "name": "review operation",
+                "kind": "SPAN_KIND_SERVER",
+                "startTimeUnixNano": "1700000000000000001",
+                "endTimeUnixNano": "1700000000000001001",
+                "status": { "code": "STATUS_CODE_OK", "message": "" },
+                "attributes": [
+                  {
+                    "key": "flags",
+                    "value": {
+                      "arrayValue": { "values": [{ "boolValue": false }, { "doubleValue": 0 }] }
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "timeUnixNano": "1700000000000000002",
+                    "name": "started",
+                    "attributes": [],
+                    "droppedAttributesCount": 0
+                  }
+                ],
+                "links": []
+              },
+              {
+                "traceId": "00000000000000000000000000000001",
+                "spanId": "0000000000000002",
+                "flags": 769,
+                "traceState": "vendor=synthetic",
+                "parentSpanId": "0000000000000001",
+                "name": "child operation",
+                "kind": 3,
+                "startTimeUnixNano": "1700000000000000011",
+                "endTimeUnixNano": "1700000000000000091",
+                "status": { "code": 2, "message": "Synthetic upstream failure" },
+                "attributes": [],
+                "events": [],
+                "links": [
+                  {
+                    "traceId": "AAAAAAAAAAAAAAAAAAAAAg==",
+                    "spanId": "AAAAAAAAAAM=",
+                    "flags": 256,
+                    "traceState": "vendor=linked",
+                    "attributes": [
+                      { "key": "link.enabled", "value": { "boolValue": false } },
+                      { "key": "link.counter", "value": { "intValue": "9007199254740993" } }
+                    ],
+                    "droppedAttributesCount": "2"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

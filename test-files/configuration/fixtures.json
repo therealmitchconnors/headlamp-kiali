@@ -1,0 +1,71 @@
+{
+  "virtualService": {
+    "apiVersion": "networking.istio.io/v1",
+    "kind": "VirtualService",
+    "metadata": {
+      "name": "reviews-fixture",
+      "namespace": "bookinfo",
+      "uid": "synthetic-virtual-service",
+      "resourceVersion": "1",
+      "generation": 2,
+      "creationTimestamp": "2026-10-01T00:00:00Z"
+    },
+    "spec": {
+      "hosts": ["reviews"],
+      "gateways": ["mesh", "edge/public"],
+      "exportTo": ["."],
+      "http": [
+        {
+          "name": "weighted-reviews",
+          "match": [{ "uri": { "prefix": "/reviews" }, "headers": { "x-test": { "exact": "" } } }],
+          "route": [
+            { "destination": { "host": "reviews", "subset": "v1", "port": { "number": 9080 } }, "weight": 0 },
+            { "destination": { "host": "reviews.bookinfo.svc.cluster.local", "subset": "v2" }, "weight": 100 }
+          ],
+          "mirrors": [{ "destination": { "host": "ratings.bookinfo" }, "percentage": { "value": 10 } }],
+          "timeout": "3s",
+          "retries": { "attempts": 2, "perTryTimeout": "1s", "retryOn": "5xx", "retryRemoteLocalities": false },
+          "headers": { "response": { "remove": ["x-private"] } },
+          "corsPolicy": { "allowCredentials": false, "allowMethods": ["GET"], "allowOrigins": [{ "exact": "https://example.test" }] }
+        },
+        { "delegate": { "name": "nested-routes", "namespace": "edge" } },
+        { "directResponse": { "status": 503, "body": { "string": "temporarily unavailable" } } }
+      ],
+      "tcp": [{ "match": [{ "port": 9000 }], "route": [{ "destination": { "host": "ratings" }, "weight": 100 }] }],
+      "tls": [{ "match": [{ "sniHosts": ["reviews.example.test"], "port": 443 }], "route": [{ "destination": { "host": "reviews" } }] }]
+    },
+    "status": {
+      "observedGeneration": 1,
+      "validationMessages": [{ "type": { "code": "FIXTURE001", "name": "Synthetic" }, "level": "WARNING", "documentationUrl": "https://example.test/schema" }],
+      "conditions": [{ "type": "Accepted", "status": "False", "reason": "Fixture", "message": "Synthetic fixture only", "lastTransitionTime": "2026-10-01T00:00:00Z" }],
+      "extensionStatus": { "pending": true }
+    }
+  },
+  "destinationRule": {
+    "apiVersion": "networking.istio.io/v1",
+    "kind": "DestinationRule",
+    "metadata": {
+      "name": "reviews-fixture",
+      "namespace": "bookinfo",
+      "uid": "synthetic-destination-rule",
+      "resourceVersion": "1",
+      "creationTimestamp": "2026-10-01T00:00:00Z"
+    },
+    "spec": {
+      "host": "reviews.bookinfo.svc.cluster.local",
+      "exportTo": ["."],
+      "workloadSelector": { "matchLabels": { "app": "productpage" } },
+      "trafficPolicy": {
+        "loadBalancer": { "simple": "ROUND_ROBIN" },
+        "connectionPool": { "tcp": { "maxConnections": 100 }, "http": { "http2MaxRequests": 200 } },
+        "outlierDetection": { "consecutive5xxErrors": 5, "interval": "10s", "baseEjectionTime": "30s" },
+        "tls": { "mode": "ISTIO_MUTUAL" },
+        "portLevelSettings": [{ "port": { "number": 9080 }, "tls": { "mode": "DISABLE" } }]
+      },
+      "subsets": [
+        { "name": "v1", "labels": { "version": "v1" } },
+        { "name": "v2", "labels": { "version": "v2" }, "trafficPolicy": { "loadBalancer": { "simple": "LEAST_REQUEST" } } }
+      ]
+    }
+  }
+}

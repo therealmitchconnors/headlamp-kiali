@@ -22,30 +22,10 @@ import { namespaceScope } from '../core/scope';
 import { loadCorrelationSnapshot } from '../data/correlation';
 import { useRequest } from '../hooks/useRequest';
 import ClusterScope from './ClusterScope';
+import ResourceName from './CorrelatedResourceName';
 import RequestStatus from './RequestStatus';
-
-const RESOURCE_ROUTES: Partial<Record<CorrelationResource['identity']['kind'], string>> = {
-  Deployment: 'Deployment',
-  StatefulSet: 'StatefulSet',
-  DaemonSet: 'DaemonSet',
-  ReplicaSet: 'ReplicaSet',
-  Job: 'Job',
-  CronJob: 'CronJob',
-  Pod: 'Pod',
-  Service: 'service',
-};
-
-function ResourceName({ resource }: { resource: CorrelationResource }) {
-  const { cluster, namespace, name, kind } = resource.identity;
-  const routeName = RESOURCE_ROUTES[kind];
-  return routeName ? (
-    <Link routeName={routeName} activeCluster={cluster} params={{ namespace, name }}>
-      {name}
-    </Link>
-  ) : (
-    <span>{name}</span>
-  );
-}
+import WorkloadAccounts from './WorkloadAccounts';
+import WorkloadLabelSource from './WorkloadLabelSource';
 
 function ApplicationDetails({ app, complete }: { app: Application; complete: boolean }) {
   const { t } = useTranslation();
@@ -60,6 +40,17 @@ function ApplicationDetails({ app, complete }: { app: Application; complete: boo
             namespace: app.namespace,
           })}
         </Typography>
+        <Link
+          routeName="kiali-health"
+          activeCluster={app.cluster}
+          search={new URLSearchParams({
+            kind: 'Application',
+            namespace: app.namespace,
+            name: app.name,
+          }).toString()}
+        >
+          {t('Inspect application health')}
+        </Link>
         {!complete && (
           <Alert severity="warning">
             {t(
@@ -69,6 +60,18 @@ function ApplicationDetails({ app, complete }: { app: Application; complete: boo
         )}
       </SectionBox>
       <SectionBox title={t('Associated workloads')}>
+        <Alert severity="info">
+          {t(
+            'Pod account names come from spec.serviceAccountName on UID-attributed Pods in this captured namespace. They do not prove ServiceAccount existence, permissions, a trust domain or complete mesh account coverage. Missing names do not become default, and VM entry accounts are separate.'
+          )}
+        </Alert>
+        {app.workloads.some(workload => workload.resource.virtualMachine) && (
+          <Alert severity="info">
+            {t(
+              'VM workload labels follow the first selector-matched WorkloadEntry in the captured list, or the WorkloadGroup selector labels when none match. Entry order can affect labels. WorkloadEntries are not Pods; proxy, account and replica-health evidence is not inferred, and VM traffic creation is not supported by the current wizard.'
+            )}
+          </Alert>
+        )}
         <SimpleTable
           data={app.workloads}
           columns={[
@@ -81,6 +84,16 @@ function ApplicationDetails({ app, complete }: { app: Application; complete: boo
               ),
             },
             { label: t('Kind'), getter: (workload: CorrelatedWorkload) => workload.identity.kind },
+            {
+              label: t('Observed Pod accounts'),
+              getter: (workload: CorrelatedWorkload) => <WorkloadAccounts workload={workload} />,
+            },
+            {
+              label: t('Label evidence'),
+              getter: (workload: CorrelatedWorkload) => (
+                <WorkloadLabelSource {...workload.resource} />
+              ),
+            },
             {
               label: t('Application label'),
               getter: (workload: CorrelatedWorkload) => workload.app?.key,
@@ -141,6 +154,30 @@ function ApplicationDetails({ app, complete }: { app: Application; complete: boo
                   ? t('Sidecar')
                   : t('Not detected'),
             },
+            {
+              label: t('Observed service account'),
+              getter: (pod: CorrelationResource) =>
+                pod.podAccount?.ok
+                  ? pod.podAccount.name
+                  : pod.podAccount?.ok === false
+                  ? pod.podAccount.message
+                  : t('Not collected'),
+            },
+            {
+              label: t('Diagnostics'),
+              getter: (pod: CorrelationResource) => (
+                <Link
+                  routeName="kiali-diagnostics"
+                  activeCluster={pod.identity.cluster}
+                  search={new URLSearchParams({
+                    namespace: pod.identity.namespace,
+                    pod: pod.identity.name,
+                  }).toString()}
+                >
+                  {t('Inspect pod diagnostics')}
+                </Link>
+              ),
+            },
           ]}
           emptyMessage={
             complete
@@ -190,6 +227,18 @@ function ApplicationSnapshot({
         }
         return (
           <>
+            <Alert severity="info">
+              {t(
+                'Namespace correlation includes supported WorkloadGroups, with a 15-second deadline. VM entry labels require complete entry evidence; denied or limited reads remain partial and never fall back silently to group labels.'
+              )}
+            </Alert>
+            {snapshot.sources.some(source => source.notServed) && (
+              <Alert severity="info">
+                {t(
+                  'No supported WorkloadGroup API is served; the current correlation contains only the observed Kubernetes workload kinds.'
+                )}
+              </Alert>
+            )}
             {!snapshot.complete && (
               <Alert severity="warning" sx={{ mb: 2 }}>
                 {t(
@@ -265,6 +314,22 @@ function ApplicationSnapshot({
                             }).toString()}
                           >
                             {app.name || t('Empty application label')}
+                          </Link>
+                        ),
+                      },
+                      {
+                        label: t('Health'),
+                        getter: (app: Application) => (
+                          <Link
+                            routeName="kiali-health"
+                            activeCluster={app.cluster}
+                            search={new URLSearchParams({
+                              kind: 'Application',
+                              namespace: app.namespace,
+                              name: app.name,
+                            }).toString()}
+                          >
+                            {t('Inspect health')}
                           </Link>
                         ),
                       },
@@ -352,7 +417,7 @@ function ScopedApplications({ cluster }: { cluster: string }) {
           </Typography>
           <Typography variant="body2">
             {t(
-              'This view currently covers Kubernetes controllers and Pods. External workloads, WorkloadGroups and OpenShift-specific controllers are not included yet.'
+              'This view covers supported Kubernetes controllers, Pods and WorkloadGroup-backed VM workloads. Arbitrary external workloads, custom controllers and OpenShift-specific controllers are not fully represented.'
             )}
           </Typography>
           <Autocomplete

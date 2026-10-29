@@ -14,15 +14,36 @@
  * limitations under the License.
  */
 
+import { Icon } from '@iconify/react';
 import {
+  registerKindIcon,
+  registerMapSource,
   registerPluginSettings,
   registerRoute,
   registerSidebarEntry,
 } from '@kinvolk/headlamp-plugin/lib';
 import Applications from './components/Applications';
+import ClusterComparison from './components/ClusterComparison';
+import Configuration, {
+  ConfigurationDetail,
+  ConfigurationList,
+} from './components/configuration/Configuration';
+import CustomDashboards from './components/CustomDashboards';
+import Diagnostics from './components/Diagnostics';
+import Histograms from './components/Histograms';
+import Mesh from './components/Mesh';
+import Mtls from './components/Mtls';
 import Overview from './components/Overview';
 import { Namespaces, Services, Workloads } from './components/Resources';
+import ServiceTrafficWizard from './components/ServiceTrafficWizard';
 import Settings from './components/Settings';
+import Topology from './components/Topology';
+import Traces from './components/Traces';
+import Traffic from './components/Traffic';
+import TrafficSignals from './components/TrafficSignals';
+import WorkloadHealth from './components/WorkloadHealth';
+import { kialiConfigurationSource } from './mapView';
+import { configurationDefinitions } from './resources/registry';
 
 registerSidebarEntry({
   name: 'kiali',
@@ -33,7 +54,19 @@ registerSidebarEntry({
 
 const pages = [
   { name: 'overview', label: 'Overview', component: Overview },
+  { name: 'clusters', label: 'Cluster comparison', component: ClusterComparison },
   { name: 'applications', label: 'Applications', component: Applications },
+  { name: 'mesh', label: 'Mesh inventory', component: Mesh },
+  { name: 'mtls', label: 'mTLS configuration', component: Mtls },
+  { name: 'traces', label: 'Traces', component: Traces },
+  { name: 'diagnostics', label: 'Pod diagnostics', component: Diagnostics },
+  { name: 'configuration', label: 'Mesh configuration', component: Configuration },
+  { name: 'traffic', label: 'Traffic metrics', component: Traffic },
+  { name: 'histograms', label: 'Traffic histograms', component: Histograms },
+  { name: 'signals', label: 'Traffic signals', component: TrafficSignals },
+  { name: 'dashboards', label: 'Custom dashboards', component: CustomDashboards },
+  { name: 'graph', label: 'Traffic graph', component: Topology },
+  { name: 'health', label: 'Health', component: WorkloadHealth },
   { name: 'namespaces', label: 'Namespaces', component: Namespaces },
   { name: 'services', label: 'Services', component: Services },
   { name: 'workloads', label: 'Workloads', component: Workloads },
@@ -53,3 +86,36 @@ for (const page of pages) {
 }
 
 registerPluginSettings('kiali', Settings, false);
+registerRoute({
+  name: 'kiali-service-traffic',
+  path: '/kiali/service-traffic',
+  sidebar: 'kiali-services',
+  exact: true,
+  component: ServiceTrafficWizard,
+});
+
+for (const definition of configurationDefinitions) {
+  registerRoute({
+    name: definition.resourceClass.listRoute,
+    path: `/kiali/configuration/${definition.id}`,
+    sidebar: 'kiali-configuration',
+    exact: true,
+    component: () => <ConfigurationList definition={definition} />,
+  });
+  registerRoute({
+    name: definition.resourceClass.detailsRoute,
+    path: `/kiali/configuration/${definition.id}/${
+      definition.resourceClass.isNamespaced ? ':namespace/' : ''
+    }:name`,
+    sidebar: 'kiali-configuration',
+    exact: true,
+    component: () => <ConfigurationDetail definition={definition} />,
+  });
+  // Gateway is also a built-in Gateway API kind; leave its global icon unchanged.
+  if (definition.kind !== 'Gateway')
+    registerKindIcon(definition.kind, {
+      icon: <Icon icon="mdi:routes" width="70%" height="70%" />,
+      color: 'rgb(50,108,229)',
+    });
+}
+registerMapSource(kialiConfigurationSource);

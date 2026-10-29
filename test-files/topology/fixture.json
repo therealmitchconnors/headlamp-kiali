@@ -1,0 +1,80 @@
+{
+  "labels": {
+    "reporter": "source",
+    "source_cluster": "Kubernetes",
+    "source_workload_namespace": "bookinfo",
+    "source_workload": "productpage-v1",
+    "source_canonical_service": "productpage",
+    "source_canonical_revision": "v1",
+    "destination_cluster": "Kubernetes",
+    "destination_workload_namespace": "bookinfo",
+    "destination_workload": "reviews-v1",
+    "destination_canonical_service": "reviews",
+    "destination_canonical_revision": "v1",
+    "destination_service_namespace": "bookinfo",
+    "destination_service": "reviews.bookinfo.svc.cluster.local",
+    "destination_service_name": "reviews",
+    "request_protocol": "http",
+    "response_code": "200",
+    "response_flags": "-",
+    "connection_security_policy": "mutual_tls"
+  },
+  "samples": [
+    { "labels": {}, "rate": 1 },
+    {
+      "labels": { "destination_workload": "reviews-v2", "destination_canonical_revision": "v2" },
+      "rate": 2
+    },
+    {
+      "labels": {
+        "destination_workload": "reviews-v3",
+        "destination_canonical_revision": "v3",
+        "request_protocol": "grpc",
+        "grpc_response_status": "0"
+      },
+      "rate": 3
+    },
+    {
+      "labels": {
+        "source_workload": "reviews-v2",
+        "source_canonical_service": "reviews",
+        "source_canonical_revision": "v2",
+        "destination_workload": "ratings-v1",
+        "destination_canonical_service": "ratings",
+        "destination_canonical_revision": "v1",
+        "destination_service_name": "ratings",
+        "destination_service": "ratings.bookinfo.svc.cluster.local"
+      },
+      "rate": 2
+    },
+    {
+      "labels": {
+        "source_workload": "reviews-v3",
+        "source_canonical_service": "reviews",
+        "source_canonical_revision": "v3",
+        "destination_workload": "ratings-v1",
+        "destination_canonical_service": "ratings",
+        "destination_canonical_revision": "v1",
+        "destination_service_name": "ratings",
+        "destination_service": "ratings.bookinfo.svc.cluster.local",
+        "response_code": "503",
+        "response_flags": "UF",
+        "connection_security_policy": "none"
+      },
+      "rate": 3
+    },
+    {
+      "labels": {
+        "source_cluster": "remote-east",
+        "source_workload_namespace": "ingress",
+        "source_workload": "gateway",
+        "source_canonical_service": "gateway",
+        "destination_workload": "productpage-v1",
+        "destination_canonical_service": "productpage",
+        "destination_service_name": "productpage",
+        "destination_service": "productpage.bookinfo.svc.cluster.local"
+      },
+      "rate": 6
+    }
+  ]
+}

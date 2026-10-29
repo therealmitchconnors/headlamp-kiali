@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode, useSyncExternalStore } from 'react';
 import { readConfig } from '../core/config';
@@ -96,6 +96,123 @@ async function fillEndpoint() {
 }
 
 describe('native per-cluster settings', () => {
+  it('persists custom dashboard settings and rejects unsupported chart fields', async () => {
+    render(<Settings />);
+    const definitions = {
+      namespaceLabel: 'kubernetes_namespace',
+      clusterLabel: null,
+      dashboards: [
+        {
+          name: 'runtime',
+          title: 'Runtime',
+          items: [
+            {
+              chart: { name: 'Memory', metricName: 'memory_bytes', unit: 'bytes', dataType: 'raw' },
+            },
+          ],
+        },
+      ],
+    };
+    const field = screen.getByLabelText('Custom aggregate dashboards (JSON)');
+    fireEvent.change(field, { target: { value: JSON.stringify(definitions) } });
+    await userEvent.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: {
+          customDashboards: {
+            namespaceLabel: 'kubernetes_namespace',
+            clusterLabel: null,
+            dashboards: [{ name: 'runtime' }],
+          },
+        },
+      },
+    });
+    fireEvent.change(field, {
+      target: { value: JSON.stringify({ ...definitions, includes: ['unsupported'] }) },
+    });
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    expect(screen.getByText(/contains unsupported fields: includes/)).toBeDefined();
+    expect(state.request).not.toHaveBeenCalled();
+  });
+  it('saves and restores the per-cluster bare-wildcard toggle without a cluster request', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null }, beta: { prometheus: null } },
+    };
+    render(<Settings />);
+    const user = userEvent.setup();
+    const toggle = screen.getByLabelText(
+      'Skip bare wildcard hosts in Istio Gateway conflict checks'
+    );
+    expect((toggle as HTMLInputElement).checked).toBe(false);
+    await user.click(toggle);
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: { alpha: { skipWildcardGatewayHosts: true }, beta: { prometheus: null } },
+    });
+    cleanup();
+    render(<Settings />);
+    expect(
+      (
+        screen.getByLabelText(
+          'Skip bare wildcard hosts in Istio Gateway conflict checks'
+        ) as HTMLInputElement
+      ).checked
+    ).toBe(true);
+    await user.click(
+      screen.getByLabelText('Skip bare wildcard hosts in Istio Gateway conflict checks')
+    );
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: { alpha: { skipWildcardGatewayHosts: false } },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+  });
+  it('saves an explicit telemetry identity, rejects invalid text and clears it deliberately', async () => {
+    render(<Settings />);
+    const user = userEvent.setup();
+    const field = screen.getByLabelText('Default Istio metric cluster label');
+    await user.type(field, ' mesh-id');
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.clear(field);
+    await user.type(field, 'Kubernetes');
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({ clusters: { alpha: { telemetryCluster: 'Kubernetes' } } });
+    await user.clear(field);
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({ clusters: { alpha: { telemetryCluster: null } } });
+    expect(state.request).not.toHaveBeenCalled();
+  });
+  it('validates and saves Gateway class registry settings without issuing cluster mutations', async () => {
+    render(<Settings />);
+    const user = userEvent.setup();
+    const input = screen.getByLabelText('Gateway API class registry (JSON)');
+    await user.clear(input);
+    await user.paste(
+      JSON.stringify({
+        classes: [{ name: 'Custom', className: 'custom' }],
+        selector: { team: 'mesh' },
+      })
+    );
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    const saved = readConfig(state.stored);
+    if (saved.valid === false) throw new Error(saved.message);
+    expect(saved.config.clusters.alpha.gatewayClasses).toEqual({
+      classes: [{ name: 'Custom', className: 'custom' }],
+      selector: { team: 'mesh' },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+    await user.clear(input);
+    await user.paste(JSON.stringify({ classes: [], selector: { 'bad key': 'value' } }));
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    expect(state.writes).toHaveLength(1);
+  });
   it('does not select an arbitrary cluster or make a network request', () => {
     state.selected = [];
     render(<Settings />);
@@ -206,8 +323,98 @@ describe('native per-cluster settings', () => {
       expect(saved.config.clusters.alpha).toEqual({
         prometheus: null,
         appLabels: { app: 'team/app', version: 'team/version' },
+        healthRates: [],
+        identityDomain: null,
+        tracing: null,
       });
     }
     expect(state.request).not.toHaveBeenCalled();
+  });
+
+  it('validates and persists health tolerances without making a network request', async () => {
+    render(<Settings />);
+    const user = userEvent.setup();
+    const rules = screen.getByLabelText('Custom health rules (JSON)');
+    await user.clear(rules);
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.click(rules);
+    await user.paste(
+      JSON.stringify([
+        {
+          kind: 'workload',
+          name: 'reviews.*',
+          tolerance: [
+            { code: '5xx', degraded: 1, failure: 5, protocol: 'http', direction: 'inbound' },
+          ],
+        },
+      ])
+    );
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    const saved = readConfig(state.stored);
+    expect(saved.valid).toBe(true);
+    if (saved.valid) expect(saved.config.clusters.alpha.healthRates?.[0].name).toBe('reviews.*');
+    expect(state.request).not.toHaveBeenCalled();
+  });
+
+  it('requires an explicit valid DNS suffix without conflating the selected cluster name', async () => {
+    render(<Settings />);
+    const user = userEvent.setup();
+    const domain = screen.getByLabelText('Service DNS identity domain');
+    expect((domain as HTMLInputElement).value).toBe('');
+    await user.type(domain, 'https://bad');
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.clear(domain);
+    await user.type(domain, 'svc.mesh.example');
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    const saved = readConfig(state.stored);
+    if (!saved.valid) throw new Error('Expected valid saved configuration');
+    expect(saved.config.clusters.alpha.identityDomain).toBe('svc.mesh.example');
+    expect(state.request).not.toHaveBeenCalled();
+  });
+
+  it('persists tracing independently and cancels checks when provider, endpoint or enablement changes', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: {
+          prometheus: null,
+          tracing: {
+            provider: 'jaeger',
+            endpoint: { namespace: 'observability', service: 'query', port: 'http', basePath: '' },
+          },
+        },
+      },
+    };
+    state.request.mockImplementation(() => new Promise(() => {}));
+    render(<Settings />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Check tracing connection' }));
+    await waitFor(() => expect(state.request).toHaveBeenCalledTimes(1));
+    const providerSignal: AbortSignal = state.request.mock.calls[0][1].signal;
+    await user.click(screen.getByRole('combobox', { name: 'Tracing provider' }));
+    await user.click(screen.getByRole('option', { name: 'Tempo' }));
+    expect(providerSignal.aborted).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Check tracing connection' }));
+    await waitFor(() => expect(state.request).toHaveBeenCalledTimes(2));
+    expect(state.request.mock.calls[1][0]).toContain('/api/search/tags');
+    const endpointSignal: AbortSignal = state.request.mock.calls[1][1].signal;
+    await user.type(screen.getByLabelText(/^Tracing Service \*/), '-new');
+    expect(endpointSignal.aborted).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    const saved = readConfig(state.stored);
+    if (!saved.valid) throw new Error('Expected valid saved tracing');
+    expect(saved.config.clusters.alpha.prometheus).toBeNull();
+    expect(saved.config.clusters.alpha.tracing?.provider).toBe('tempo');
+    expect(saved.config.clusters.alpha.tracing?.endpoint.service).toBe('query-new');
+    await user.click(screen.getByRole('button', { name: 'Check tracing connection' }));
+    await waitFor(() => expect(state.request).toHaveBeenCalledTimes(3));
+    const enabledSignal: AbortSignal = state.request.mock.calls[2][1].signal;
+    await user.click(screen.getByLabelText('Connect to an existing tracing Service'));
+    expect(enabledSignal.aborted).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Check tracing connection' })).toBeNull();
   });
 });

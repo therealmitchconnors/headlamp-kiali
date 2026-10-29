@@ -1,0 +1,929 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "business/checkers/sidecars/global_checker.go": "db53f17f9300e68fc10d8b0bc2875dc20d733fc6",
+    "business/checkers/sidecars_checker.go": "7b3f3c6fb59a1adae5623358cb4fee48ef3dd479",
+    "models/istio_validation.go": "d13e0b576e9392cb7e19578c05a07f2641efc054"
+  },
+  "cases": [
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "istio-system",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "mesh-root",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "istio-system",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "mesh-root",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {}
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": null
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {}
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": null
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {}
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": ""
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    },
+    {
+      "input": {
+        "rootNamespace": "bookinfo",
+        "namespace": "bookinfo",
+        "spec": {
+          "workloadSelector": {
+            "labels": {
+              "app": "reviews",
+              "version": "v1"
+            }
+          }
+        }
+      },
+      "expected": [
+        {
+          "code": "KIA1006",
+          "message": "Global default sidecar should not have workloadSelector",
+          "severity": "warning",
+          "path": "spec/workloadSelector"
+        }
+      ]
+    }
+  ]
+}

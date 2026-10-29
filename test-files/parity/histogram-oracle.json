@@ -1,0 +1,3340 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "prometheus/metrics.go": "941c8de27de564abace6ee0cf717c6b2fb8a1d01",
+    "business/metrics_definitions.go": "2d9c32a25b1769e44ce927db14e75f7e544544f5"
+  },
+  "cases": [
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "duration",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_duration_milliseconds_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_duration_milliseconds_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "requestSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_request_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_request_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"Kubernetes\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\\\"cluster\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "inbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"west\\\\zone\",destination_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "Kubernetes",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"Kubernetes\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "east\"cluster",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\\\"cluster\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p50"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p95"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "metric": "responseSize",
+        "direction": "outbound",
+        "telemetryCluster": "west\\zone",
+        "workload": "reviews-v1",
+        "summaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ],
+        "namespace": "bookinfo",
+        "minutes": 15,
+        "end": 10000
+      },
+      "expected": {
+        "avg": "sum(rate(istio_response_bytes_sum{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) / sum(rate(istio_response_bytes_count{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"west\\\\zone\",source_workload=\"reviews-v1\"}[5m])) by (le))"
+      }
+    }
+  ]
+}

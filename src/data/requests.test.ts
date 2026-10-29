@@ -80,6 +80,20 @@ describe('capability response contracts', () => {
     );
     expect(() => serviceProxyPath(endpoint, '/../pods')).toThrow();
     expect(() => serviceProxyPath(endpoint, '/api?token=private')).toThrow();
+    expect(serviceProxyPath(endpoint, '/api/v2/search/tag/.service.name/values')).toContain(
+      '/proxy/metrics/api/v2/search/tag/.service.name/values'
+    );
+    for (const suffix of [
+      '/api/./values',
+      '/api/../values',
+      '/api/.',
+      '/api/..',
+      '/api/%2e%2e/values',
+      '/api\\..\\values',
+      '/api/values\n',
+      '/api/values#fragment',
+    ])
+      expect(() => serviceProxyPath(endpoint, suffix)).toThrow();
   });
 
   it('reads real discovery version shapes without inferring control-plane health', async () => {
