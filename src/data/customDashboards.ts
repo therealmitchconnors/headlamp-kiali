@@ -1,6 +1,6 @@
 import { ServiceEndpoint } from '../core/config';
 import { customDashboardJobs, CustomDashboardQuery } from '../core/customDashboards';
-import { decodeScalarRange } from '../core/metricRanges';
+import { decodeGroupedRange } from '../core/metricRanges';
 import { ClusterScope } from '../core/scope';
 import { loadMetricRanges } from './metricRanges';
 
@@ -22,12 +22,31 @@ export async function loadCustomDashboard(
     (response, range, key) => {
       const job = jobs.find(job => job.key === key);
       if (!job) throw new Error('Custom dashboard chart is missing from its captured request');
-      const metric = decodeScalarRange(
+      const groups = job.chart.groupLabels ?? [];
+      const metric = decodeGroupedRange(
         response,
         range,
         'Custom dashboard chart',
-        job.chart.dataType === 'rate'
+        job.chart.dataType === 'rate',
+        groups
       );
+      const filters = {
+        ...captured.labelsFilters,
+        [captured.namespaceLabel]: captured.namespace,
+        ...(captured.clusterLabel ? { [captured.clusterLabel]: captured.metricCluster } : {}),
+      };
+      for (const name of groups) {
+        if (
+          Object.prototype.hasOwnProperty.call(filters, name) &&
+          metric.series.some(
+            series =>
+              (Object.prototype.hasOwnProperty.call(series.labels, name)
+                ? series.labels[name]
+                : '') !== filters[name]
+          )
+        )
+          throw new Error('Returned metric group contradicts a captured equality filter');
+      }
       const scale = job.chart.unitScale ?? 1;
       return {
         ...metric,

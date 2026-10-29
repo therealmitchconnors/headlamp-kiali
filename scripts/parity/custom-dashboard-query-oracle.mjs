@@ -31,6 +31,11 @@ assert.ok(
 );
 assert.ok(
   text['business/dashboards.go'].includes(
+    'byLabels := append(chart.GroupLabels, params.ByLabels...)'
+  )
+);
+assert.ok(
+  text['business/dashboards.go'].includes(
     'promClient.FetchRateRange(ctx, ref.MetricName, []string{filters}, grouping, &params.RangeQuery)'
   )
 );
@@ -42,6 +47,10 @@ const rawBody = fullRaw.slice(fullRaw.indexOf('\tquery := fmt.Sprintf'), fullRaw
 assert.ok(rawBody.includes('return fetchRange'));
 const rate = text['prometheus/metrics.go'].match(/^func fetchRateRange\([\s\S]*?^\}/m)?.[0];
 assert.ok(rate);
+const histogram = text['prometheus/metrics.go'].match(
+  /^func buildHistogramQueries\([\s\S]*?^\}/m
+)?.[0];
+assert.ok(histogram);
 const cases = [];
 for (const [dataType, aggregator] of [
   ['raw', 'sum'],
@@ -49,6 +58,7 @@ for (const [dataType, aggregator] of [
   ['raw', 'min'],
   ['raw', 'max'],
   ['rate', 'sum'],
+  ['histogram', 'sum'],
 ])
   for (const metricName of ['memory_bytes', 'requests_total', 'runtime:queue_depth'])
     for (const scope of [
@@ -60,18 +70,34 @@ for (const [dataType, aggregator] of [
       },
       { namespaceLabel: 'namespace', clusterLabel: null, metricCluster: '' },
     ])
-      cases.push({
-        ...scope,
-        namespace: 'bookinfo',
-        chart: { name: 'Chart', unit: 'value', metricName, dataType, aggregator },
-      });
+      for (const groupLabels of [
+        [],
+        ['pod'],
+        ['revision', 'pod'],
+        ['zone', 'pod', 'namespace', 'cluster'],
+      ])
+        cases.push({
+          ...scope,
+          namespace: 'bookinfo',
+          chart: {
+            name: 'Chart',
+            unit: 'value',
+            metricName,
+            dataType,
+            aggregator,
+            ...(groupLabels.length ? { groupLabels } : {}),
+          },
+          ...(dataType === 'histogram'
+            ? { histogramSummaries: ['avg', 'p50', 'p90', 'p95', 'p99'] }
+            : {}),
+        });
 const directory = await mkdtemp(join(tmpdir(), 'kiali-custom-query-oracle-'));
 let output;
 try {
   await writeFile(
     join(directory, 'main.go'),
     `package main
-import("context";"fmt";"encoding/json";"os";"strconv")
+import("context";"fmt";"encoding/json";"os";"strconv";"strings")
 type Metric=string
 type RangeQuery struct{RateFunc string;RateInterval string;Range int}
 type Client struct{api interface{}}
@@ -80,18 +106,23 @@ func(in *Client) FetchRange(ctx context.Context,metricName,labels,grouping,aggre
 ${rawBody}
 }
 ${rate.replaceAll('prom_v1.API', 'interface{}')}
+${histogram}
 func main(){
- var inputs []struct{Namespace string;NamespaceLabel string;ClusterLabel *string;MetricCluster string;Chart struct{MetricName string;DataType string;Aggregator string}}
+ var inputs []struct{Namespace string;NamespaceLabel string;ClusterLabel *string;MetricCluster string;Chart struct{MetricName string;DataType string;Aggregator string;GroupLabels []string}}
  if err:=json.NewDecoder(os.Stdin).Decode(&inputs);err!=nil{panic(err)}
- output:=[]string{}
+ output:=[]interface{}{}
  for _,in:=range inputs{
   labels:="{"+in.NamespaceLabel+"="+strconv.Quote(in.Namespace)
   if in.ClusterLabel!=nil{labels+=","+*in.ClusterLabel+"="+strconv.Quote(in.MetricCluster)}
   labels+="}"
   q:=RangeQuery{RateFunc:"rate",RateInterval:"5m"}
-  var value string
-  if in.Chart.DataType=="rate"{value=fetchRateRange(context.Background(),nil,in.Chart.MetricName,[]string{labels},"",&q)
-  }else{value=(&Client{}).FetchRange(context.Background(),in.Chart.MetricName,labels,"",in.Chart.Aggregator,&q)}
+  grouping:=strings.Join(in.Chart.GroupLabels,",")
+  var value interface{}
+  if in.Chart.DataType=="histogram"{
+   queries:=buildHistogramQueries(context.Background(),in.Chart.MetricName,labels,grouping,"5m",true,[]string{"0.5","0.9","0.95","0.99"})
+   value=map[string]string{"avg":queries["avg"],"p50":queries["0.5"],"p90":queries["0.9"],"p95":queries["0.95"],"p99":queries["0.99"]}
+  }else if in.Chart.DataType=="rate"{value=fetchRateRange(context.Background(),nil,in.Chart.MetricName,[]string{labels},grouping,&q)
+  }else{value=(&Client{}).FetchRange(context.Background(),in.Chart.MetricName,labels,grouping,in.Chart.Aggregator,&q)}
   output=append(output,value)
  }
  if err:=json.NewEncoder(os.Stdout).Encode(output);err!=nil{panic(err)}

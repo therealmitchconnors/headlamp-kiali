@@ -215,7 +215,7 @@ assert.equal(istioGatewayConflicts.cases.length, 328);
 assert.equal(peerSelectorless.cases.length, 176);
 assert.equal(virtualWorkloadLabels.cases.length, 96);
 assert.equal(workloadEntryHealth.cases.length, 228);
-assert.equal(customDashboardQueries.cases.length, 45);
+assert.equal(customDashboardQueries.cases.length, 216);
 assert.deepEqual(customDashboardQueries.sources, {
   'prometheus/client.go': 'e0d914d91a981d2963bf59672fdd28293fe0d7ab',
   'prometheus/metrics.go': '941c8de27de564abace6ee0cf717c6b2fb8a1d01',
@@ -411,5 +411,5 @@ for (const fixture of health.workloads) {
 }
 console.log(
   'Pinned inventory and oracle consistent: 508 sources, 616 inventory entries, ' +
-    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 45 custom-dashboard query, 72 validation-exclusion and 75 label Go oracle cases.'
+    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 216 custom-dashboard query, 72 validation-exclusion and 75 label Go oracle cases.'
 );

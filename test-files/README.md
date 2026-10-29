@@ -774,14 +774,14 @@ Restore the exact prior Kiali settings and wait for persistence before closing.
 
 ### Custom aggregate dashboard scenarios
 
-Reproduce the 45 original raw/rate expression cases:
+Reproduce the 216 original raw/rate/histogram expression cases, including grouping:
 
 ```sh
 node scripts/parity/custom-dashboard-query-oracle.mjs --source /path/to/pinned/kiali --check
 ```
 
-The extracted raw-query construction and rate helper use a transport sink,
-not a backend/parser. Core/config/data/UI tests cover unsupported-field
+The extracted raw-query construction, rate helper and histogram builder use a
+transport sink, not a backend/parser. Core/config/data/UI tests cover unsupported-field
 rejection, definition/chart/text limits, metric/label validation, mandatory
 cluster scoping or explicit single-cluster acknowledgment, exact capture,
 negative raw values, nonnegative rates, scale overflow/underflow and the shared
@@ -853,6 +853,30 @@ Six hosted groups observed 12 intercepted metric GETs, with actual chart/table
 rendering and corrected retry verified. The named-metric/legacy fixture also
 passed again. All new positive samples were synthetic; prior Kiali settings
 were restored and no cluster writes occurred.
+
+For grouped charts, configure `groupLabels: ["pod","revision"]` through Settings
+and reload. Return several named groups, including an omitted label, signed and
+zero samples, offset timestamps and nonfinite gaps. Inspect real separate lines,
+the accessible wrapping legend, numeric headers and captured grouping labels.
+Reverse response order without changing identities and preserve line order/colors.
+Deny one metric and retain its successful sibling's groups. Grouping and included
+template changes must invalidate results without replay.
+
+Check raw/rate and all classic histogram query shapes. Reject undeclared labels,
+duplicate groups (including absent/empty equivalence), contradictory equality
+filter labels and nine groups per response. Verify exactly eight total lines
+across a panel's metrics and reject the ninth without truncation. Exercise empty
+and all-unavailable results, corrected retry, 256-character values, 1,024-character
+captions, four group names totaling 256 characters and 241 samples per group.
+Ungrouped multi-metric/template and built-in histogram/signal regressions must
+keep their strict scalar response contract.
+Seven hosted groups observed 32 intercepted GETs. They inspected actual chart
+lines, captions/numeric columns and long-label layout, exact eight-line and
+1,024-character boundaries, response-order stability, per-metric failures and
+corrected retry. Ungrouped named metrics and template composition were rechecked.
+All new samples were synthetic; settings/handlers were restored and no writes
+occurred. Grouped query evidence expands the custom oracle from 45 to 216
+original-Go cases; it does not replace the separate built-in histogram oracle.
 
 ### Additional traffic signals
 

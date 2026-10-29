@@ -1,3 +1,4 @@
+import { metricGroupIdentity, metricGroupLabels } from './metricGroups';
 import { isRecord } from './object';
 import { decodePrometheus, trafficMetricLabels, TrafficQuery } from './telemetry';
 
@@ -49,9 +50,32 @@ export function decodeScalarRange(
   label: string,
   nonnegative: boolean
 ) {
+  return decodeRange(response, query, label, nonnegative, []);
+}
+
+export function decodeGroupedRange(
+  response: unknown,
+  query: MetricTimeRange,
+  label: string,
+  nonnegative: boolean,
+  groupLabels: readonly string[]
+) {
+  return decodeRange(response, query, label, nonnegative, metricGroupLabels(groupLabels));
+}
+
+function decodeRange(
+  response: unknown,
+  query: MetricTimeRange,
+  label: string,
+  nonnegative: boolean,
+  groups: readonly string[]
+) {
   validateMetricTimeRange(query);
   const maxSamples = Math.floor((query.minutes * 60) / 15) + 1;
-  const aggregationError = `${label} returned unexpected aggregation labels or multiple series`;
+  const maxSeries = groups.length ? 8 : 1;
+  const aggregationError = groups.length
+    ? `${label} returned undeclared grouping labels or more than 8 series`
+    : `${label} returned unexpected aggregation labels or multiple series`;
   const rangeError = nonnegative
     ? `${label} samples exceed the captured range, sample budget or nonnegative domain`
     : `${label} samples exceed the captured range or sample budget`;
@@ -61,17 +85,29 @@ export function decodeScalarRange(
     isRecord(response.data) &&
     Array.isArray(response.data.result)
   ) {
-    if (response.data.result.length > 1) throw new Error(aggregationError);
+    if (response.data.result.length > maxSeries) throw new Error(aggregationError);
     for (const entry of response.data.result) {
-      if (isRecord(entry) && isRecord(entry.metric) && Object.keys(entry.metric).length)
+      if (
+        isRecord(entry) &&
+        isRecord(entry.metric) &&
+        Object.keys(entry.metric).some(key => !groups.includes(key))
+      )
         throw new Error(aggregationError);
       if (isRecord(entry) && Array.isArray(entry.values) && entry.values.length > maxSamples)
         throw new Error(rangeError);
     }
   }
   const metric = decodePrometheus(response, 'matrix');
-  if (metric.series.length > 1 || metric.series.some(series => Object.keys(series.labels).length))
+  if (
+    metric.series.length > maxSeries ||
+    metric.series.some(series => Object.keys(series.labels).some(key => !groups.includes(key)))
+  )
     throw new Error(aggregationError);
+  if (groups.length) {
+    const keys = metric.series.map(series => metricGroupIdentity(series.labels, groups).key);
+    if (new Set(keys).size !== keys.length)
+      throw new Error(`${label} returned duplicate label groups`);
+  }
   const start = query.end - query.minutes * 60;
   if (
     metric.series.some(

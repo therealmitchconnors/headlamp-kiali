@@ -285,12 +285,22 @@ dashboards and integration/live/Desktop closure remain substantial work.
   included chart rendering, captured references, invalidation, rejection paths,
   query expansion bounds and corrected retry. Named-metric/legacy regressions
   also passed. All new positive chart data was synthetic; no writes occurred.
-- Latest template increment: **171 focused tests in six files**, plus
+- Custom dashboard `groupLabels` now retain independent raw/rate/histogram
+  series with strict declared-label, duplicate, scope and cardinality guards.
+  Seven hosted groups/32 intercepted GETs verified real chart lines, wrapping
+  captions, gaps/zero, unchanged ordering on reordered responses, independent
+  failures, exact eight-line and 1,024-character boundaries and corrected retry.
+  Named-metric and template regressions also passed. All new positive samples
+  were synthetic; no writes occurred.
+- Latest grouping increment: **695 focused tests in 13 files**, plus
+  a final three-test chart-layout rerun and type/lint/i18n/build/package checks.
+  Its expanded 216-case original-Go query oracle and parity catalog check passed.
+  Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
   Prior full-suite checkpoint: **19,415 tests in 155 files**, with
   type/lint/schema/parity/i18n/build/package checks passing.
   Comparison metrics reject unexpected aggregation labels and mixed times.
-  Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
+  Independent original-Go evidence totals 17,620 cases, including 216 custom-dashboard
   queries, 228 WorkloadEntry
   health and 96 VM-label selection,
   176 selectorless
@@ -314,7 +324,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `39c4285e1e3f844a4ab8ef65ada9033467b10d7163f3fe5340b01dc0c5598d3d`.
+  `c94023a15e5db60987a7fd02d9fbada332747924d41ff84fc5322bacd3dad2d6`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -953,7 +963,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric charts with equality filters/template composition implemented; grouped series, discovery, annotations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric/grouped charts with equality filters/template composition implemented; discovery, annotations, dynamic aggregations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -974,13 +984,15 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is label-grouped charts, followed by built-in runtime
-discovery and namespace/workload annotation overrides. Saved template composition
-is complete for the documented bounded subset. Inspect the pinned grouping
-query/series contract first: the current aggregate decoder deliberately accepts
-only one unlabeled series, so merely enabling a schema field is not sufficient.
-Keep group/series cardinality separately bounded from the existing eight-query
-budget and preserve explicit namespace/cluster scope.
+The dashboard continuation is runtime discovery, built-in definitions and
+namespace/workload annotation overrides. Saved template composition and label
+grouping are complete for their documented bounded subsets. Preserve scalar
+decoding for ungrouped callers and independently bound grouped response/panel
+cardinality alongside the eight-query budget. The pinned discovery matcher uses
+literal include strings when suppressing standalone templates, whereas composition
+trims them; preserve or explicitly document that distinction before enabling
+discovery. App auto-discovery also depends on explicit Pod annotations, complete
+workload attribution and configured application-label selectors.
 
 1. Extend remaining configuration checkers and Gateway listener/port/controller
    semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar

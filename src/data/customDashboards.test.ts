@@ -291,3 +291,115 @@ it('rejects histogram expansion overflow before transport and caps a cancelled q
     vi.useRealTimers();
   }
 });
+
+it('captures grouping and scales independent groups without changing their labels', async () => {
+  const input = query();
+  input.dashboard.items = input.dashboard.items.slice(0, 1);
+  input.dashboard.items[0].chart.groupLabels = ['pod'];
+  vi.mocked(ApiProxy.request).mockResolvedValue({
+    status: 'success',
+    data: {
+      resultType: 'matrix',
+      result: [
+        { metric: { pod: 'z' }, values: [[10000, '-2000']] },
+        {
+          metric: { pod: 'a' },
+          values: [
+            [9985, 'NaN'],
+            [10000, '0'],
+          ],
+        },
+      ],
+    },
+  });
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.dashboard.items[0].chart.groupLabels[0] = 'changed';
+  const result = await pending;
+  expect(result.query.dashboard.items[0].chart.groupLabels).toEqual(['pod']);
+  expect(result.charts[0].read).toMatchObject({
+    ok: true,
+    result: {
+      series: [
+        { labels: { pod: 'z' }, samples: [{ value: -2 }] },
+        { labels: { pod: 'a' }, samples: [{ value: null }, { value: 0 }] },
+      ],
+    },
+  });
+  const expression = new URL(
+    String(vi.mocked(ApiProxy.request).mock.calls[0][0]),
+    'http://example.test'
+  ).searchParams.get('query');
+  expect(expression).toMatch(/ by \(pod\)$/);
+});
+it.each([
+  { group: 'namespace', labels: { namespace: 'other' }, ok: false },
+  { group: 'namespace', labels: {}, ok: false },
+  { group: 'namespace', labels: { namespace: 'bookinfo' }, ok: true },
+  { group: 'cluster', labels: { cluster: 'other' }, ok: false },
+  { group: 'job', labels: {}, ok: true },
+  { group: 'job', labels: { job: 'nonempty' }, ok: false },
+  { group: 'constructor', labels: {}, ok: true },
+])(
+  'checks captured equality filters on returned $group groups %#',
+  async ({ group, labels, ok }) => {
+    const input = query();
+    input.dashboard.items = input.dashboard.items.slice(0, 1);
+    input.dashboard.items[0].chart.groupLabels = [group];
+    input.labelsFilters = { job: '' };
+    vi.mocked(ApiProxy.request).mockResolvedValue(matrix([[10000, '0']], labels));
+    const result = await loadCustomDashboard(
+      { cluster: 'alpha' },
+      provider,
+      input,
+      new AbortController().signal
+    );
+    expect(result.charts[0].read.ok).toBe(ok);
+    if (!ok)
+      expect(result.charts[0].read).toMatchObject({
+        error: { message: 'Returned metric group contradicts a captured equality filter' },
+      });
+  }
+);
+it.each(['duplicate', 'overflow', 'unexpected'])(
+  'isolates a %s grouped response without dropping successful siblings',
+  async failure => {
+    const input = query();
+    input.dashboard.items = input.dashboard.items.slice(0, 2);
+    input.dashboard.items.forEach(item => {
+      item.chart.groupLabels = ['pod'];
+    });
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (!String(path).includes('metric_0')) return matrix([[10000, '2000']], { pod: 'valid' });
+      const labels =
+        failure === 'duplicate'
+          ? [{ pod: 'a' }, { pod: 'a' }]
+          : failure === 'unexpected'
+          ? [{ extra: 'x' }]
+          : Array.from({ length: 9 }, (_, i) => ({ pod: `p${i}` }));
+      return {
+        status: 'success',
+        data: {
+          resultType: 'matrix',
+          result: labels.map(metric => ({ metric, values: [[10000, '1']] })),
+        },
+      };
+    });
+    const result = await loadCustomDashboard(
+      { cluster: 'alpha' },
+      provider,
+      input,
+      new AbortController().signal
+    );
+    expect(result.charts[0].read).toMatchObject({ ok: false, error: { kind: 'invalid-response' } });
+    expect(result.charts[1].read).toMatchObject({
+      ok: true,
+      result: { series: [{ labels: { pod: 'valid' }, samples: [{ value: 2 }] }] },
+    });
+    expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+  }
+);

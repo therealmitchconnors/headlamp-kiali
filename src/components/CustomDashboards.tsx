@@ -19,6 +19,7 @@ import {
   resolveCustomDashboard,
 } from '../core/customDashboards';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
+import { ComparisonMetric, groupedMetricComparisons } from '../core/metricComparison';
 import { clusterScope } from '../core/scope';
 import { loadCustomDashboard } from '../data/customDashboards';
 import { useRequest } from '../hooks/useRequest';
@@ -107,16 +108,38 @@ function DashboardResults({
           )}
           {groupedCharts(data.charts).map(([key, entries]) => {
             const { chart, summary } = entries[0];
+            const grouped = !!chart.groupLabels?.length;
             const title = summary
               ? t('{{chart}} - {{summary}}', { chart: chart.name, summary: summaryNames[summary] })
               : chart.name;
-            const successful = entries.flatMap((entry, index) =>
+            let successful: ComparisonMetric[] = entries.flatMap((entry, index) =>
               entry.read.ok
                 ? [{ name: entry.metric.displayName, result: entry.read.result, colorIndex: index }]
                 : []
             );
+            let groupingError: string | undefined;
+            if (grouped) {
+              try {
+                successful = groupedMetricComparisons(successful, chart.groupLabels ?? []).map(
+                  (metric, index) => ({ ...metric, colorIndex: index })
+                );
+              } catch (error) {
+                successful = [];
+                groupingError =
+                  error instanceof Error ? error.message : t('Grouped chart is unavailable');
+              }
+            }
             return (
               <SectionBox key={key} title={title}>
+                {grouped && (
+                  <Typography variant="body2">
+                    {t(
+                      'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
+                      { labels: chart.groupLabels?.join(', ') }
+                    )}
+                  </Typography>
+                )}
+                {groupingError && <Alert severity="error">{groupingError}</Alert>}
                 {entries.map(({ key, metric, read }) => (
                   <Stack key={key} spacing={1}>
                     {(entries.length > 1 || metric.displayName !== chart.name) && (
@@ -144,7 +167,7 @@ function DashboardResults({
                         {!!read.result.warnings.length && (
                           <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
                         )}
-                        {entries.length > 1 &&
+                        {(entries.length > 1 || grouped) &&
                           !read.result.series.some(series =>
                             series.samples.some(sample => sample.value !== null)
                           ) && (
@@ -159,7 +182,7 @@ function DashboardResults({
                   </Stack>
                 ))}
                 {successful.length > 0 &&
-                  (entries.length === 1 ? (
+                  (entries.length === 1 && !grouped ? (
                     <MetricChart
                       result={successful[0].result}
                       title={title}
@@ -235,7 +258,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This native dashboard view supports saved template includes, named metrics on aggregate raw/rate charts and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Each metric aggregates its matching series; different metrics are compared, not added together. Duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports saved template includes, named metrics on raw/rate charts and classic histogram summaries, with optional groupLabels. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Metrics aggregate within their selected groups; different metrics and groups are compared, not added together. Duplicate scrapes are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Grouped responses and chart panels are limited to eight series; overflow is an error, not truncation. Missing samples are not zero or healthy. Native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>

@@ -6,6 +6,7 @@ import {
   validateCustomDashboard,
   validateCustomDashboardSettings,
 } from './customDashboards';
+import { HistogramSummary } from './histograms';
 import { metricRangeParameters } from './metricRanges';
 const oracle: {
   cases: {
@@ -15,22 +16,26 @@ const oracle: {
       clusterLabel: string | null;
       metricCluster: string;
       chart: CustomDashboardQuery['dashboard']['items'][number]['chart'];
+      histogramSummaries?: HistogramSummary[];
     };
-    expected: string;
+    expected: string | Record<string, string>;
   }[];
 } = JSON.parse(oracleText);
 it.each(oracle.cases)(
-  'matches original custom raw/rate query construction %#',
+  'matches original custom raw/rate/histogram grouped query construction %#',
   ({ input, expected }) => {
+    const jobs = customDashboardJobs({
+      ...input,
+      minutes: 15,
+      end: 10000,
+      singleClusterConfirmed: true,
+      dashboard: { name: 'runtime', title: 'Runtime', items: [{ chart: input.chart }] },
+    });
     expect(
-      customDashboardJobs({
-        ...input,
-        minutes: 15,
-        end: 10000,
-        singleClusterConfirmed: true,
-        dashboard: { name: 'runtime', title: 'Runtime', items: [{ chart: input.chart }] },
-      })[0].expression
-    ).toBe(expected);
+      typeof expected === 'string'
+        ? jobs[0].expression
+        : Object.fromEntries(jobs.map(job => [job.summary, job.expression]))
+    ).toEqual(expected);
   }
 );
 
@@ -90,7 +95,7 @@ it.each([
   { ...dashboard, includes: ['other'] },
   { ...dashboard, items: [{ include: 'other' }] },
   { ...dashboard, items: [{ chart: { ...chart, dataType: 'unsupported' } }] },
-  { ...dashboard, items: [{ chart: { ...chart, groupLabels: ['pod'] } }] },
+  { ...dashboard, items: [{ chart: { ...chart, groupLabels: ['bad-label'] } }] },
   { ...dashboard, items: [{ chart: { ...chart, metricName: 'up} or vector(1)' } }] },
   { ...dashboard, items: [{ chart: { ...chart, unitScale: -1 } }] },
   { ...dashboard, items: [{ chart: { ...chart, unitScale: Infinity } }] },

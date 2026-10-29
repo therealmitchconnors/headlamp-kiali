@@ -24,10 +24,13 @@ vi.mock('./MetricChart', () => ({
   ),
 }));
 vi.mock('./MetricComparisonChart', () => ({
-  default: ({ title, metrics }: { title: string; metrics: { name: string }[] }) => (
+  default: ({ title, metrics }: { title: string; metrics: { name: string; group?: string }[] }) => (
     <div role="img" aria-label={title}>
-      {metrics.map(metric => (
-        <span key={metric.name}>{metric.name}</span>
+      {metrics.map((metric, index) => (
+        <span key={index}>
+          {metric.name}
+          {metric.group ? ` ${metric.group}` : ''}
+        </span>
       ))}
     </div>
   ),
@@ -409,3 +412,60 @@ it('rejects included metric/summary fan-out before calling the reader', async ()
   expect(screen.getByText(/at most 8 metric queries/)).toBeDefined();
   expect(loadCustomDashboard).not.toHaveBeenCalled();
 });
+
+it.each(['normal', 'overflow', 'empty', 'failure'])(
+  'renders grouped chart %s results explicitly',
+  async mode => {
+    const changed = structuredClone(configured);
+    Object.assign(changed.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+      groupLabels: ['pod'],
+      metrics: [
+        { metricName: 'used', displayName: 'Used' },
+        { metricName: 'limit', displayName: 'Limit' },
+      ],
+    });
+    vi.mocked(useKialiConfig).mockReturnValue(changed);
+    vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+      query,
+      metrics: [],
+      charts: customDashboardJobs(query).map(job => ({
+        ...job,
+        read:
+          mode === 'failure' && job.metric.metricName === 'used'
+            ? { ok: false, error: { kind: 'forbidden', message: 'Used denied' } }
+            : {
+                ok: true,
+                result: {
+                  warnings: [],
+                  series:
+                    mode === 'empty'
+                      ? []
+                      : Array.from({ length: mode === 'overflow' ? 5 : 2 }, (_, i) => ({
+                          labels: { pod: `p${i}` },
+                          samples: [{ timestamp: query.end, value: i }],
+                        })),
+                },
+              },
+      })),
+    }));
+    open();
+    await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+    await screen.findByText(/Captured grouping labels: pod/);
+    if (mode === 'overflow') {
+      expect(screen.getByText(/Grouped chart exceeds 8 displayed series/)).toBeDefined();
+      expect(screen.queryAllByRole('img')).toHaveLength(0);
+    } else if (mode === 'empty') {
+      expect(screen.getByText('No finite samples were returned for Used.')).toBeDefined();
+      expect(screen.getByText('No finite samples were returned for Limit.')).toBeDefined();
+      expect(screen.queryAllByRole('img')).toHaveLength(0);
+    } else {
+      expect(screen.getByRole('img', { name: 'Memory' })).toBeDefined();
+      expect(screen.getByText('Limit {pod="p0"}')).toBeDefined();
+      expect(screen.getByText('Limit {pod="p1"}')).toBeDefined();
+      if (mode === 'failure') {
+        expect(screen.getByText('Used: Used denied')).toBeDefined();
+        expect(screen.queryByText('Used {pod="p0"}')).toBeNull();
+      }
+    }
+  }
+);

@@ -1,19 +1,20 @@
+import { metricGroupIdentity, metricGroupLabels } from './metricGroups';
 import { MetricResult } from './telemetry';
 
 export interface ComparisonMetric {
   name: string;
   result: MetricResult;
   colorIndex?: number;
+  group?: string;
 }
 export function metricComparisonData(metrics: readonly ComparisonMetric[]) {
-  if (
-    !metrics.length ||
-    metrics.length > 8 ||
-    new Set(metrics.map(metric => metric.name)).size !== metrics.length
-  )
+  const names = metrics.map(metric =>
+    metric.group === undefined ? metric.name : `${JSON.stringify(metric.name)} ${metric.group}`
+  );
+  if (!metrics.length || metrics.length > 8 || new Set(names).size !== names.length)
     throw new Error('Metric comparison requires 1 to 8 distinctly named metrics');
   const series = metrics.map((metric, index) => ({
-    name: metric.name,
+    name: names[index],
     key: `series${index}`,
     colorIndex: metric.colorIndex ?? index,
   }));
@@ -30,6 +31,7 @@ export function metricComparisonData(metrics: readonly ComparisonMetric[]) {
     if (
       !metric.name.trim() ||
       metric.name.length > 256 ||
+      (metric.group !== undefined && (!metric.group.trim() || metric.group.length > 1024)) ||
       metric.result.series.length > 1 ||
       metric.result.series.some(
         series => Object.keys(series.labels).length || series.samples.length > 241
@@ -57,4 +59,38 @@ export function metricComparisonData(metrics: readonly ComparisonMetric[]) {
     }
   });
   return { series, rows: [...rows.values()].sort((a, b) => a.timestamp - b.timestamp) };
+}
+
+export function groupedMetricComparisons(
+  metrics: readonly ComparisonMetric[],
+  groupLabels: readonly string[]
+): ComparisonMetric[] {
+  const groups = metricGroupLabels(groupLabels);
+  if (!groups.length) throw new Error('Choose explicit grouping labels for grouped comparisons');
+  if (metrics.length > 8 || new Set(metrics.map(metric => metric.name)).size !== metrics.length)
+    throw new Error('Grouped comparison requires at most 8 distinctly named metrics');
+  const result = metrics.flatMap(metric => {
+    if (metric.result.series.length > 8)
+      throw new Error('Grouped comparison exceeds 8 series per metric');
+    const series = metric.result.series
+      .map(series => ({
+        ...metricGroupIdentity(series.labels, groups),
+        series,
+      }))
+      .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    if (new Set(series.map(item => item.key)).size !== series.length)
+      throw new Error('Grouped comparison contains duplicate label groups');
+    return series.map(
+      ({ caption, series }): ComparisonMetric => ({
+        name: metric.name,
+        group: caption,
+        result: { warnings: [], series: [{ labels: {}, samples: series.samples }] },
+      })
+    );
+  });
+  if (result.length > 8)
+    throw new Error(
+      'Grouped chart exceeds 8 displayed series across its metrics; narrow the label filters'
+    );
+  return result;
 }

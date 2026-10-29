@@ -35,6 +35,7 @@ export default function MetricComparisonChart({
   unit: string;
 }) {
   const { t } = useTranslation();
+  const grouped = metrics.some(metric => metric.group !== undefined);
   let data: ReturnType<typeof metricComparisonData>;
   try {
     data = metricComparisonData(metrics);
@@ -71,7 +72,7 @@ export default function MetricComparisonChart({
             <Tooltip
               labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
             />
-            <Legend />
+            {!grouped && <Legend />}
             {data.series.map(series => (
               <Line
                 key={series.key}
@@ -86,12 +87,48 @@ export default function MetricComparisonChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {grouped && (
+        <Stack
+          component="ul"
+          aria-label={t('Grouped metric series')}
+          spacing={0.5}
+          sx={{ listStyle: 'none', pl: 0 }}
+        >
+          {data.series.map(series => (
+            <Typography
+              component="li"
+              key={series.key}
+              variant="body2"
+              sx={{ overflowWrap: 'anywhere' }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'inline-block',
+                  width: 16,
+                  height: 3,
+                  marginRight: 8,
+                  backgroundColor: colors[series.colorIndex],
+                }}
+              />
+              {series.name}
+            </Typography>
+          ))}
+        </Stack>
+      )}
       <details>
         <summary>{t('Show compared metric values')}</summary>
         <SimpleTable
           data={data.rows}
           columns={[
-            { label: t('Time'), getter: row => new Date(row.timestamp * 1000).toLocaleString() },
+            {
+              label: t('Time'),
+              getter: row => (
+                <span style={{ whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                  {new Date(row.timestamp * 1000).toLocaleString()}
+                </span>
+              ),
+            },
             ...data.series.map(series => ({
               label: series.name,
               getter: (row: (typeof data.rows)[number]) => {

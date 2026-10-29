@@ -1,5 +1,6 @@
 import { trimGoSpace } from './goStrings';
 import { histogramExpressions, HistogramSummary } from './histograms';
+import { metricGroupLabels } from './metricGroups';
 import { metricRangeParameters, MetricTimeRange, validateMetricTimeRange } from './metricRanges';
 import { isDnsLabel, isRecord } from './object';
 import { metricSelector } from './telemetry';
@@ -12,6 +13,7 @@ export interface CustomChart {
   dataType: 'raw' | 'rate' | 'histogram';
   aggregator?: 'sum' | 'avg' | 'min' | 'max';
   unitScale?: number;
+  groupLabels?: string[];
 }
 export interface CustomDashboardMetric {
   metricName: string;
@@ -104,7 +106,16 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     const raw = item.chart;
     keys(
       raw,
-      ['name', 'metricName', 'metrics', 'unit', 'dataType', 'aggregator', 'unitScale'],
+      [
+        'name',
+        'metricName',
+        'metrics',
+        'unit',
+        'dataType',
+        'aggregator',
+        'unitScale',
+        'groupLabels',
+      ],
       'Aggregate chart'
     );
     const name = text(raw.name, 256, 'Chart name');
@@ -131,6 +142,7 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
       throw new Error('A dashboard chart requires metrics or a legacy metricName');
     if (raw.dataType !== 'raw' && raw.dataType !== 'rate' && raw.dataType !== 'histogram')
       throw new Error('Custom aggregate charts support only raw, rate or histogram dataType');
+    const groupLabels = metricGroupLabels(raw.groupLabels, raw.dataType === 'histogram');
     const aggregator = raw.aggregator ?? 'sum';
     if (
       aggregator !== 'sum' &&
@@ -149,6 +161,7 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
         name,
         ...(legacyName ? { metricName: legacyName } : {}),
         ...(raw.metrics !== undefined ? { metrics } : {}),
+        ...(raw.groupLabels !== undefined ? { groupLabels } : {}),
         unit: text(raw.unit, 128, 'Chart unit'),
         dataType: raw.dataType,
         aggregator,
@@ -310,7 +323,8 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
         ? histogramExpressions(
             metric.metricName,
             labels,
-            query.histogramSummaries ?? ['avg', 'p95']
+            query.histogramSummaries ?? ['avg', 'p95'],
+            chart.groupLabels
           ).map(({ summary, expression }) => ({
             key: `${index}:${metricIndex}:${summary}`,
             chart,
@@ -326,9 +340,10 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
               chartIndex: index,
               metric,
               expression:
-                chart.dataType === 'rate'
+                (chart.dataType === 'rate'
                   ? `sum(rate(${metric.metricName}${selector}[5m]))`
-                  : `${chart.aggregator}(${metric.metricName}${selector})`,
+                  : `${chart.aggregator}(${metric.metricName}${selector})`) +
+                (chart.groupLabels?.length ? ` by (${chart.groupLabels.join(',')})` : ''),
             },
           ]
     )

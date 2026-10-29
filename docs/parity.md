@@ -918,7 +918,7 @@ The original `Client.FetchRange` query-construction block and complete
 replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
-existing baseline. Template includes are covered below; label-grouped charts,
+existing baseline. Template includes and label-grouped charts are covered below;
 builtins, runtime discovery, namespace/workload annotations, layout contracts
 and external Grafana/Perses links remain unsupported and are rejected explicitly.
 
@@ -1070,6 +1070,53 @@ were synthetic; settings were restored durably and no Kubernetes writes occurred
 The increment passed **171 focused tests in six files** and type/lint/i18n/build/
 package gates. The prior full-suite checkpoint remains 19,415 tests in 155 files;
 source-oracle totals stay 17,449 and finding coverage stays 38 bounded codes.
+
+### Label-grouped custom charts
+
+The saved `groupLabels` field now follows the pinned dashboard caller's always-on
+grouping path. Raw/rate expressions retain `by (...)`; histogram averages group
+both operands and quantiles group cumulative buckets by `le` plus the declared
+labels. Dynamic `ByLabels`/aggregation controls and `sortLabel` conversion remain
+unsupported, rather than silently changing the grouped result.
+
+The custom-dashboard query oracle now executes **216 original-Go cases**:
+180 raw/rate and 36 histogram combinations, covering absent, single, multiple
+and four-label grouping. This adds 171 cases to the prior 45-case harness and
+brings total independent original-Go evidence to **17,620 cases**. The unchanged
+180-case built-in histogram oracle remains a separate check.
+
+Native grouping is bounded to four distinct names with 256 total characters,
+excluding `__name__` and histogram `le`. The range decoder accepts only declared
+dimensions, at most eight series and 241 captured samples per series, preserving
+signed custom observations, rate-domain checks, explicit zero and nonfinite gaps.
+Returned grouped labels must agree with any captured equality filter. Duplicate
+label sets, including absent/empty-equivalent sets, are rejected instead of merged.
+Values are at most 256 characters without unpaired surrogates; escaped group
+captions are at most 1,024 characters, excluding the metric display name.
+Ungrouped callers retain scalar decoding.
+
+Each successful metric/group is compared independently. A chart/summary panel
+allows at most eight lines across all its metrics; overflow is a visible panel
+error, not a truncated success. Names and group values remain separate in the
+model and form unambiguous quoted legend/table captions. Groups sort by captured
+label identity; response ordering does not change colors, but membership changes
+can. An external wrapping legend avoids shrinking the plot for long captions.
+Numeric union rows retain gaps and zero without summation or extrapolation.
+Individual metric failures do not hide successful sibling metrics. Group labels
+are metric dimensions, not current-resource, health or authorization evidence.
+
+Seven hosted groups issued 32 intercepted metric GETs, verifying persisted group
+definitions, actual lines and accessible legends/tables, signed/zero/gapped data,
+ordering under reversed responses, independent denials and malformed responses,
+eight-line and 1,024-character caption boundaries, grouped histogram/rate
+semantics, captured-scope contradictions and corrected retry. Timestamp cells
+were made wrappable after a screenshot exposed overlap beside long grouped
+headers. Ungrouped named-metric and template fixtures passed again. New positive
+samples were synthetic; settings were restored and no Kubernetes writes occurred.
+The increment passed **695 focused tests in 13 files**, a final three-test
+chart-layout rerun, type/lint/i18n/build/package gates and the expanded Go oracle/
+catalog checks. Full-suite evidence remains the earlier 19,415-test checkpoint;
+finding coverage remains 38 bounded codes.
 
 ## Additional traffic counter signals
 

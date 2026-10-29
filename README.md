@@ -792,7 +792,26 @@ within a chart. Metrics share the chart's declared unit, scale and aggregation;
 they are drawn as separate named lines, never added together. The numeric
 comparison table preserves zero and missing-timestamp gaps. A failed metric
 is reported without hiding successful responses from its siblings or changing
-their declared series colors.
+their declared series colors for ungrouped comparisons.
+
+Set chart `groupLabels`, for example `["pod","revision"]`, to aggregate separately
+by those metric labels. This applies to raw values, rates, histogram averages
+and quantiles. Each named metric/group becomes its own line and numeric column;
+group labels do not establish Kubernetes resource identity. Missing grouping
+labels are shown as `<absent>`, not a guessed value. Empty and absent labels
+cannot produce duplicate series for the same metric. Group order is deterministic
+for a captured set; colors can change when group membership changes. Long group
+captions wrap in a separate legend rather than squeezing the chart.
+
+Grouping accepts up to four distinct labels totaling 256 name characters;
+`__name__` is excluded, as is `le` for classic histograms. Each response permits
+at most eight groups, each with at most 241 samples. A chart/summary panel also
+permits at most eight series **across all its metrics**. Excess groups, unexpected
+dimensions, duplicate groups or labels contradicting captured equality filters
+are errors, never silently truncated or merged. Group values are bounded to 256
+characters and group captions to 1,024 characters, excluding the separately
+bounded metric display name. Without grouping, the
+strict single-unlabeled-series response contract is unchanged.
 
 Templates can reuse other definitions saved in the **same cluster's** dashboard
 settings. For example, append
@@ -815,7 +834,8 @@ the capture without automatically querying again.
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
 samples; the pinned zero default means one. Overflow/underflow is an error,
-not a zero substitution. All matching series are aggregated; duplicate scrapes
+not a zero substitution. Matching series are aggregated within each selected
+group, or into one aggregate without grouping; duplicate scrapes
 and metric-specific dimensions are not deduplicated.
 
 **Additional metric labels (JSON)** supplies up to ten exact equality filters,
@@ -844,8 +864,8 @@ samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
 
-This is **not full custom-dashboard parity**: label-grouped charts,
-native histograms, builtin runtime discovery, namespace/workload annotation
+This is **not full custom-dashboard parity**: dynamic aggregation pickers,
+sorting, native histograms, builtin runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget

@@ -26,6 +26,67 @@
     },
     {
       "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
         "namespaceLabel": "kubernetes_namespace",
         "clusterLabel": "metric_cluster",
         "metricCluster": "east\"\\west",
@@ -39,6 +100,67 @@
         }
       },
       "expected": "sum(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -59,6 +181,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(memory_bytes{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -71,6 +254,67 @@
         }
       },
       "expected": "sum(requests_total{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -87,6 +331,67 @@
         }
       },
       "expected": "sum(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -107,6 +412,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(requests_total{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -119,6 +485,67 @@
         }
       },
       "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -135,6 +562,67 @@
         }
       },
       "expected": "sum(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -155,6 +643,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(runtime:queue_depth{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -167,6 +716,67 @@
         }
       },
       "expected": "avg(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -183,6 +793,67 @@
         }
       },
       "expected": "avg(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -203,6 +874,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(memory_bytes{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -215,6 +947,67 @@
         }
       },
       "expected": "avg(requests_total{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -231,6 +1024,67 @@
         }
       },
       "expected": "avg(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -251,6 +1105,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(requests_total{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -263,6 +1178,67 @@
         }
       },
       "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -279,6 +1255,67 @@
         }
       },
       "expected": "avg(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -299,6 +1336,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "avg",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "avg(runtime:queue_depth{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -311,6 +1409,67 @@
         }
       },
       "expected": "min(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -327,6 +1486,67 @@
         }
       },
       "expected": "min(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -347,6 +1567,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(memory_bytes{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -359,6 +1640,67 @@
         }
       },
       "expected": "min(requests_total{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -375,6 +1717,67 @@
         }
       },
       "expected": "min(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -395,6 +1798,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(requests_total{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -407,6 +1871,67 @@
         }
       },
       "expected": "min(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -423,6 +1948,67 @@
         }
       },
       "expected": "min(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -443,6 +2029,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "min",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "min(runtime:queue_depth{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -455,6 +2102,67 @@
         }
       },
       "expected": "max(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -471,6 +2179,67 @@
         }
       },
       "expected": "max(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -491,6 +2260,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(memory_bytes{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -503,6 +2333,67 @@
         }
       },
       "expected": "max(requests_total{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -519,6 +2410,67 @@
         }
       },
       "expected": "max(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -539,6 +2491,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(requests_total{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -551,6 +2564,67 @@
         }
       },
       "expected": "max(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -567,6 +2641,67 @@
         }
       },
       "expected": "max(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"})"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -587,6 +2722,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\"}) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\"}) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "raw",
+          "aggregator": "max",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "max(runtime:queue_depth{namespace=\"bookinfo\"}) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -599,6 +2795,67 @@
         }
       },
       "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -615,6 +2872,67 @@
         }
       },
       "expected": "sum(rate(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -635,6 +2953,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(memory_bytes{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -647,6 +3026,67 @@
         }
       },
       "expected": "sum(rate(requests_total{namespace=\"bookinfo\",cluster=\"east\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -663,6 +3103,67 @@
         }
       },
       "expected": "sum(rate(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -683,6 +3184,67 @@
     {
       "input": {
         "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(requests_total{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
         "clusterLabel": "cluster",
         "metricCluster": "east",
         "namespace": "bookinfo",
@@ -695,6 +3257,67 @@
         }
       },
       "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)"
     },
     {
       "input": {
@@ -714,6 +3337,67 @@
     },
     {
       "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
         "namespaceLabel": "namespace",
         "clusterLabel": null,
         "metricCluster": "",
@@ -727,6 +3411,1228 @@
         }
       },
       "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\"}[5m]))"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\"}[5m])) by (pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\"}[5m])) by (revision,pod)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "rate",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        }
+      },
+      "expected": "sum(rate(runtime:queue_depth{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)"
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) / sum(rate(memory_bytes_count{namespace=\"bookinfo\",cluster=\"east\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod) / sum(rate(memory_bytes_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod) / sum(rate(memory_bytes_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(memory_bytes_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) / sum(rate(memory_bytes_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod) / sum(rate(memory_bytes_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod) / sum(rate(memory_bytes_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(memory_bytes_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\"}[5m])) / sum(rate(memory_bytes_count{namespace=\"bookinfo\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\"}[5m])) by (pod) / sum(rate(memory_bytes_count{namespace=\"bookinfo\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\"}[5m])) by (revision,pod) / sum(rate(memory_bytes_count{namespace=\"bookinfo\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "memory_bytes",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(memory_bytes_sum{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(memory_bytes_count{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(memory_bytes_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) / sum(rate(requests_total_count{namespace=\"bookinfo\",cluster=\"east\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod) / sum(rate(requests_total_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod) / sum(rate(requests_total_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(requests_total_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) / sum(rate(requests_total_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod) / sum(rate(requests_total_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod) / sum(rate(requests_total_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(requests_total_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\"}[5m])) / sum(rate(requests_total_count{namespace=\"bookinfo\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\"}[5m])) by (pod) / sum(rate(requests_total_count{namespace=\"bookinfo\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\"}[5m])) by (revision,pod) / sum(rate(requests_total_count{namespace=\"bookinfo\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "requests_total",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(requests_total_sum{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(requests_total_count{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(requests_total_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\",cluster=\"east\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": "cluster",
+        "metricCluster": "east",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\",cluster=\"east\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) / sum(rate(runtime:queue_depth_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod) / sum(rate(runtime:queue_depth_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod) / sum(rate(runtime:queue_depth_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "kubernetes_namespace",
+        "clusterLabel": "metric_cluster",
+        "metricCluster": "east\"\\west",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(runtime:queue_depth_count{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{kubernetes_namespace=\"bookinfo\",metric_cluster=\"east\\\"\\\\west\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum"
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\"}[5m])) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\"}[5m]))",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\"}[5m])) by (pod) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\"}[5m])) by (pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "revision",
+            "pod"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\"}[5m])) by (revision,pod) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\"}[5m])) by (revision,pod)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,revision,pod))"
+      }
+    },
+    {
+      "input": {
+        "namespaceLabel": "namespace",
+        "clusterLabel": null,
+        "metricCluster": "",
+        "namespace": "bookinfo",
+        "chart": {
+          "name": "Chart",
+          "unit": "value",
+          "metricName": "runtime:queue_depth",
+          "dataType": "histogram",
+          "aggregator": "sum",
+          "groupLabels": [
+            "zone",
+            "pod",
+            "namespace",
+            "cluster"
+          ]
+        },
+        "histogramSummaries": [
+          "avg",
+          "p50",
+          "p90",
+          "p95",
+          "p99"
+        ]
+      },
+      "expected": {
+        "avg": "sum(rate(runtime:queue_depth_sum{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster) / sum(rate(runtime:queue_depth_count{namespace=\"bookinfo\"}[5m])) by (zone,pod,namespace,cluster)",
+        "p50": "histogram_quantile(0.5, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p90": "histogram_quantile(0.9, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p95": "histogram_quantile(0.95, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))",
+        "p99": "histogram_quantile(0.99, sum(rate(runtime:queue_depth_bucket{namespace=\"bookinfo\"}[5m])) by (le,zone,pod,namespace,cluster))"
+      }
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { metricGroupLabels } from './metricGroups';
 import { decodeAggregatedRange } from './metricRanges';
 import { metricSelector, trafficMetricLabels, TrafficQuery } from './telemetry';
 
@@ -16,7 +17,8 @@ const quantiles = { p50: '0.5', p90: '0.9', p95: '0.95', p99: '0.99' };
 export function histogramExpressions(
   name: string,
   labels: Readonly<Record<string, string>>,
-  summaries: readonly HistogramSummary[]
+  summaries: readonly HistogramSummary[],
+  groupLabels: readonly string[] = []
 ): { summary: HistogramSummary; expression: string }[] {
   if (
     typeof name !== 'string' ||
@@ -32,12 +34,16 @@ export function histogramExpressions(
       'Choose a bounded histogram metric name and 1 to 5 distinct supported summaries'
     );
   const selector = `{${metricSelector(labels)}}`;
+  const groups = metricGroupLabels(groupLabels, true).join(',');
+  const by = groups ? ` by (${groups})` : '';
   return summaries.map(summary => ({
     summary,
     expression:
       summary === 'avg'
-        ? `sum(rate(${name}_sum${selector}[5m])) / sum(rate(${name}_count${selector}[5m]))`
-        : `histogram_quantile(${quantiles[summary]}, sum(rate(${name}_bucket${selector}[5m])) by (le))`,
+        ? `sum(rate(${name}_sum${selector}[5m]))${by} / sum(rate(${name}_count${selector}[5m]))${by}`
+        : `histogram_quantile(${
+            quantiles[summary]
+          }, sum(rate(${name}_bucket${selector}[5m])) by (le${groups ? `,${groups}` : ''}))`,
   }));
 }
 export function histogramQueries(

@@ -99,3 +99,32 @@ it('shows all-unavailable and invalid inputs without fabricating a chart', () =>
   view.rerender(<MetricComparisonChart title="Capacity" unit="bytes" metrics={[]} />);
   expect(screen.getByRole('alert').textContent).toContain('1 to 8');
 });
+
+it('shows unambiguous group captions on legends and numeric columns', () => {
+  render(
+    <MetricComparisonChart
+      title="Grouped"
+      unit="bytes"
+      metrics={[
+        {
+          name: 'Used',
+          group: '{pod="a"}',
+          result: { warnings: [], series: [{ labels: {}, samples: [{ timestamp: 1, value: 0 }] }] },
+        },
+        {
+          name: 'Used',
+          group: '{pod=<absent>}',
+          result: {
+            warnings: [],
+            series: [{ labels: {}, samples: [{ timestamp: 2, value: -2 }] }],
+          },
+        },
+      ]}
+    />
+  );
+  expect(screen.getByTestId('"Used" {pod="a"}').getAttribute('data-connect')).toBe('false');
+  expect(screen.getByRole('columnheader', { name: '"Used" {pod="a"}' })).toBeDefined();
+  expect(screen.getByRole('columnheader', { name: '"Used" {pod=<absent>}' })).toBeDefined();
+  expect(screen.getByText('0.0000')).toBeDefined();
+  expect(screen.getAllByText('Unavailable')).toHaveLength(2);
+});
