@@ -30,8 +30,8 @@ it('distinguishes eight source items from bounded expanded metadata without drop
   expect(() =>
     validateCustomDashboard({ name: 'd', title: 'D', items: dashboard(9).items })
   ).toThrow('1 to 8');
-  expect(dashboard(160).items).toHaveLength(160);
-  expect(() => dashboard(161)).toThrow('1 to 160');
+  expect(dashboard(328).items).toHaveLength(328);
+  expect(() => dashboard(329)).toThrow('1 to 328');
   const resolved = resolveCustomDashboard(
     [
       { name: 'root', title: 'Root', items: [{ include: 'leaf' }, chart(8)] },
@@ -102,7 +102,7 @@ it('bounds resolved metadata text and preserves literal chart names', () => {
     validateResolvedCustomDashboard({
       name: 'd',
       title: 'D',
-      items: Array.from({ length: 130 }, (_, i) => ({
+      items: Array.from({ length: 256 }, (_, i) => ({
         chart: {
           name: `${i}${'x'.repeat(240)}`,
           metricName: 'm'.repeat(256),
@@ -111,7 +111,7 @@ it('bounds resolved metadata text and preserves literal chart names', () => {
         },
       })),
     })
-  ).toThrow('64 KiB');
+  ).toThrow('128 KiB');
   const input = query(1);
   input.dashboard.items[0].chart.name = '__proto__';
   input.chartNames = ['__proto__'];

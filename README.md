@@ -784,6 +784,17 @@ null`, every source/settings change clears the form's required **single-cluster
 source confirmation**; Headlamp cannot verify that assertion. Do not omit the
 cluster selector for a shared multi-cluster data source.
 
+**Include the bundled Kiali dashboard catalog** opts this browser's cluster
+settings into 21 pinned Kiali v2.33.0 templates (91 inline charts), including
+Istiod, Envoy, Go, JVM, Node.js and Vert.x families. It defaults off to preserve
+existing saved-dashboard behavior. The JSON equivalent is `includeBuiltins:
+true`. Definitions are bundled locally, not fetched or installed in Kubernetes.
+Your saved definitions take precedence by exact template name, including in
+included dependencies, and are listed first. Built-in copies are never inserted
+into the saved user array. Dropdowns and captured references disclose their source.
+Scope labels, metric-cluster identity/acknowledgment and explicit loading remain
+required; enabling the catalog does not prove those metrics are available.
+
 For several metrics on the same chart, replace `metricName` with a `metrics`
 list of `{"metricName":"used_bytes","displayName":"Used"}` entries. A nonempty
 list takes precedence over the legacy single field; an empty/absent list uses
@@ -925,8 +936,10 @@ precomputed percentiles. Each summary becomes one request and one labeled
 panel. Signed custom histogram values are preserved (for example temperature);
 the built-in Istio latency/size histogram checks remain nonnegative.
 
-Limits are 20 saved definitions, eight source items per template and up to 160
-resolved charts of metadata, with 64 KiB normalized source/resolved JSON,
+Limits are 20 saved definitions (64 KiB), plus the separately bounded 21-template
+bundled catalog (64 KiB). The effective catalog is capped at 41 templates and
+128 KiB; eight source items per template allow at most 328 resolved charts of
+metadata within that same 128 KiB budget,
 **eight requests after expanding metrics and histogram summaries**, three
 concurrent reads, a 15-second deadline and 15-second
 samples over 5/15/60-minute captured windows. Settings/provider changes clear
@@ -944,11 +957,15 @@ the draft selection. Only selected charts receive query-specific grouping and
 histogram-summary expansion; declarations are still validated as a whole.
 
 This is **not full custom-dashboard parity**: sorting, native histograms,
-builtin runtime discovery, namespace/workload annotation
+automatic application/runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget
 scenarios were fixture-backed.
+
+The bundled capture is generated, not hand-edited:
+`npm run dashboards:generate -- --source /path/to/pinned/kiali`.
+`npm run dashboards:check` verifies its pinned checksum offline.
 
 ## Traffic graph
 

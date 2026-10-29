@@ -323,7 +323,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   over-limit selections, full-definition grouping options, original panel order,
   exact eight-query batches, capture/reset semantics and raw-only selection
   independent of unselected histogram settings. Aggregation regressions passed.
-- Latest chart-selection increment: **412 focused tests in nine files**, plus
+- The checksum-pinned built-in catalog now ships all 21 templates and 91 inline
+  charts behind a per-cluster opt-in. Saved definitions override names without
+  copying bundled data into ConfigStore. Five hosted groups/eight metric GETs/
+  two discovery GETs verified opt-in persistence, Go charts, source provenance,
+  bounded Thorntail composition, overrides/discovery and opt-out. Saved-only
+  selection regressions passed; no Kubernetes writes occurred.
+- Latest catalog increment: **442 focused tests in 11 files**, plus
+  type/lint/i18n/build/package, offline catalog checksum and hosted checks passed.
+  Previous chart-selection increment: **412 focused tests in nine files**, plus
   type/lint/i18n/build/package and hosted checks passed.
   Previous aggregation increment: **456 focused tests in 14 files**, plus
   type/lint/i18n/build/package and hosted checks passed.
@@ -365,7 +373,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `036675d2e47e57ad6e4c82a155f25d88734357138463074b641b9a6de354adb5`.
+  `93f0ccb484b416e5641e5a7d81c43f32cba0a7b9c6997cbb31e58039648e2fc8`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1004,7 +1012,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric/grouped charts with equality filters/template composition and explicit saved-template discovery implemented; builtin/automatic discovery, annotations, dynamic aggregations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, grouping/value controls, display bounds/spans and explicit chart batches implemented; automatic app discovery, annotations, per-template disabling, sorting and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -1025,8 +1033,8 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is built-in definitions, automatic application
-discovery and namespace/workload annotation overrides. Explicit saved-template
+The dashboard continuation is per-template disabling, automatic application
+discovery and namespace/workload annotation overrides. Built-in definitions and explicit saved-template
 discovery, composition and label grouping are implemented for their documented
 bounded subsets. Literal includes are now preserved in settings for discovery;
 composition still trims them. App auto-discovery depends on explicit Pod
@@ -1037,14 +1045,16 @@ The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`
 and `aggregations`; no `chartType` or `xAxis` fields occur in that catalog.
 Unitless charts, captured axis bounds and responsive spans are now supported.
-Aggregation grouping/value controls and explicit bounded chart selection are
-also implemented. Load the pinned catalog without silently dropping panels:
+Aggregation grouping/value controls, explicit bounded chart selection and the
+opted-in pinned catalog are implemented without silently dropping panels:
 the pinned `thorntail` template expands to nine charts, and histogram expansion
 can exceed the eight-query budget independently of chart count. The catalog has
 59 aggregation declarations, using only label/displayName and no conflicting
-aliases after include expansion. Keep the saved-user
-definition budget distinct from a bundled catalog, and account for include
-expansion and histogram query counts rather than simply raising every limit.
+aliases after include expansion. Saved-user inputs retain their 20-template/
+64 KiB budget; the bundled 21 templates have a separate 64 KiB guard. Effective
+metadata is bounded to 41 templates, 328 resolved charts and 128 KiB, while
+requests/series remain independently bounded. Use `dashboards:generate`/
+`dashboards:check` for the pinned generated capture.
 Preserve strict scalar decoding for ungrouped callers and explicit response,
 panel and query cardinality limits.
 

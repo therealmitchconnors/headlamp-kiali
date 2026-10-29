@@ -96,6 +96,37 @@ async function fillEndpoint() {
 }
 
 describe('native per-cluster settings', () => {
+  it('opts into the pinned catalog per cluster without copying definitions or contacting Kubernetes', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null }, beta: { prometheus: null } },
+    };
+    render(<Settings />);
+    const toggle = screen.getByLabelText('Include the bundled Kiali dashboard catalog');
+    expect((toggle as HTMLInputElement).checked).toBe(false);
+    await userEvent.click(toggle);
+    await userEvent.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: { customDashboards: { includeBuiltins: true, dashboards: [] } },
+        beta: { prometheus: null },
+      },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+    cleanup();
+    render(<Settings />);
+    expect(
+      (screen.getByLabelText('Include the bundled Kiali dashboard catalog') as HTMLInputElement)
+        .checked
+    ).toBe(true);
+    fireEvent.change(screen.getByLabelText('Custom aggregate dashboards (JSON)'), {
+      target: { value: '{' },
+    });
+    expect(
+      (screen.getByLabelText('Include the bundled Kiali dashboard catalog') as HTMLInputElement)
+        .disabled
+    ).toBe(true);
+  });
   it('persists custom dashboard settings and rejects unsupported chart fields', async () => {
     render(<Settings />);
     const definitions = {

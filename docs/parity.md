@@ -1056,7 +1056,7 @@ charts and ordered template name/title references; editing any definition clears
 the capture without replay.
 
 Twenty templates with at most eight source items each bound traversal and depth.
-Resolved metadata now allows up to 160 charts under the explicit selection
+Resolved metadata now allows up to 328 charts under the effective-catalog and explicit selection
 extension below; source templates still contain at most eight items. A bounded
 named subset of a larger intermediate expansion is allowed. Metric/summary expansion,
 encoded-query, three-worker and deadline limits still apply before transport.
@@ -1272,7 +1272,8 @@ were restored and no Kubernetes writes occurred. Original-Go evidence remains
 ### Explicit bounded chart batches
 
 Source templates still accept one to eight items, while resolved composition
-metadata can contain up to 160 uniquely named charts within 64 KiB. This keeps
+metadata can contain up to 328 uniquely named charts within 128 KiB once bundled
+and saved inputs are combined. Saved-user input remains limited separately. This keeps
 all reachable chart metadata instead of dropping excess panels. An optional
 captured `chartNames` selection chooses one to eight known distinct names.
 Omitting it retains the legacy all-chart behavior, including the eight-expanded-
@@ -1297,6 +1298,43 @@ unchecked. Aggregation/value-filter regressions passed. The increment passed
 **412 focused tests in nine files** and type/lint/i18n/build/package gates.
 Samples were synthetic; settings/handlers were restored with no Kubernetes
 writes. Independent original-Go evidence remains 17,620 cases.
+
+### Opted-in pinned built-in catalog
+
+The plugin now bundles the complete `DEFAULT_DASHBOARDS_YAML` capture from
+`config/dashboards/dashboards.go`, Git blob
+`cbbc6cd2ac7834b117fb11e61af613d92016b30f`, at the pinned Kiali commit.
+`src/core/builtinDashboards.json` contains 21 templates and 91 inline charts;
+`scripts/generate-dashboards.mjs` verifies the source blob and reproducible
+SHA-256 `ef584498688cbf0cf3a7b5ffd314d45e373ad1176484cb8523691ba53a5ef35a`.
+The generated capture is checked offline and in tests. No template is silently
+trimmed or stripped of unsupported fields: all bundled definitions normalize,
+resolve and produce a valid bounded query for every selected chart.
+
+`includeBuiltins` is opt-in per browser/Headlamp cluster to preserve existing
+saved-dashboard behavior. Saved definitions take precedence by exact name and
+are listed first; the bundled copies never enter the saved user array. Resolved
+references and explicit discovery retain source provenance. The source/version
+is visible, and toggling the catalog invalidates captured results without replay.
+All metric namespace/cluster labels and endpoint scope still require explicit
+configuration; a bundled template does not prove availability or resource identity.
+
+Saved-user limits remain twenty templates and 64 KiB. The bundled twenty-one
+templates have their own 64 KiB guard; combining them permits at most 41 effective
+templates and 128 KiB. Eight source items per template yield a conservative 328
+resolved-chart bound. Request, sample, series and explicit chart-selection limits
+are unchanged. Whole-catalog opt-out and name overrides are supported; per-template
+disable declarations, automatic app discovery and annotation overlays remain open.
+
+Five hosted groups issued eight intercepted metric GETs and two discovery GETs.
+They verified opt-in save/hard reload with an empty saved-user array, all 21
+selector entries, six Go charts with aggregation/unit metadata, source labels,
+explicit bundled discovery, a bounded subset of the nine-chart Thorntail
+composition, whole-name overrides and opt-out without losing saved definitions
+or replaying requests. Saved-only selection regressions passed. The increment
+passed **442 focused tests in 11 files**, type/lint/i18n/build/package gates and
+the offline catalog check. All new positive samples were synthetic; settings/
+handlers were restored, with no cluster writes. Original-Go evidence stays 17,620.
 
 ## Additional traffic counter signals
 

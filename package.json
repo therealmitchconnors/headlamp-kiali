@@ -17,7 +17,9 @@
     "i18n": "headlamp-plugin i18n",
     "parity:check": "node scripts/parity/check-catalog.mjs",
     "resources:generate": "node scripts/generate-resources.mjs",
-    "resources:check": "node scripts/generate-resources.mjs --check"
+    "resources:check": "node scripts/generate-resources.mjs --check",
+    "dashboards:generate": "node scripts/generate-dashboards.mjs",
+    "dashboards:check": "node scripts/generate-dashboards.mjs --check"
   },
   "keywords": [
     "headlamp",

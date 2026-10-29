@@ -85,6 +85,9 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   `gateway-schemas.json`. Gateway schemas are pinned upstream sources matching
   Kiali's dependencies, not captured from an installed Gateway API. Use
   `npm run resources:generate` / `resources:check`; do not hand-edit them.
+- `src/core/builtinDashboards.json` is a checksum-pinned capture of Kiali's
+  built-in catalog. Use `npm run dashboards:generate -- --source <pinned-kiali>`
+  and `npm run dashboards:check`; do not hand-edit its definitions or provenance.
 - Configuration identities include API group and scope. Istio Gateway and Gateway
   API Gateway have distinct classes/routes. GatewayClass is cluster-scoped:
   no namespace in its route, object metadata, API path or authorization review.

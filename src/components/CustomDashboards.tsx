@@ -23,6 +23,7 @@ import {
   resolveCustomDashboard,
 } from '../core/customDashboards';
 import { DashboardAggregation, dashboardAggregationOptions } from '../core/dashboardAggregations';
+import { BUILTIN_DASHBOARD_SOURCE, effectiveDashboardCatalog } from '../core/dashboardCatalog';
 import { DashboardDiscoveryQuery, dashboardDiscoveryRequest } from '../core/dashboardDiscovery';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { ComparisonMetric, groupedMetricComparisons } from '../core/metricComparison';
@@ -112,6 +113,15 @@ function DashboardResults({
                     columns={[
                       { label: t('Template'), getter: item => item.name },
                       { label: t('Title'), getter: item => item.title },
+                      {
+                        label: t('Definition source'),
+                        getter: item =>
+                          item.origin === 'builtin'
+                            ? t('Bundled Kiali template')
+                            : item.origin === 'custom'
+                            ? t('Saved custom definition')
+                            : t('Source not captured'),
+                      },
                     ]}
                   />
                 </details>
@@ -286,6 +296,15 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   const config = useKialiConfig();
   const settings = config.valid ? getClusterConfig(config.config, cluster) : undefined;
   const definition = settings?.customDashboards;
+  let catalog: ReturnType<typeof effectiveDashboardCatalog> | undefined;
+  let catalogError: string | undefined;
+  if (definition) {
+    try {
+      catalog = effectiveDashboardCatalog(definition);
+    } catch (error) {
+      catalogError = error instanceof Error ? error.message : t('Dashboard catalog is unavailable');
+    }
+  }
   const [selected, setSelected] = useState('');
   const [namespace, setNamespace] = useState(
     new URLSearchParams(useLocation().search).get('namespace') ?? ''
@@ -302,19 +321,19 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
     settings?.prometheus,
     settings?.telemetryCluster,
     definition,
+    definition?.includeBuiltins ? BUILTIN_DASHBOARD_SOURCE : null,
   ]);
   useEffect(() => setError(''), [binding]);
   const { identity, setIdentity, query, setQuery, capturedSettings } =
     useTelemetryQuery<CustomDashboardQuery>(binding, settings);
   const discovery = useTelemetryQuery<DashboardDiscoveryQuery>(binding, settings);
-  const template =
-    definition?.dashboards.find(item => item.name === selected) ?? definition?.dashboards[0];
+  const template = catalog?.templates.find(item => item.name === selected) ?? catalog?.templates[0];
   let resolved: ReturnType<typeof resolveCustomDashboard> | undefined;
   let aggregations: DashboardAggregation[] = [];
   let resolutionError: string | undefined;
-  if (template && definition) {
+  if (template && catalog) {
     try {
-      const result = resolveCustomDashboard(definition.dashboards, template.name);
+      const result = resolveCustomDashboard(catalog.templates, template.name);
       aggregations = dashboardAggregationOptions(result.dashboard);
       resolved = result;
     } catch (error) {
@@ -362,15 +381,28 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This native dashboard view supports saved template includes, named metrics on raw/rate charts and classic histogram summaries, with optional groupLabels. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Metrics aggregate within their selected groups; different metrics and groups are compared, not added together. Duplicate scrapes are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Grouped responses and chart panels are limited to eight series; overflow is an error, not truncation. Missing samples are not zero or healthy. Native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports saved and opted-in bundled templates, includes, named metrics on raw/rate charts and classic histogram summaries, with optional groupLabels. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Metrics aggregate within their selected groups; different metrics and groups are compared, not added together. Duplicate scrapes are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Grouped responses and chart panels are limited to eight series; overflow is an error, not truncation. Missing samples are not zero or healthy. Native histograms, automatic application discovery, annotation overrides and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>
             {t('Configure dashboard definitions')}
           </Link>
+          {definition?.includeBuiltins && (
+            <Alert severity="info">
+              {t(
+                'Bundled catalog: Kiali {{version}}, commit {{commit}}. Saved definitions take precedence by name; the catalog does not establish metric availability or namespace/cluster identity.',
+                {
+                  version: BUILTIN_DASHBOARD_SOURCE.version,
+                  commit: BUILTIN_DASHBOARD_SOURCE.commit,
+                }
+              )}
+            </Alert>
+          )}
           {config.valid === false ? (
             <Alert severity="error">{config.message}</Alert>
-          ) : !definition?.dashboards.length ? (
+          ) : catalogError ? (
+            <Alert severity="error">{catalogError}</Alert>
+          ) : !catalog?.templates.length ? (
             <Alert severity="info">
               {t('No custom aggregate dashboards are configured for this cluster.')}
             </Alert>
@@ -391,9 +423,10 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                     setError('');
                   }}
                 >
-                  {definition.dashboards.map(item => (
+                  {catalog.templates.map(item => (
                     <MenuItem key={item.name} value={item.name}>
                       {item.title}
+                      {catalog.origins.get(item.name) === 'builtin' ? t(' (built-in)') : ''}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -615,7 +648,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                 variant="contained"
                 onClick={() => {
                   try {
-                    if (!dashboard || !resolved)
+                    if (!dashboard || !resolved || !catalog)
                       throw new Error(resolutionError ?? t('Choose a configured dashboard'));
                     const next: CustomDashboardQuery = {
                       ...captureScope(),
@@ -626,7 +659,12 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                       byLabels: aggregations
                         .filter(option => byLabels.includes(option.label))
                         .map(option => option.label),
-                      templateReferences: structuredClone(resolved.references),
+                      templateReferences: resolved.references.map(reference => {
+                        const origin = catalog.origins.get(reference.name);
+                        if (!origin)
+                          throw new Error(t('Dashboard definition source is unavailable'));
+                        return { ...reference, origin };
+                      }),
                       ...(hasHistograms ? { histogramSummaries: [...summaries] } : {}),
                     };
                     customDashboardJobs(next);
@@ -642,7 +680,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
               >
                 {t('Load custom dashboard')}
               </Button>
-              {definition.dashboards.some(template => template.discoverOn) && (
+              {catalog.templates.some(template => template.discoverOn) && (
                 <>
                   <Typography variant="body2">
                     {t(
@@ -655,7 +693,11 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                       try {
                         const next: DashboardDiscoveryQuery = {
                           ...captureScope(),
-                          templates: structuredClone(definition.dashboards),
+                          templates: structuredClone(catalog.templates),
+                          templateSources: [...catalog.origins].map(([name, origin]) => ({
+                            name,
+                            origin,
+                          })),
                         };
                         dashboardDiscoveryRequest(next);
                         setError('');

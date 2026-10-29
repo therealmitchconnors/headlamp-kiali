@@ -954,8 +954,30 @@ histogram summaries must fit exactly eight requests. Definition changes clear
 the capture and reset selection, without replay. A raw-only batch must not be
 blocked by unused histogram-summary settings. Four hosted groups/16 intercepted
 GETs covered these cases and corrected retry; aggregation controls were rechecked.
-Core tests cover 160 resolved charts, 64 KiB metadata, invalid/unknown/duplicate
+Core tests now cover the effective-catalog bound of 328 resolved charts and
+128 KiB metadata, invalid/unknown/duplicate
 selections, preserved indices and query-specific rules on selected charts only.
+
+For the bundled catalog, regenerate/check the pinned asset with:
+
+```sh
+npm run dashboards:generate -- --source /path/to/pinned/kiali
+npm run dashboards:check
+```
+
+Opt in through Settings and reload. The saved user array must remain empty
+while the selector exposes 21 bundled templates. Load all six Go charts and
+inspect absent units, aggregation declarations and captured source labels.
+Explicit discovery should match bundled names without loading charts. The
+Thorntail include expansion has nine charts: require an explicit bounded subset.
+Override `go` by name with a saved definition and confirm loading/discovery use
+that definition with custom provenance. Opt out and retain the saved override
+without a replay.
+
+Five hosted groups observed eight metric GETs and two discovery GETs, with
+saved-only selection regressions passing. Core tests resolve every template and
+build queries for every chart, check the exact capture hash, copy isolation and
+separate user/effective budgets. New samples were synthetic; no writes occurred.
 
 ### Additional traffic signals
 

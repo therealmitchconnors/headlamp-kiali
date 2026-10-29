@@ -11,6 +11,11 @@ import { metricRangeParameters, MetricTimeRange, validateMetricTimeRange } from 
 import { isDnsLabel, isRecord } from './object';
 import { metricSelector } from './telemetry';
 
+export const MAX_EFFECTIVE_DASHBOARD_TEMPLATES = 41;
+export const MAX_RESOLVED_DASHBOARD_CHARTS = MAX_EFFECTIVE_DASHBOARD_TEMPLATES * 8;
+const CUSTOM_DASHBOARD_BYTES = 65536;
+// Separate 64 KiB budgets for the saved-user definitions and pinned bundled catalog.
+const EFFECTIVE_DASHBOARD_BYTES = CUSTOM_DASHBOARD_BYTES * 2;
 export interface CustomChart extends ChartDisplay {
   name: string;
   metricName?: string;
@@ -40,6 +45,7 @@ export interface CustomDashboardSettings {
   namespaceLabel: string;
   clusterLabel: string | null;
   dashboards: CustomDashboardTemplate[];
+  includeBuiltins?: boolean;
 }
 export interface CustomDashboardScopeQuery extends MetricTimeRange {
   namespace: string;
@@ -54,7 +60,7 @@ export interface CustomDashboardQuery extends CustomDashboardScopeQuery {
   chartNames?: string[];
   byLabels?: string[];
   histogramSummaries?: HistogramSummary[];
-  templateReferences?: { name: string; title: string }[];
+  templateReferences?: { name: string; title: string; origin?: 'builtin' | 'custom' }[];
 }
 export interface CustomDashboardJob {
   key: string;
@@ -95,7 +101,7 @@ export function dashboardLabel(value: unknown): string {
     throw new Error('Dashboard scope labels must be Prometheus label names other than __name__');
   return name;
 }
-function dashboardHeader(value: unknown, maximum: 8 | 160 = 8) {
+function dashboardHeader(value: unknown, maximum: number = 8) {
   if (!isRecord(value)) throw new Error('A custom dashboard must be an object');
   keys(value, ['name', 'title', 'runtime', 'discoverOn', 'items'], 'Custom dashboard');
   const name = text(value.name, 128, 'Dashboard name');
@@ -120,7 +126,7 @@ function dashboardHeader(value: unknown, maximum: 8 | 160 = 8) {
     throw new Error(
       maximum === 8
         ? 'Dashboard definitions require 1 to 8 source items'
-        : 'Resolved dashboards require 1 to 160 charts'
+        : 'Resolved dashboards require 1 to 328 charts'
     );
   return { name, title, metadata, rawItems: value.items };
 }
@@ -128,12 +134,12 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
   return validateChartDashboard(value, 8);
 }
 export function validateResolvedCustomDashboard(value: unknown): CustomDashboard {
-  const dashboard = validateChartDashboard(value, 160);
-  if (JSON.stringify(dashboard).length > 65536)
-    throw new Error('Resolved dashboard metadata exceeds 64 KiB');
+  const dashboard = validateChartDashboard(value, MAX_RESOLVED_DASHBOARD_CHARTS);
+  if (JSON.stringify(dashboard).length > EFFECTIVE_DASHBOARD_BYTES)
+    throw new Error('Resolved dashboard metadata exceeds 128 KiB');
   return dashboard;
 }
-function validateChartDashboard(value: unknown, maximum: 8 | 160): CustomDashboard {
+function validateChartDashboard(value: unknown, maximum: number): CustomDashboard {
   const { name, title, metadata, rawItems } = dashboardHeader(value, maximum);
   const chartNames = new Set<string>();
   const items = rawItems.map(item => {
@@ -262,21 +268,35 @@ export function validateCustomDashboardTemplate(value: unknown): CustomDashboard
   });
   return { name, title, ...metadata, items };
 }
-function dashboardTemplates(value: unknown): CustomDashboardTemplate[] {
-  if (!Array.isArray(value) || value.length > 20)
-    throw new Error('At most 20 custom dashboard definitions can be saved per cluster');
+function dashboardTemplates(value: unknown, bundled = false): CustomDashboardTemplate[] {
+  if (!Array.isArray(value) || value.length > (bundled ? MAX_EFFECTIVE_DASHBOARD_TEMPLATES : 20))
+    throw new Error(
+      bundled
+        ? 'Effective dashboard catalog exceeds 41 templates'
+        : 'At most 20 custom dashboard definitions can be saved per cluster'
+    );
   const dashboards = value.map(validateCustomDashboardTemplate);
-  if (JSON.stringify(dashboards).length > 65536)
-    throw new Error('Custom dashboard definitions exceed 64 KiB of normalized JSON');
+  if (
+    JSON.stringify(dashboards).length >
+    (bundled ? EFFECTIVE_DASHBOARD_BYTES : CUSTOM_DASHBOARD_BYTES)
+  )
+    throw new Error(
+      bundled
+        ? 'Effective dashboard catalog exceeds 128 KiB'
+        : 'Custom dashboard definitions exceed 64 KiB of normalized JSON'
+    );
   if (new Set(dashboards.map(dashboard => dashboard.name)).size !== dashboards.length)
     throw new Error('Custom dashboard names must be distinct');
   return dashboards;
+}
+export function validateDashboardCatalog(value: unknown): CustomDashboardTemplate[] {
+  return dashboardTemplates(value, true);
 }
 export function resolveCustomDashboard(
   templates: readonly CustomDashboardTemplate[],
   selected: string
 ): { dashboard: CustomDashboard; references: { name: string; title: string }[] } {
-  const parsed = dashboardTemplates(templates);
+  const parsed = validateDashboardCatalog(templates);
   const catalog = new Map(parsed.map(template => [template.name, template]));
   const visited = new Set<string>();
   const references: { name: string; title: string }[] = [];
@@ -319,13 +339,26 @@ export function customChartMetrics(chart: CustomChart): CustomDashboardMetric[] 
 }
 export function validateCustomDashboardSettings(value: unknown): CustomDashboardSettings {
   if (!isRecord(value)) throw new Error('Custom dashboard settings must be an object');
-  keys(value, ['namespaceLabel', 'clusterLabel', 'dashboards'], 'Custom dashboard settings');
+  keys(
+    value,
+    ['namespaceLabel', 'clusterLabel', 'dashboards', 'includeBuiltins'],
+    'Custom dashboard settings'
+  );
+  if (value.includeBuiltins !== undefined && typeof value.includeBuiltins !== 'boolean')
+    throw new Error('includeBuiltins must be a boolean');
   const namespaceLabel = dashboardLabel(value.namespaceLabel);
   const clusterLabel = value.clusterLabel === null ? null : dashboardLabel(value.clusterLabel);
   if (clusterLabel === namespaceLabel)
     throw new Error('Namespace and metric cluster labels must differ');
   const dashboards = dashboardTemplates(value.dashboards);
-  return { namespaceLabel, clusterLabel, dashboards };
+  return {
+    namespaceLabel,
+    clusterLabel,
+    dashboards,
+    ...(value.includeBuiltins !== undefined
+      ? { includeBuiltins: value.includeBuiltins === true }
+      : {}),
+  };
 }
 export function customDashboardLabels(query: CustomDashboardScopeQuery): Record<string, string> {
   validateMetricTimeRange(query);

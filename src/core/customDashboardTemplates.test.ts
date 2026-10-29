@@ -202,8 +202,18 @@ it('supports exactly twenty visited templates and rejects excess, duplicate and 
   );
   expect(resolveCustomDashboard(chain, 't0').references).toHaveLength(20);
   expect(() =>
-    resolveCustomDashboard([...chain, template('extra', [chart('Extra')])], 't0')
+    validateCustomDashboardSettings({
+      namespaceLabel: 'namespace',
+      clusterLabel: 'cluster',
+      dashboards: [...chain, template('extra', [chart('Extra')])],
+    })
   ).toThrow('At most 20');
+  expect(() =>
+    resolveCustomDashboard(
+      Array.from({ length: 42 }, (_, i) => template(`t${i}`, [chart(`C${i}`)])),
+      't0'
+    )
+  ).toThrow('41 templates');
   expect(() => resolveCustomDashboard([chain[0], chain[0]], 't0')).toThrow(
     'names must be distinct'
   );
@@ -213,5 +223,11 @@ it('supports exactly twenty visited templates and rejects excess, duplicate and 
       Array.from({ length: 8 }, (_, j) => chart(`C${j}${'c'.repeat(250)}`, 'm'.repeat(256)))
     )
   );
-  expect(() => resolveCustomDashboard(oversized, 't0')).toThrow('64 KiB');
+  expect(() =>
+    validateCustomDashboardSettings({
+      namespaceLabel: 'namespace',
+      clusterLabel: 'cluster',
+      dashboards: oversized,
+    })
+  ).toThrow('64 KiB');
 });

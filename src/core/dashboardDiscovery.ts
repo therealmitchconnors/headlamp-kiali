@@ -2,14 +2,17 @@ import {
   customDashboardLabels,
   CustomDashboardScopeQuery,
   CustomDashboardTemplate,
+  MAX_EFFECTIVE_DASHBOARD_TEMPLATES,
   metricName,
-  validateCustomDashboardSettings,
+  validateDashboardCatalog,
 } from './customDashboards';
+import type { DashboardOrigin } from './dashboardCatalog';
 import { compareGoStrings } from './goStrings';
 import { decodePrometheus, metricSelector } from './telemetry';
 
 export interface DashboardDiscoveryQuery extends CustomDashboardScopeQuery {
   templates: CustomDashboardTemplate[];
+  templateSources?: { name: string; origin: DashboardOrigin }[];
 }
 export interface DashboardRuntime {
   name: string;
@@ -18,11 +21,7 @@ export interface DashboardRuntime {
 
 export function dashboardDiscoveryRequest(query: DashboardDiscoveryQuery) {
   const labels = customDashboardLabels(query);
-  const templates = validateCustomDashboardSettings({
-    namespaceLabel: query.namespaceLabel,
-    clusterLabel: query.clusterLabel,
-    dashboards: query.templates,
-  }).dashboards;
+  const templates = validateDashboardCatalog(query.templates);
   if (!templates.some(template => template.discoverOn))
     throw new Error('Configure at least one discoverOn metric before discovering dashboards');
   const expression = `count({${metricSelector(labels)}}) by (__name__)`;
@@ -36,7 +35,7 @@ export function matchDashboardRuntimes(
   templates: readonly CustomDashboardTemplate[],
   metricNames: readonly string[]
 ): DashboardRuntime[] {
-  if (templates.length > 20 || metricNames.length > 2000)
+  if (templates.length > MAX_EFFECTIVE_DASHBOARD_TEMPLATES || metricNames.length > 2000)
     throw new Error('Dashboard discovery exceeds its template or metric-name budget');
   const names = new Set(metricNames);
   const matched = templates.filter(

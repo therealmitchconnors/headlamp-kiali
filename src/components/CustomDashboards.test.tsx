@@ -305,14 +305,18 @@ it('captures histogram summary selection and rejects empty selections without re
   expect(screen.queryAllByRole('img')).toHaveLength(0);
 });
 
-const withTemplates = (dashboards: CustomDashboardTemplate[]) => ({
+const withTemplates = (dashboards: CustomDashboardTemplate[], includeBuiltins?: boolean) => ({
   ...configured,
   config: {
     ...configured.config,
     clusters: {
       alpha: {
         ...configured.config.clusters.alpha,
-        customDashboards: { ...configured.config.clusters.alpha.customDashboards, dashboards },
+        customDashboards: {
+          ...configured.config.clusters.alpha.customDashboards,
+          dashboards,
+          ...(includeBuiltins !== undefined ? { includeBuiltins } : {}),
+        },
       },
     },
   },
@@ -340,8 +344,8 @@ it('captures resolved charts and template provenance, and invalidates when an in
   expect(captured.dashboard.name).toBe('root');
   expect(captured.dashboard.items.map(item => item.chart.name)).toEqual(['Latency']);
   expect(captured.templateReferences).toEqual([
-    { name: 'root', title: 'Composition' },
-    { name: 'leaf', title: 'Reusable charts' },
+    { name: 'root', title: 'Composition', origin: 'custom' },
+    { name: 'leaf', title: 'Reusable charts', origin: 'custom' },
   ]);
   expect(customDashboardJobs(captured)).toHaveLength(2);
   await userEvent.click(screen.getByText('Show captured dashboard template references'));
@@ -735,4 +739,33 @@ it('requires explicit chart narrowing for large composed dashboards and preserve
   await userEvent.click(screen.getByRole('option', { name: 'Leaf' }));
   expect(screen.getByText('Choose dashboard charts (8 of 8 selected)')).toBeDefined();
   expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+});
+it('offers opted-in builtins without copying them into saved definitions and captures their origin', async () => {
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates([], true));
+  const view = open();
+  expect(screen.getByText(/Bundled catalog: Kiali v2.33.0/)).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Go Metrics (built-in)' }));
+  expect(screen.getByRole('checkbox', { name: 'Group by Pod (pod_name)' })).toBeDefined();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Goroutines' });
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  const signal = vi.mocked(loadCustomDashboard).mock.calls[0][3];
+  expect(captured.dashboard.name).toBe('go');
+  expect(captured.dashboard.items).toHaveLength(6);
+  expect(captured.templateReferences).toEqual([
+    { name: 'go', title: 'Go Metrics', origin: 'builtin' },
+  ]);
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates([], false));
+  view.rerender(
+    <MemoryRouter>
+      <CustomDashboards />
+    </MemoryRouter>
+  );
+  expect(
+    screen.getByText('No custom aggregate dashboards are configured for this cluster.')
+  ).toBeDefined();
+  expect(signal.aborted).toBe(true);
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
 });

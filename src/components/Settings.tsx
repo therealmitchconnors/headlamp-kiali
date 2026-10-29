@@ -244,6 +244,7 @@ function ClusterSettingsForm({
         customDashboards:
           initialCustomDashboards === undefined &&
           customDashboards?.dashboards.length === 0 &&
+          customDashboards.includeBuiltins !== true &&
           customDashboards.namespaceLabel === 'namespace' &&
           customDashboards.clusterLabel === 'cluster'
             ? undefined
@@ -496,6 +497,37 @@ function ClusterSettingsForm({
           'Default off, matching pinned Kiali. This skips comparisons involving a bare * host, not *.example.com patterns. It affects local KIA0301 checks only, not Gateway API checks or cluster configuration.'
         )}
       </Typography>
+      <FormControlLabel
+        label={t('Include the bundled Kiali dashboard catalog')}
+        control={
+          <Switch
+            checked={customDashboards?.includeBuiltins === true}
+            disabled={!!dashboardValidation}
+            onChange={event => {
+              if (!customDashboards) {
+                setFeedback({
+                  error: true,
+                  message: t('Correct dashboard JSON before changing the bundled catalog'),
+                });
+                return;
+              }
+              setDashboardText(
+                JSON.stringify(
+                  { ...customDashboards, includeBuiltins: event.target.checked },
+                  null,
+                  2
+                )
+              );
+              setFeedback(undefined);
+            }}
+          />
+        }
+      />
+      <Typography variant="body2">
+        {t(
+          'Opt-in per cluster. The plugin bundles 21 Kiali v2.33.0 templates; no cluster installation or remote template fetch is needed. Your saved definitions override matching bundled names. Namespace and metric-cluster selectors remain explicit.'
+        )}
+      </Typography>
       <TextField
         label={t('Custom aggregate dashboards (JSON)')}
         multiline
@@ -508,7 +540,7 @@ function ClusterSettingsForm({
         }}
         inputProps={{ maxLength: 131072 }}
         helperText={t(
-          'Use namespaceLabel, clusterLabel and dashboards. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Built-in catalogs, automatic app discovery, sorting and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
+          'Use namespaceLabel, clusterLabel, dashboards and optional includeBuiltins. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Automatic app discovery, sorting and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
         )}
       />
       {validation && (

@@ -80,6 +80,19 @@ export default function DashboardDiscovery({
                       { label: t('Title'), getter: item => item.title },
                       { label: t('Discovery metric'), getter: item => item.discoverOn },
                       {
+                        label: t('Definition source'),
+                        getter: item => {
+                          const origin = data.query.templateSources?.find(
+                            source => source.name === item.name
+                          )?.origin;
+                          return origin === 'builtin'
+                            ? t('Bundled Kiali template')
+                            : origin === 'custom'
+                            ? t('Saved custom definition')
+                            : t('Source not captured');
+                        },
+                      },
+                      {
                         label: t('Selection'),
                         getter: item => (
                           <Button onClick={() => onSelect(item.name)}>
