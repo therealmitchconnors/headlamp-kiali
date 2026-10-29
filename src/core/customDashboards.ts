@@ -1,3 +1,4 @@
+import { ChartDisplay, validateChartDisplay } from './chartDisplay';
 import { trimGoSpace } from './goStrings';
 import { histogramExpressions, HistogramSummary } from './histograms';
 import { metricGroupLabels } from './metricGroups';
@@ -5,7 +6,7 @@ import { metricRangeParameters, MetricTimeRange, validateMetricTimeRange } from 
 import { isDnsLabel, isRecord } from './object';
 import { metricSelector } from './telemetry';
 
-export interface CustomChart {
+export interface CustomChart extends ChartDisplay {
   name: string;
   metricName?: string;
   metrics?: CustomDashboardMetric[];
@@ -131,6 +132,9 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
         'aggregator',
         'unitScale',
         'groupLabels',
+        'min',
+        'max',
+        'spans',
       ],
       'Aggregate chart'
     );
@@ -175,6 +179,7 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     return {
       chart: {
         name,
+        ...validateChartDisplay(raw),
         ...(legacyName ? { metricName: legacyName } : {}),
         ...(raw.metrics !== undefined ? { metrics } : {}),
         ...(raw.groupLabels !== undefined ? { groupLabels } : {}),

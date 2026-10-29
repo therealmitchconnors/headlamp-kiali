@@ -305,7 +305,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   the missing unit and dimensional uncertainty. Three hosted groups/five GETs
   verified persistence, scaled signed/zero values, real grouped lines and a
   subsequent declared-unit change. Samples were synthetic and no writes occurred.
-- Latest unitless increment: **390 focused tests in nine files**, plus
+- Captured safe-integer `min`/`max` display bounds and 1..12-column `spans`
+  now work across scalar, named and grouped charts. Four hosted groups/eight
+  GETs verified exact axes, post-scale numeric preservation, responsive stacking
+  without refetch, one-sided all-outside domains, invalid-input rejection and
+  an unsafe-geometry error that retains the numeric table. Unit regressions
+  passed again. New samples were synthetic; no writes occurred.
+- Latest display increment: **399 focused tests in ten files**, plus
+  type/lint/i18n/build/package and hosted checks passed.
+  Previous unitless increment: **390 focused tests in nine files**, plus
   type/lint/i18n/build/package and hosted checks passed.
   Previous discovery increment: **398 focused tests in nine files**, plus
   type/lint/i18n/build/package and hosted checks passed.
@@ -341,7 +349,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `bd88e9e5a567e8bdff95f09c85e6dd8a451deb156f827a87f31f6b7450e5f96d`.
+  `942e5c3ebdfb8b0ab799fe0f62ac68769908e6e6bdddb5e741a87654fc576ef6`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1012,9 +1020,10 @@ selectors.
 The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`
 and `aggregations`; no `chartType` or `xAxis` fields occur in that catalog.
-Unitless charts are now supported explicitly. Implement the remaining
-chart-layout/axis/aggregation contracts before
-loading the catalog instead of silently dropping them. Keep the saved-user
+Unitless charts, captured axis bounds and responsive spans are now supported.
+Implement the remaining aggregation controls and explicit bounded chart
+selection before loading the catalog instead of silently dropping fields or
+panels. Keep the saved-user
 definition budget distinct from a bundled catalog, and account for include
 expansion and histogram query counts rather than simply raising every limit.
 Preserve strict scalar decoding for ungrouped callers and explicit response,

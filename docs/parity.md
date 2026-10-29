@@ -1183,6 +1183,41 @@ passed **390 focused tests in nine files** and type/lint/i18n/build/package
 checks; settings and handlers were restored with no Kubernetes writes.
 Original-Go evidence remains 17,620 cases.
 
+### Captured display bounds and spans
+
+The pinned frontend `KChart` forwards supplied `min`/`max` as Victory domain
+limits, and `Dashboard` places charts in a twelve-column grid using `spans`.
+The native schema now accepts safe-integer bounds and spans 1..12, with
+null/absent bounds omitted and zero/absent spans treated as full width.
+Invalid/reversed bounds and invalid spans fail before a provider request.
+
+Both scalar and comparison renderers apply bounds after unit scaling without
+clamping stored samples. They disclose the requested edges, count outside
+samples and retain the complete numeric table. An automatic edge expands only
+when necessary to avoid an inverted/zero-width domain; declared edges never
+change. Nonfinite geometry produces a display error while preserving the table.
+No-bounds callers retain their existing Recharts auto-domain behavior.
+
+Captured span values drive a responsive MUI twelve-column grid. Native cards
+stack at full width below 900 pixels; this deliberately differs from the source
+layout on narrow screens. Plot heights remain native defaults; upstream
+row-height allocation, maximization and collapse controls are not claimed.
+The source was inspected at these verified Git blob identities:
+`Dashboard.tsx` `5bae5eaea3a39924d1015382e19064fbcb61b798`,
+`KChart.tsx` `164795d09bfd8060ca0ce6222bd5e90b27ada58d`, and
+`ChartWithLegend.tsx` `f2abf3dceb7e479b96ca2a406d68c4b4644832fa`,
+all under `frontend/src/components/Charts/` at the pinned Kiali commit.
+
+Four hosted groups/eight intercepted GETs verified settings persistence, exact
+0..10 axes on all three chart paths, post-scale unclamped numeric values,
+two half-width cards and full-width defaults, stacking at 800 pixels without
+refetch, invalid-bound rejection, valid one-sided domains when all samples are
+outside, and an unsafe-geometry error with the full table still available.
+SVG errors were checked explicitly. The unitless/declared-unit fixture passed
+again. The increment passed **399 focused tests in ten files** plus type/lint/
+i18n/build/package gates. Samples were synthetic; settings/handlers were restored
+with no Kubernetes writes. No additional Go oracle cases are claimed.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

@@ -910,6 +910,22 @@ Then explicitly declare a unit and restore normal labeling without extra queries
 Three hosted groups/five intercepted GETs covered these cases. All samples were
 synthetic, with no writes or retained fixture settings.
 
+For display bounds and spans, save `min: 0`, `max: 10`, `spans: 6` on adjacent
+charts, keeping another chart at the default full width. Check actual region
+geometry at desktop width, then stack at 800 pixels without new requests.
+Verify Y-axis ticks preserve 0..10 on scalar, named and grouped charts.
+Return samples outside both bounds after unitScale; count them explicitly and
+retain their original numeric values. Test all-negative data with only minimum
+zero and all-positive data with only maximum zero: only the automatic edge may
+expand. Invalid/reversed bounds must prevent reads. Extreme values that would
+produce nonfinite display geometry must show an error but retain the table.
+
+Four hosted groups/eight intercepted GETs covered these cases and checked SVG
+errors. The declared/undeclared-unit fixture passed again. Core tests cover
+safe-integer bounds, spans 1..12/default zero, 1,928 samples and the first excess
+sample. The new positive samples were synthetic; no writes occurred and all
+fixture settings/handlers were restored.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

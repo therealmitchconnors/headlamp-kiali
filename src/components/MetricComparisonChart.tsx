@@ -13,7 +13,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { metricAxis } from '../core/chartDisplay';
 import { ComparisonMetric, metricComparisonData } from '../core/metricComparison';
+import MetricAxisNotice from './MetricAxisNotice';
 
 const colors = [
   '#1976d2',
@@ -29,10 +31,14 @@ export default function MetricComparisonChart({
   metrics,
   title,
   unit,
+  min,
+  max,
 }: {
   metrics: ComparisonMetric[];
   title: string;
   unit: string | null;
+  min?: number;
+  max?: number;
 }) {
   const { t } = useTranslation();
   const grouped = metrics.some(metric => metric.group !== undefined);
@@ -52,6 +58,18 @@ export default function MetricComparisonChart({
         {t('Samples are unavailable or non-finite. No zero values have been substituted.')}
       </Alert>
     );
+  let axis: ReturnType<typeof metricAxis> | undefined;
+  let axisError: string | undefined;
+  try {
+    axis = metricAxis(
+      metrics.flatMap(metric =>
+        metric.result.series.flatMap(series => series.samples.map(sample => sample.value))
+      ),
+      { min, max }
+    );
+  } catch (error) {
+    axisError = error instanceof Error ? error.message : t('Chart display bounds are unavailable');
+  }
   return (
     <Stack spacing={1}>
       <Typography variant="body2">
@@ -65,33 +83,36 @@ export default function MetricComparisonChart({
       <Typography variant="body2">
         {t('Missing timestamps stay gaps; lines are not summed or extrapolated.')}
       </Typography>
-      <div role="img" aria-label={title}>
-        <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={data.rows}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
-            />
-            <YAxis />
-            <Tooltip
-              labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
-            />
-            {!grouped && <Legend />}
-            {data.series.map(series => (
-              <Line
-                key={series.key}
-                name={series.name}
-                dataKey={series.key}
-                stroke={colors[series.colorIndex]}
-                dot={{ r: 2 }}
-                connectNulls={false}
-                isAnimationActive={false}
+      <MetricAxisNotice min={min} max={max} outside={axis?.outside ?? 0} error={axisError} />
+      {!axisError && (
+        <div role="img" aria-label={title}>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={data.rows}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
               />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+              <YAxis {...(axis?.domain ? { domain: axis.domain, allowDataOverflow: true } : {})} />
+              <Tooltip
+                labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
+              />
+              {!grouped && <Legend />}
+              {data.series.map(series => (
+                <Line
+                  key={series.key}
+                  name={series.name}
+                  dataKey={series.key}
+                  stroke={colors[series.colorIndex]}
+                  dot={{ r: 2 }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {grouped && (
         <Stack
           component="ul"

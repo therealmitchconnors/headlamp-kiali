@@ -38,7 +38,9 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
 vi.mock('recharts', () => ({
   CartesianGrid: () => null,
   XAxis: () => null,
-  YAxis: () => null,
+  YAxis: ({ domain }: { domain?: [number, number] }) => (
+    <span data-testid="axis" data-domain={JSON.stringify(domain)} />
+  ),
   Tooltip: () => null,
   Legend: () => null,
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -105,6 +107,39 @@ it('does not claim a shared physical unit when a comparison omits its unit', () 
   ).toBeDefined();
   expect(screen.getByRole('columnheader', { name: 'Observed' })).toBeDefined();
   expect(screen.getByText('0.0000')).toBeDefined();
+});
+it('keeps out-of-bounds numeric values and an explicit error for unsafe display geometry', () => {
+  const metrics = [
+    {
+      name: 'Observed',
+      result: {
+        warnings: [],
+        series: [
+          {
+            labels: {},
+            samples: [
+              { timestamp: 1, value: -2 },
+              { timestamp: 2, value: 12 },
+            ],
+          },
+        ],
+      },
+    },
+  ];
+  const view = render(
+    <MetricComparisonChart title="Bounded" unit="bytes" metrics={metrics} min={0} max={10} />
+  );
+  expect(screen.getByTestId('axis').getAttribute('data-domain')).toBe('[0,10]');
+  expect(screen.getByText('-2.0000')).toBeDefined();
+  expect(screen.getByText('12.000')).toBeDefined();
+  expect(screen.getByText(/outside the display bounds: 2/)).toBeDefined();
+  metrics[0].result.series[0].samples[0].value = Number.MAX_VALUE;
+  view.rerender(
+    <MetricComparisonChart title="Bounded" unit="bytes" metrics={metrics} min={0} max={1} />
+  );
+  expect(screen.getByText(/cannot represent these samples safely/)).toBeDefined();
+  expect(screen.queryByRole('img')).toBeNull();
+  expect(screen.getByText(Number.MAX_VALUE.toPrecision(5))).toBeDefined();
 });
 it('shows all-unavailable and invalid inputs without fabricating a chart', () => {
   const view = render(

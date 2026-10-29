@@ -871,6 +871,19 @@ explicitly warn that metric dimensions must be checked. `unitScale` still applie
 without declaring a unit. Nonempty units retain their existing display behavior;
 malformed or whitespace-only unit values remain errors.
 
+Optional integer `min`/`max` values set **display-only** bounds after unit scaling;
+the minimum must be lower than the maximum when both are given. Samples outside
+the view are counted and remain unchanged in the numeric table. A missing edge
+is automatic; if all values lie outside a one-sided bound, only the automatic
+edge is expanded to keep a valid axis. Unsafe display geometry is reported
+without discarding the numeric table.
+
+Optional `spans` chooses 1..12 columns of a twelve-column chart grid. Omitted,
+null or zero spans retain full-width cards. On viewports below 900 pixels,
+cards stack at full width for readability; this is a native responsive choice,
+not pixel-for-pixel reproduction of Kiali's layout. Histogram summary panels
+inherit the original chart's span and bounds.
+
 **Additional metric labels (JSON)** supplies up to ten exact equality filters,
 for example `{"job":"my-runtime","container":"reviews"}`. Values are literal
 strings; empty equality also matches an omitted label under Prometheus

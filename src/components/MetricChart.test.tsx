@@ -24,7 +24,19 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
 vi.mock('recharts', () => ({
   CartesianGrid: () => null,
   XAxis: () => null,
-  YAxis: () => null,
+  YAxis: ({
+    domain,
+    allowDataOverflow,
+  }: {
+    domain?: [number, number];
+    allowDataOverflow?: boolean;
+  }) => (
+    <span
+      data-testid="axis"
+      data-domain={JSON.stringify(domain)}
+      data-overflow={String(allowDataOverflow)}
+    />
+  ),
   Tooltip: () => null,
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -94,4 +106,31 @@ it('uses an explicit unspecified-unit disclosure and neutral value labels', () =
   expect(screen.getByRole('columnheader', { name: 'Value' })).toBeDefined();
   view.rerender(<MetricChart {...props} seriesName="Observed count" />);
   expect(screen.getByTestId('line').getAttribute('data-name')).toBe('Observed count');
+});
+it('passes captured display bounds to the axis and discloses excluded samples', () => {
+  render(
+    <MetricChart
+      title="Bounded"
+      unit="bytes"
+      min={0}
+      max={10}
+      result={{
+        warnings: [],
+        series: [
+          {
+            labels: {},
+            samples: [
+              { timestamp: 1, value: -2 },
+              { timestamp: 2, value: 0 },
+              { timestamp: 3, value: 12 },
+            ],
+          },
+        ],
+      }}
+    />
+  );
+  expect(screen.getByTestId('axis').getAttribute('data-domain')).toBe('[0,10]');
+  expect(screen.getByTestId('axis').getAttribute('data-overflow')).toBe('true');
+  expect(screen.getByText(/minimum 0; maximum 10/)).toBeDefined();
+  expect(screen.getByText(/outside the display bounds: 2/)).toBeDefined();
 });

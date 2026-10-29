@@ -1,6 +1,7 @@
 import { useTranslation } from '@kinvolk/headlamp-plugin/lib';
 import { Link, SectionBox, SimpleTable } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -109,99 +110,125 @@ function DashboardResults({
               />
             </details>
           )}
-          {groupedCharts(data.charts).map(([key, entries]) => {
-            const { chart, summary } = entries[0];
-            const grouped = !!chart.groupLabels?.length;
-            const title = summary
-              ? t('{{chart}} - {{summary}}', { chart: chart.name, summary: summaryNames[summary] })
-              : chart.name;
-            let successful: ComparisonMetric[] = entries.flatMap((entry, index) =>
-              entry.read.ok
-                ? [{ name: entry.metric.displayName, result: entry.read.result, colorIndex: index }]
-                : []
-            );
-            let groupingError: string | undefined;
-            if (grouped) {
-              try {
-                successful = groupedMetricComparisons(successful, chart.groupLabels ?? []).map(
-                  (metric, index) => ({ ...metric, colorIndex: index })
-                );
-              } catch (error) {
-                successful = [];
-                groupingError =
-                  error instanceof Error ? error.message : t('Grouped chart is unavailable');
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 2 }}>
+            {groupedCharts(data.charts).map(([key, entries]) => {
+              const { chart, summary } = entries[0];
+              const grouped = !!chart.groupLabels?.length;
+              const title = summary
+                ? t('{{chart}} - {{summary}}', {
+                    chart: chart.name,
+                    summary: summaryNames[summary],
+                  })
+                : chart.name;
+              let successful: ComparisonMetric[] = entries.flatMap((entry, index) =>
+                entry.read.ok
+                  ? [
+                      {
+                        name: entry.metric.displayName,
+                        result: entry.read.result,
+                        colorIndex: index,
+                      },
+                    ]
+                  : []
+              );
+              let groupingError: string | undefined;
+              if (grouped) {
+                try {
+                  successful = groupedMetricComparisons(successful, chart.groupLabels ?? []).map(
+                    (metric, index) => ({ ...metric, colorIndex: index })
+                  );
+                } catch (error) {
+                  successful = [];
+                  groupingError =
+                    error instanceof Error ? error.message : t('Grouped chart is unavailable');
+                }
               }
-            }
-            return (
-              <SectionBox key={key} title={title}>
-                {grouped && (
-                  <Typography variant="body2">
-                    {t(
-                      'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
-                      { labels: chart.groupLabels?.join(', ') }
-                    )}
-                  </Typography>
-                )}
-                {groupingError && <Alert severity="error">{groupingError}</Alert>}
-                {entries.map(({ key, metric, read }) => (
-                  <Stack key={key} spacing={1}>
-                    {(entries.length > 1 || metric.displayName !== chart.name) && (
-                      <Typography variant="subtitle2">{metric.displayName}</Typography>
-                    )}
-                    <Typography variant="body2">
-                      {t(
-                        'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
-                        {
-                          metric: metric.metricName,
-                          type: chart.dataType,
-                          aggregation: chart.aggregator ?? 'sum',
-                          scale: chart.unitScale ?? 1,
-                        }
-                      )}
-                    </Typography>
-                    {read.ok === false ? (
-                      <Alert severity="error">
-                        {entries.length > 1
-                          ? `${metric.displayName}: ${read.error.message}`
-                          : read.error.message}
-                      </Alert>
-                    ) : (
-                      <>
-                        {!!read.result.warnings.length && (
-                          <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+              return (
+                <Box
+                  key={key}
+                  component="section"
+                  aria-label={title}
+                  sx={{
+                    gridColumn: { xs: 'span 12', md: `span ${chart.spans ?? 12}` },
+                    minWidth: 0,
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  <SectionBox title={title}>
+                    {grouped && (
+                      <Typography variant="body2">
+                        {t(
+                          'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
+                          { labels: chart.groupLabels?.join(', ') }
                         )}
-                        {(entries.length > 1 || grouped) &&
-                          !read.result.series.some(series =>
-                            series.samples.some(sample => sample.value !== null)
-                          ) && (
-                            <Alert severity="info">
-                              {t('No finite samples were returned for {{metric}}.', {
-                                metric: metric.displayName,
-                              })}
-                            </Alert>
-                          )}
-                      </>
+                      </Typography>
                     )}
-                  </Stack>
-                ))}
-                {successful.length > 0 &&
-                  (entries.length === 1 && !grouped ? (
-                    <MetricChart
-                      result={successful[0].result}
-                      title={title}
-                      unit={chart.unit ?? null}
-                      seriesName={entries[0].metric.displayName}
-                    />
-                  ) : (
-                    <MetricComparisonChart
-                      metrics={successful}
-                      title={title}
-                      unit={chart.unit ?? null}
-                    />
-                  ))}
-              </SectionBox>
-            );
-          })}
+                    {groupingError && <Alert severity="error">{groupingError}</Alert>}
+                    {entries.map(({ key, metric, read }) => (
+                      <Stack key={key} spacing={1}>
+                        {(entries.length > 1 || metric.displayName !== chart.name) && (
+                          <Typography variant="subtitle2">{metric.displayName}</Typography>
+                        )}
+                        <Typography variant="body2">
+                          {t(
+                            'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                            {
+                              metric: metric.metricName,
+                              type: chart.dataType,
+                              aggregation: chart.aggregator ?? 'sum',
+                              scale: chart.unitScale ?? 1,
+                            }
+                          )}
+                        </Typography>
+                        {read.ok === false ? (
+                          <Alert severity="error">
+                            {entries.length > 1
+                              ? `${metric.displayName}: ${read.error.message}`
+                              : read.error.message}
+                          </Alert>
+                        ) : (
+                          <>
+                            {!!read.result.warnings.length && (
+                              <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+                            )}
+                            {(entries.length > 1 || grouped) &&
+                              !read.result.series.some(series =>
+                                series.samples.some(sample => sample.value !== null)
+                              ) && (
+                                <Alert severity="info">
+                                  {t('No finite samples were returned for {{metric}}.', {
+                                    metric: metric.displayName,
+                                  })}
+                                </Alert>
+                              )}
+                          </>
+                        )}
+                      </Stack>
+                    ))}
+                    {successful.length > 0 &&
+                      (entries.length === 1 && !grouped ? (
+                        <MetricChart
+                          result={successful[0].result}
+                          title={title}
+                          unit={chart.unit ?? null}
+                          seriesName={entries[0].metric.displayName}
+                          min={chart.min}
+                          max={chart.max}
+                        />
+                      ) : (
+                        <MetricComparisonChart
+                          metrics={successful}
+                          title={title}
+                          unit={chart.unit ?? null}
+                          min={chart.min}
+                          max={chart.max}
+                        />
+                      ))}
+                  </SectionBox>
+                </Box>
+              );
+            })}
+          </Box>
           <details>
             <summary>{t('Show captured dashboard queries')}</summary>
             {customDashboardJobs(data.query).map(job => (
