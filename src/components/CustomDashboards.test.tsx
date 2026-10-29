@@ -691,3 +691,48 @@ it('clears optional grouping drafts when changing templates instead of reviving 
   ).toBe(false);
   expect(loadCustomDashboard).not.toHaveBeenCalled();
 });
+it('requires explicit chart narrowing for large composed dashboards and preserves captured selection', async () => {
+  const base = configured.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart;
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates([
+      {
+        name: 'root',
+        title: 'Root expanded',
+        items: [{ include: 'leaf' }, { chart: { ...base, name: 'Ninth' } }],
+      },
+      {
+        name: 'leaf',
+        title: 'Leaf',
+        items: Array.from({ length: 8 }, (_, i) => ({ chart: { ...base, name: `Chart ${i}` } })),
+      },
+    ])
+  );
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(
+    screen.getByText('Choose 1 to 8 distinct chart names from the captured dashboard')
+  ).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('button', { name: 'Clear chart selection' }));
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Include chart Ninth' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Ninth' });
+  expect(
+    screen.getByText(
+      'Captured chart selection: 1 of 9 configured charts. Only the selected charts were queried.'
+    )
+  ).toBeDefined();
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  expect(captured.dashboard.items).toHaveLength(9);
+  expect(captured.chartNames).toEqual(['Ninth']);
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Include chart Chart 0' }));
+  expect(captured.chartNames).toEqual(['Ninth']);
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Chart 0' });
+  expect(vi.mocked(loadCustomDashboard).mock.calls[1][2].chartNames).toEqual(['Chart 0', 'Ninth']);
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Leaf' }));
+  expect(screen.getByText('Choose dashboard charts (8 of 8 selected)')).toBeDefined();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+});

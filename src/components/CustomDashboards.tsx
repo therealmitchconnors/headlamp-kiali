@@ -14,6 +14,8 @@ import { useLocation } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { getClusterConfig, ServiceEndpoint } from '../core/config';
 import {
+  CustomChart,
+  customChartMetrics,
   customDashboardJobs,
   CustomDashboardQuery,
   CustomDashboardScopeQuery,
@@ -75,6 +77,15 @@ function DashboardResults({
                   namespace: data.query.namespace,
                   time: new Date(data.query.end * 1000).toISOString(),
                 })}
+              </Typography>
+              <Typography variant="body2">
+                {t(
+                  'Captured chart selection: {{selected}} of {{total}} configured charts. Only the selected charts were queried.',
+                  {
+                    selected: data.query.chartNames?.length ?? data.query.dashboard.items.length,
+                    total: data.query.dashboard.items.length,
+                  }
+                )}
               </Typography>
               <Alert severity="info">
                 {data.query.clusterLabel
@@ -316,6 +327,17 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   const [grouping, setGrouping] = useState<{ key: string; labels: string[] }>();
   useEffect(() => setGrouping(undefined), [groupingKey]);
   const byLabels = grouping?.key === groupingKey ? grouping.labels : [];
+  const [chartSelection, setChartSelection] = useState<{ key: string; names: string[] }>();
+  useEffect(() => setChartSelection(undefined), [groupingKey]);
+  const allChartNames = dashboard?.items.map(item => item.chart.name) ?? [];
+  const chartNames = chartSelection?.key === groupingKey ? chartSelection.names : allChartNames;
+  const chartCost = (chart: CustomChart) =>
+    customChartMetrics(chart).length * (chart.dataType === 'histogram' ? summaries.length : 1);
+  const selectedCost =
+    dashboard?.items.reduce(
+      (sum, item) => sum + (chartNames.includes(item.chart.name) ? chartCost(item.chart) : 0),
+      0
+    ) ?? 0;
   const hasHistograms = dashboard?.items.some(item => item.chart.dataType === 'histogram');
   const captureScope = (): CustomDashboardScopeQuery => {
     if (!definition) throw new Error(t('Configure dashboard definitions before querying'));
@@ -462,6 +484,71 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                   </Stack>
                 </Stack>
               )}
+              {dashboard && dashboard.items.length > 1 && (
+                <details open={dashboard.items.length > 8}>
+                  <summary>
+                    {t('Choose dashboard charts ({{selected}} of {{total}} selected)', {
+                      selected: chartNames.length,
+                      total: dashboard.items.length,
+                    })}
+                  </summary>
+                  <Typography variant="body2">
+                    {t(
+                      'All charts start selected. Narrow the selection explicitly when it exceeds eight expanded metric requests; no charts are silently dropped. Histogram summaries and named metrics count separately.'
+                    )}
+                  </Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      onClick={() =>
+                        setChartSelection({ key: groupingKey, names: [...allChartNames] })
+                      }
+                    >
+                      {t('Select all dashboard charts')}
+                    </Button>
+                    <Button onClick={() => setChartSelection({ key: groupingKey, names: [] })}>
+                      {t('Clear chart selection')}
+                    </Button>
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    {dashboard.items.map(({ chart }) => (
+                      <Stack key={chart.name} direction="row" spacing={1} alignItems="center">
+                        <FormControlLabel
+                          label={t('Include chart {{name}}', { name: chart.name })}
+                          control={
+                            <Checkbox
+                              checked={chartNames.includes(chart.name)}
+                              onChange={event => {
+                                const checked = event.target.checked;
+                                setChartSelection(current => {
+                                  const previous =
+                                    current?.key === groupingKey ? current.names : allChartNames;
+                                  return {
+                                    key: groupingKey,
+                                    names: checked
+                                      ? [...previous, chart.name]
+                                      : previous.filter(name => name !== chart.name),
+                                  };
+                                });
+                              }}
+                            />
+                          }
+                        />
+                        <Typography variant="caption">
+                          {t('Expanded requests: {{count}}', { count: chartCost(chart) })}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </details>
+              )}
+              {dashboard && (
+                <Typography variant="body2">
+                  {t(
+                    'Selected charts: {{charts}}. Expanded metric requests: {{requests}} of 8 maximum.',
+                    { charts: chartNames.length, requests: selectedCost }
+                  )}
+                </Typography>
+              )}
               {hasHistograms && (
                 <Stack spacing={1}>
                   <Typography>
@@ -533,6 +620,9 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                     const next: CustomDashboardQuery = {
                       ...captureScope(),
                       dashboard: structuredClone(dashboard),
+                      chartNames: dashboard.items
+                        .filter(item => chartNames.includes(item.chart.name))
+                        .map(item => item.chart.name),
                       byLabels: aggregations
                         .filter(option => byLabels.includes(option.label))
                         .map(option => option.label),

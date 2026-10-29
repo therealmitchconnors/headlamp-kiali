@@ -942,6 +942,21 @@ axis/layout regressions passed. Core tests cover last-display-name conversion,
 UTF-8 ordering, alias handling, 32 choices and 64 observed values per label.
 All samples were synthetic, with no writes or retained fixture settings.
 
+For chart batches, compose a template with eight included raw charts plus a
+ninth histogram. Save/reload without truncating metadata. All-selected and empty
+selections must fail without transport. Select only the histogram and use an
+aggregation declared by an unselected raw chart; exactly the selected summaries
+should be queried. Draft selection changes retain the captured result until load.
+
+Check original chart order/indices when selecting out of order. Eight selected
+charts can still exceed the expanded request budget; six raw charts plus two
+histogram summaries must fit exactly eight requests. Definition changes clear
+the capture and reset selection, without replay. A raw-only batch must not be
+blocked by unused histogram-summary settings. Four hosted groups/16 intercepted
+GETs covered these cases and corrected retry; aggregation controls were rechecked.
+Core tests cover 160 resolved charts, 64 KiB metadata, invalid/unknown/duplicate
+selections, preserved indices and query-specific rules on selected charts only.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

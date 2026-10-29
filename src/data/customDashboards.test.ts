@@ -374,6 +374,34 @@ it('captures optional grouping independently of fixed declarations and decodes t
   });
   expect(ApiProxy.request).toHaveBeenCalledTimes(1);
 });
+it('captures explicit chart batches and original indices without querying omitted charts', async () => {
+  const input = query();
+  input.dashboard.items.push({
+    chart: { name: 'extra', metricName: 'extra_metric', dataType: 'raw', unitScale: 0.001 },
+  });
+  input.chartNames = ['extra', 'chart-7'];
+  vi.mocked(ApiProxy.request).mockResolvedValue(matrix());
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.chartNames[0] = 'chart-0';
+  input.dashboard.items.pop();
+  const result = await pending;
+  expect(result.query.dashboard.items).toHaveLength(9);
+  expect(result.query.chartNames).toEqual(['extra', 'chart-7']);
+  expect(result.charts.map(chart => [chart.chartIndex, chart.chart.name])).toEqual([
+    [7, 'chart-7'],
+    [8, 'extra'],
+  ]);
+  expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+  const requests = vi.mocked(ApiProxy.request).mock.calls.map(([path]) => String(path));
+  expect(requests[0]).toContain('metric_7');
+  expect(requests[1]).toContain('extra_metric');
+  expect(requests.every(path => !path.includes('metric_0'))).toBe(true);
+});
 it.each([
   { group: 'namespace', labels: { namespace: 'other' }, ok: false },
   { group: 'namespace', labels: {}, ok: false },

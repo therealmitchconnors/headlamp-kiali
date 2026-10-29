@@ -317,7 +317,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   value filtering, missing-label retention, first-observed single selection,
   reset on new results, rejection paths and corrected retry. Display/axis
   regressions passed. New samples were synthetic; no writes occurred.
-- Latest aggregation increment: **456 focused tests in 14 files**, plus
+- Larger compositions now retain up to 160 charts of bounded metadata and offer
+  explicit chart batches, without raising the eight-expanded-request limit.
+  Four hosted groups/16 GETs verified nine-chart composition, rejected empty/
+  over-limit selections, full-definition grouping options, original panel order,
+  exact eight-query batches, capture/reset semantics and raw-only selection
+  independent of unselected histogram settings. Aggregation regressions passed.
+- Latest chart-selection increment: **412 focused tests in nine files**, plus
+  type/lint/i18n/build/package and hosted checks passed.
+  Previous aggregation increment: **456 focused tests in 14 files**, plus
   type/lint/i18n/build/package and hosted checks passed.
   Previous display increment: **399 focused tests in ten files**, plus
   type/lint/i18n/build/package and hosted checks passed.
@@ -357,7 +365,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `551fddec34e98095c0739c73eaff79e7899934d9315b7f336a0211bcca6a234a`.
+  `036675d2e47e57ad6e4c82a155f25d88734357138463074b641b9a6de354adb5`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1029,8 +1037,8 @@ The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`
 and `aggregations`; no `chartType` or `xAxis` fields occur in that catalog.
 Unitless charts, captured axis bounds and responsive spans are now supported.
-Aggregation grouping/value controls are also implemented. Add explicit bounded
-chart selection before loading the catalog instead of silently dropping panels:
+Aggregation grouping/value controls and explicit bounded chart selection are
+also implemented. Load the pinned catalog without silently dropping panels:
 the pinned `thorntail` template expands to nine charts, and histogram expansion
 can exceed the eight-query budget independently of chart count. The catalog has
 59 aggregation declarations, using only label/displayName and no conflicting

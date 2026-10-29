@@ -173,7 +173,7 @@ it('bounds all selected expansions before expression construction, including met
   ];
   expect(jobs(definitions)).toHaveLength(8);
   definitions[0].items.push(chart('Ninth'));
-  expect(() => jobs(definitions)).toThrow('1 to 8');
+  expect(() => jobs(definitions)).toThrow('8 metric queries');
   definitions[0].items.pop();
   definitions[1].items[0].chart!.metrics = [
     { metricName: 'a', displayName: 'A' },
@@ -194,7 +194,7 @@ it('allows a bounded chart subset from a larger intermediate expansion', () => {
     ),
   ];
   expect(jobs(definitions)).toHaveLength(1);
-  expect(() => resolveCustomDashboard(definitions, 'middle')).toThrow('1 to 8');
+  expect(resolveCustomDashboard(definitions, 'middle').dashboard.items).toHaveLength(9);
 });
 it('supports exactly twenty visited templates and rejects excess, duplicate and oversized definitions', () => {
   const chain = Array.from({ length: 20 }, (_, i) =>

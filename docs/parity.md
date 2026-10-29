@@ -931,8 +931,10 @@ samples remain gaps, zero is preserved, and finite unit-scaling overflow or
 underflow is a visible chart error. No series/replica/scrape deduplication is
 inferred from a sum.
 
-Bounds are 20 saved definitions, eight charts per dashboard, 64 KiB normalized
-definition JSON, three concurrent requests and a 15-second whole-read deadline.
+Bounds initially limited dashboards to eight charts; the explicit selection
+extension below retains the request budget while allowing larger compositions.
+Saved definitions remain capped at 20, with 64 KiB normalized definition JSON,
+three concurrent requests and a 15-second whole-read deadline.
 Per-chart denial/shape errors do not hide successful siblings. Provider,
 definition or saved identity changes clear submitted results and the
 single-cluster acknowledgment, without replay or resurrection.
@@ -1054,8 +1056,9 @@ charts and ordered template name/title references; editing any definition clears
 the capture without replay.
 
 Twenty templates with at most eight source items each bound traversal and depth.
-The selected result must contain one to eight charts; a bounded named subset of
-a larger intermediate expansion is allowed. Existing metric/summary expansion,
+Resolved metadata now allows up to 160 charts under the explicit selection
+extension below; source templates still contain at most eight items. A bounded
+named subset of a larger intermediate expansion is allowed. Metric/summary expansion,
 encoded-query, three-worker and deadline limits still apply before transport.
 All composed metrics retain the selected namespace/provider/cluster-label scope.
 This is source-inspected native evidence, not an additional original-Go oracle.
@@ -1265,6 +1268,35 @@ regressions passed. The increment passed **456 focused tests in 14 files** plus
 type/lint/i18n/build/package gates. Samples were synthetic; settings/handlers
 were restored and no Kubernetes writes occurred. Original-Go evidence remains
 17,620 cases; these new controls are source-inspected/native-tested.
+
+### Explicit bounded chart batches
+
+Source templates still accept one to eight items, while resolved composition
+metadata can contain up to 160 uniquely named charts within 64 KiB. This keeps
+all reachable chart metadata instead of dropping excess panels. An optional
+captured `chartNames` selection chooses one to eight known distinct names.
+Omitting it retains the legacy all-chart behavior, including the eight-expanded-
+query rejection. The native UI starts with all charts selected and requires
+explicit narrowing when over budget.
+
+Only selected charts are expanded into metric/summary jobs and query-specific
+grouping. Original chart indices and definition order survive selection;
+unselected histograms cannot impose unused summary/bucket-label constraints.
+Global aggregation declarations remain available from the full captured
+definition, following their dashboard-wide scope. Source metadata validation,
+include-cycle/repeated-reference semantics, request/series limits and deadlines
+are unchanged. Selected-chart counts remain visible with the captured result,
+and draft edits never rewrite an existing capture or replay requests.
+
+Four hosted groups/16 intercepted GETs verified persistence of a nine-chart
+composition, all/empty selection rejection, a selected histogram using an
+aggregation declared on an unselected chart, original panel order, independent
+chart/request bounds, an exact eight-query batch, source reset and corrected
+retry. A raw-only selection also succeeded with unused histogram summaries
+unchecked. Aggregation/value-filter regressions passed. The increment passed
+**412 focused tests in nine files** and type/lint/i18n/build/package gates.
+Samples were synthetic; settings/handlers were restored with no Kubernetes
+writes. Independent original-Go evidence remains 17,620 cases.
 
 ## Additional traffic counter signals
 

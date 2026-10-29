@@ -925,13 +925,23 @@ precomputed percentiles. Each summary becomes one request and one labeled
 panel. Signed custom histogram values are preserved (for example temperature);
 the built-in Istio latency/size histogram checks remain nonnegative.
 
-Limits are 20 saved definitions, eight source items per template and eight
-resolved charts per selected dashboard, 64 KiB normalized definition JSON,
+Limits are 20 saved definitions, eight source items per template and up to 160
+resolved charts of metadata, with 64 KiB normalized source/resolved JSON,
 **eight requests after expanding metrics and histogram summaries**, three
 concurrent reads, a 15-second deadline and 15-second
 samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
+
+**Choose dashboard charts** makes larger compositions usable without raising
+the request limit. All charts start selected; explicitly narrow an over-budget
+selection rather than receiving a silently truncated dashboard. A submitted
+batch contains one to eight distinct charts and must still fit eight expanded
+metric/summary requests. Queries and panels keep definition order and original
+chart indices. Results disclose the captured selection count, while later draft
+edits neither refetch nor relabel that capture. Source/template changes reset
+the draft selection. Only selected charts receive query-specific grouping and
+histogram-summary expansion; declarations are still validated as a whole.
 
 This is **not full custom-dashboard parity**: sorting, native histograms,
 builtin runtime discovery, namespace/workload annotation

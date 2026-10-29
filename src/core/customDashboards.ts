@@ -51,6 +51,7 @@ export interface CustomDashboardScopeQuery extends MetricTimeRange {
 }
 export interface CustomDashboardQuery extends CustomDashboardScopeQuery {
   dashboard: CustomDashboard;
+  chartNames?: string[];
   byLabels?: string[];
   histogramSummaries?: HistogramSummary[];
   templateReferences?: { name: string; title: string }[];
@@ -94,7 +95,7 @@ export function dashboardLabel(value: unknown): string {
     throw new Error('Dashboard scope labels must be Prometheus label names other than __name__');
   return name;
 }
-function dashboardHeader(value: unknown) {
+function dashboardHeader(value: unknown, maximum: 8 | 160 = 8) {
   if (!isRecord(value)) throw new Error('A custom dashboard must be an object');
   keys(value, ['name', 'title', 'runtime', 'discoverOn', 'items'], 'Custom dashboard');
   const name = text(value.name, 128, 'Dashboard name');
@@ -115,14 +116,25 @@ function dashboardHeader(value: unknown) {
     ...(runtime !== undefined ? { runtime } : {}),
     ...(discoverOn !== undefined ? { discoverOn } : {}),
   };
-  if (!Array.isArray(value.items) || !value.items.length || value.items.length > 8)
+  if (!Array.isArray(value.items) || !value.items.length || value.items.length > maximum)
     throw new Error(
-      'Custom dashboards require 1 to 8 items and must resolve to 1 to 8 aggregate charts'
+      maximum === 8
+        ? 'Dashboard definitions require 1 to 8 source items'
+        : 'Resolved dashboards require 1 to 160 charts'
     );
   return { name, title, metadata, rawItems: value.items };
 }
 export function validateCustomDashboard(value: unknown): CustomDashboard {
-  const { name, title, metadata, rawItems } = dashboardHeader(value);
+  return validateChartDashboard(value, 8);
+}
+export function validateResolvedCustomDashboard(value: unknown): CustomDashboard {
+  const dashboard = validateChartDashboard(value, 160);
+  if (JSON.stringify(dashboard).length > 65536)
+    throw new Error('Resolved dashboard metadata exceeds 64 KiB');
+  return dashboard;
+}
+function validateChartDashboard(value: unknown, maximum: 8 | 160): CustomDashboard {
+  const { name, title, metadata, rawItems } = dashboardHeader(value, maximum);
   const chartNames = new Set<string>();
   const items = rawItems.map(item => {
     if (!isRecord(item) || !isRecord(item.chart))
@@ -296,7 +308,7 @@ export function resolveCustomDashboard(
   const template = catalog.get(selected);
   if (!template) throw new Error('Selected dashboard is unavailable');
   return {
-    dashboard: validateCustomDashboard({ ...template, items }),
+    dashboard: validateResolvedCustomDashboard({ ...template, items }),
     references,
   };
 }
@@ -340,17 +352,22 @@ export function customDashboardLabels(query: CustomDashboardScopeQuery): Record<
 }
 export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboardJob[] {
   const labels = customDashboardLabels(query);
-  const dashboard = validateCustomDashboard(query.dashboard);
+  const dashboard = validateResolvedCustomDashboard(query.dashboard);
+  const selected = dashboardChartSelection(query.chartNames, dashboard);
   const byLabels = dashboardByLabels(query.byLabels, dashboard);
   const selector = `{${metricSelector(labels)}}`;
-  const charts = dashboard.items.map(({ chart }) => ({
-    chart,
-    metrics: customChartMetrics(chart),
-    groupLabels: metricGroupLabels(
-      [...(chart.groupLabels ?? []), ...byLabels],
-      chart.dataType === 'histogram'
-    ),
-  }));
+  const charts = dashboard.items
+    .map(({ chart }, chartIndex) => ({ chart, chartIndex }))
+    .filter(item => selected.has(item.chart.name))
+    .map(({ chart, chartIndex }) => ({
+      chart,
+      chartIndex,
+      metrics: customChartMetrics(chart),
+      groupLabels: metricGroupLabels(
+        [...(chart.groupLabels ?? []), ...byLabels],
+        chart.dataType === 'histogram'
+      ),
+    }));
   const count = charts.reduce(
     (sum, { chart, metrics }) =>
       sum +
@@ -360,7 +377,7 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
   const budgetMessage =
     'Custom dashboards support at most 8 metric queries after expanding histogram summaries and metric declarations; reduce charts, metrics or selected summaries';
   if (count > 8) throw new Error(budgetMessage);
-  const jobs = charts.flatMap<CustomDashboardJob>(({ chart, metrics, groupLabels }, index) =>
+  const jobs = charts.flatMap<CustomDashboardJob>(({ chart, chartIndex, metrics, groupLabels }) =>
     metrics.flatMap<CustomDashboardJob>((metric, metricIndex) =>
       chart.dataType === 'histogram'
         ? histogramExpressions(
@@ -369,9 +386,9 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
             query.histogramSummaries ?? ['avg', 'p95'],
             groupLabels
           ).map(({ summary, expression }) => ({
-            key: `${index}:${metricIndex}:${summary}`,
+            key: `${chartIndex}:${metricIndex}:${summary}`,
             chart,
-            chartIndex: index,
+            chartIndex,
             groupLabels,
             metric,
             summary,
@@ -379,9 +396,9 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
           }))
         : [
             {
-              key: `${index}:${metricIndex}:value`,
+              key: `${chartIndex}:${metricIndex}:value`,
               chart,
-              chartIndex: index,
+              chartIndex,
               groupLabels,
               metric,
               expression:
@@ -396,6 +413,20 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
   if (jobs.length > 8) throw new Error(budgetMessage);
   jobs.forEach(job => metricRangeParameters(query, job.expression));
   return jobs;
+}
+
+export function dashboardChartSelection(value: unknown, dashboard: CustomDashboard): Set<string> {
+  const names = new Set(dashboard.items.map(item => item.chart.name));
+  if (value === undefined) return names;
+  if (
+    !Array.isArray(value) ||
+    !value.length ||
+    value.length > 8 ||
+    new Set(value).size !== value.length ||
+    value.some(name => typeof name !== 'string' || !names.has(name))
+  )
+    throw new Error('Choose 1 to 8 distinct chart names from the captured dashboard');
+  return new Set(value);
 }
 
 export function dashboardLabelFilters(
