@@ -336,6 +336,44 @@ it('captures grouping and scales independent groups without changing their label
   ).searchParams.get('query');
   expect(expression).toMatch(/ by \(pod\)$/);
 });
+it('captures optional grouping independently of fixed declarations and decodes the effective labels', async () => {
+  const input = query();
+  input.dashboard.items = input.dashboard.items.slice(0, 1);
+  input.dashboard.items[0].chart.aggregations = [{ label: 'pod', displayName: 'Pod' }];
+  input.byLabels = ['pod'];
+  vi.mocked(ApiProxy.request).mockResolvedValue({
+    status: 'success',
+    data: {
+      resultType: 'matrix',
+      result: [
+        { metric: { pod: 'one' }, values: [[10000, '1000']] },
+        { metric: { pod: 'two' }, values: [[10000, '2000']] },
+      ],
+    },
+  });
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.byLabels[0] = 'changed';
+  input.dashboard.items[0].chart.aggregations[0].label = 'changed';
+  const result = await pending;
+  expect(result.query.byLabels).toEqual(['pod']);
+  expect(result.charts[0].groupLabels).toEqual(['pod']);
+  expect(result.charts[0].chart.groupLabels).toBeUndefined();
+  expect(result.charts[0].read).toMatchObject({
+    ok: true,
+    result: {
+      series: [
+        { labels: { pod: 'one' }, samples: [{ value: 1 }] },
+        { labels: { pod: 'two' }, samples: [{ value: 2 }] },
+      ],
+    },
+  });
+  expect(ApiProxy.request).toHaveBeenCalledTimes(1);
+});
 it.each([
   { group: 'namespace', labels: { namespace: 'other' }, ok: false },
   { group: 'namespace', labels: {}, ok: false },

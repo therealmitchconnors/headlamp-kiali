@@ -1218,6 +1218,54 @@ again. The increment passed **399 focused tests in ten files** plus type/lint/
 i18n/build/package gates. Samples were synthetic; settings/handlers were restored
 with no Kubernetes writes. No additional Go oracle cases are claimed.
 
+### Optional aggregation grouping and captured value filters
+
+Chart `aggregations` now declares bounded label/display-name/single-selection
+options. The source `ConvertAggregations` last-declaration-by-display-name rule
+and UTF-8 sorting precede the frontend's per-label map behavior. Compatible
+aliases therefore keep the last sorted display name with the original label-map
+position. Native validation rejects aliases whose single-selection modes
+conflict, rather than reproducing the source's inconsistent first/last alias
+behavior.
+
+Optional query `byLabels` is captured separately from fixed `groupLabels`.
+The UI submits choices in option-map order on explicit load; the backend-style
+builder appends them after each chart's fixed groups. Effective labels are
+carried with every job/result through decoding, filter-consistency checks,
+captioning and comparison rendering. Unknown/duplicate/excess labels and
+histogram `le` are rejected before transport. Grouping drafts reset when the
+source or selected template changes.
+
+Observed aggregation values are display-only controls. Source-compatible
+visibility excludes only explicit false values of labels that a series actually
+contains; absent labels remain visible. Single-selection starts with the first
+observed value, and immutable Map-based state handles arbitrary literal values
+without prototype-key hazards. Filters change charts and numeric tables locally,
+not server queries, captured data or authority. Hidden counts and lack of visible
+samples remain distinct from empty responses. Native selections reset for each
+new captured result; upstream URL persistence/cross-refresh state is not claimed.
+Axis notices and numeric tables describe the currently visible series.
+
+Bounds are eight declarations per chart, 32 distinct display-name choices,
+four effective grouping labels, eight successful responses with eight series
+each, and at most 64 observed values per label. Provider decoding limits remain
+in force before display filtering. The pinned caller/helper sources inspected
+for this increment include `CustomMetrics.tsx` blob
+`2f5b936b67e0f22ea390aea7c62e30b49e0f4c5c`, `Metrics/Helper.ts`
+`462d0dc7a15008b1b3b13deee7c600480a8734c2`, `MetricsSettingsDropdown.tsx`
+`76be1e8051f6d5a98ee784a4b1072d8e5a00ef89`, and `TimeSeriesUtils.ts`
+`697177bd5282327217bd383416b249e2313f800f` at the pinned Kiali commit.
+
+Five hosted groups/six intercepted GETs verified saved declarations, unchecked
+optional defaults, canonical request ordering, actual grouped lines, local
+checkbox/radio updates without requests, empty/prototype-key values, missing-label
+retention, all-hidden disclosure, first-observed single selection and reset,
+preflight duplication/alias errors and corrected retry. Display-bound/layout
+regressions passed. The increment passed **456 focused tests in 14 files** plus
+type/lint/i18n/build/package gates. Samples were synthetic; settings/handlers
+were restored and no Kubernetes writes occurred. Original-Go evidence remains
+17,620 cases; these new controls are source-inspected/native-tested.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

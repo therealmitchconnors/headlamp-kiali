@@ -106,14 +106,17 @@ beforeEach(() => {
     .mockImplementation(async (_scope, _provider, query) => ({
       query,
       metrics: [],
-      charts: customDashboardJobs(query).map(({ chart, key, summary, metric, chartIndex }) => ({
-        key,
-        chart,
-        summary,
-        metric,
-        chartIndex,
-        read: { ok: true, result: { warnings: [], series: [] } },
-      })),
+      charts: customDashboardJobs(query).map(
+        ({ chart, key, summary, metric, chartIndex, groupLabels }) => ({
+          key,
+          chart,
+          summary,
+          metric,
+          chartIndex,
+          groupLabels,
+          read: { ok: true, result: { warnings: [], series: [] } },
+        })
+      ),
     }));
 });
 afterEach(cleanup);
@@ -550,5 +553,141 @@ it('does not present a discovery denial as an empty successful match', async () 
   await userEvent.click(screen.getByRole('button', { name: 'Discover saved dashboards' }));
   await screen.findByText('Access denied: Discovery denied');
   expect(screen.queryByText(/No saved dashboard templates matched/)).toBeNull();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+});
+
+it('captures optional grouping and filters captured values locally while retaining absent labels', async () => {
+  const definition: CustomDashboardTemplate = {
+    ...configured.config.clusters.alpha.customDashboards.dashboards[0],
+    items: [
+      {
+        chart: {
+          ...configured.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart,
+          aggregations: [{ label: 'pod', displayName: 'Pod' }],
+        },
+      },
+    ],
+  };
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates([definition]));
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: {
+        ok: true,
+        result: {
+          warnings: [],
+          series: [
+            { labels: { pod: 'one' }, samples: [{ timestamp: query.end, value: 1 }] },
+            { labels: { pod: 'two' }, samples: [{ timestamp: query.end, value: 2 }] },
+            { labels: {}, samples: [{ timestamp: query.end, value: 3 }] },
+          ],
+        },
+      },
+    })),
+  }));
+  open();
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Group by Pod (pod)' }));
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByText('Memory {pod="one"}');
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  expect(captured.byLabels).toEqual(['pod']);
+  expect(captured.dashboard.items[0].chart.groupLabels).toBeUndefined();
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Group by Pod (pod)' }));
+  expect(captured.byLabels).toEqual(['pod']);
+  await userEvent.click(screen.getByText('Filter captured aggregation values (display only)'));
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Show Pod = "one"' }));
+  expect(screen.queryByText('Memory {pod="one"}')).toBeNull();
+  expect(screen.getByText(/Returned series hidden by display filters: 1/)).toBeDefined();
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Show Pod = "two"' }));
+  expect(screen.getByText('Memory {pod=<absent>}')).toBeDefined();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
+it('uses first-observed single selection, changes only the display, and resets on a new result', async () => {
+  const definition: CustomDashboardTemplate = {
+    ...configured.config.clusters.alpha.customDashboards.dashboards[0],
+    items: [
+      {
+        chart: {
+          ...configured.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart,
+          groupLabels: ['pod'],
+          aggregations: [{ label: 'pod', displayName: 'Pod', singleSelection: true }],
+        },
+      },
+    ],
+  };
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates([definition]));
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: {
+        ok: true,
+        result: {
+          warnings: [],
+          series: ['b', 'a'].map(pod => ({
+            labels: { pod },
+            samples: [{ timestamp: query.end, value: 1 }],
+          })),
+        },
+      },
+    })),
+  }));
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByText('Memory {pod="b"}');
+  expect(screen.queryByText('Memory {pod="a"}')).toBeNull();
+  await userEvent.click(screen.getByText('Filter captured aggregation values (display only)'));
+  await userEvent.click(screen.getByRole('radio', { name: 'Show Pod = "a"' }));
+  expect(screen.getByText('Memory {pod="a"}')).toBeDefined();
+  expect(screen.queryByText('Memory {pod="b"}')).toBeNull();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByText('Memory {pod="b"}');
+  expect(screen.queryByText('Memory {pod="a"}')).toBeNull();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+});
+it('clears optional grouping drafts when changing templates instead of reviving old selections', async () => {
+  const base = configured.config.clusters.alpha.customDashboards.dashboards[0];
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates([
+      {
+        ...base,
+        items: [
+          {
+            chart: { ...base.items[0].chart, aggregations: [{ label: 'pod', displayName: 'Pod' }] },
+          },
+        ],
+      },
+      {
+        ...base,
+        name: 'other',
+        title: 'Other',
+        items: [
+          {
+            chart: {
+              ...base.items[0].chart,
+              aggregations: [{ label: 'zone', displayName: 'Zone' }],
+            },
+          },
+        ],
+      },
+    ])
+  );
+  open();
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Group by Pod (pod)' }));
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Other' }));
+  expect(
+    (screen.getByRole('checkbox', { name: 'Group by Zone (zone)' }) as HTMLInputElement).checked
+  ).toBe(false);
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Runtime' }));
+  expect(
+    (screen.getByRole('checkbox', { name: 'Group by Pod (pod)' }) as HTMLInputElement).checked
+  ).toBe(false);
   expect(loadCustomDashboard).not.toHaveBeenCalled();
 });

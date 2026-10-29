@@ -20,6 +20,7 @@ import {
   dashboardLabelFilters,
   resolveCustomDashboard,
 } from '../core/customDashboards';
+import { DashboardAggregation, dashboardAggregationOptions } from '../core/dashboardAggregations';
 import { DashboardDiscoveryQuery, dashboardDiscoveryRequest } from '../core/dashboardDiscovery';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { ComparisonMetric, groupedMetricComparisons } from '../core/metricComparison';
@@ -29,13 +30,14 @@ import { useRequest } from '../hooks/useRequest';
 import { useTelemetryQuery } from '../hooks/useTelemetryQuery';
 import ClusterScope from './ClusterScope';
 import DashboardDiscovery from './DashboardDiscovery';
+import DashboardValueFilters from './DashboardValueFilters';
 import MetricChart from './MetricChart';
 import MetricComparisonChart from './MetricComparisonChart';
 import RequestStatus from './RequestStatus';
 
 type DashboardRead = Awaited<ReturnType<typeof loadCustomDashboard>>['charts'][number];
-function groupedCharts(charts: readonly DashboardRead[]) {
-  const groups = new Map<string, DashboardRead[]>();
+function groupedCharts<T extends DashboardRead>(charts: readonly T[]) {
+  const groups = new Map<string, T[]>();
   for (const chart of charts) {
     const key = JSON.stringify([chart.chartIndex, chart.summary ?? 'value']);
     const group = groups.get(key) ?? [];
@@ -64,184 +66,205 @@ function DashboardResults({
   return (
     <RequestStatus state={state} loadingLabel={t('Loading custom dashboard...')}>
       {data => (
-        <Stack spacing={2}>
-          <Typography>
-            {t('Captured dashboard: {{title}}; namespace {{namespace}}; ending {{time}}', {
-              title: data.query.dashboard.title,
-              namespace: data.query.namespace,
-              time: new Date(data.query.end * 1000).toISOString(),
-            })}
-          </Typography>
-          <Alert severity="info">
-            {data.query.clusterLabel
-              ? t('Captured metric cluster filter: {{label}} = {{value}}', {
-                  label: data.query.clusterLabel,
-                  value: data.query.metricCluster,
-                })
-              : t(
-                  'No dedicated metric-cluster selector was configured. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
-                )}
-          </Alert>
-          {!!data.query.templateReferences?.length && (
-            <details>
-              <summary>{t('Show captured dashboard template references')}</summary>
-              <SimpleTable
-                data={data.query.templateReferences}
-                columns={[
-                  { label: t('Template'), getter: item => item.name },
-                  { label: t('Title'), getter: item => item.title },
-                ]}
-              />
-            </details>
-          )}
-          {!!Object.keys(data.query.labelsFilters ?? {}).length && (
-            <details>
-              <summary>{t('Show captured dashboard label filters')}</summary>
-              <SimpleTable
-                data={Object.entries(data.query.labelsFilters ?? {})}
-                columns={[
-                  { label: t('Metric label'), getter: ([key]: [string, string]) => key },
-                  {
-                    label: t('Literal value'),
-                    getter: ([, value]: [string, string]) =>
-                      value === '' ? t('Empty; also matches an omitted label') : value,
-                  },
-                ]}
-              />
-            </details>
-          )}
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 2 }}>
-            {groupedCharts(data.charts).map(([key, entries]) => {
-              const { chart, summary } = entries[0];
-              const grouped = !!chart.groupLabels?.length;
-              const title = summary
-                ? t('{{chart}} - {{summary}}', {
-                    chart: chart.name,
-                    summary: summaryNames[summary],
-                  })
-                : chart.name;
-              let successful: ComparisonMetric[] = entries.flatMap((entry, index) =>
-                entry.read.ok
-                  ? [
-                      {
-                        name: entry.metric.displayName,
-                        result: entry.read.result,
-                        colorIndex: index,
-                      },
-                    ]
-                  : []
-              );
-              let groupingError: string | undefined;
-              if (grouped) {
-                try {
-                  successful = groupedMetricComparisons(successful, chart.groupLabels ?? []).map(
-                    (metric, index) => ({ ...metric, colorIndex: index })
-                  );
-                } catch (error) {
-                  successful = [];
-                  groupingError =
-                    error instanceof Error ? error.message : t('Grouped chart is unavailable');
-                }
-              }
-              return (
-                <Box
-                  key={key}
-                  component="section"
-                  aria-label={title}
-                  sx={{
-                    gridColumn: { xs: 'span 12', md: `span ${chart.spans ?? 12}` },
-                    minWidth: 0,
-                    overflowWrap: 'anywhere',
-                  }}
-                >
-                  <SectionBox title={title}>
-                    {grouped && (
-                      <Typography variant="body2">
-                        {t(
-                          'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
-                          { labels: chart.groupLabels?.join(', ') }
-                        )}
-                      </Typography>
-                    )}
-                    {groupingError && <Alert severity="error">{groupingError}</Alert>}
-                    {entries.map(({ key, metric, read }) => (
-                      <Stack key={key} spacing={1}>
-                        {(entries.length > 1 || metric.displayName !== chart.name) && (
-                          <Typography variant="subtitle2">{metric.displayName}</Typography>
-                        )}
-                        <Typography variant="body2">
-                          {t(
-                            'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
-                            {
-                              metric: metric.metricName,
-                              type: chart.dataType,
-                              aggregation: chart.aggregator ?? 'sum',
-                              scale: chart.unitScale ?? 1,
-                            }
-                          )}
-                        </Typography>
-                        {read.ok === false ? (
-                          <Alert severity="error">
-                            {entries.length > 1
-                              ? `${metric.displayName}: ${read.error.message}`
-                              : read.error.message}
-                          </Alert>
-                        ) : (
-                          <>
-                            {!!read.result.warnings.length && (
-                              <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
-                            )}
-                            {(entries.length > 1 || grouped) &&
-                              !read.result.series.some(series =>
-                                series.samples.some(sample => sample.value !== null)
-                              ) && (
-                                <Alert severity="info">
-                                  {t('No finite samples were returned for {{metric}}.', {
-                                    metric: metric.displayName,
-                                  })}
-                                </Alert>
-                              )}
-                          </>
-                        )}
-                      </Stack>
-                    ))}
-                    {successful.length > 0 &&
-                      (entries.length === 1 && !grouped ? (
-                        <MetricChart
-                          result={successful[0].result}
-                          title={title}
-                          unit={chart.unit ?? null}
-                          seriesName={entries[0].metric.displayName}
-                          min={chart.min}
-                          max={chart.max}
-                        />
-                      ) : (
-                        <MetricComparisonChart
-                          metrics={successful}
-                          title={title}
-                          unit={chart.unit ?? null}
-                          min={chart.min}
-                          max={chart.max}
-                        />
-                      ))}
-                  </SectionBox>
-                </Box>
-              );
-            })}
-          </Box>
-          <details>
-            <summary>{t('Show captured dashboard queries')}</summary>
-            {customDashboardJobs(data.query).map(job => (
-              <Typography
-                key={job.key}
-                component="pre"
-                sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
-              >
-                {job.expression}
+        <DashboardValueFilters data={data}>
+          {(charts, filters) => (
+            <Stack spacing={2}>
+              <Typography>
+                {t('Captured dashboard: {{title}}; namespace {{namespace}}; ending {{time}}', {
+                  title: data.query.dashboard.title,
+                  namespace: data.query.namespace,
+                  time: new Date(data.query.end * 1000).toISOString(),
+                })}
               </Typography>
-            ))}
-          </details>
-        </Stack>
+              <Alert severity="info">
+                {data.query.clusterLabel
+                  ? t('Captured metric cluster filter: {{label}} = {{value}}', {
+                      label: data.query.clusterLabel,
+                      value: data.query.metricCluster,
+                    })
+                  : t(
+                      'No dedicated metric-cluster selector was configured. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
+                    )}
+              </Alert>
+              {!!data.query.byLabels?.length && (
+                <Typography variant="body2">
+                  {t('Captured optional grouping labels: {{labels}}', {
+                    labels: data.query.byLabels.join(', '),
+                  })}
+                </Typography>
+              )}
+              {!!data.query.templateReferences?.length && (
+                <details>
+                  <summary>{t('Show captured dashboard template references')}</summary>
+                  <SimpleTable
+                    data={data.query.templateReferences}
+                    columns={[
+                      { label: t('Template'), getter: item => item.name },
+                      { label: t('Title'), getter: item => item.title },
+                    ]}
+                  />
+                </details>
+              )}
+              {!!Object.keys(data.query.labelsFilters ?? {}).length && (
+                <details>
+                  <summary>{t('Show captured dashboard label filters')}</summary>
+                  <SimpleTable
+                    data={Object.entries(data.query.labelsFilters ?? {})}
+                    columns={[
+                      { label: t('Metric label'), getter: ([key]: [string, string]) => key },
+                      {
+                        label: t('Literal value'),
+                        getter: ([, value]: [string, string]) =>
+                          value === '' ? t('Empty; also matches an omitted label') : value,
+                      },
+                    ]}
+                  />
+                </details>
+              )}
+              {filters}
+              <Box
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 2 }}
+              >
+                {groupedCharts(charts).map(([key, entries]) => {
+                  const { chart, summary, groupLabels } = entries[0];
+                  const grouped = !!groupLabels.length;
+                  const title = summary
+                    ? t('{{chart}} - {{summary}}', {
+                        chart: chart.name,
+                        summary: summaryNames[summary],
+                      })
+                    : chart.name;
+                  let successful: ComparisonMetric[] = entries.flatMap((entry, index) =>
+                    entry.read.ok
+                      ? [
+                          {
+                            name: entry.metric.displayName,
+                            result: entry.read.result,
+                            colorIndex: index,
+                          },
+                        ]
+                      : []
+                  );
+                  let groupingError: string | undefined;
+                  if (grouped) {
+                    try {
+                      successful = groupedMetricComparisons(successful, groupLabels).map(
+                        (metric, index) => ({ ...metric, colorIndex: index })
+                      );
+                    } catch (error) {
+                      successful = [];
+                      groupingError =
+                        error instanceof Error ? error.message : t('Grouped chart is unavailable');
+                    }
+                  }
+                  return (
+                    <Box
+                      key={key}
+                      component="section"
+                      aria-label={title}
+                      sx={{
+                        gridColumn: { xs: 'span 12', md: `span ${chart.spans ?? 12}` },
+                        minWidth: 0,
+                        overflowWrap: 'anywhere',
+                      }}
+                    >
+                      <SectionBox title={title}>
+                        {grouped && (
+                          <Typography variant="body2">
+                            {t(
+                              'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
+                              { labels: groupLabels.join(', ') }
+                            )}
+                          </Typography>
+                        )}
+                        {groupingError && <Alert severity="error">{groupingError}</Alert>}
+                        {entries.map(({ key, metric, read, hiddenSeries }) => (
+                          <Stack key={key} spacing={1}>
+                            {(entries.length > 1 || metric.displayName !== chart.name) && (
+                              <Typography variant="subtitle2">{metric.displayName}</Typography>
+                            )}
+                            <Typography variant="body2">
+                              {t(
+                                'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                                {
+                                  metric: metric.metricName,
+                                  type: chart.dataType,
+                                  aggregation: chart.aggregator ?? 'sum',
+                                  scale: chart.unitScale ?? 1,
+                                }
+                              )}
+                            </Typography>
+                            {read.ok === false ? (
+                              <Alert severity="error">
+                                {entries.length > 1
+                                  ? `${metric.displayName}: ${read.error.message}`
+                                  : read.error.message}
+                              </Alert>
+                            ) : (
+                              <>
+                                {!!read.result.warnings.length && (
+                                  <Alert severity="warning">
+                                    {read.result.warnings.join('; ')}
+                                  </Alert>
+                                )}
+                                {(entries.length > 1 || grouped) &&
+                                  !read.result.series.some(series =>
+                                    series.samples.some(sample => sample.value !== null)
+                                  ) && (
+                                    <Alert severity="info">
+                                      {hiddenSeries > 0
+                                        ? t(
+                                            'No finite samples are visible for {{metric}} with the current display filters.',
+                                            { metric: metric.displayName }
+                                          )
+                                        : t('No finite samples were returned for {{metric}}.', {
+                                            metric: metric.displayName,
+                                          })}
+                                    </Alert>
+                                  )}
+                              </>
+                            )}
+                          </Stack>
+                        ))}
+                        {successful.length > 0 &&
+                          (entries.length === 1 && !grouped ? (
+                            <MetricChart
+                              result={successful[0].result}
+                              title={title}
+                              unit={chart.unit ?? null}
+                              seriesName={entries[0].metric.displayName}
+                              min={chart.min}
+                              max={chart.max}
+                            />
+                          ) : (
+                            <MetricComparisonChart
+                              metrics={successful}
+                              title={title}
+                              unit={chart.unit ?? null}
+                              min={chart.min}
+                              max={chart.max}
+                            />
+                          ))}
+                      </SectionBox>
+                    </Box>
+                  );
+                })}
+              </Box>
+              <details>
+                <summary>{t('Show captured dashboard queries')}</summary>
+                {customDashboardJobs(data.query).map(job => (
+                  <Typography
+                    key={job.key}
+                    component="pre"
+                    sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
+                  >
+                    {job.expression}
+                  </Typography>
+                ))}
+              </details>
+            </Stack>
+          )}
+        </DashboardValueFilters>
       )}
     </RequestStatus>
   );
@@ -276,16 +299,23 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   const template =
     definition?.dashboards.find(item => item.name === selected) ?? definition?.dashboards[0];
   let resolved: ReturnType<typeof resolveCustomDashboard> | undefined;
+  let aggregations: DashboardAggregation[] = [];
   let resolutionError: string | undefined;
   if (template && definition) {
     try {
-      resolved = resolveCustomDashboard(definition.dashboards, template.name);
+      const result = resolveCustomDashboard(definition.dashboards, template.name);
+      aggregations = dashboardAggregationOptions(result.dashboard);
+      resolved = result;
     } catch (error) {
       resolutionError =
         error instanceof Error ? error.message : t('Dashboard composition is unavailable');
     }
   }
   const dashboard = resolved?.dashboard;
+  const groupingKey = JSON.stringify([binding, template?.name]);
+  const [grouping, setGrouping] = useState<{ key: string; labels: string[] }>();
+  useEffect(() => setGrouping(undefined), [groupingKey]);
+  const byLabels = grouping?.key === groupingKey ? grouping.labels : [];
   const hasHistograms = dashboard?.items.some(item => item.chart.dataType === 'histogram');
   const captureScope = (): CustomDashboardScopeQuery => {
     if (!definition) throw new Error(t('Configure dashboard definitions before querying'));
@@ -395,6 +425,43 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                   'Optional exact equality filters, for example {"job":"my-runtime"}. Up to 10 labels; namespace and configured metric-cluster labels cannot be replaced. Empty values also match missing labels. These drafts are captured only when loading and are not saved to settings or navigation URLs.'
                 )}
               />
+              {!!aggregations.length && (
+                <Stack spacing={1} role="group" aria-label={t('Optional metric grouping')}>
+                  <Typography>
+                    {t(
+                      'Optional grouping from aggregation declarations applies on the next explicit load, in addition to fixed groupLabels. Captured label values can be hidden separately without refetching.'
+                    )}
+                  </Typography>
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    {aggregations.map(option => (
+                      <FormControlLabel
+                        key={option.label}
+                        label={t('Group by {{name}} ({{label}})', {
+                          name: option.displayName,
+                          label: option.label,
+                        })}
+                        control={
+                          <Checkbox
+                            checked={byLabels.includes(option.label)}
+                            onChange={event => {
+                              const checked = event.target.checked;
+                              setGrouping(current => {
+                                const previous = current?.key === groupingKey ? current.labels : [];
+                                return {
+                                  key: groupingKey,
+                                  labels: checked
+                                    ? [...previous, option.label]
+                                    : previous.filter(label => label !== option.label),
+                                };
+                              });
+                            }}
+                          />
+                        }
+                      />
+                    ))}
+                  </Stack>
+                </Stack>
+              )}
               {hasHistograms && (
                 <Stack spacing={1}>
                   <Typography>
@@ -466,6 +533,9 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                     const next: CustomDashboardQuery = {
                       ...captureScope(),
                       dashboard: structuredClone(dashboard),
+                      byLabels: aggregations
+                        .filter(option => byLabels.includes(option.label))
+                        .map(option => option.label),
                       templateReferences: structuredClone(resolved.references),
                       ...(hasHistograms ? { histogramSummaries: [...summaries] } : {}),
                     };

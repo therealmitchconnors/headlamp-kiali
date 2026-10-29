@@ -22,7 +22,7 @@ export async function loadCustomDashboard(
     (response, range, key) => {
       const job = jobs.find(job => job.key === key);
       if (!job) throw new Error('Custom dashboard chart is missing from its captured request');
-      const groups = job.chart.groupLabels ?? [];
+      const groups = job.groupLabels;
       const metric = decodeGroupedRange(
         response,
         range,
@@ -73,6 +73,7 @@ export async function loadCustomDashboard(
         ...item,
         chart: job.chart,
         chartIndex: job.chartIndex,
+        groupLabels: job.groupLabels,
         metric: job.metric,
         ...(job.summary ? { summary: job.summary } : {}),
       };

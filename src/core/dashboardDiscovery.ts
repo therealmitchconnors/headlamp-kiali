@@ -5,6 +5,7 @@ import {
   metricName,
   validateCustomDashboardSettings,
 } from './customDashboards';
+import { compareGoStrings } from './goStrings';
 import { decodePrometheus, metricSelector } from './telemetry';
 
 export interface DashboardDiscoveryQuery extends CustomDashboardScopeQuery {
@@ -29,16 +30,6 @@ export function dashboardDiscoveryRequest(query: DashboardDiscoveryQuery) {
   if (parameters.toString().length > 16384)
     throw new Error('Encoded dashboard discovery query parameters exceed 16 KiB');
   return { templates, expression, parameters: parameters.toString() };
-}
-
-function compareUTF8(a: string, b: string): number {
-  const encoder = new TextEncoder();
-  const left = encoder.encode(a);
-  const right = encoder.encode(b);
-  for (let index = 0; index < Math.min(left.length, right.length); index++) {
-    if (left[index] !== right[index]) return left[index] - right[index];
-  }
-  return left.length - right.length;
 }
 
 export function matchDashboardRuntimes(
@@ -70,10 +61,10 @@ export function matchDashboardRuntimes(
     runtimes.set(name, runtime);
   }
   return [...runtimes.values()]
-    .sort((a, b) => compareUTF8(a.name, b.name))
+    .sort((a, b) => compareGoStrings(a.name, b.name))
     .map(runtime => ({
       ...runtime,
-      dashboards: runtime.dashboards.sort((a, b) => compareUTF8(a.name, b.name)),
+      dashboards: runtime.dashboards.sort((a, b) => compareGoStrings(a.name, b.name)),
     }));
 }
 
@@ -96,7 +87,7 @@ export function decodeDashboardDiscovery(response: unknown, query: DashboardDisc
   const wanted = new Set(
     plan.templates.flatMap(template => (template.discoverOn ? [template.discoverOn] : []))
   );
-  const observed = names.filter(name => wanted.has(name)).sort(compareUTF8);
+  const observed = names.filter(name => wanted.has(name)).sort(compareGoStrings);
   return {
     runtimes: matchDashboardRuntimes(plan.templates, observed),
     observed,

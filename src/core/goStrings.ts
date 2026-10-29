@@ -22,3 +22,13 @@ export function trimGoSpace(value: string): string {
   while (end > start && space(value.charCodeAt(end - 1))) end--;
   return value.slice(start, end);
 }
+
+export function compareGoStrings(a: string, b: string): number {
+  const encoder = new TextEncoder();
+  const left = encoder.encode(a);
+  const right = encoder.encode(b);
+  for (let index = 0; index < Math.min(left.length, right.length); index++) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return left.length - right.length;
+}

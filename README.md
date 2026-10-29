@@ -884,6 +884,29 @@ cards stack at full width for readability; this is a native responsive choice,
 not pixel-for-pixel reproduction of Kiali's layout. Histogram summary panels
 inherit the original chart's span and bounds.
 
+Use plural `aggregations` to declare optional grouping choices, for example
+`[{"label":"pod_name","displayName":"Pod","singleSelection":false}]`. These are
+label choices, not the numeric `aggregator` operation. Select **Group by ...**
+and explicitly load to append those labels after fixed `groupLabels`. The
+combined labels retain the four-label limit; repeating a fixed label is rejected
+rather than silently deduplicated.
+
+**Filter captured aggregation values (display only)** then offers observed
+values from successful responses. These controls change charts/tables locally,
+not requests, authorization or captured responses. Series lacking a label remain
+visible. `singleSelection: true` initially selects the first observed value and
+uses radio controls. Display selections reset on a new result and are not saved
+to settings or navigation URLs. Hidden-series counts are explicit; no hidden
+series is reported as an empty provider response.
+
+There are at most eight declarations per chart and 32 distinct display-name
+choices per dashboard. Repeated display names use the last declaration, following
+the source converter; aliases for one metric label use the last sorted display
+name. Aliases with conflicting `singleSelection` modes are rejected. Captured
+values remain bounded by eight responses/eight series/four labels each, with
+at most 64 values per label. Display filters do not relax provider-response limits;
+use the explicit server-side equality filters when a query returns too many groups.
+
 **Additional metric labels (JSON)** supplies up to ten exact equality filters,
 for example `{"job":"my-runtime","container":"reviews"}`. Values are literal
 strings; empty equality also matches an omitted label under Prometheus
@@ -910,8 +933,8 @@ samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
 
-This is **not full custom-dashboard parity**: dynamic aggregation pickers,
-sorting, native histograms, builtin runtime discovery, namespace/workload annotation
+This is **not full custom-dashboard parity**: sorting, native histograms,
+builtin runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget

@@ -926,6 +926,22 @@ safe-integer bounds, spans 1..12/default zero, 1,928 samples and the first exces
 sample. The new positive samples were synthetic; no writes occurred and all
 fixture settings/handlers were restored.
 
+For aggregation controls, save `aggregations` label/displayName declarations,
+load once without optional grouping, then check labels in reverse order and
+explicitly load. Request grouping must follow option-map order after fixed
+groupLabels, without changing scope or request count. Open captured-value
+filters and toggle ordinary, empty and `__proto__` values: only local charts/
+tables change, missing labels remain visible, and all-hidden is not reported as
+an empty provider response.
+
+Enable `singleSelection` and verify the first observed value, radio selection
+without refetch, and reset on a new captured result. Repeated fixed/optional
+labels and conflicting alias selection modes must fail before requests.
+Five hosted groups/six intercepted GETs covered these cases and corrected retry;
+axis/layout regressions passed. Core tests cover last-display-name conversion,
+UTF-8 ordering, alias handling, 32 choices and 64 observed values per label.
+All samples were synthetic, with no writes or retained fixture settings.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

@@ -70,6 +70,7 @@ label-grouped raw/rate/histogram queries and bounded independent-series comparis
 explicit saved-dashboard metric-name discovery and literal include suppression,
 preserved undeclared chart units without inferred physical dimensions,
 captured dashboard axis limits and twelve-column chart spans,
+optional aggregation grouping and captured label-value display selection,
 Service traffic-generation shapes/defaults,
 TCP traffic-shifting wizard generation,
 circuit-breaker wizard capabilities,
