@@ -273,7 +273,12 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Three hosted groups/eight intercepted GETs covered literal/empty values,
   rejected scope overrides and invalid/oversized inputs, and corrected retry.
   Shared range reads now enforce a 16 KiB encoded query-parameter budget.
-- **19,404 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
+- Named custom chart metrics now use pinned list-over-legacy precedence and
+  render as separate lines with aligned timestamps, explicit gaps and a
+  matching numeric comparison table. Five hosted groups/nine intercepted
+  reads verified persistence, labels, per-metric errors/stable colors,
+  histogram grouping, expansion bounds and legacy fallback.
+- **19,415 tests in 155 files**, with type/lint/schema/parity/i18n/build/package checks passing.
   Comparison metrics reject unexpected aggregation labels and mixed times.
   Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
   queries, 228 WorkloadEntry
@@ -299,7 +304,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `169e7db469206e8c5b8413679665b67083198add889ba970c8bd7f6ff425da0c`.
+  `ab26b9d6c8aa4609c6e9fd12044190a20ead0374f5c5ddaabd7b1041a2c72b08`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are

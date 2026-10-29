@@ -23,6 +23,15 @@ vi.mock('./MetricChart', () => ({
     </div>
   ),
 }));
+vi.mock('./MetricComparisonChart', () => ({
+  default: ({ title, metrics }: { title: string; metrics: { name: string }[] }) => (
+    <div role="img" aria-label={title}>
+      {metrics.map(metric => (
+        <span key={metric.name}>{metric.name}</span>
+      ))}
+    </div>
+  ),
+}));
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   SimpleTable: <T,>({
     data,
@@ -90,10 +99,12 @@ beforeEach(() => {
     .mockImplementation(async (_scope, _provider, query) => ({
       query,
       metrics: [],
-      charts: customDashboardJobs(query).map(({ chart, key, summary }) => ({
+      charts: customDashboardJobs(query).map(({ chart, key, summary, metric, chartIndex }) => ({
         key,
         chart,
         summary,
+        metric,
+        chartIndex,
         read: { ok: true, result: { warnings: [], series: [] } },
       })),
     }));
@@ -200,8 +211,7 @@ it('shows missing configuration and per-chart failure rather than an empty succe
     metrics: [],
     charts: [
       {
-        key: '0',
-        chart: query.dashboard.items[0].chart,
+        ...customDashboardJobs(query)[0],
         read: { ok: false, error: { kind: 'forbidden', message: 'Dashboard read denied' } },
       },
     ],
@@ -238,6 +248,28 @@ it('captures draft equality filters and blocks scope replacement before a read',
   fireEvent.change(field, { target: { value: '{}' } });
   expect(vi.mocked(loadCustomDashboard).mock.calls[0][2].labelsFilters?.job).toBe('runtime');
   expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
+it('groups declared metric comparisons under one chart per histogram summary', async () => {
+  const changed = structuredClone(configured);
+  Object.assign(changed.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    name: 'Capacity',
+    dataType: 'histogram',
+    metrics: [
+      { metricName: 'used', displayName: 'Used' },
+      { metricName: 'limit', displayName: 'Limit' },
+    ],
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(changed);
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Capacity - Average' });
+  expect(screen.getByRole('img', { name: 'Capacity - P95' })).toBeDefined();
+  expect(screen.getAllByRole('img')).toHaveLength(2);
+  expect(
+    vi
+      .mocked(loadCustomDashboard)
+      .mock.calls[0][2].dashboard.items[0].chart.metrics?.map(metric => metric.displayName)
+  ).toEqual(['Used', 'Limit']);
 });
 it('captures histogram summary selection and rejects empty selections without replay', async () => {
   const changed = structuredClone(configured);

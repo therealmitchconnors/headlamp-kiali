@@ -18,10 +18,12 @@ export default function MetricChart({
   result,
   title,
   unit,
+  seriesName,
 }: {
   result: MetricResult;
   title: string;
   unit: string;
+  seriesName?: string;
 }) {
   const { t } = useTranslation();
   const points = result.series.flatMap(series => series.samples);
@@ -48,7 +50,7 @@ export default function MetricChart({
               labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
             />
             <Line
-              name={unit}
+              name={seriesName ?? unit}
               dataKey="value"
               dot={available === 1}
               connectNulls={false}

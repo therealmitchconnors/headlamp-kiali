@@ -918,7 +918,7 @@ The original `Client.FetchRange` query-construction block and complete
 replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
-existing baseline. Template includes, grouped/multi-metric charts,
+existing baseline. Template includes and label-grouped charts,
 builtins, runtime discovery, namespace/workload annotations, layout contracts
 and external Grafana/Perses links remain unsupported and are rejected explicitly.
 
@@ -1005,6 +1005,34 @@ ten-label/encoded-size bounds and a corrected retry. No cluster reads beyond
 the fixture metrics, writes, or persisted filter drafts were introduced.
 This is native/contract evidence, not an additional independent Go oracle.
 Gates pass **19,404 tests in 153 files**.
+
+### Named multi-metric charts
+
+Charts now accept `metrics` entries containing `metricName` and `displayName`,
+following the pinned `MonitoringDashboardChart.GetMetrics` precedence:
+a nonempty list overrides the deprecated single `metricName`; otherwise the
+legacy metric and chart name supply one series. The native boundary additionally
+requires bounded, nonblank, distinct display names and valid metric identifiers.
+It preserves declared order and does not infer a unit or rename invalid fields.
+No new Go oracle cases are claimed for this source-inspected metadata behavior.
+
+Each metric and histogram summary counts toward the eight-query bound before
+expression construction or transport. Histogram comparisons are grouped into
+one panel per summary. The multi-line chart uses a union of returned timestamps,
+fills absent observations with null rather than zero, and never sums or
+extrapolates named metrics. At most eight 241-sample scalar series yield 1,928
+union rows. Table columns show the same named values, gaps and signed numbers.
+Failed metrics remain explicit; surviving series retain their declared color
+position on retry. The single-metric chart keeps its existing behavior, with
+an optional display-name label for custom metric tooltips.
+
+Five hosted groups issued nine intercepted metric GETs, checking Settings
+save/hard reload, legacy precedence, two real rendered lines/legend labels in
+one panel, signed/zero/gapped numeric data, independent failure with stable
+sibling color, two multi-metric histogram panels, expansion rejection and
+empty-list fallback. The earlier single-metric histogram fixture passed again.
+Runtime imports, screenshots and console were inspected; all samples in the
+new positive cases were synthetic. Gates pass **19,415 tests in 155 files**.
 
 ## Additional traffic counter signals
 

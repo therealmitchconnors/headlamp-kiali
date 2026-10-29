@@ -823,6 +823,16 @@ The hosted fixture observed eight GETs across three groups, with no writes
 or filters saved to settings/navigation. Core tests cover exactly 16,384
 encoded parameter characters and the first over-limit character.
 
+For named multi-metric charts, configure both a valid legacy `metricName` and
+a nonempty `metrics` list; only the list may be queried. Use offset timestamp
+sets to verify numeric alignment and explicit gaps, not summation/extrapolation.
+Deny the first metric and ensure the second remains visible with its original
+declared color. Switch to histogram mode and get one comparison panel per
+summary; five metrics times two summaries must fail before requests. Empty
+metrics must restore legacy fallback. Five hosted groups observed nine GETs,
+with no writes or persisted fixture settings. Pure comparison tests cover
+eight metrics, 241 samples each and 1,928 distinct union timestamps.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

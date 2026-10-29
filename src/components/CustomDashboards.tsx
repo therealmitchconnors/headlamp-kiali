@@ -24,7 +24,20 @@ import { useRequest } from '../hooks/useRequest';
 import { useTelemetryQuery } from '../hooks/useTelemetryQuery';
 import ClusterScope from './ClusterScope';
 import MetricChart from './MetricChart';
+import MetricComparisonChart from './MetricComparisonChart';
 import RequestStatus from './RequestStatus';
+
+type DashboardRead = Awaited<ReturnType<typeof loadCustomDashboard>>['charts'][number];
+function groupedCharts(charts: readonly DashboardRead[]) {
+  const groups = new Map<string, DashboardRead[]>();
+  for (const chart of charts) {
+    const key = JSON.stringify([chart.chartIndex, chart.summary ?? 'value']);
+    const group = groups.get(key) ?? [];
+    group.push(chart);
+    groups.set(key, group);
+  }
+  return [...groups];
+}
 
 function DashboardResults({
   cluster,
@@ -79,33 +92,70 @@ function DashboardResults({
               />
             </details>
           )}
-          {data.charts.map(({ key, chart, read, summary }) => {
+          {groupedCharts(data.charts).map(([key, entries]) => {
+            const { chart, summary } = entries[0];
             const title = summary
               ? t('{{chart}} - {{summary}}', { chart: chart.name, summary: summaryNames[summary] })
               : chart.name;
+            const successful = entries.flatMap((entry, index) =>
+              entry.read.ok
+                ? [{ name: entry.metric.displayName, result: entry.read.result, colorIndex: index }]
+                : []
+            );
             return (
               <SectionBox key={key} title={title}>
-                <Typography variant="body2">
-                  {t(
-                    'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
-                    {
-                      metric: chart.metricName,
-                      type: chart.dataType,
-                      aggregation: chart.aggregator ?? 'sum',
-                      scale: chart.unitScale ?? 1,
-                    }
-                  )}
-                </Typography>
-                {read.ok === false ? (
-                  <Alert severity="error">{read.error.message}</Alert>
-                ) : (
-                  <>
-                    {!!read.result.warnings.length && (
-                      <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+                {entries.map(({ key, metric, read }) => (
+                  <Stack key={key} spacing={1}>
+                    {(entries.length > 1 || metric.displayName !== chart.name) && (
+                      <Typography variant="subtitle2">{metric.displayName}</Typography>
                     )}
-                    <MetricChart result={read.result} title={title} unit={chart.unit} />
-                  </>
-                )}
+                    <Typography variant="body2">
+                      {t(
+                        'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                        {
+                          metric: metric.metricName,
+                          type: chart.dataType,
+                          aggregation: chart.aggregator ?? 'sum',
+                          scale: chart.unitScale ?? 1,
+                        }
+                      )}
+                    </Typography>
+                    {read.ok === false ? (
+                      <Alert severity="error">
+                        {entries.length > 1
+                          ? `${metric.displayName}: ${read.error.message}`
+                          : read.error.message}
+                      </Alert>
+                    ) : (
+                      <>
+                        {!!read.result.warnings.length && (
+                          <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+                        )}
+                        {entries.length > 1 &&
+                          !read.result.series.some(series =>
+                            series.samples.some(sample => sample.value !== null)
+                          ) && (
+                            <Alert severity="info">
+                              {t('No finite samples were returned for {{metric}}.', {
+                                metric: metric.displayName,
+                              })}
+                            </Alert>
+                          )}
+                      </>
+                    )}
+                  </Stack>
+                ))}
+                {successful.length > 0 &&
+                  (entries.length === 1 ? (
+                    <MetricChart
+                      result={successful[0].result}
+                      title={title}
+                      unit={chart.unit}
+                      seriesName={entries[0].metric.displayName}
+                    />
+                  ) : (
+                    <MetricComparisonChart metrics={successful} title={title} unit={chart.unit} />
+                  ))}
               </SectionBox>
             );
           })}
@@ -161,7 +211,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This native dashboard view supports aggregate raw gauges, counter rates and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. All matching series are aggregated; duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Includes, grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports named metrics on aggregate raw/rate charts and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Each metric aggregates its matching series; different metrics are compared, not added together. Duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Includes, grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>

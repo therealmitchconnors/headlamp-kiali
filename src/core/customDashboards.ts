@@ -5,11 +5,16 @@ import { metricSelector } from './telemetry';
 
 export interface CustomChart {
   name: string;
-  metricName: string;
+  metricName?: string;
+  metrics?: CustomDashboardMetric[];
   unit: string;
   dataType: 'raw' | 'rate' | 'histogram';
   aggregator?: 'sum' | 'avg' | 'min' | 'max';
   unitScale?: number;
+}
+export interface CustomDashboardMetric {
+  metricName: string;
+  displayName: string;
 }
 export interface CustomDashboard {
   name: string;
@@ -36,6 +41,8 @@ export interface CustomDashboardJob {
   chart: CustomChart;
   expression: string;
   summary?: HistogramSummary;
+  chartIndex: number;
+  metric: CustomDashboardMetric;
 }
 
 function keys(value: Record<string, unknown>, allowed: readonly string[], label: string) {
@@ -46,11 +53,13 @@ function keys(value: Record<string, unknown>, allowed: readonly string[], label:
 function text(value: unknown, maximum: number, label: string): string {
   if (
     typeof value !== 'string' ||
-    !value ||
+    !value.trim() ||
     value.length > maximum ||
     /[\u0000-\u001f\u007f]/.test(value)
   )
-    throw new Error(`${label} requires 1 to ${maximum} characters without controls`);
+    throw new Error(
+      `${label} requires 1 to ${maximum} characters with nonblank text and no controls`
+    );
   return value;
 }
 function metricName(value: unknown): string {
@@ -82,12 +91,31 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     const raw = item.chart;
     keys(
       raw,
-      ['name', 'metricName', 'unit', 'dataType', 'aggregator', 'unitScale'],
+      ['name', 'metricName', 'metrics', 'unit', 'dataType', 'aggregator', 'unitScale'],
       'Aggregate chart'
     );
     const name = text(raw.name, 256, 'Chart name');
     if (chartNames.has(name)) throw new Error('Dashboard chart names must be distinct');
     chartNames.add(name);
+    const legacyName =
+      raw.metricName === undefined || raw.metricName === null || raw.metricName === ''
+        ? undefined
+        : metricName(raw.metricName);
+    const rawMetrics = raw.metrics ?? [];
+    if (!Array.isArray(rawMetrics) || rawMetrics.length > 8)
+      throw new Error('A dashboard chart supports at most 8 metric declarations');
+    const displayNames = new Set<string>();
+    const metrics = rawMetrics.map(item => {
+      if (!isRecord(item)) throw new Error('Dashboard metrics require metricName and displayName');
+      keys(item, ['metricName', 'displayName'], 'Dashboard metric');
+      const displayName = text(item.displayName, 256, 'Metric display name');
+      if (displayNames.has(displayName))
+        throw new Error('Metric display names must be distinct within a chart');
+      displayNames.add(displayName);
+      return { metricName: metricName(item.metricName), displayName };
+    });
+    if (!metrics.length && !legacyName)
+      throw new Error('A dashboard chart requires metrics or a legacy metricName');
     if (raw.dataType !== 'raw' && raw.dataType !== 'rate' && raw.dataType !== 'histogram')
       throw new Error('Custom aggregate charts support only raw, rate or histogram dataType');
     const aggregator = raw.aggregator ?? 'sum';
@@ -106,7 +134,8 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     return {
       chart: {
         name,
-        metricName: metricName(raw.metricName),
+        ...(legacyName ? { metricName: legacyName } : {}),
+        ...(raw.metrics !== undefined ? { metrics } : {}),
         unit: text(raw.unit, 128, 'Chart unit'),
         dataType: raw.dataType,
         aggregator,
@@ -115,6 +144,11 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     };
   });
   return { name, title, items };
+}
+export function customChartMetrics(chart: CustomChart): CustomDashboardMetric[] {
+  if (chart.metrics?.length) return chart.metrics.map(metric => ({ ...metric }));
+  if (!chart.metricName) throw new Error('A dashboard chart has no effective metric');
+  return [{ metricName: chart.metricName, displayName: chart.name }];
 }
 export function validateCustomDashboardSettings(value: unknown): CustomDashboardSettings {
   if (!isRecord(value)) throw new Error('Custom dashboard settings must be an object');
@@ -156,33 +190,49 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
     ...additional,
   };
   const selector = `{${metricSelector(labels)}}`;
-  const jobs = dashboard.items.flatMap<CustomDashboardJob>(({ chart }, index) =>
-    chart.dataType === 'histogram'
-      ? histogramExpressions(
-          chart.metricName,
-          labels,
-          query.histogramSummaries ?? ['avg', 'p95']
-        ).map(({ summary, expression }) => ({
-          key: `${index}:${summary}`,
-          chart,
-          summary,
-          expression,
-        }))
-      : [
-          {
-            key: String(index),
-            chart,
-            expression:
-              chart.dataType === 'rate'
-                ? `sum(rate(${chart.metricName}${selector}[5m]))`
-                : `${chart.aggregator}(${chart.metricName}${selector})`,
-          },
-        ]
+  const charts = dashboard.items.map(({ chart }) => ({
+    chart,
+    metrics: customChartMetrics(chart),
+  }));
+  const count = charts.reduce(
+    (sum, { chart, metrics }) =>
+      sum +
+      metrics.length * (chart.dataType === 'histogram' ? query.histogramSummaries?.length ?? 2 : 1),
+    0
   );
-  if (jobs.length > 8)
-    throw new Error(
-      'Custom dashboards support at most 8 metric queries after expanding histogram summaries; reduce charts or selected summaries'
-    );
+  const budgetMessage =
+    'Custom dashboards support at most 8 metric queries after expanding histogram summaries and metric declarations; reduce charts, metrics or selected summaries';
+  if (count > 8) throw new Error(budgetMessage);
+  const jobs = charts.flatMap<CustomDashboardJob>(({ chart, metrics }, index) =>
+    metrics.flatMap<CustomDashboardJob>((metric, metricIndex) =>
+      chart.dataType === 'histogram'
+        ? histogramExpressions(
+            metric.metricName,
+            labels,
+            query.histogramSummaries ?? ['avg', 'p95']
+          ).map(({ summary, expression }) => ({
+            key: `${index}:${metricIndex}:${summary}`,
+            chart,
+            chartIndex: index,
+            metric,
+            summary,
+            expression,
+          }))
+        : [
+            {
+              key: `${index}:${metricIndex}:value`,
+              chart,
+              chartIndex: index,
+              metric,
+              expression:
+                chart.dataType === 'rate'
+                  ? `sum(rate(${metric.metricName}${selector}[5m]))`
+                  : `${chart.aggregator}(${metric.metricName}${selector})`,
+            },
+          ]
+    )
+  );
+  if (jobs.length > 8) throw new Error(budgetMessage);
   jobs.forEach(job => metricRangeParameters(query, job.expression));
   return jobs;
 }

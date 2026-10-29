@@ -784,6 +784,16 @@ null`, every source/settings change clears the form's required **single-cluster
 source confirmation**; Headlamp cannot verify that assertion. Do not omit the
 cluster selector for a shared multi-cluster data source.
 
+For several metrics on the same chart, replace `metricName` with a `metrics`
+list of `{"metricName":"used_bytes","displayName":"Used"}` entries. A nonempty
+list takes precedence over the legacy single field; an empty/absent list uses
+the legacy metric and chart name. Display names must be nonblank and distinct
+within a chart. Metrics share the chart's declared unit, scale and aggregation;
+they are drawn as separate named lines, never added together. The numeric
+comparison table preserves zero and missing-timestamp gaps. A failed metric
+is reported without hiding successful responses from its siblings or changing
+their declared series colors.
+
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
 samples; the pinned zero default means one. Overflow/underflow is an error,
@@ -815,8 +825,8 @@ samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
 
-This is **not full custom-dashboard parity**: includes, grouped/multi-metric
-charts, native histograms, builtin runtime discovery, namespace/workload annotation
+This is **not full custom-dashboard parity**: includes, label-grouped charts,
+native histograms, builtin runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget

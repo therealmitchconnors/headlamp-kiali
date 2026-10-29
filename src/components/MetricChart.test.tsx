@@ -16,8 +16,13 @@ vi.mock('recharts', () => ({
   Tooltip: () => null,
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Line: ({ dot, connectNulls }: { dot: boolean; connectNulls: boolean }) => (
-    <span data-testid="line" data-dot={String(dot)} data-connect={String(connectNulls)} />
+  Line: ({ dot, connectNulls, name }: { dot: boolean; connectNulls: boolean; name: string }) => (
+    <span
+      data-testid="line"
+      data-dot={String(dot)}
+      data-connect={String(connectNulls)}
+      data-name={name}
+    />
   ),
 }));
 afterEach(cleanup);
@@ -53,4 +58,15 @@ it('keeps unavailable samples explicit rather than drawing a zero series', () =>
   expect(
     screen.getByText('Samples are unavailable or non-finite. No zero values have been substituted.')
   ).toBeDefined();
+});
+it('uses an optional declared series label without changing the default unit label', () => {
+  const props = {
+    title: 'Capacity',
+    unit: 'bytes',
+    result: { warnings: [], series: [{ labels: {}, samples: [{ timestamp: 1, value: 1 }] }] },
+  };
+  const view = render(<MetricChart {...props} />);
+  expect(screen.getByTestId('line').getAttribute('data-name')).toBe('bytes');
+  view.rerender(<MetricChart {...props} seriesName="Used" />);
+  expect(screen.getByTestId('line').getAttribute('data-name')).toBe('Used');
 });

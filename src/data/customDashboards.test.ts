@@ -215,6 +215,50 @@ it('captures label filters and rejects oversized encoded expressions before any 
   ).rejects.toThrow('16 KiB');
   expect(ApiProxy.request).not.toHaveBeenCalled();
 });
+it('captures metric declarations before awaiting and retains per-metric failures and summary identity', async () => {
+  const input = query();
+  input.dashboard.items = [
+    {
+      chart: {
+        name: 'Capacity',
+        unit: 'bytes',
+        dataType: 'histogram',
+        metricName: 'legacy_ignored',
+        metrics: [
+          { metricName: 'used', displayName: 'Used' },
+          { metricName: 'limit', displayName: 'Limit' },
+        ],
+      },
+    },
+  ];
+  input.histogramSummaries = ['avg', 'p95'];
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const expression = new URL(String(path), 'http://example.test').searchParams.get('query') || '';
+    if (expression.includes('limit_bucket'))
+      throw { status: 403, message: 'Limit quantile denied' };
+    return matrix([[10000, '0']]);
+  });
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.dashboard.items[0].chart.metrics![0].metricName = 'changed';
+  const result = await pending;
+  expect(
+    result.charts.map(read => [read.chartIndex, read.metric.metricName, read.summary])
+  ).toEqual([
+    [0, 'used', 'avg'],
+    [0, 'used', 'p95'],
+    [0, 'limit', 'avg'],
+    [0, 'limit', 'p95'],
+  ]);
+  expect(result.charts[3].read).toMatchObject({ ok: false, error: { kind: 'forbidden' } });
+  for (const [path] of vi.mocked(ApiProxy.request).mock.calls) {
+    expect(String(path)).not.toMatch(/legacy_ignored|changed/);
+  }
+});
 it('rejects histogram expansion overflow before transport and caps a cancelled queue', async () => {
   const input = query();
   input.dashboard.items.forEach(item => {

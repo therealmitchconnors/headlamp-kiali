@@ -50,7 +50,13 @@ export async function loadCustomDashboard(
     charts: result.metrics.map(item => {
       const job = jobs.find(job => job.key === item.key);
       if (!job) throw new Error('Custom dashboard result has no captured chart');
-      return { ...item, chart: job.chart, ...(job.summary ? { summary: job.summary } : {}) };
+      return {
+        ...item,
+        chart: job.chart,
+        chartIndex: job.chartIndex,
+        metric: job.metric,
+        ...(job.summary ? { summary: job.summary } : {}),
+      };
     }),
   };
 }

@@ -1,5 +1,6 @@
 import oracleText from '../../test-files/parity/custom-dashboard-query-oracle.json?raw';
 import {
+  customChartMetrics,
   customDashboardJobs,
   CustomDashboardQuery,
   validateCustomDashboard,
@@ -164,8 +165,8 @@ it('expands classic histograms into exact average and selected quantile jobs', (
     dataType: 'histogram',
   };
   expect(customDashboardJobs(input).map(job => [job.key, job.summary])).toEqual([
-    ['0:avg', 'avg'],
-    ['0:p95', 'p95'],
+    ['0:0:avg', 'avg'],
+    ['0:0:p95', 'p95'],
   ]);
   input.histogramSummaries = ['avg', 'p50', 'p90', 'p95', 'p99'];
   const jobs = customDashboardJobs(input);
@@ -202,6 +203,70 @@ it('bounds expanded queries, not just chart count, and rejects unsupported summa
       items: [{ chart: { ...chart, dataType: 'histogram', aggregator: 'max' } }],
     })
   ).toThrow('sum aggregation');
+});
+it('uses nonempty metrics before the legacy metric field and preserves declared labels', () => {
+  const normalized = validateCustomDashboard({
+    ...dashboard,
+    items: [
+      {
+        chart: {
+          ...chart,
+          metricName: 'legacy_metric',
+          metrics: [
+            { metricName: 'used_bytes', displayName: 'Used' },
+            { metricName: 'limit_bytes', displayName: 'Limit' },
+          ],
+        },
+      },
+    ],
+  });
+  expect(customChartMetrics(normalized.items[0].chart)).toEqual([
+    { metricName: 'used_bytes', displayName: 'Used' },
+    { metricName: 'limit_bytes', displayName: 'Limit' },
+  ]);
+  const jobs = customDashboardJobs({ ...query(), dashboard: normalized });
+  expect(jobs.map(job => job.metric.displayName)).toEqual(['Used', 'Limit']);
+  expect(jobs.every(job => !job.expression.includes('legacy_metric'))).toBe(true);
+  expect(
+    customChartMetrics(
+      validateCustomDashboard({ ...dashboard, items: [{ chart: { ...chart, metrics: [] } }] })
+        .items[0].chart
+    )
+  ).toEqual([{ metricName: chart.metricName, displayName: chart.name }]);
+});
+it('validates metric declarations and counts metric-by-summary expansion before transport', () => {
+  const metrics = Array.from({ length: 4 }, (_, i) => ({
+    metricName: `metric_${i}`,
+    displayName: `Metric ${i}`,
+  }));
+  const value = validateCustomDashboard({
+    ...dashboard,
+    items: [{ chart: { ...chart, dataType: 'histogram', metrics } }],
+  });
+  expect(customDashboardJobs({ ...query(), dashboard: value })).toHaveLength(8);
+  value.items[0].chart.metrics!.push({ metricName: 'extra', displayName: 'Extra' });
+  expect(() => customDashboardJobs({ ...query(), dashboard: value })).toThrow('8 metric queries');
+  for (const invalid of [
+    { ...chart, metricName: undefined, metrics: [] },
+    { ...chart, metrics: [{ metricName: 'one', displayName: '' }] },
+    { ...chart, metrics: [{ metricName: 'one', displayName: '   ' }] },
+    {
+      ...chart,
+      metrics: [
+        { metricName: 'one', displayName: 'Same' },
+        { metricName: 'two', displayName: 'Same' },
+      ],
+    },
+    { ...chart, metrics: [{ metricName: 'sum(up)', displayName: 'Bad' }] },
+    {
+      ...chart,
+      metrics: Array.from({ length: 9 }, (_, i) => ({
+        metricName: `metric_${i}`,
+        displayName: `Metric ${i}`,
+      })),
+    },
+  ])
+    expect(() => validateCustomDashboard({ ...dashboard, items: [{ chart: invalid }] })).toThrow();
 });
 it('adds literal equality filters consistently without replacing mandatory scope', () => {
   const input = query();
