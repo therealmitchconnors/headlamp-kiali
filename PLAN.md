@@ -292,7 +292,17 @@ dashboards and integration/live/Desktop closure remain substantial work.
   failures, exact eight-line and 1,024-character boundaries and corrected retry.
   Named-metric and template regressions also passed. All new positive samples
   were synthetic; no writes occurred.
-- Latest grouping increment: **695 focused tests in 13 files**, plus
+- Explicit saved-template discovery now captures `discoverOn`/runtime metadata,
+  scope and instant, preserves literal include suppression separately from
+  trimmed composition, and never fetches charts merely by selecting a match.
+  Five hosted groups observed ten intercepted discovery GETs, three explicitly
+  loaded charts and a 15,101 ms timeout/retry. A separate real Bookinfo query
+  returned ten metric names and matched `istio_requests_total` under explicit
+  destination namespace/cluster/reporter selectors. This is metric presence,
+  not application-language evidence. Grouped-chart runtime regressions passed.
+- Latest discovery increment: **398 focused tests in nine files**, plus
+  type/lint/i18n/build/package and hosted checks passed.
+  Previous grouping increment: **695 focused tests in 13 files**, plus
   a final three-test chart-layout rerun and type/lint/i18n/build/package checks.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
@@ -324,7 +334,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `c94023a15e5db60987a7fd02d9fbada332747924d41ff84fc5322bacd3dad2d6`.
+  `b5267326bf691a7516414acb58e2b359f7c010c06b63a69fc1c7df45212d89a8`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -963,7 +973,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric/grouped charts with equality filters/template composition implemented; discovery, annotations, dynamic aggregations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric/grouped charts with equality filters/template composition and explicit saved-template discovery implemented; builtin/automatic discovery, annotations, dynamic aggregations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -984,15 +994,23 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is runtime discovery, built-in definitions and
-namespace/workload annotation overrides. Saved template composition and label
-grouping are complete for their documented bounded subsets. Preserve scalar
-decoding for ungrouped callers and independently bound grouped response/panel
-cardinality alongside the eight-query budget. The pinned discovery matcher uses
-literal include strings when suppressing standalone templates, whereas composition
-trims them; preserve or explicitly document that distinction before enabling
-discovery. App auto-discovery also depends on explicit Pod annotations, complete
-workload attribution and configured application-label selectors.
+The dashboard continuation is built-in definitions, automatic application
+discovery and namespace/workload annotation overrides. Explicit saved-template
+discovery, composition and label grouping are implemented for their documented
+bounded subsets. Literal includes are now preserved in settings for discovery;
+composition still trims them. App auto-discovery depends on explicit Pod
+annotations, complete workload attribution and configured application-label
+selectors.
+
+The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
+91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`
+and `aggregations`; no `chartType` or `xAxis` fields occur in that catalog.
+Implement the relevant unitless/chart-layout/axis/aggregation contracts before
+loading the catalog instead of silently dropping them. Keep the saved-user
+definition budget distinct from a bundled catalog, and account for include
+expansion and histogram query counts rather than simply raising every limit.
+Preserve strict scalar decoding for ungrouped callers and explicit response,
+panel and query cardinality limits.
 
 1. Extend remaining configuration checkers and Gateway listener/port/controller
    semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar

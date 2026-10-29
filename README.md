@@ -831,6 +831,32 @@ than ignored. Saved definitions stay unexpanded. Results capture the resolved
 charts and visited template names/titles; changing an included definition clears
 the capture without automatically querying again.
 
+For explicit discovery of saved definitions, add a template-level `discoverOn`
+metric name and optional `runtime` display label. **Discover saved dashboards**
+issues a single namespace/metric-cluster/filter-scoped `count(...) by (__name__)`
+query at the captured end instant, not across the selected chart time range.
+Results match exact returned metric names; a runtime label is your declaration,
+not proof that an application uses that runtime. Selecting a result changes the
+template draft without loading charts. Denials/timeouts remain failures, not an
+empty successful match.
+
+Following the pinned matcher, a matching parent suppresses a standalone child
+only when its **literal direct include** equals the child's name. `"child"`
+suppresses it; `" child "` and `"child$Chart"` do not. Include text is now
+preserved when saving and trimmed only for composition; previously saved
+canonical includes remain valid. Discovery does not resolve includes, so a
+matched definition can still have an error when loaded. No built-in catalog,
+Pod annotations or automatic application discovery is implied.
+
+Discovery accepts the same twenty saved definitions, protected equality filters
+and 16 KiB encoded-query bound, with at most 2,000 returned metric names and a
+15-second deadline. Counts are not interpreted as health or runtime evidence.
+`discoverOn` must be a canonical metric name without surrounding whitespace;
+raw selectors/PromQL and regex discovery expressions are not accepted.
+An actual Bookinfo discovery read matched `istio_requests_total` using explicit
+destination namespace, cluster `Kubernetes` and reporter selectors; no backend
+or new cluster component was installed.
+
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
 samples; the pinned zero default means one. Overflow/underflow is an error,

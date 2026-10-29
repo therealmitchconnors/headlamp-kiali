@@ -878,6 +878,29 @@ All new samples were synthetic; settings/handlers were restored and no writes
 occurred. Grouped query evidence expands the custom oracle from 45 to 216
 original-Go cases; it does not replace the separate built-in histogram oracle.
 
+For saved-template discovery, configure template-level `discoverOn` metric names
+and optional `runtime` labels. Preserve literal include text through Settings
+save/reload. Match parent/child names together: a literal `child` include suppresses
+the child, while ` child ` and `child$Chart` do not. All three still compose when
+explicitly loaded. Discovery must issue one captured instant count-by-name GET,
+never a chart request; selecting a result changes only the template draft.
+
+Check zero/nonfinite count values without treating them as health, unspecified
+runtime labels, returned warnings, draft independence and saved-definition
+invalidation. Reject duplicate names, extra dimensions and wrong timestamps.
+Keep denial and timeout separate from a valid empty result; cancel at fifteen
+seconds and retry explicitly. Five hosted groups observed ten discovery GETs,
+three explicit chart GETs and a 15,101 ms timeout. A real, unintercepted Bookinfo
+query returned ten names and matched `istio_requests_total` using
+`destination_workload_namespace`, `destination_cluster="Kubernetes"` and the
+destination reporter. No workload-language or health inference was made.
+All settings/handlers were restored, with no cluster writes.
+
+Stock Headlamp's Select role can differ from the SDK test renderer. Inspect the
+rendered labelled control and form value rather than assuming a `combobox` role.
+Its request errors can also prefix provider text with `Forbidden -`; verify the
+classification and detail without assuming the unit-test mock's exact prefix.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

@@ -47,6 +47,8 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - Headlamp 0.35.0 also expects CommonComponents `Link.search` to be a string.
   Serialize query parameters with URLSearchParams rather than passing the
   object form accepted by newer SDK declarations.
+- The stock host's Select role can differ from the SDK test renderer. Inspect
+  the rendered labelled control and form value rather than assuming `combobox`.
 - `Link.activeCluster` preserves the currently selected cluster group. For
   navigation from a multi-context comparison to a single-cluster Kiali page,
   pass `params={{ cluster: target }}` instead; otherwise the link can retain

@@ -4,7 +4,9 @@ import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { customDashboardJobs, CustomDashboardTemplate } from '../core/customDashboards';
+import { decodeDashboardDiscovery } from '../core/dashboardDiscovery';
 import { loadCustomDashboard } from '../data/customDashboards';
+import { discoverCustomDashboards } from '../data/dashboardDiscovery';
 import CustomDashboards from './CustomDashboards';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
@@ -16,6 +18,7 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
 }));
 vi.mock('../config', () => ({ useKialiConfig: vi.fn() }));
 vi.mock('../data/customDashboards', () => ({ loadCustomDashboard: vi.fn() }));
+vi.mock('../data/dashboardDiscovery', () => ({ discoverCustomDashboards: vi.fn() }));
 vi.mock('./MetricChart', () => ({
   default: ({ title, unit }: { title: string; unit: string }) => (
     <div role="img" aria-label={title}>
@@ -96,6 +99,7 @@ const configured = {
   },
 };
 beforeEach(() => {
+  vi.mocked(discoverCustomDashboards).mockReset();
   vi.mocked(useKialiConfig).mockReturnValue(configured);
   vi.mocked(loadCustomDashboard)
     .mockReset()
@@ -469,3 +473,82 @@ it.each(['normal', 'overflow', 'empty', 'failure'])(
     }
   }
 );
+
+it('discovers saved definitions with captured scope, selects without loading and invalidates on source changes', async () => {
+  const definitions = [
+    {
+      ...configured.config.clusters.alpha.customDashboards.dashboards[0],
+      discoverOn: 'runtime_info',
+      runtime: 'Go',
+    },
+    {
+      ...configured.config.clusters.alpha.customDashboards.dashboards[0],
+      name: 'other',
+      title: 'Other',
+      discoverOn: 'runtime_info',
+      runtime: 'Go',
+    },
+  ];
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates(definitions));
+  vi.mocked(discoverCustomDashboards).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    expression: 'captured discovery',
+    ...decodeDashboardDiscovery(
+      {
+        status: 'success',
+        data: {
+          resultType: 'vector',
+          result: [{ metric: { __name__: 'runtime_info' }, value: [query.end, '0'] }],
+        },
+      },
+      query
+    ),
+  }));
+  const view = open();
+  await userEvent.click(screen.getByRole('button', { name: 'Discover saved dashboards' }));
+  await screen.findByRole('button', { name: 'Select other' });
+  const captured = vi.mocked(discoverCustomDashboards).mock.calls[0][2];
+  const signal = vi.mocked(discoverCustomDashboards).mock.calls[0][3];
+  expect(captured.namespace).toBe('bookinfo');
+  expect(captured.metricCluster).toBe('east');
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('button', { name: 'Select other' }));
+  expect(screen.getByRole('combobox', { name: 'Dashboard template' }).textContent).toBe('Other');
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Dashboard namespace'), { target: { value: 'draft' } });
+  expect(captured.namespace).toBe('bookinfo');
+  expect(discoverCustomDashboards).toHaveBeenCalledTimes(1);
+  const changed = withTemplates(structuredClone(definitions));
+  changed.config.clusters.alpha.prometheus = {
+    ...changed.config.clusters.alpha.prometheus,
+    service: 'changed',
+  };
+  vi.mocked(useKialiConfig).mockReturnValue(changed);
+  view.rerender(
+    <MemoryRouter>
+      <CustomDashboards />
+    </MemoryRouter>
+  );
+  expect(screen.queryByRole('button', { name: 'Select other' })).toBeNull();
+  expect(signal.aborted).toBe(true);
+  expect(discoverCustomDashboards).toHaveBeenCalledTimes(1);
+});
+it('does not present a discovery denial as an empty successful match', async () => {
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates([
+      {
+        ...configured.config.clusters.alpha.customDashboards.dashboards[0],
+        discoverOn: 'runtime_info',
+      },
+    ])
+  );
+  vi.mocked(discoverCustomDashboards).mockRejectedValue({
+    status: 403,
+    message: 'Discovery denied',
+  });
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Discover saved dashboards' }));
+  await screen.findByText('Access denied: Discovery denied');
+  expect(screen.queryByText(/No saved dashboard templates matched/)).toBeNull();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+});

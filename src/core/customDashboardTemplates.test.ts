@@ -59,7 +59,7 @@ it('trims Go edge whitespace and gives a nonempty include precedence over a vali
   const value = validateCustomDashboardTemplate(
     template('root', [{ include: '\u0085 \t leaf$Chosen \n\u0085', ...chart('Shadow') }])
   );
-  expect(value.items[0].include).toBe('leaf$Chosen');
+  expect(value.items[0].include).toBe('\u0085 \t leaf$Chosen \n\u0085');
   expect(value.items[0].chart?.name).toBe('Shadow');
   expect(
     resolveCustomDashboard([value, template('leaf', [chart('Chosen')])], 'root').dashboard.items[0]

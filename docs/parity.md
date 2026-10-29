@@ -919,7 +919,7 @@ replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
 existing baseline. Template includes and label-grouped charts are covered below;
-builtins, runtime discovery, namespace/workload annotations, layout contracts
+builtins, automatic application-runtime discovery, namespace/workload annotations, layout contracts
 and external Grafana/Perses links remain unsupported and are rejected explicitly.
 
 The shared metric-range reader now accepts a common captured time-range shape,
@@ -1117,6 +1117,51 @@ The increment passed **695 focused tests in 13 files**, a final three-test
 chart-layout rerun, type/lint/i18n/build/package gates and the expanded Go oracle/
 catalog checks. Full-suite evidence remains the earlier 19,415-test checkpoint;
 finding coverage remains 38 bounded codes.
+
+### Explicit saved-template discovery
+
+Optional template-level `discoverOn` and `runtime` fields support an explicit
+discovery action. The reader follows pinned `GetMetricsForLabels` query shape,
+`count({captured labels}) by (__name__)`, using one captured instant and retaining
+the native explicit metric-cluster selector/acknowledgment contract. Responses
+must be bounded vectors with only `__name__`, unique valid names and matching
+sample timestamps. At most 2,000 names are decoded, then only configured
+`discoverOn` names are retained. The source matcher uses names, not count values;
+zero or nonfinite counts therefore do not become health/runtime verdicts.
+
+Matching definitions are grouped by their declared runtime label, including an
+explicit unspecified group. UTF-8 ordering follows Go for runtime names; template
+references are sorted deterministically rather than copying Go map iteration
+order. Only a matching parent's literal direct include suppresses a standalone
+matching child. Whitespace includes and chart-specific `$` includes do not
+suppress a base template. Include strings now preserve their input text in
+settings; composition still trims at resolution. Existing canonical settings
+retain their behavior. Discovery never resolves missing/cyclic dependencies.
+
+The native schema requires canonical `discoverOn` metric names instead of
+silently trimming a value that the source fetcher's wanted-name filter would
+not match. Queries, definitions, source settings and scope are captured before
+I/O, with a 16 KiB encoded-parameter limit and 15-second deadline. Definition/
+source changes invalidate discovery without replay. Selection only changes the
+template draft; chart fetching remains explicit. Transport/decoder failures
+never become successful empty discovery.
+
+This is source-inspected native functionality, not a new Go-oracle claim.
+Built-in catalog loading, automatic app/Pod-label selection, annotations and
+discovery-auto threshold behavior remain open.
+
+Five hosted groups issued ten intercepted discovery GETs and three explicitly
+requested chart GETs. They verified metadata/literal-include persistence,
+source-compatible suppression and composition, selection without fetching,
+captured drafts, definition invalidation, denied/malformed/empty responses,
+a **15,101 ms** timeout and corrected retry. Grouped-chart regressions passed
+again. A separate unintercepted Bookinfo read returned ten metric names and
+matched `istio_requests_total` under explicit destination-namespace, cluster
+`Kubernetes` and reporter selectors. That demonstrates metric-name presence,
+not an application-language runtime. Settings/handlers were restored and no
+Kubernetes writes occurred. The increment passed **398 focused tests in nine
+files**, type/lint/i18n/build/package checks and actual contribution/console
+inspection. Independent original-Go evidence remains 17,620 cases.
 
 ## Additional traffic counter signals
 

@@ -15,9 +15,11 @@ import { getClusterConfig, ServiceEndpoint } from '../core/config';
 import {
   customDashboardJobs,
   CustomDashboardQuery,
+  CustomDashboardScopeQuery,
   dashboardLabelFilters,
   resolveCustomDashboard,
 } from '../core/customDashboards';
+import { DashboardDiscoveryQuery, dashboardDiscoveryRequest } from '../core/dashboardDiscovery';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { ComparisonMetric, groupedMetricComparisons } from '../core/metricComparison';
 import { clusterScope } from '../core/scope';
@@ -25,6 +27,7 @@ import { loadCustomDashboard } from '../data/customDashboards';
 import { useRequest } from '../hooks/useRequest';
 import { useTelemetryQuery } from '../hooks/useTelemetryQuery';
 import ClusterScope from './ClusterScope';
+import DashboardDiscovery from './DashboardDiscovery';
 import MetricChart from './MetricChart';
 import MetricComparisonChart from './MetricComparisonChart';
 import RequestStatus from './RequestStatus';
@@ -238,6 +241,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   useEffect(() => setError(''), [binding]);
   const { identity, setIdentity, query, setQuery, capturedSettings } =
     useTelemetryQuery<CustomDashboardQuery>(binding, settings);
+  const discovery = useTelemetryQuery<DashboardDiscoveryQuery>(binding, settings);
   const template =
     definition?.dashboards.find(item => item.name === selected) ?? definition?.dashboards[0];
   let resolved: ReturnType<typeof resolveCustomDashboard> | undefined;
@@ -252,6 +256,23 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   }
   const dashboard = resolved?.dashboard;
   const hasHistograms = dashboard?.items.some(item => item.chart.dataType === 'histogram');
+  const captureScope = (): CustomDashboardScopeQuery => {
+    if (!definition) throw new Error(t('Configure dashboard definitions before querying'));
+    return {
+      namespace,
+      metricCluster: identity,
+      minutes,
+      end: current ? Math.floor(Date.now() / 1000) : Math.floor(new Date(endTime).getTime() / 1000),
+      namespaceLabel: definition.namespaceLabel,
+      clusterLabel: definition.clusterLabel,
+      singleClusterConfirmed: acknowledged === binding,
+      labelsFilters: dashboardLabelFilters(
+        JSON.parse(filterText),
+        definition.namespaceLabel,
+        definition.clusterLabel
+      ),
+    };
+  };
   return (
     <Stack spacing={2}>
       <SectionBox title={t('Custom aggregate dashboards')} headerProps={{ headerStyle: 'main' }}>
@@ -412,22 +433,9 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                     if (!dashboard || !resolved)
                       throw new Error(resolutionError ?? t('Choose a configured dashboard'));
                     const next: CustomDashboardQuery = {
-                      namespace,
-                      metricCluster: identity,
-                      minutes,
-                      end: current
-                        ? Math.floor(Date.now() / 1000)
-                        : Math.floor(new Date(endTime).getTime() / 1000),
-                      namespaceLabel: definition.namespaceLabel,
-                      clusterLabel: definition.clusterLabel,
-                      singleClusterConfirmed: acknowledged === binding,
+                      ...captureScope(),
                       dashboard: structuredClone(dashboard),
                       templateReferences: structuredClone(resolved.references),
-                      labelsFilters: dashboardLabelFilters(
-                        JSON.parse(filterText),
-                        definition.namespaceLabel,
-                        definition.clusterLabel
-                      ),
                       ...(hasHistograms ? { histogramSummaries: [...summaries] } : {}),
                     };
                     customDashboardJobs(next);
@@ -443,6 +451,38 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
               >
                 {t('Load custom dashboard')}
               </Button>
+              {definition.dashboards.some(template => template.discoverOn) && (
+                <>
+                  <Typography variant="body2">
+                    {t(
+                      'Saved-template discovery checks exact discoverOn metric names at the captured end instant. The time-range length and histogram-summary selections do not affect discovery. It does not import a built-in catalog or automatically inspect applications.'
+                    )}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      try {
+                        const next: DashboardDiscoveryQuery = {
+                          ...captureScope(),
+                          templates: structuredClone(definition.dashboards),
+                        };
+                        dashboardDiscoveryRequest(next);
+                        setError('');
+                        discovery.setQuery(next);
+                      } catch (error) {
+                        discovery.setQuery(undefined);
+                        setError(
+                          error instanceof Error
+                            ? error.message
+                            : t('Invalid dashboard discovery selection')
+                        );
+                      }
+                    }}
+                  >
+                    {t('Discover saved dashboards')}
+                  </Button>
+                </>
+              )}
             </>
           )}
           {(error || resolutionError) && <Alert severity="error">{error || resolutionError}</Alert>}
@@ -450,6 +490,17 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
       </SectionBox>
       {query && capturedSettings?.prometheus && (
         <DashboardResults cluster={cluster} endpoint={capturedSettings.prometheus} query={query} />
+      )}
+      {discovery.query && discovery.capturedSettings?.prometheus && (
+        <DashboardDiscovery
+          cluster={cluster}
+          endpoint={discovery.capturedSettings.prometheus}
+          query={discovery.query}
+          onSelect={name => {
+            setSelected(name);
+            setError('');
+          }}
+        />
       )}
     </Stack>
   );
