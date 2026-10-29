@@ -8,7 +8,19 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
       key.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key] ?? ''),
   }),
 }));
-vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({ SimpleTable: () => <table /> }));
+vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
+  SimpleTable: ({ columns }: { columns: { label: string }[] }) => (
+    <table>
+      <thead>
+        <tr>
+          {columns.map(column => (
+            <th key={column.label}>{column.label}</th>
+          ))}
+        </tr>
+      </thead>
+    </table>
+  ),
+}));
 vi.mock('recharts', () => ({
   CartesianGrid: () => null,
   XAxis: () => null,
@@ -69,4 +81,17 @@ it('uses an optional declared series label without changing the default unit lab
   expect(screen.getByTestId('line').getAttribute('data-name')).toBe('bytes');
   view.rerender(<MetricChart {...props} seriesName="Used" />);
   expect(screen.getByTestId('line').getAttribute('data-name')).toBe('Used');
+});
+it('uses an explicit unspecified-unit disclosure and neutral value labels', () => {
+  const props = {
+    title: 'Untyped measurement',
+    unit: null,
+    result: { warnings: [], series: [{ labels: {}, samples: [{ timestamp: 1, value: 0 }] }] },
+  };
+  const view = render(<MetricChart {...props} />);
+  expect(screen.getByText('Unit not specified by the chart definition.')).toBeDefined();
+  expect(screen.getByTestId('line').getAttribute('data-name')).toBe('Value');
+  expect(screen.getByRole('columnheader', { name: 'Value' })).toBeDefined();
+  view.rerender(<MetricChart {...props} seriesName="Observed count" />);
+  expect(screen.getByTestId('line').getAttribute('data-name')).toBe('Observed count');
 });

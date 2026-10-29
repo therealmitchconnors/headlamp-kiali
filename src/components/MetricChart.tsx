@@ -22,7 +22,7 @@ export default function MetricChart({
 }: {
   result: MetricResult;
   title: string;
-  unit: string;
+  unit: string | null;
   seriesName?: string;
 }) {
   const { t } = useTranslation();
@@ -36,7 +36,9 @@ export default function MetricChart({
     );
   return (
     <Stack spacing={1}>
-      <Typography variant="body2">{t('Unit: {{unit}}', { unit })}</Typography>
+      <Typography variant="body2">
+        {unit ? t('Unit: {{unit}}', { unit }) : t('Unit not specified by the chart definition.')}
+      </Typography>
       <div role="img" aria-label={title}>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={points}>
@@ -50,7 +52,7 @@ export default function MetricChart({
               labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
             />
             <Line
-              name={seriesName ?? unit}
+              name={seriesName ?? (unit || t('Value'))}
               dataKey="value"
               dot={available === 1}
               connectNulls={false}
@@ -70,7 +72,7 @@ export default function MetricChart({
                 new Date(point.timestamp * 1000).toLocaleString(),
             },
             {
-              label: unit,
+              label: unit || t('Value'),
               getter: (point: { value: number | null }) =>
                 point.value === null ? t('Unavailable') : point.value.toPrecision(5),
             },

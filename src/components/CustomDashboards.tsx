@@ -189,11 +189,15 @@ function DashboardResults({
                     <MetricChart
                       result={successful[0].result}
                       title={title}
-                      unit={chart.unit}
+                      unit={chart.unit ?? null}
                       seriesName={entries[0].metric.displayName}
                     />
                   ) : (
-                    <MetricComparisonChart metrics={successful} title={title} unit={chart.unit} />
+                    <MetricComparisonChart
+                      metrics={successful}
+                      title={title}
+                      unit={chart.unit ?? null}
+                    />
                   ))}
               </SectionBox>
             );

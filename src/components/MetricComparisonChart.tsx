@@ -32,7 +32,7 @@ export default function MetricComparisonChart({
 }: {
   metrics: ComparisonMetric[];
   title: string;
-  unit: string;
+  unit: string | null;
 }) {
   const { t } = useTranslation();
   const grouped = metrics.some(metric => metric.group !== undefined);
@@ -54,11 +54,16 @@ export default function MetricComparisonChart({
     );
   return (
     <Stack spacing={1}>
-      <Typography variant="body2">{t('Unit: {{unit}}', { unit })}</Typography>
       <Typography variant="body2">
-        {t(
-          'Metrics share the declared chart unit. Missing timestamps stay gaps; lines are not summed or extrapolated.'
-        )}
+        {unit ? t('Unit: {{unit}}', { unit }) : t('Unit not specified by the chart definition.')}
+      </Typography>
+      {!unit && (
+        <Typography variant="body2">
+          {t('No unit is declared. Check metric dimensions before comparing these values.')}
+        </Typography>
+      )}
+      <Typography variant="body2">
+        {t('Missing timestamps stay gaps; lines are not summed or extrapolated.')}
       </Typography>
       <div role="img" aria-label={title}>
         <ResponsiveContainer width="100%" height={260}>

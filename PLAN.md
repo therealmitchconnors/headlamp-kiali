@@ -300,7 +300,14 @@ dashboards and integration/live/Desktop closure remain substantial work.
   returned ten metric names and matched `istio_requests_total` under explicit
   destination namespace/cluster/reporter selectors. This is metric presence,
   not application-language evidence. Grouped-chart runtime regressions passed.
-- Latest discovery increment: **398 focused tests in nine files**, plus
+- Charts now preserve unspecified units rather than inventing physical dimensions.
+  Scalar tables use a neutral Value heading; grouped/named comparisons disclose
+  the missing unit and dimensional uncertainty. Three hosted groups/five GETs
+  verified persistence, scaled signed/zero values, real grouped lines and a
+  subsequent declared-unit change. Samples were synthetic and no writes occurred.
+- Latest unitless increment: **390 focused tests in nine files**, plus
+  type/lint/i18n/build/package and hosted checks passed.
+  Previous discovery increment: **398 focused tests in nine files**, plus
   type/lint/i18n/build/package and hosted checks passed.
   Previous grouping increment: **695 focused tests in 13 files**, plus
   a final three-test chart-layout rerun and type/lint/i18n/build/package checks.
@@ -334,7 +341,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `b5267326bf691a7516414acb58e2b359f7c010c06b63a69fc1c7df45212d89a8`.
+  `bd88e9e5a567e8bdff95f09c85e6dd8a451deb156f827a87f31f6b7450e5f96d`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1005,7 +1012,8 @@ selectors.
 The pinned `config/dashboards/dashboards.go` catalog contains **21 templates and
 91 inline charts, 42 without a unit**. Its extra chart fields are `spans`, `min`
 and `aggregations`; no `chartType` or `xAxis` fields occur in that catalog.
-Implement the relevant unitless/chart-layout/axis/aggregation contracts before
+Unitless charts are now supported explicitly. Implement the remaining
+chart-layout/axis/aggregation contracts before
 loading the catalog instead of silently dropping them. Keep the saved-user
 definition budget distinct from a bundled catalog, and account for include
 expansion and histogram query counts rather than simply raising every limit.

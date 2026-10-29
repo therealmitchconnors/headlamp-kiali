@@ -864,6 +864,13 @@ not a zero substitution. Matching series are aggregated within each selected
 group, or into one aggregate without grouping; duplicate scrapes
 and metric-specific dimensions are not deduplicated.
 
+The `unit` field is optional. Omitted, null or empty units stay **unspecified**;
+the plugin does not infer a dimension from a metric name or replace it with a
+physical unit. Scalar tables use a neutral **Value** heading, and comparisons
+explicitly warn that metric dimensions must be checked. `unitScale` still applies
+without declaring a unit. Nonempty units retain their existing display behavior;
+malformed or whitespace-only unit values remain errors.
+
 **Additional metric labels (JSON)** supplies up to ten exact equality filters,
 for example `{"job":"my-runtime","container":"reviews"}`. Values are literal
 strings; empty equality also matches an omitted label under Prometheus

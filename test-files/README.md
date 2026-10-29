@@ -901,6 +901,15 @@ rendered labelled control and form value rather than assuming a `combobox` role.
 Its request errors can also prefix provider text with `Forbidden -`; verify the
 classification and detail without assuming the unit-test mock's exact prefix.
 
+For undeclared units, omit `unit`, save and hard reload; no unit property should
+be invented. Load a metric whose name ends in `_bytes` and retain the explicit
+unspecified-unit disclosure instead of guessing bytes. Scalar numeric headers
+must say Value, and signed/zero values must still obey unitScale. Add grouped
+named metrics and verify the dimensional-compatibility warning and actual lines.
+Then explicitly declare a unit and restore normal labeling without extra queries.
+Three hosted groups/five intercepted GETs covered these cases. All samples were
+synthetic, with no writes or retained fixture settings.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

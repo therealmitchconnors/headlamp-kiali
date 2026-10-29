@@ -9,7 +9,7 @@ export interface CustomChart {
   name: string;
   metricName?: string;
   metrics?: CustomDashboardMetric[];
-  unit: string;
+  unit?: string;
   dataType: 'raw' | 'rate' | 'histogram';
   aggregator?: 'sum' | 'avg' | 'min' | 'max';
   unitScale?: number;
@@ -178,7 +178,9 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
         ...(legacyName ? { metricName: legacyName } : {}),
         ...(raw.metrics !== undefined ? { metrics } : {}),
         ...(raw.groupLabels !== undefined ? { groupLabels } : {}),
-        unit: text(raw.unit, 128, 'Chart unit'),
+        ...(raw.unit === undefined || raw.unit === null || raw.unit === ''
+          ? {}
+          : { unit: text(raw.unit, 128, 'Chart unit') }),
         dataType: raw.dataType,
         aggregator,
         unitScale: scale === 0 ? 1 : scale,

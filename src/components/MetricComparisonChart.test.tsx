@@ -86,6 +86,26 @@ it('renders distinct named series and a numeric table preserving gaps and zero',
   expect(screen.getByText('0.0000')).toBeDefined();
   expect(screen.getAllByText('Unavailable')).toHaveLength(2);
 });
+it('does not claim a shared physical unit when a comparison omits its unit', () => {
+  render(
+    <MetricComparisonChart
+      title="Unknown dimensions"
+      unit={null}
+      metrics={[
+        {
+          name: 'Observed',
+          result: { warnings: [], series: [{ labels: {}, samples: [{ timestamp: 1, value: 0 }] }] },
+        },
+      ]}
+    />
+  );
+  expect(screen.getByText('Unit not specified by the chart definition.')).toBeDefined();
+  expect(
+    screen.getByText('No unit is declared. Check metric dimensions before comparing these values.')
+  ).toBeDefined();
+  expect(screen.getByRole('columnheader', { name: 'Observed' })).toBeDefined();
+  expect(screen.getByText('0.0000')).toBeDefined();
+});
 it('shows all-unavailable and invalid inputs without fabricating a chart', () => {
   const view = render(
     <MetricComparisonChart

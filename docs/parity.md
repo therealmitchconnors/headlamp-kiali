@@ -1163,6 +1163,26 @@ Kubernetes writes occurred. The increment passed **398 focused tests in nine
 files**, type/lint/i18n/build/package checks and actual contribution/console
 inspection. Independent original-Go evidence remains 17,620 cases.
 
+### Charts without declared units
+
+The pinned `ConvertChart` copies its unit string without inferring one; 42 of
+the 91 inline built-in charts omit that field. Native chart definitions now
+accept absent/null/empty units and preserve the absence. Shared chart components
+require an explicit nullable unit argument, so other callers cannot accidentally
+omit an expected unit. Missing units produce an explicit disclosure, a neutral
+scalar-table `Value` heading and a dimensional-compatibility warning for
+comparisons. Declared metric names remain tooltip/legend identities. Scaling,
+signed values, gaps and zero retain their existing semantics; a scale factor is
+not evidence of a unit. Invalid nonempty declarations remain errors.
+
+Three hosted groups/five intercepted GETs verified saved omission and reload,
+an actual scalar line with neutral numeric headers, signed/zero scaling,
+four named/grouped lines with dimension warnings despite bytes-like metric
+names, and a declared-unit update. All samples were synthetic. The increment
+passed **390 focused tests in nine files** and type/lint/i18n/build/package
+checks; settings and handlers were restored with no Kubernetes writes.
+Original-Go evidence remains 17,620 cases.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

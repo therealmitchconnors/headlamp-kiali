@@ -57,6 +57,29 @@ const query = (): CustomDashboardQuery => ({
   minutes: 15,
   end: 10000,
 });
+it.each([undefined, null, ''])(
+  'keeps unspecified unit %# distinct from a declared physical unit',
+  unit => {
+    const result = validateCustomDashboard({
+      ...dashboard,
+      items: [{ chart: { ...chart, unit, unitScale: 0.001 } }],
+    });
+    expect(result.items[0].chart.unit).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(result.items[0].chart, 'unit')).toBe(false);
+    expect(result.items[0].chart.unitScale).toBe(0.001);
+    expect(customDashboardJobs({ ...query(), dashboard: result })[0].expression).toBe(
+      'sum(container_memory_working_set_bytes{namespace="bookinfo",cluster="east"})'
+    );
+  }
+);
+it.each([42, {}, '   ', 'bytes\n', 'b'.repeat(129)])(
+  'rejects invalid declared unit %# instead of silently treating it as unspecified',
+  unit => {
+    expect(() =>
+      validateCustomDashboard({ ...dashboard, items: [{ chart: { ...chart, unit } }] })
+    ).toThrow('Chart unit');
+  }
+);
 it('normalizes the bounded Kiali raw/rate subset and preserves explicit scope and escaping', () => {
   expect(customDashboardJobs(query())[0].expression).toBe(
     'sum(container_memory_working_set_bytes{namespace="bookinfo",cluster="east"})'
