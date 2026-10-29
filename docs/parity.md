@@ -918,7 +918,7 @@ The original `Client.FetchRange` query-construction block and complete
 replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
-existing baseline. Template includes and label-grouped charts,
+existing baseline. Template includes are covered below; label-grouped charts,
 builtins, runtime discovery, namespace/workload annotations, layout contracts
 and external Grafana/Perses links remain unsupported and are rejected explicitly.
 
@@ -1033,6 +1033,43 @@ sibling color, two multi-metric histogram panels, expansion rejection and
 empty-list fallback. The earlier single-metric histogram fixture passed again.
 Runtime imports, screenshots and console were inspected; all samples in the
 new positive cases were synthetic. Gates pass **19,415 tests in 155 files**.
+
+### Saved template composition
+
+`resolveCustomDashboard` follows the pinned `business/dashboards.go`
+`loadAndResolveDashboardResource`/`resolveReferences` pipeline for locally saved
+definitions. It applies Go edge-whitespace trimming, nonempty-include precedence,
+whole-template and exact `template$Chart name` selection, ordered flattening and
+first-match selection. The complete referenced template is resolved before chart
+selection. Its shared visited set is deliberately retained across siblings:
+reusing the same template twice is an error even without a recursive cycle.
+
+The native schema and resolution boundary remain stricter: missing chart matches
+are errors rather than silently omitted items; extra `$` suffixes are rejected;
+even a shadowed chart must satisfy the supported schema. Selected resolved chart
+names must be distinct. Unresolved references can be saved but fail visibly when
+selected, without a remote template lookup or metric request. Source definitions
+remain unexpanded in ConfigStore. Submitted results capture detached resolved
+charts and ordered template name/title references; editing any definition clears
+the capture without replay.
+
+Twenty templates with at most eight source items each bound traversal and depth.
+The selected result must contain one to eight charts; a bounded named subset of
+a larger intermediate expansion is allowed. Existing metric/summary expansion,
+encoded-query, three-worker and deadline limits still apply before transport.
+All composed metrics retain the selected namespace/provider/cluster-label scope.
+This is source-inspected native evidence, not an additional original-Go oracle.
+
+Six hosted groups issued 12 intercepted metric GETs, verifying Settings
+save/hard reload, unexpanded definitions, ordered nested charts and an actual
+included histogram curve, captured reference headers/rows, draft independence,
+referenced-definition invalidation, missing/cyclic/repeated dependencies,
+full resolution before selection, expansion rejection and corrected retry.
+The existing named-metric/legacy fixture passed again. The new positive samples
+were synthetic; settings were restored durably and no Kubernetes writes occurred.
+The increment passed **171 focused tests in six files** and type/lint/i18n/build/
+package gates. The prior full-suite checkpoint remains 19,415 tests in 155 files;
+source-oracle totals stay 17,449 and finding coverage stays 38 bounded codes.
 
 ## Additional traffic counter signals
 

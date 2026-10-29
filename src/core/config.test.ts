@@ -63,6 +63,25 @@ describe('versioned, cluster-scoped configuration', () => {
       }).valid
     ).toBe(false);
   });
+  it('round-trips saved dashboard includes without flattening or sharing source objects', () => {
+    const definitions = {
+      namespaceLabel: 'namespace',
+      clusterLabel: 'cluster',
+      dashboards: [{ name: 'root', title: 'Root', items: [{ include: 'shared$Memory' }] }],
+    };
+    const source: KialiConfig = { schemaVersion: 1, clusters: { beta: { prometheus: null } } };
+    const updated = updateClusterConfig(source, 'alpha', {
+      prometheus: null,
+      customDashboards: definitions,
+    });
+    expect(readConfig(updated)).toEqual({ valid: true, config: updated });
+    expect(updated.clusters.alpha.customDashboards?.dashboards).toEqual(definitions.dashboards);
+    definitions.dashboards[0].items[0].include = 'changed';
+    expect(updated.clusters.alpha.customDashboards?.dashboards[0].items[0].include).toBe(
+      'shared$Memory'
+    );
+    expect(updated.clusters.beta).toEqual(source.clusters.beta);
+  });
   it('round-trips an optional boolean wildcard Gateway setting without changing another cluster', () => {
     const config: KialiConfig = { schemaVersion: 1, clusters: { beta: { prometheus: null } } };
     const next = updateClusterConfig(config, 'alpha', {

@@ -794,6 +794,24 @@ comparison table preserves zero and missing-timestamp gaps. A failed metric
 is reported without hiding successful responses from its siblings or changing
 their declared series colors.
 
+Templates can reuse other definitions saved in the **same cluster's** dashboard
+settings. For example, append
+`{"name":"overview","title":"Runtime overview","items":[{"include":"memory"}]}`
+to the `dashboards` array above. An item containing
+`{"include":"memory$Memory working-set aggregate"}` selects that exact chart
+instead of the whole template. Includes preserve chart order and take precedence
+over a chart on the same item. Empty includes fall back to the item's chart.
+No remote template or built-in catalog is fetched.
+
+Following pinned Kiali behavior, each template may be visited only once per
+selection: repeated references are rejected even across separate sibling
+includes, not just actual cycles. The entire referenced template is resolved
+before selecting a named chart. Missing templates/charts are explicit errors
+before metrics requests; malformed extra `$` suffixes are also rejected rather
+than ignored. Saved definitions stay unexpanded. Results capture the resolved
+charts and visited template names/titles; changing an included definition clears
+the capture without automatically querying again.
+
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
 samples; the pinned zero default means one. Overflow/underflow is an error,
@@ -818,14 +836,15 @@ precomputed percentiles. Each summary becomes one request and one labeled
 panel. Signed custom histogram values are preserved (for example temperature);
 the built-in Istio latency/size histogram checks remain nonnegative.
 
-Limits are 20 saved definitions, eight charts per dashboard, 64 KiB normalized
-definition JSON, **eight requests after expanding histogram summaries**, three
+Limits are 20 saved definitions, eight source items per template and eight
+resolved charts per selected dashboard, 64 KiB normalized definition JSON,
+**eight requests after expanding metrics and histogram summaries**, three
 concurrent reads, a 15-second deadline and 15-second
 samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
 
-This is **not full custom-dashboard parity**: includes, label-grouped charts,
+This is **not full custom-dashboard parity**: label-grouped charts,
 native histograms, builtin runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate

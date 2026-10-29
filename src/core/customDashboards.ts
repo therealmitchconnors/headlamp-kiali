@@ -1,3 +1,4 @@
+import { trimGoSpace } from './goStrings';
 import { histogramExpressions, HistogramSummary } from './histograms';
 import { metricRangeParameters, MetricTimeRange, validateMetricTimeRange } from './metricRanges';
 import { isDnsLabel, isRecord } from './object';
@@ -21,10 +22,15 @@ export interface CustomDashboard {
   title: string;
   items: { chart: CustomChart }[];
 }
+export interface CustomDashboardTemplate {
+  name: string;
+  title: string;
+  items: { chart?: CustomChart; include?: string }[];
+}
 export interface CustomDashboardSettings {
   namespaceLabel: string;
   clusterLabel: string | null;
-  dashboards: CustomDashboard[];
+  dashboards: CustomDashboardTemplate[];
 }
 export interface CustomDashboardQuery extends MetricTimeRange {
   namespace: string;
@@ -35,6 +41,7 @@ export interface CustomDashboardQuery extends MetricTimeRange {
   dashboard: CustomDashboard;
   histogramSummaries?: HistogramSummary[];
   labelsFilters?: Record<string, string>;
+  templateReferences?: { name: string; title: string }[];
 }
 export interface CustomDashboardJob {
   key: string;
@@ -74,7 +81,7 @@ export function dashboardLabel(value: unknown): string {
     throw new Error('Dashboard scope labels must be Prometheus label names other than __name__');
   return name;
 }
-export function validateCustomDashboard(value: unknown): CustomDashboard {
+function dashboardHeader(value: unknown) {
   if (!isRecord(value)) throw new Error('A custom dashboard must be an object');
   keys(value, ['name', 'title', 'items'], 'Custom dashboard');
   const name = text(value.name, 128, 'Dashboard name');
@@ -82,11 +89,17 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     throw new Error('Dashboard names require letters, digits, dot, underscore or hyphen');
   const title = text(value.title, 256, 'Dashboard title');
   if (!Array.isArray(value.items) || !value.items.length || value.items.length > 8)
-    throw new Error('Custom dashboards require 1 to 8 aggregate charts');
+    throw new Error(
+      'Custom dashboards require 1 to 8 items and must resolve to 1 to 8 aggregate charts'
+    );
+  return { name, title, rawItems: value.items };
+}
+export function validateCustomDashboard(value: unknown): CustomDashboard {
+  const { name, title, rawItems } = dashboardHeader(value);
   const chartNames = new Set<string>();
-  const items = value.items.map(item => {
+  const items = rawItems.map(item => {
     if (!isRecord(item) || !isRecord(item.chart))
-      throw new Error('Dashboard items require a chart; includes are not supported yet');
+      throw new Error('Resolved dashboard items require a chart');
     keys(item, ['chart'], 'Dashboard item');
     const raw = item.chart;
     keys(
@@ -145,6 +158,100 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
   });
   return { name, title, items };
 }
+function dashboardReference(
+  value: unknown
+): { include: string; name: string; chartName?: string } | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || value.length > 1024)
+    throw new Error('Dashboard include must be a string of at most 1024 characters');
+  const include = trimGoSpace(value);
+  if (!include) return null;
+  const parts = include.split('$');
+  if (
+    parts.length > 2 ||
+    parts[0].length > 128 ||
+    /^[A-Za-z0-9][A-Za-z0-9_.-]*$/.exec(parts[0])?.[0] !== parts[0]
+  )
+    throw new Error(
+      'Dashboard includes require a template name with an optional $chart-name suffix'
+    );
+  return {
+    include,
+    name: parts[0],
+    ...(parts.length === 2 ? { chartName: text(parts[1], 256, 'Included chart name') } : {}),
+  };
+}
+export function validateCustomDashboardTemplate(value: unknown): CustomDashboardTemplate {
+  const { name, title, rawItems } = dashboardHeader(value);
+  const names = new Set<string>();
+  const items = rawItems.map(item => {
+    if (!isRecord(item)) throw new Error('Dashboard items must be objects');
+    keys(item, ['include', 'chart'], 'Dashboard item');
+    const reference = dashboardReference(item.include);
+    const chart =
+      item.chart === undefined || item.chart === null
+        ? undefined
+        : validateCustomDashboard({ name, title, items: [{ chart: item.chart }] }).items[0].chart;
+    if (!reference && !chart)
+      throw new Error('Dashboard items require a chart or nonempty include');
+    if (!reference && chart) {
+      if (names.has(chart.name)) throw new Error('Dashboard chart names must be distinct');
+      names.add(chart.name);
+    }
+    return { ...(reference ? { include: reference.include } : {}), ...(chart ? { chart } : {}) };
+  });
+  return { name, title, items };
+}
+function dashboardTemplates(value: unknown): CustomDashboardTemplate[] {
+  if (!Array.isArray(value) || value.length > 20)
+    throw new Error('At most 20 custom dashboard definitions can be saved per cluster');
+  const dashboards = value.map(validateCustomDashboardTemplate);
+  if (JSON.stringify(dashboards).length > 65536)
+    throw new Error('Custom dashboard definitions exceed 64 KiB of normalized JSON');
+  if (new Set(dashboards.map(dashboard => dashboard.name)).size !== dashboards.length)
+    throw new Error('Custom dashboard names must be distinct');
+  return dashboards;
+}
+export function resolveCustomDashboard(
+  templates: readonly CustomDashboardTemplate[],
+  selected: string
+): { dashboard: CustomDashboard; references: { name: string; title: string }[] } {
+  const parsed = dashboardTemplates(templates);
+  const catalog = new Map(parsed.map(template => [template.name, template]));
+  const visited = new Set<string>();
+  const references: { name: string; title: string }[] = [];
+  const resolve = (name: string): { chart: CustomChart }[] => {
+    // Pinned Kiali retains visited templates across siblings, not just the recursion stack.
+    if (visited.has(name)) throw new Error(`Repeated or circular dashboard include: ${name}`);
+    visited.add(name);
+    const template = catalog.get(name);
+    if (!template) throw new Error(`Included dashboard is missing: ${name}`);
+    references.push({ name, title: template.title });
+    const charts: { chart: CustomChart }[] = [];
+    for (const item of template.items) {
+      const reference = dashboardReference(item.include);
+      if (reference) {
+        const included = resolve(reference.name);
+        const matching =
+          reference.chartName === undefined
+            ? included
+            : included.filter(item => item.chart.name === reference.chartName).slice(0, 1);
+        if (!matching.length) throw new Error(`Included chart was not found: ${reference.include}`);
+        charts.push(...matching);
+      } else if (item.chart) {
+        charts.push({ chart: item.chart });
+      }
+    }
+    return charts;
+  };
+  const items = resolve(selected);
+  const template = catalog.get(selected);
+  if (!template) throw new Error('Selected dashboard is unavailable');
+  return {
+    dashboard: validateCustomDashboard({ name: template.name, title: template.title, items }),
+    references,
+  };
+}
 export function customChartMetrics(chart: CustomChart): CustomDashboardMetric[] {
   if (chart.metrics?.length) return chart.metrics.map(metric => ({ ...metric }));
   if (!chart.metricName) throw new Error('A dashboard chart has no effective metric');
@@ -157,13 +264,7 @@ export function validateCustomDashboardSettings(value: unknown): CustomDashboard
   const clusterLabel = value.clusterLabel === null ? null : dashboardLabel(value.clusterLabel);
   if (clusterLabel === namespaceLabel)
     throw new Error('Namespace and metric cluster labels must differ');
-  if (!Array.isArray(value.dashboards) || value.dashboards.length > 20)
-    throw new Error('At most 20 custom dashboard definitions can be saved per cluster');
-  const dashboards = value.dashboards.map(validateCustomDashboard);
-  if (JSON.stringify(dashboards).length > 65536)
-    throw new Error('Custom dashboard definitions exceed 64 KiB of normalized JSON');
-  if (new Set(dashboards.map(dashboard => dashboard.name)).size !== dashboards.length)
-    throw new Error('Custom dashboard names must be distinct');
+  const dashboards = dashboardTemplates(value.dashboards);
   return { namespaceLabel, clusterLabel, dashboards };
 }
 export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboardJob[] {

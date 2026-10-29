@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKialiConfig } from '../config';
-import { customDashboardJobs } from '../core/customDashboards';
+import { customDashboardJobs, CustomDashboardTemplate } from '../core/customDashboards';
 import { loadCustomDashboard } from '../data/customDashboards';
 import CustomDashboards from './CustomDashboards';
 
@@ -293,4 +293,119 @@ it('captures histogram summary selection and rejects empty selections without re
   expect(screen.getByText(/1 to 5 distinct supported summaries/)).toBeDefined();
   expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
   expect(screen.queryAllByRole('img')).toHaveLength(0);
+});
+
+const withTemplates = (dashboards: CustomDashboardTemplate[]) => ({
+  ...configured,
+  config: {
+    ...configured.config,
+    clusters: {
+      alpha: {
+        ...configured.config.clusters.alpha,
+        customDashboards: { ...configured.config.clusters.alpha.customDashboards, dashboards },
+      },
+    },
+  },
+});
+it('captures resolved charts and template provenance, and invalidates when an included definition changes', async () => {
+  const definitions: CustomDashboardTemplate[] = [
+    { name: 'root', title: 'Composition', items: [{ include: 'leaf$Latency' }] },
+    {
+      name: 'leaf',
+      title: 'Reusable charts',
+      items: [
+        { chart: { name: 'Latency', metricName: 'latency', dataType: 'histogram', unit: 's' } },
+        { chart: { name: 'Unused', metricName: 'unused', dataType: 'raw', unit: 'bytes' } },
+      ],
+    },
+  ];
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates(definitions));
+  const view = open();
+  expect(screen.getByRole('checkbox', { name: 'Histogram summary P95' })).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Latency - Average' });
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  const signal = vi.mocked(loadCustomDashboard).mock.calls[0][3];
+  expect(captured.dashboard.name).toBe('root');
+  expect(captured.dashboard.items.map(item => item.chart.name)).toEqual(['Latency']);
+  expect(captured.templateReferences).toEqual([
+    { name: 'root', title: 'Composition' },
+    { name: 'leaf', title: 'Reusable charts' },
+  ]);
+  expect(customDashboardJobs(captured)).toHaveLength(2);
+  await userEvent.click(screen.getByText('Show captured dashboard template references'));
+  expect(screen.getByRole('cell', { name: 'leaf' })).toBeDefined();
+  const changed = structuredClone(definitions);
+  changed[1].title = 'Changed charts';
+  changed[1].items[0].chart!.metricName = 'changed_metric';
+  vi.mocked(useKialiConfig).mockReturnValue(withTemplates(changed));
+  view.rerender(
+    <MemoryRouter>
+      <CustomDashboards />
+    </MemoryRouter>
+  );
+  await waitFor(() => expect(screen.queryAllByRole('img')).toHaveLength(0));
+  expect(signal.aborted).toBe(true);
+  expect(captured.templateReferences?.[1].title).toBe('Reusable charts');
+  expect(captured.dashboard.items[0].chart.metricName).toBe('latency');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
+it.each([
+  { items: [{ include: 'root' }], error: 'Repeated or circular dashboard include: root' },
+  { items: [{ include: 'missing' }], error: 'Included dashboard is missing: missing' },
+  { items: [{ include: 'leaf$Missing' }], error: 'Included chart was not found: leaf$Missing' },
+  {
+    items: [{ include: 'leaf' }, { include: 'leaf' }],
+    error: 'Repeated or circular dashboard include: leaf',
+  },
+])('shows $error without issuing a metric request', async ({ items, error }) => {
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates([
+      { name: 'root', title: 'Composition', items },
+      {
+        name: 'leaf',
+        title: 'Leaf',
+        items: configured.config.clusters.alpha.customDashboards.dashboards[0].items,
+      },
+    ])
+  );
+  open();
+  expect(screen.getByText(error)).toBeDefined();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('combobox', { name: 'Dashboard template' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Leaf' }));
+  expect(screen.queryByText(error)).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
+it('rejects included metric/summary fan-out before calling the reader', async () => {
+  vi.mocked(useKialiConfig).mockReturnValue(
+    withTemplates([
+      { name: 'root', title: 'Composition', items: [{ include: 'leaf' }] },
+      {
+        name: 'leaf',
+        title: 'Leaf',
+        items: [
+          {
+            chart: {
+              name: 'Summary',
+              unit: 's',
+              dataType: 'histogram',
+              metrics: Array.from({ length: 5 }, (_, i) => ({
+                metricName: `m${i}`,
+                displayName: `M${i}`,
+              })),
+            },
+          },
+        ],
+      },
+    ])
+  );
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(screen.getByText(/at most 8 metric queries/)).toBeDefined();
+  expect(loadCustomDashboard).not.toHaveBeenCalled();
 });

@@ -508,7 +508,7 @@ function ClusterSettingsForm({
         }}
         inputProps={{ maxLength: 131072 }}
         helperText={t(
-          'Use namespaceLabel, clusterLabel and dashboards. Each dashboard has name, title and 1 to 8 items containing chart name, unit, dataType (raw/rate/histogram), optional aggregator and unitScale. Supply metrics entries with metricName/displayName, or the legacy metricName field; a nonempty metrics list takes precedence. Metrics and histogram summaries count toward the eight-query limit. Includes, grouping/discovery and external links are unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster metrics source. These settings are browser-local, not Kubernetes changes.'
+          'Use namespaceLabel, clusterLabel and dashboards. Each dashboard has name, title and 1 to 8 items containing a chart or include. A nonempty include takes precedence: use another saved template name or template$Chart name. Repeated references, cycles and missing templates/charts are errors when resolving the selection. Charts use name, unit, dataType (raw/rate/histogram), optional aggregator and unitScale. Supply metrics entries with metricName/displayName, or the legacy metricName field; a nonempty metrics list takes precedence. Resolved charts, metrics and histogram summaries share the eight-query limit. Grouping/discovery and external links are unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster metrics source. These settings are browser-local, not Kubernetes changes.'
         )}
       />
       {validation && (

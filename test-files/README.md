@@ -833,6 +833,27 @@ metrics must restore legacy fallback. Five hosted groups observed nine GETs,
 with no writes or persisted fixture settings. Pure comparison tests cover
 eight metrics, 241 samples each and 1,928 distinct union timestamps.
 
+For saved template composition, configure a root with whole-template and
+`template$Chart name` items referencing other definitions in the same cluster.
+Save and hard reload; includes must remain unexpanded in Settings. Query the
+root and inspect resolved chart order, included histogram controls, exact scope
+labels and captured template name/title references. A shadow chart must not be
+queried when its item has a nonempty include. Change an included definition and
+confirm results clear without replay.
+
+Reject missing templates/charts, cycles and repeated sibling references before
+network requests; two different chart references to the same template still
+count as repetition in pinned Kiali. Resolve all dependencies before selecting
+a chart, even unused ones. Verify corrected retry and included metrics/summary
+expansion at the eight-query bound. Core tests cover Go whitespace, first exact
+match, immutable source/capture separation, extra-suffix rejection, twenty
+visited templates, 64 KiB definitions and bounded subsets of larger intermediate
+expansions. These tests are native/source-inspected, not new original-Go cases.
+Six hosted groups observed 12 intercepted metric GETs, with actual chart/table
+rendering and corrected retry verified. The named-metric/legacy fixture also
+passed again. All new positive samples were synthetic; prior Kiali settings
+were restored and no cluster writes occurred.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

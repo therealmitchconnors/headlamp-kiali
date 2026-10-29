@@ -278,7 +278,17 @@ dashboards and integration/live/Desktop closure remain substantial work.
   matching numeric comparison table. Five hosted groups/nine intercepted
   reads verified persistence, labels, per-metric errors/stable colors,
   histogram grouping, expansion bounds and legacy fallback.
-- **19,415 tests in 155 files**, with type/lint/schema/parity/i18n/build/package checks passing.
+- Saved dashboard templates now compose whole-template and exact chart includes,
+  preserving pinned shared-visited-set behavior and ordered resolution.
+  Missing references and unsupported syntax fail before metrics requests.
+  Six hosted groups/12 intercepted GETs verified Settings persistence, actual
+  included chart rendering, captured references, invalidation, rejection paths,
+  query expansion bounds and corrected retry. Named-metric/legacy regressions
+  also passed. All new positive chart data was synthetic; no writes occurred.
+- Latest template increment: **171 focused tests in six files**, plus
+  type/lint/i18n/build/package and hosted checks passed.
+  Prior full-suite checkpoint: **19,415 tests in 155 files**, with
+  type/lint/schema/parity/i18n/build/package checks passing.
   Comparison metrics reject unexpected aggregation labels and mixed times.
   Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
   queries, 228 WorkloadEntry
@@ -304,7 +314,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `ab26b9d6c8aa4609c6e9fd12044190a20ead0374f5c5ddaabd7b1041a2c72b08`.
+  `39c4285e1e3f844a4ab8ef65ada9033467b10d7163f3fe5340b01dc0c5598d3d`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -942,8 +952,8 @@ the authority for individual behavior and platform claims.
 | `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Thirty-five bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight additional rate families and scoped duration/size histograms implemented; complete upstream query/default/dashboard coverage remains | `resource-views`, `correlation` |
+| `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
+| `telemetry` | Partial / open | Initial charts, eight additional rate families, scoped histograms and custom multi-metric charts with equality filters/template composition implemented; grouped series, discovery, annotations and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -963,6 +973,14 @@ Desktop debug target. These are development-environment milestones, not product
 installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
+
+The dashboard continuation is label-grouped charts, followed by built-in runtime
+discovery and namespace/workload annotation overrides. Saved template composition
+is complete for the documented bounded subset. Inspect the pinned grouping
+query/series contract first: the current aggregate decoder deliberately accepts
+only one unlabeled series, so merely enabling a schema field is not sufficient.
+Keep group/series cardinality separately bounded from the existing eight-query
+budget and preserve explicit namespace/cluster scope.
 
 1. Extend remaining configuration checkers and Gateway listener/port/controller
    semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar

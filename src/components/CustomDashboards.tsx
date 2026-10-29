@@ -16,6 +16,7 @@ import {
   customDashboardJobs,
   CustomDashboardQuery,
   dashboardLabelFilters,
+  resolveCustomDashboard,
 } from '../core/customDashboards';
 import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { clusterScope } from '../core/scope';
@@ -76,6 +77,18 @@ function DashboardResults({
                   'No dedicated metric-cluster selector was configured. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
                 )}
           </Alert>
+          {!!data.query.templateReferences?.length && (
+            <details>
+              <summary>{t('Show captured dashboard template references')}</summary>
+              <SimpleTable
+                data={data.query.templateReferences}
+                columns={[
+                  { label: t('Template'), getter: item => item.name },
+                  { label: t('Title'), getter: item => item.title },
+                ]}
+              />
+            </details>
+          )}
           {!!Object.keys(data.query.labelsFilters ?? {}).length && (
             <details>
               <summary>{t('Show captured dashboard label filters')}</summary>
@@ -202,8 +215,19 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
   useEffect(() => setError(''), [binding]);
   const { identity, setIdentity, query, setQuery, capturedSettings } =
     useTelemetryQuery<CustomDashboardQuery>(binding, settings);
-  const dashboard =
+  const template =
     definition?.dashboards.find(item => item.name === selected) ?? definition?.dashboards[0];
+  let resolved: ReturnType<typeof resolveCustomDashboard> | undefined;
+  let resolutionError: string | undefined;
+  if (template && definition) {
+    try {
+      resolved = resolveCustomDashboard(definition.dashboards, template.name);
+    } catch (error) {
+      resolutionError =
+        error instanceof Error ? error.message : t('Dashboard composition is unavailable');
+    }
+  }
+  const dashboard = resolved?.dashboard;
   const hasHistograms = dashboard?.items.some(item => item.chart.dataType === 'histogram');
   return (
     <Stack spacing={2}>
@@ -211,7 +235,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This native dashboard view supports named metrics on aggregate raw/rate charts and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Each metric aggregates its matching series; different metrics are compared, not added together. Duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Includes, grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports saved template includes, named metrics on aggregate raw/rate charts and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. Each metric aggregates its matching series; different metrics are compared, not added together. Duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight expanded metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>
@@ -234,8 +258,11 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                   select
                   label={t('Dashboard template')}
                   sx={{ minWidth: 200 }}
-                  value={dashboard?.name ?? ''}
-                  onChange={event => setSelected(event.target.value)}
+                  value={template?.name ?? ''}
+                  onChange={event => {
+                    setSelected(event.target.value);
+                    setError('');
+                  }}
                 >
                   {definition.dashboards.map(item => (
                     <MenuItem key={item.name} value={item.name}>
@@ -359,7 +386,8 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                 variant="contained"
                 onClick={() => {
                   try {
-                    if (!dashboard) throw new Error(t('Choose a configured dashboard'));
+                    if (!dashboard || !resolved)
+                      throw new Error(resolutionError ?? t('Choose a configured dashboard'));
                     const next: CustomDashboardQuery = {
                       namespace,
                       metricCluster: identity,
@@ -371,6 +399,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                       clusterLabel: definition.clusterLabel,
                       singleClusterConfirmed: acknowledged === binding,
                       dashboard: structuredClone(dashboard),
+                      templateReferences: structuredClone(resolved.references),
                       labelsFilters: dashboardLabelFilters(
                         JSON.parse(filterText),
                         definition.namespaceLabel,
@@ -393,7 +422,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
               </Button>
             </>
           )}
-          {error && <Alert severity="error">{error}</Alert>}
+          {(error || resolutionError) && <Alert severity="error">{error || resolutionError}</Alert>}
         </Stack>
       </SectionBox>
       {query && capturedSettings?.prometheus && (

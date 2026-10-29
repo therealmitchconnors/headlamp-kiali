@@ -60,11 +60,16 @@ it('captures settings/range and bounds eight jobs to three workers with independ
   const scope = { cluster: 'alpha' };
   const endpoint = { ...provider };
   const input = query();
+  input.templateReferences = [
+    { name: 'runtime', title: 'Runtime' },
+    { name: 'shared', title: 'Shared charts' },
+  ];
   const expected = structuredClone(input);
   const pending = loadCustomDashboard(scope, endpoint, input, new AbortController().signal);
   scope.cluster = 'other';
   endpoint.service = 'other';
   input.dashboard.items.length = 0;
+  input.templateReferences[1].title = 'mutated';
   input.end = 0;
   const result = await pending;
   expect(result.query).toEqual(expected);
