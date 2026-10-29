@@ -255,14 +255,20 @@ dashboards and integration/live/Desktop closure remain substantial work.
   accounts and missing/malformed/denied/owner-mismatch behavior with no
   ServiceAccount-object reads or writes. Complete account-principal validation
   remains open.
-- Native custom aggregate dashboards now support bounded saved raw/rate chart
+- Native custom aggregate dashboards now support bounded saved raw/rate/histogram chart
   definitions, explicit namespace/metric-cluster scoping, captured history,
   signed gauges, unit scaling, independent chart errors and shared read limits.
   Five hosted groups observed 27 intercepted reads, concurrency three and a
   15,549 ms timeout; actual Bookinfo memory-metric aggregation returned 61
   finite nonzero samples. Full custom dashboard/discovery/annotation/Grafana/
   Perses parity remains open.
-- **19,394 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
+- Classic custom histograms now expand selected Average/P50/P90/P95/P99 summaries
+  through the shared query builder, preserving signed custom samples while
+  keeping built-in Istio histogram domains unchanged. Three hosted groups/
+  13 intercepted reads verified all summaries, per-summary failure, captured
+  drafts and exact eight-request expansion bounds. Prior raw/rate and Istio
+  histogram runtime regressions passed.
+- **19,400 tests in 153 files**, with type/lint/schema/parity/i18n/build/package checks passing.
   Comparison metrics reject unexpected aggregation labels and mixed times.
   Independent original-Go evidence totals 17,449 cases, including 45 custom-dashboard
   queries, 228 WorkloadEntry
@@ -288,7 +294,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `850389dfdb542dfd3ef4cd5a909b8e0cec7230003f6d0716c73f912c16dccac8`.
+  `461ab72f858f53c33f8d6a899706255da880f315e78320d34aba1e7155aa0078`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -832,7 +838,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 
 | Surface | Current implementation | Important limit |
 | --- | --- | --- |
-| Kiali navigation | Overview, Applications, Mesh inventory, mTLS configuration, Traces, Mesh configuration, Traffic metrics/signals/histograms/graph, Custom aggregate dashboards, Cluster comparison, Health, Pod diagnostics, Namespaces, Services, Workloads, Connection settings | No links to unimplemented features; custom dashboards are a bounded raw/rate subset |
+| Kiali navigation | Overview, Applications, Mesh inventory, mTLS configuration, Traces, Mesh configuration, Traffic metrics/signals/histograms/graph, Custom aggregate dashboards, Cluster comparison, Health, Pod diagnostics, Namespaces, Services, Workloads, Connection settings | No links to unimplemented features; custom dashboards are a bounded raw/rate/classic-histogram subset |
 | Overview | Istio API discovery and existing Prometheus Service connectivity | API presence is not mesh/control-plane health |
 | Native resource browsing | Namespace/Service tables; Deployment, StatefulSet, DaemonSet, Job and CronJob tabs | No plugin list mutations; details delegate to Headlamp |
 | Settings | Version-1 cluster ConfigStore: Prometheus/tracing Service endpoints, app/version labels, health rules and explicit service DNS suffix | Browser-profile-local; unknown DNS suffix remains unset; no credentials |

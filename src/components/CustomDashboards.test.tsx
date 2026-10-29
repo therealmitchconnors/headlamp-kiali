@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKialiConfig } from '../config';
+import { customDashboardJobs } from '../core/customDashboards';
 import { loadCustomDashboard } from '../data/customDashboards';
 import CustomDashboards from './CustomDashboards';
 
@@ -70,9 +71,10 @@ beforeEach(() => {
     .mockImplementation(async (_scope, _provider, query) => ({
       query,
       metrics: [],
-      charts: query.dashboard.items.map(({ chart }, index) => ({
-        key: String(index),
+      charts: customDashboardJobs(query).map(({ chart, key, summary }) => ({
+        key,
         chart,
+        summary,
         read: { ok: true, result: { warnings: [], series: [] } },
       })),
     }));
@@ -192,5 +194,28 @@ it('shows missing configuration and per-chart failure rather than an empty succe
   );
   await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
   await screen.findByText('Dashboard read denied');
+  expect(screen.queryAllByRole('img')).toHaveLength(0);
+});
+it('captures histogram summary selection and rejects empty selections without replay', async () => {
+  const changed = structuredClone(configured);
+  Object.assign(changed.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    name: 'Latency',
+    dataType: 'histogram',
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(changed);
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Latency - Average' });
+  expect(screen.getByRole('img', { name: 'Latency - P95' })).toBeDefined();
+  const captured = vi.mocked(loadCustomDashboard).mock.calls[0][2];
+  await user.click(screen.getByRole('checkbox', { name: 'Histogram summary P95' }));
+  expect(captured.histogramSummaries).toEqual(['avg', 'p95']);
+  expect(screen.getByRole('img', { name: 'Latency - P95' })).toBeDefined();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('checkbox', { name: 'Histogram summary Average' }));
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  expect(screen.getByText(/1 to 5 distinct supported summaries/)).toBeDefined();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
   expect(screen.queryAllByRole('img')).toHaveLength(0);
 });

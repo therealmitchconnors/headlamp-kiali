@@ -1,5 +1,10 @@
 import oracleText from '../../test-files/parity/histogram-oracle.json?raw';
-import { decodeHistogram, histogramQueries,HistogramQuery } from './histograms';
+import {
+  decodeHistogram,
+  histogramExpressions,
+  histogramQueries,
+  HistogramQuery,
+} from './histograms';
 
 const oracle: { cases: { input: HistogramQuery; expected: Record<string, string> }[] } =
   JSON.parse(oracleText);
@@ -34,6 +39,22 @@ it('rejects unsafe metric/scope, unsupported summaries and impossible captured r
     Object.assign(invalid, changes);
     expect(() => histogramQueries(invalid)).toThrow();
   }
+});
+it('shares the classic histogram builder without accepting query fragments or unsupported labels', () => {
+  expect(
+    histogramExpressions('custom:histogram', { namespace: 'bookinfo', cluster: 'east"mesh' }, [
+      'p99',
+    ])[0].expression
+  ).toBe(
+    'histogram_quantile(0.99, sum(rate(custom:histogram_bucket{namespace="bookinfo",cluster="east\\"mesh"}[5m])) by (le))'
+  );
+  for (const name of ['', 'bad\n', 'metric{foo="bar"}', 'x'.repeat(257)])
+    expect(() => histogramExpressions(name, { namespace: 'bookinfo' }, ['avg'])).toThrow(
+      'metric name'
+    );
+  expect(() => histogramExpressions('valid', { 'bad-label': 'bookinfo' }, ['avg'])).toThrow(
+    'metric label'
+  );
 });
 const result = (values: unknown[], labels = {}) => ({
   status: 'success',

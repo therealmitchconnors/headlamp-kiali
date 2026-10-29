@@ -87,7 +87,7 @@ it('requires explicit single-cluster acknowledgment when omitting the metric clu
 it.each([
   { ...dashboard, includes: ['other'] },
   { ...dashboard, items: [{ include: 'other' }] },
-  { ...dashboard, items: [{ chart: { ...chart, dataType: 'histogram' } }] },
+  { ...dashboard, items: [{ chart: { ...chart, dataType: 'unsupported' } }] },
   { ...dashboard, items: [{ chart: { ...chart, groupLabels: ['pod'] } }] },
   { ...dashboard, items: [{ chart: { ...chart, metricName: 'up} or vector(1)' } }] },
   { ...dashboard, items: [{ chart: { ...chart, unitScale: -1 } }] },
@@ -152,4 +152,53 @@ it('preserves zero scale as the pinned default of one and rejects bad range inpu
   for (const end of [NaN, Infinity, 0, 900])
     expect(() => customDashboardJobs({ ...query(), end })).toThrow('time range');
   expect(() => customDashboardJobs({ ...query(), namespace: '../bookinfo' })).toThrow('namespace');
+});
+
+it('expands classic histograms into exact average and selected quantile jobs', () => {
+  const input = query();
+  input.dashboard.items[0].chart = {
+    name: 'Temperature',
+    metricName: 'temperature_celsius',
+    unit: 'C',
+    dataType: 'histogram',
+  };
+  expect(customDashboardJobs(input).map(job => [job.key, job.summary])).toEqual([
+    ['0:avg', 'avg'],
+    ['0:p95', 'p95'],
+  ]);
+  input.histogramSummaries = ['avg', 'p50', 'p90', 'p95', 'p99'];
+  const jobs = customDashboardJobs(input);
+  expect(jobs[0].expression).toBe(
+    'sum(rate(temperature_celsius_sum{namespace="bookinfo",cluster="east"}[5m])) / sum(rate(temperature_celsius_count{namespace="bookinfo",cluster="east"}[5m]))'
+  );
+  for (const [index, quantile] of ['0.5', '0.9', '0.95', '0.99'].entries())
+    expect(jobs[index + 1].expression).toBe(
+      `histogram_quantile(${quantile}, sum(rate(temperature_celsius_bucket{namespace="bookinfo",cluster="east"}[5m])) by (le))`
+    );
+});
+it('bounds expanded queries, not just chart count, and rejects unsupported summaries', () => {
+  const input = query();
+  input.dashboard.items = [
+    {
+      chart: { name: 'Histogram', metricName: 'custom_duration', unit: 's', dataType: 'histogram' },
+    },
+    ...Array.from({ length: 3 }, (_, i) => ({
+      chart: { ...input.dashboard.items[0].chart, name: `raw-${i}` },
+    })),
+  ];
+  input.histogramSummaries = ['avg', 'p50', 'p90', 'p95', 'p99'];
+  expect(customDashboardJobs(input)).toHaveLength(8);
+  input.dashboard.items.push({ chart: { ...input.dashboard.items[1].chart, name: 'extra' } });
+  expect(() => customDashboardJobs(input)).toThrow('8 metric queries');
+  input.dashboard.items = input.dashboard.items.slice(0, 1);
+  for (const invalid of [[], ['avg', 'avg'], ['p100']]) {
+    Object.assign(input, { histogramSummaries: invalid });
+    expect(() => customDashboardJobs(input)).toThrow('1 to 5 distinct');
+  }
+  expect(() =>
+    validateCustomDashboard({
+      ...dashboard,
+      items: [{ chart: { ...chart, dataType: 'histogram', aggregator: 'max' } }],
+    })
+  ).toThrow('sum aggregation');
 });

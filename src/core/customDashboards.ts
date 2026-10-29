@@ -1,3 +1,4 @@
+import { histogramExpressions, HistogramSummary } from './histograms';
 import { MetricTimeRange, validateMetricTimeRange } from './metricRanges';
 import { isDnsLabel, isRecord } from './object';
 import { metricSelector } from './telemetry';
@@ -6,7 +7,7 @@ export interface CustomChart {
   name: string;
   metricName: string;
   unit: string;
-  dataType: 'raw' | 'rate';
+  dataType: 'raw' | 'rate' | 'histogram';
   aggregator?: 'sum' | 'avg' | 'min' | 'max';
   unitScale?: number;
 }
@@ -27,6 +28,13 @@ export interface CustomDashboardQuery extends MetricTimeRange {
   namespaceLabel: string;
   clusterLabel: string | null;
   dashboard: CustomDashboard;
+  histogramSummaries?: HistogramSummary[];
+}
+export interface CustomDashboardJob {
+  key: string;
+  chart: CustomChart;
+  expression: string;
+  summary?: HistogramSummary;
 }
 
 function keys(value: Record<string, unknown>, allowed: readonly string[], label: string) {
@@ -79,8 +87,8 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
     const name = text(raw.name, 256, 'Chart name');
     if (chartNames.has(name)) throw new Error('Dashboard chart names must be distinct');
     chartNames.add(name);
-    if (raw.dataType !== 'raw' && raw.dataType !== 'rate')
-      throw new Error('Custom aggregate charts currently support only raw or rate dataType');
+    if (raw.dataType !== 'raw' && raw.dataType !== 'rate' && raw.dataType !== 'histogram')
+      throw new Error('Custom aggregate charts support only raw, rate or histogram dataType');
     const aggregator = raw.aggregator ?? 'sum';
     if (
       aggregator !== 'sum' &&
@@ -89,8 +97,8 @@ export function validateCustomDashboard(value: unknown): CustomDashboard {
       aggregator !== 'max'
     )
       throw new Error('Raw dashboard aggregation must be sum, avg, min or max');
-    if (raw.dataType === 'rate' && aggregator !== 'sum')
-      throw new Error('Rate dashboard charts use sum aggregation');
+    if (raw.dataType !== 'raw' && aggregator !== 'sum')
+      throw new Error('Rate and histogram dashboard charts use sum aggregation');
     const scale = raw.unitScale ?? 1;
     if (typeof scale !== 'number' || !Number.isFinite(scale) || scale < 0 || scale > 1e12)
       throw new Error('Dashboard unitScale must be finite and between 0 and 1e12');
@@ -123,7 +131,7 @@ export function validateCustomDashboardSettings(value: unknown): CustomDashboard
     throw new Error('Custom dashboard names must be distinct');
   return { namespaceLabel, clusterLabel, dashboards };
 }
-export function customDashboardJobs(query: CustomDashboardQuery) {
+export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboardJob[] {
   validateMetricTimeRange(query);
   if (!isDnsLabel(query.namespace)) throw new Error('Choose an explicit dashboard namespace');
   const namespaceLabel = dashboardLabel(query.namespaceLabel);
@@ -140,16 +148,37 @@ export function customDashboardJobs(query: CustomDashboardQuery) {
     );
   }
   const dashboard = validateCustomDashboard(query.dashboard);
-  const selector = `{${metricSelector({
+  const labels = {
     [namespaceLabel]: query.namespace,
     ...(clusterLabel ? { [clusterLabel]: query.metricCluster } : {}),
-  })}}`;
-  return dashboard.items.map(({ chart }, index) => ({
-    key: String(index),
-    chart,
-    expression:
-      chart.dataType === 'rate'
-        ? `sum(rate(${chart.metricName}${selector}[5m]))`
-        : `${chart.aggregator}(${chart.metricName}${selector})`,
-  }));
+  };
+  const selector = `{${metricSelector(labels)}}`;
+  const jobs = dashboard.items.flatMap<CustomDashboardJob>(({ chart }, index) =>
+    chart.dataType === 'histogram'
+      ? histogramExpressions(
+          chart.metricName,
+          labels,
+          query.histogramSummaries ?? ['avg', 'p95']
+        ).map(({ summary, expression }) => ({
+          key: `${index}:${summary}`,
+          chart,
+          summary,
+          expression,
+        }))
+      : [
+          {
+            key: String(index),
+            chart,
+            expression:
+              chart.dataType === 'rate'
+                ? `sum(rate(${chart.metricName}${selector}[5m]))`
+                : `${chart.aggregator}(${chart.metricName}${selector})`,
+          },
+        ]
+  );
+  if (jobs.length > 8)
+    throw new Error(
+      'Custom dashboards support at most 8 metric queries after expanding histogram summaries; reduce charts or selected summaries'
+    );
+  return jobs;
 }

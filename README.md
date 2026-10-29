@@ -790,14 +790,23 @@ samples; the pinned zero default means one. Overflow/underflow is an error,
 not a zero substitution. All matching series are aggregated; duplicate scrapes
 and metric-specific dimensions are not deduplicated.
 
+Set `dataType` to **`histogram`** for classic `_sum`/`_count`/`_bucket` metric
+families, using the base metric name. Choose Average/P50/P90/P95/P99 in the
+dashboard view; Average and P95 are the initial view selection. Averages use
+aggregate sum/count rates and quantiles aggregate cumulative buckets, not
+precomputed percentiles. Each summary becomes one request and one labeled
+panel. Signed custom histogram values are preserved (for example temperature);
+the built-in Istio latency/size histogram checks remain nonnegative.
+
 Limits are 20 saved definitions, eight charts per dashboard, 64 KiB normalized
-definition JSON, three concurrent reads, a 15-second deadline and 15-second
+definition JSON, **eight requests after expanding histogram summaries**, three
+concurrent reads, a 15-second deadline and 15-second
 samples over 5/15/60-minute captured windows. Settings/provider changes clear
 submitted results without replay. Individual chart errors, non-finite gaps
 and explicit zero remain distinct.
 
-This is **not full custom-dashboard parity**: includes, grouped/multi-metric or
-histogram charts, builtin runtime discovery, namespace/workload annotation
+This is **not full custom-dashboard parity**: includes, grouped/multi-metric
+charts, native histograms, builtin runtime discovery, namespace/workload annotation
 overrides and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget

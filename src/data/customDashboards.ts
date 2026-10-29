@@ -47,9 +47,10 @@ export async function loadCustomDashboard(
   );
   return {
     ...result,
-    charts: result.metrics.map(item => ({
-      ...item,
-      chart: jobs.find(job => job.key === item.key)!.chart,
-    })),
+    charts: result.metrics.map(item => {
+      const job = jobs.find(job => job.key === item.key);
+      if (!job) throw new Error('Custom dashboard result has no captured chart');
+      return { ...item, chart: job.chart, ...(job.summary ? { summary: job.summary } : {}) };
+    }),
   };
 }

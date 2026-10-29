@@ -13,10 +13,37 @@ export interface HistogramQuery extends TrafficQuery {
   summaries: HistogramSummary[];
 }
 const quantiles = { p50: '0.5', p90: '0.9', p95: '0.95', p99: '0.99' };
+export function histogramExpressions(
+  name: string,
+  labels: Readonly<Record<string, string>>,
+  summaries: readonly HistogramSummary[]
+): { summary: HistogramSummary; expression: string }[] {
+  if (
+    typeof name !== 'string' ||
+    name.length > 256 ||
+    /^[A-Za-z_:][A-Za-z0-9_:]*$/.exec(name)?.[0] !== name ||
+    !Array.isArray(summaries) ||
+    !summaries.length ||
+    summaries.length > 5 ||
+    new Set(summaries).size !== summaries.length ||
+    summaries.some(value => !HISTOGRAM_SUMMARIES.some(summary => summary === value))
+  )
+    throw new Error(
+      'Choose a bounded histogram metric name and 1 to 5 distinct supported summaries'
+    );
+  const selector = `{${metricSelector(labels)}}`;
+  return summaries.map(summary => ({
+    summary,
+    expression:
+      summary === 'avg'
+        ? `sum(rate(${name}_sum${selector}[5m])) / sum(rate(${name}_count${selector}[5m]))`
+        : `histogram_quantile(${quantiles[summary]}, sum(rate(${name}_bucket${selector}[5m])) by (le))`,
+  }));
+}
 export function histogramQueries(
   query: HistogramQuery
 ): { summary: HistogramSummary; expression: string }[] {
-  const labels = `{${metricSelector(trafficMetricLabels(query))}}`;
+  const labels = trafficMetricLabels(query);
   if (
     !Object.prototype.hasOwnProperty.call(TRAFFIC_HISTOGRAMS, query.metric) ||
     !Array.isArray(query.summaries) ||
@@ -32,13 +59,7 @@ export function histogramQueries(
       'Choose an available histogram, 1 to 5 distinct summaries and a valid captured time'
     );
   const name = TRAFFIC_HISTOGRAMS[query.metric].metric;
-  return query.summaries.map(summary => ({
-    summary,
-    expression:
-      summary === 'avg'
-        ? `sum(rate(${name}_sum${labels}[5m])) / sum(rate(${name}_count${labels}[5m]))`
-        : `histogram_quantile(${quantiles[summary]}, sum(rate(${name}_bucket${labels}[5m])) by (le))`,
-  }));
+  return histogramExpressions(name, labels, query.summaries);
 }
 export function decodeHistogram(response: unknown, query: HistogramQuery) {
   return decodeAggregatedRange(response, query, 'Histogram summary');

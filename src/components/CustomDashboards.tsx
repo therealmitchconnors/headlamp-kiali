@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { getClusterConfig, ServiceEndpoint } from '../core/config';
 import { customDashboardJobs, CustomDashboardQuery } from '../core/customDashboards';
+import { HISTOGRAM_SUMMARIES, HistogramSummary } from '../core/histograms';
 import { clusterScope } from '../core/scope';
 import { loadCustomDashboard } from '../data/customDashboards';
 import { useRequest } from '../hooks/useRequest';
@@ -31,6 +32,7 @@ function DashboardResults({
   query: CustomDashboardQuery;
 }) {
   const { t } = useTranslation();
+  const summaryNames = { avg: t('Average'), p50: 'P50', p90: 'P90', p95: 'P95', p99: 'P99' };
   const load = useCallback(
     (signal: AbortSignal) => loadCustomDashboard(clusterScope(cluster), endpoint, query, signal),
     [cluster, endpoint, query]
@@ -57,31 +59,36 @@ function DashboardResults({
                   'No metric cluster selector was sent. You explicitly confirmed this source contains only one cluster; the plugin cannot verify that assertion.'
                 )}
           </Alert>
-          {data.charts.map(({ key, chart, read }) => (
-            <SectionBox key={key} title={chart.name}>
-              <Typography variant="body2">
-                {t(
-                  'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
-                  {
-                    metric: chart.metricName,
-                    type: chart.dataType,
-                    aggregation: chart.aggregator ?? 'sum',
-                    scale: chart.unitScale ?? 1,
-                  }
-                )}
-              </Typography>
-              {read.ok === false ? (
-                <Alert severity="error">{read.error.message}</Alert>
-              ) : (
-                <>
-                  {!!read.result.warnings.length && (
-                    <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+          {data.charts.map(({ key, chart, read, summary }) => {
+            const title = summary
+              ? t('{{chart}} - {{summary}}', { chart: chart.name, summary: summaryNames[summary] })
+              : chart.name;
+            return (
+              <SectionBox key={key} title={title}>
+                <Typography variant="body2">
+                  {t(
+                    'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                    {
+                      metric: chart.metricName,
+                      type: chart.dataType,
+                      aggregation: chart.aggregator ?? 'sum',
+                      scale: chart.unitScale ?? 1,
+                    }
                   )}
-                  <MetricChart result={read.result} title={chart.name} unit={chart.unit} />
-                </>
-              )}
-            </SectionBox>
-          ))}
+                </Typography>
+                {read.ok === false ? (
+                  <Alert severity="error">{read.error.message}</Alert>
+                ) : (
+                  <>
+                    {!!read.result.warnings.length && (
+                      <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+                    )}
+                    <MetricChart result={read.result} title={title} unit={chart.unit} />
+                  </>
+                )}
+              </SectionBox>
+            );
+          })}
           <details>
             <summary>{t('Show captured dashboard queries')}</summary>
             {customDashboardJobs(data.query).map(job => (
@@ -110,6 +117,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
     new URLSearchParams(useLocation().search).get('namespace') ?? ''
   );
   const [minutes, setMinutes] = useState<CustomDashboardQuery['minutes']>(15);
+  const [summaries, setSummaries] = useState<HistogramSummary[]>(['avg', 'p95']);
   const [current, setCurrent] = useState(true);
   const [endTime, setEndTime] = useState('');
   const [acknowledged, setAcknowledged] = useState<string>();
@@ -125,13 +133,14 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
     useTelemetryQuery<CustomDashboardQuery>(binding, settings);
   const dashboard =
     definition?.dashboards.find(item => item.name === selected) ?? definition?.dashboards[0];
+  const hasHistograms = dashboard?.items.some(item => item.chart.dataType === 'histogram');
   return (
     <Stack spacing={2}>
       <SectionBox title={t('Custom aggregate dashboards')} headerProps={{ headerStyle: 'main' }}>
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'This initial native dashboard view supports aggregate raw gauges and counter rates from saved definitions. Raw values may be negative; rate charts use sum(rate(...[5m])). All matching series are aggregated; duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most three concurrent queries and a 15-second deadline. Missing samples are not zero or healthy. Includes, grouping, histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
+              'This native dashboard view supports aggregate raw gauges, counter rates and classic histogram summaries. Raw gauges and custom histogram observations may be negative; rates use sum(rate(...[5m])). Histogram averages use sum/count counters and quantiles use cumulative buckets, never averages of precomputed percentiles. All matching series are aggregated; duplicate scrapes and metric-specific labels are not reconciled. Reads use 15-second samples, at most eight metric queries, three concurrent requests and a 15-second deadline. Missing samples are not zero or healthy. Includes, grouping, native histograms, built-in discovery, annotation overrides and external dashboard links remain unsupported.'
             )}
           </Alert>
           <Link routeName="kiali-settings" params={{ cluster }}>
@@ -201,6 +210,37 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                   ))}
                 </TextField>
               </Stack>
+              {hasHistograms && (
+                <Stack spacing={1}>
+                  <Typography>
+                    {t(
+                      'Histogram summaries use five-minute rate windows. Average and P95 are the initial view selection; each selected summary counts toward the eight-query dashboard limit.'
+                    )}
+                  </Typography>
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    {HISTOGRAM_SUMMARIES.map(summary => (
+                      <FormControlLabel
+                        key={summary}
+                        label={t('Histogram summary {{name}}', {
+                          name: summary === 'avg' ? t('Average') : summary.toUpperCase(),
+                        })}
+                        control={
+                          <Checkbox
+                            checked={summaries.includes(summary)}
+                            onChange={event => {
+                              setSummaries(current =>
+                                event.target.checked
+                                  ? [...current, summary]
+                                  : current.filter(value => value !== summary)
+                              );
+                            }}
+                          />
+                        }
+                      />
+                    ))}
+                  </Stack>
+                </Stack>
+              )}
               {definition.clusterLabel === null && (
                 <FormControlLabel
                   label={t('I confirm this Prometheus source contains only one cluster')}
@@ -248,6 +288,7 @@ export function CustomDashboardScope({ cluster }: { cluster: string }) {
                       clusterLabel: definition.clusterLabel,
                       singleClusterConfirmed: acknowledged === binding,
                       dashboard: structuredClone(dashboard),
+                      ...(hasHistograms ? { histogramSummaries: [...summaries] } : {}),
                     };
                     customDashboardJobs(next);
                     setError('');

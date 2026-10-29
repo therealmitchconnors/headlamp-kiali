@@ -58,8 +58,8 @@ it('captures settings/range and bounds eight jobs to three workers with independ
     }
   });
   const scope = { cluster: 'alpha' };
-    const endpoint = { ...provider };
-    const input = query();
+  const endpoint = { ...provider };
+  const input = query();
   const expected = structuredClone(input);
   const pending = loadCustomDashboard(scope, endpoint, input, new AbortController().signal);
   scope.cluster = 'other';
@@ -149,4 +149,68 @@ it('does not send an unscoped or invalid template request', async () => {
     )
   ).rejects.toThrow('namespace');
   expect(ApiProxy.request).not.toHaveBeenCalled();
+});
+it('captures histogram summaries, permits signed observations and isolates a quantile failure', async () => {
+  const input = query();
+  input.dashboard.items = [
+    {
+      chart: {
+        name: 'Temperature',
+        unit: 'C',
+        metricName: 'temperature',
+        dataType: 'histogram',
+        unitScale: 0.1,
+      },
+    },
+  ];
+  input.histogramSummaries = ['avg', 'p50', 'p90', 'p95', 'p99'];
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const expression = new URL(String(path), 'http://example.test').searchParams.get('query') || '';
+    if (expression.includes('histogram_quantile(0.95'))
+      throw { status: 403, message: 'Quantile denied' };
+    return matrix();
+  });
+  const pending = loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  input.histogramSummaries.length = 0;
+  const result = await pending;
+  expect(result.query.histogramSummaries).toEqual(['avg', 'p50', 'p90', 'p95', 'p99']);
+  expect(result.charts.map(chart => chart.summary)).toEqual(['avg', 'p50', 'p90', 'p95', 'p99']);
+  expect(result.charts[0].read).toMatchObject({
+    ok: true,
+    result: { series: [{ samples: [{ value: null }, { value: -200 }] }] },
+  });
+  expect(result.charts[3].read).toMatchObject({ ok: false, error: { kind: 'forbidden' } });
+  expect(ApiProxy.request).toHaveBeenCalledTimes(5);
+});
+it('rejects histogram expansion overflow before transport and caps a cancelled queue', async () => {
+  const input = query();
+  input.dashboard.items.forEach(item => {
+    item.chart.dataType = 'histogram';
+  });
+  await expect(
+    loadCustomDashboard({ cluster: 'alpha' }, provider, input, new AbortController().signal)
+  ).rejects.toThrow('8 metric queries');
+  expect(ApiProxy.request).not.toHaveBeenCalled();
+  input.histogramSummaries = ['avg'];
+  vi.useFakeTimers();
+  try {
+    vi.mocked(ApiProxy.request).mockImplementation(() => new Promise(() => {}));
+    const pending = loadCustomDashboard(
+      { cluster: 'alpha' },
+      provider,
+      input,
+      new AbortController().signal
+    );
+    const failed = expect(pending).rejects.toThrow('15 seconds');
+    await vi.advanceTimersByTimeAsync(15000);
+    await failed;
+    expect(ApiProxy.request).toHaveBeenCalledTimes(3);
+  } finally {
+    vi.useRealTimers();
+  }
 });

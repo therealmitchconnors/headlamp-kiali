@@ -906,7 +906,8 @@ i18n/build gates. Desktop and finite live histogram evidence remain open.
 
 The new custom-dashboard page executes an explicit bounded subset of the pinned
 dashboard schema: per-cluster definitions with `name`, `title` and `items.chart`
-fields for single-metric raw/rate charts. Raw aggregation supports sum/avg/min/max;
+fields for single-metric raw/rate charts and the classic histogram extension
+below. Raw aggregation supports sum/avg/min/max;
 rate uses sum of five-minute counter rates. Namespace and metric-cluster labels
 are configurable. Omitting the metric-cluster selector requires a fresh explicit
 single-cluster-source confirmation bound to the endpoint/settings; this
@@ -917,7 +918,7 @@ The original `Client.FetchRange` query-construction block and complete
 replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
-existing baseline. Template includes, grouped/multi-metric/histogram charts,
+existing baseline. Template includes, grouped/multi-metric charts,
 builtins, runtime discovery, namespace/workload annotations, layout contracts
 and external Grafana/Perses links remain unsupported and are rejected explicitly.
 
@@ -949,6 +950,35 @@ were restored and no cluster writes occurred. Gates pass **19,394 tests in
 Hosted histogram and traffic-signal regressions also passed after the shared
 reader change: duration histograms retained non-finite gaps, throughput retained
 61 explicit zero samples per panel, and bounded concurrency/deadlines held.
+
+### Classic histogram dashboard extension
+
+Saved charts now accept `dataType: histogram`. The shared classic-histogram
+builder supports average/P50/P90/P95/P99, preserving the existing Istio
+histogram query spelling and its 180 original-Go cases. No additional oracle
+count is claimed for this reuse. Average and P95 are the native view's initial
+selection, not a claim that all upstream dashboard request defaults match.
+Average uses `_sum`/`_count` rates; quantiles use `_bucket` rates grouped by `le`.
+Precomputed quantiles are not averaged. Prometheus native-histogram payloads
+remain unsupported.
+
+The captured summary list expands to individually labeled results and counts
+against the existing **eight-request** limit before transport. Chart count alone
+does not authorize a larger query fan-out. Per-summary errors are independent;
+gaps, zero, unit scaling and signed custom observations are retained.
+Signed custom histograms differ deliberately from the nonnegative domain of
+the existing latency/request-size/response-size Istio histograms.
+
+Three hosted scenario groups issued 13 intercepted GETs and measured peak
+concurrency three. They covered all five historical summaries and exact query
+shapes, signed scaling/zero/gaps, one denied quantile, captured draft independence,
+settings save/hard reload, definition invalidation, nine-query rejection,
+exact eight-query mixed charts and empty-summary rejection. The original
+Istio histogram explorer and raw/rate custom dashboards were rechecked hosted,
+including real Prometheus read paths; no writes or provider installations
+occurred. Positive custom histogram samples were synthetic.
+Gates pass **19,400 tests in 153 files**; source-oracle totals stay 17,449 and
+finding coverage stays 38 bounded codes.
 
 ## Additional traffic counter signals
 

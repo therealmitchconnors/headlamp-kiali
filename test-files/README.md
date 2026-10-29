@@ -801,6 +801,18 @@ aggregate returned 61 finite nonzero samples; duplicate scrape dimensions
 were not reconciled. Restore settings durably and remove handlers.
 No component was installed and no configuration was written to Kubernetes.
 
+For custom classic histogram charts, save a `histogram` definition using the
+base metric name, select all five supported summaries and capture historical
+time. Inspect exact sum/count and cumulative-bucket expressions, signed unit
+scaling, zero/non-finite gaps and a single-quantile denial. Change a checkbox
+without submitting and preserve the old capture. Add four raw charts alongside
+five histogram summaries: nine requests must fail before transport. Remove one
+raw chart and verify the exact eight-request dashboard succeeds. Reject empty
+summaries without leaving old charts visible. Three hosted groups observed 13
+intercepted GETs with concurrency three. Re-run both native Istio histograms
+and raw/rate dashboard fixtures; this reuses the existing 180-case histogram
+oracle without claiming new independently executed source cases.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:
