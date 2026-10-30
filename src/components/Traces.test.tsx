@@ -485,6 +485,58 @@ it('retains signed offset and ID drafts while enforcing the storage operator and
     { field: 'linkTraceId', operator: '=', value: '000AbC' },
   ]);
 });
+it('captures a directional related-span group without replaying drafts into another provider', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  const view = open('/traces?service=reviews');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('checkbox', { name: 'Require a related span group' }));
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(screen.getByText(/Related span filters require a service/)).toBeDefined();
+  expect(searchTraces).not.toHaveBeenCalled();
+  await user.type(screen.getByLabelText('Related span service'), 'ratings');
+  await user.type(
+    screen.getByLabelText('Related span operation (exact, optional)'),
+    'GET /ratings'
+  );
+  await user.click(screen.getByRole('checkbox', { name: 'Related span reported errors only' }));
+  await user.click(screen.getByLabelText('Span relationship'));
+  await user.click(
+    screen.getByRole('option', { name: 'Related span is a descendant of a primary match (>>)' })
+  );
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await screen.findByText(/Captured related-span clause:/);
+  const captured = vi.mocked(searchTraces).mock.calls[0][2];
+  expect(captured.tempoRelatedSpan).toEqual({
+    relation: 'descendant',
+    service: 'ratings',
+    operation: 'GET /ratings',
+    errorsOnly: true,
+  });
+  await user.clear(screen.getByLabelText('Related span service'));
+  await user.type(screen.getByLabelText('Related span service'), 'changed');
+  expect(captured.tempoRelatedSpan?.service).toBe('ratings');
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  state.config = configured;
+  view.rerender(
+    <Router history={view.history}>
+      <Traces />
+    </Router>
+  );
+  await waitFor(() => expect(screen.queryByText(/Captured related-span clause:/)).toBeNull());
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(
+    screen.getByText('Related span filters require Tempo; disable them before searching Jaeger')
+  ).toBeDefined();
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('checkbox', { name: 'Require a related span group' }));
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await waitFor(() => expect(searchTraces).toHaveBeenCalledTimes(2));
+  expect(vi.mocked(searchTraces).mock.calls[1][2].tempoRelatedSpan).toBeUndefined();
+});
 it('captures event, link and instrumentation scopes and preserves them after draft edits', async () => {
   const tempo = structuredClone(configured);
   if (!tempo.valid || !tempo.config.clusters.alpha.tracing)

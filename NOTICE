@@ -104,7 +104,8 @@ Detailed source identities and reproduction instructions: test-files/README.md.
 
 Tempo query interoperability:
 Typed span/resource/event/link/instrumentation attribute, literal-name and
-span/trace/event/instrumentation/ID-intrinsic query construction follows the public TraceQL HTTP/language
+span/trace/event/instrumentation/ID-intrinsic and bounded related-spanset query
+construction follows the public TraceQL HTTP/language
 contract. Parser and operator behavior was inspected at Tempo commit
 afbbb308bbad6caa74fe33f4f122aff6275974f8. No Tempo server code is bundled.
 Documentation: https://grafana.com/docs/tempo/latest/traceql/construct-traceql-queries/

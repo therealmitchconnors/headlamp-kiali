@@ -1284,6 +1284,19 @@ its positive duration token is not parseable; no floating-point arithmetic
 workaround is used. Span and whole-trace durations remain nonnegative.
 Seventeen selectable fields still share the ten-intrinsic-predicate limit.
 
+**Require a related span group** adds one explicit Tempo group with its own
+service, optional exact operation and reported-errors-only flag. Choose
+same-trace AND, child, parent, descendant, ancestor or sibling relative to the
+primary group. Existing tags and typed/intrinsic predicates remain on the
+primary left group; the captured related clause shows the separate right group.
+
+Same-trace AND can match the **same** span and returns both groups. Structural
+relations return matching right-group spans; parentage does not establish
+temporal ordering or causality. This remains one bounded search, not link
+traversal or a second provider query. Provider changes discard submissions;
+disable the group explicitly before searching Jaeger. Arbitrary pipelines,
+unions, negated relations and additional groups remain unsupported.
+
 Open a trace to inspect relative
 span timing, parents, references, attributes and events. Trace-ID URLs load
 directly; **Load trace** also retries missing or failed reads. Detail reads and
@@ -1324,7 +1337,7 @@ application data; they are not saved in plugin settings.
 
 This is bounded HTTP trace browsing, not full tracing parity. Broader workload/
 graph correlations, structural/count intrinsic Tempo filters and
-cross-span expressions,
+unrestricted cross-span pipelines,
 external-auth/tenant headers, gRPC-only
 backends, Tempo v2 partial/pruned-trace envelopes and a lossless raw trace viewer
 remain open. No tracing backend is installed in the development

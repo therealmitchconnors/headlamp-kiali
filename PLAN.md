@@ -259,7 +259,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Four hosted groups issued three GETs for all six fields; metadata regressions
   passed. **461 focused tests in six files** and normal gates passed.
   Seventeen field options retain the shared ten-predicate limit; link traversal,
-  structural/count intrinsics and cross-span expressions remain open.
+  structural/count intrinsics and unrestricted cross-span pipelines remain open.
+- One bounded related-span group now supports same-trace AND plus directional
+  child/parent/descendant/ancestor/sibling relationships. Primary and related
+  criteria stay separate; AND need not match distinct spans and structural
+  operators return right-group matches. Three hosted groups made nine searches,
+  checking all operators, quoting, capture/provider isolation and denial/retry.
+  **484 focused tests in seven files** and normal gates passed. No provider
+  matching is claimed; unions, negated relations, additional groups and raw
+  pipelines remain unsupported.
 - Event/link/instrumentation attribute scopes now share typed filtering,
   exact literals, nil predicates and bounded captured reads. Five hosted
   groups covered the three scopes/five scalar types, mixed trace intrinsics,
@@ -503,7 +511,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `2fed49795770f65fda5c1240f28eec530535e05345bbfc606893135253e33941`.
+  `535f70321b9620fbb4a74965989ea27eb2baa0c274baac769e96ad7721345548`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1264,7 +1272,9 @@ panel and query cardinality limits.
    workflows using existing correlation and guarded mutation adapters.
    Multi-object proposals require per-object outcomes; no blind retry or rollback.
 4. Continue tracing workload/graph correlations and remaining
-   structural/count intrinsic and cross-span filters. Trace-wide root/duration,
+   structural/count intrinsic filters and broader cross-span pipelines. One
+   explicit related group with six fixed relationships is implemented.
+   Trace-wide root/duration,
    event-name/offset, trace/span/parent/link IDs and instrumentation name/version intrinsics and
    event/link/instrumentation attribute scopes are now implemented.
    Literal attribute names,

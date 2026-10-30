@@ -16,6 +16,11 @@ import { getClusterConfig, TracingConfig } from '../core/config';
 import { clusterScope } from '../core/scope';
 import { traceIntrinsicName } from '../core/traceIntrinsics';
 import {
+  TEMPO_SPAN_RELATIONS,
+  TempoRelatedSpan,
+  tempoRelatedSpanClause,
+} from '../core/traceRelations';
+import {
   traceDate,
   TraceDetail,
   traceId,
@@ -330,6 +335,20 @@ function Search({
               }
             )}
           </Typography>
+          {query.tempoRelatedSpan && (
+            <Stack spacing={1}>
+              <Typography component="pre" sx={traceIdStyle}>
+                {t('Captured related-span clause: {{clause}}', {
+                  clause: tempoRelatedSpanClause(query.tempoRelatedSpan),
+                })}
+              </Typography>
+              <Typography variant="body2">
+                {t(
+                  'Primary filters apply to the left group. Same-trace AND can match the same span and returns both groups; structural relations return matching spans from the related right group. This is not a temporal ordering or linked-trace traversal.'
+                )}
+              </Typography>
+            </Stack>
+          )}
           {!!query.tags?.length && (
             <details>
               <summary>{t('Show captured tag filters')}</summary>
@@ -466,6 +485,13 @@ function TraceScope({ cluster }: { cluster: string }) {
   const nextAttribute = useRef(0);
   const [intrinsicFilters, setIntrinsicFilters] = useState<IntrinsicFilterRow[]>([]);
   const nextIntrinsic = useRef(0);
+  const [relatedEnabled, setRelatedEnabled] = useState(false);
+  const [relatedSpan, setRelatedSpan] = useState<TempoRelatedSpan>({
+    relation: 'and',
+    service: '',
+    operation: '',
+    errorsOnly: false,
+  });
   const [currentTime, setCurrentTime] = useState(true);
   const [endTime, setEndTime] = useState('');
   const [search, setSearch] = useState<{ query: TraceQuery; configKey: string }>();
@@ -474,6 +500,14 @@ function TraceScope({ cluster }: { cluster: string }) {
   const [error, setError] = useState('');
   const config = state.valid ? getClusterConfig(state.config, cluster).tracing : null;
   const configKey = JSON.stringify(config);
+  const relationNames = {
+    and: t('Both groups match in the same trace'),
+    child: t('Related span is a child of a primary match'),
+    parent: t('Related span is a parent of a primary match'),
+    descendant: t('Related span is a descendant of a primary match'),
+    ancestor: t('Related span is an ancestor of a primary match'),
+    sibling: t('Related span is a sibling of a primary match'),
+  };
   useEffect(() => setSearch(undefined), [configKey]);
   function captureWindow() {
     const end = currentTime
@@ -686,6 +720,81 @@ function TraceScope({ cluster }: { cluster: string }) {
                 }}
               />
             )}
+            {(config?.provider === 'tempo' || relatedEnabled) && (
+              <Stack spacing={2}>
+                <FormControlLabel
+                  label={t('Require a related span group')}
+                  control={
+                    <Switch
+                      checked={relatedEnabled}
+                      disabled={config?.provider !== 'tempo' && !relatedEnabled}
+                      onChange={event => setRelatedEnabled(event.target.checked)}
+                    />
+                  }
+                />
+                {relatedEnabled && (
+                  <>
+                    <Alert severity={config?.provider === 'tempo' ? 'info' : 'warning'}>
+                      {config?.provider !== 'tempo'
+                        ? t(
+                            'Related span filters require Tempo; disable them before searching Jaeger.'
+                          )
+                        : t(
+                            'One additional span group is evaluated within the same trace. Same-trace AND does not require distinct spans. Structural relations return matching right-group spans; parentage is not proof of request order or causality. Existing tags and attribute/intrinsic filters stay on the primary left group. No linked traces are fetched.'
+                          )}
+                    </Alert>
+                    <TextField
+                      select
+                      label={t('Span relationship')}
+                      value={relatedSpan.relation}
+                      onChange={event => {
+                        const relation = TEMPO_SPAN_RELATIONS.find(
+                          item => item.value === event.target.value
+                        );
+                        if (relation)
+                          setRelatedSpan(current => ({ ...current, relation: relation.value }));
+                      }}
+                    >
+                      {TEMPO_SPAN_RELATIONS.map(relation => (
+                        <MenuItem key={relation.value} value={relation.value}>
+                          {relationNames[relation.value]} ({relation.operator})
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      label={t('Related span service')}
+                      value={relatedSpan.service}
+                      inputProps={{ maxLength: 256 }}
+                      onChange={event =>
+                        setRelatedSpan(current => ({ ...current, service: event.target.value }))
+                      }
+                    />
+                    <TextField
+                      label={t('Related span operation (exact, optional)')}
+                      value={relatedSpan.operation ?? ''}
+                      inputProps={{ maxLength: 256 }}
+                      onChange={event =>
+                        setRelatedSpan(current => ({ ...current, operation: event.target.value }))
+                      }
+                    />
+                    <FormControlLabel
+                      label={t('Related span reported errors only')}
+                      control={
+                        <Switch
+                          checked={relatedSpan.errorsOnly === true}
+                          onChange={event =>
+                            setRelatedSpan(current => ({
+                              ...current,
+                              errorsOnly: event.target.checked,
+                            }))
+                          }
+                        />
+                      }
+                    />
+                  </>
+                )}
+              </Stack>
+            )}
             {!currentTime && (
               <TextField
                 type="datetime-local"
@@ -726,6 +835,7 @@ function TraceScope({ cluster }: { cluster: string }) {
                       operator,
                       value,
                     })),
+                    ...(relatedEnabled ? { tempoRelatedSpan: { ...relatedSpan } } : {}),
                   };
                   if (!config) throw new Error(t('Tracing is not configured'));
                   traceSearchPath(config.provider, next);

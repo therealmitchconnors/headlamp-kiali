@@ -2076,6 +2076,26 @@ field options but at most ten predicates, and forbid trace-detail/link traversal
 requests in the fixture. The increment passed 461 focused tests in six files
 and metadata regressions; restore settings and remove every interceptor.
 
+### Related-span searches
+
+`core/traceRelations.test.ts` checks each of the six fixed operators, exact
+left/right predicate placement, literal string protection, strict secondary
+shape/length validation, Jaeger rejection and the combined encoded URL cap.
+Same-trace AND may match the same span and returns both groups; structural
+relations return right-group matches. Do not equate either with linked traces,
+causality or timestamp ordering.
+
+Hosted checks submit all six relations using different primary/related services,
+a primary operation, a query-like related operation and related-only error
+status. Inspect the complete captured query, not merely the operator string.
+Change drafts without submission, switch providers, reject Jaeger until the
+group is explicitly disabled, and verify denial/retry. Three groups made nine
+search GETs; no detail read, link traversal or cluster write occurred. A
+keyboard Space action can disable a control that immediately disappears on
+Jaeger; wait for its disappearance instead of polling an unchecked state on a
+removed element. The increment passed 484 focused tests in seven files and
+primary ID/offset regressions. Restore settings and handlers before teardown.
+
 ### Trace name discovery
 
 `core/traceNames.test.ts`, `data/tracing.test.ts` and `Traces.test.tsx` cover

@@ -252,6 +252,38 @@ it('captures ID/offset literals and rejects invalid byte predicates before trans
   ).rejects.toThrow('hexadecimal');
   expect(ApiProxy.request).toHaveBeenCalledTimes(1);
 });
+it('captures related span scope before awaiting and never submits it to Jaeger', async () => {
+  const query = {
+    service: 'reviews',
+    start: 1700000000,
+    end: 1700000900,
+    limit: 20,
+    tempoRelatedSpan: {
+      relation: 'descendant' as const,
+      service: 'ratings',
+      operation: 'GET /ratings',
+      errorsOnly: true,
+    },
+  };
+  vi.mocked(ApiProxy.request).mockResolvedValue(fixtures.tempoSearch);
+  const pending = searchTraces(
+    clusterScope('alpha'),
+    { ...config, provider: 'tempo' },
+    query,
+    new AbortController().signal
+  );
+  query.tempoRelatedSpan.service = 'changed';
+  query.tempoRelatedSpan.operation = 'changed';
+  await pending;
+  const url = new URL(String(vi.mocked(ApiProxy.request).mock.calls[0][0]), 'http://example.test');
+  expect(url.searchParams.get('q')).toBe(
+    '{ .service.name = "reviews" } >> { .service.name = "ratings" && span:name = "GET /ratings" && span:status = error }'
+  );
+  await expect(
+    searchTraces(clusterScope('alpha'), config, query, new AbortController().signal)
+  ).rejects.toThrow('Related span filters require Tempo');
+  expect(ApiProxy.request).toHaveBeenCalledTimes(1);
+});
 it('captures punctuation and Unicode attribute keys without interpreting them as query structure', async () => {
   const key = 'k8s.io/label"\\\u00e9';
   const query = {

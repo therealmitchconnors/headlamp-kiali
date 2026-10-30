@@ -3199,6 +3199,40 @@ rejection, provider isolation and denial/retry. Metadata-string regressions
 made three more GETs. No provider or cluster objects were installed, and no
 live-provider matching or independent Tempo parser execution is claimed.
 
+### Bounded related-span groups
+
+`core/traceRelations.ts` composes one additional Tempo spanset with an explicit
+service, optional exact operation and reported-errors-only predicate. The
+whitelisted relationships are `&&`, `>`, `<`, `>>`, `<<` and `~`. Primary
+service/operation/tags/typed attributes/intrinsics remain in the left group;
+the additional criteria do not silently become same-span predicates.
+
+The pinned lexer (`a3a1f7105682e36067dc4150bdf06c60f7215fb8`), grammar
+(`d7e486ae6f25e8130971ebeeeca6a9f18a50491d`) and active spanset evaluator
+(`3f87fb38504a339d38a207d2fb8c2863fc30f85b`) were checked against Tempo commit
+`afbbb308bbad6caa74fe33f4f122aff6275974f8`. Same-trace AND requires both groups
+and returns their unique spans; it does not require distinct matches.
+Structural operations return matching right-side spans. They do not prove
+temporal order, causality or a link to another trace.
+
+Related service/operation strings are quoted and bounded to 256 characters.
+Malformed/unknown fields and unsupported relations fail locally; omitted
+related criteria preserve existing request bytes. All groups share one GET,
+window, result limit, 16 KiB URL bound and fifteen-second deadline. There is
+no OR branch that bypasses the primary filter, raw pipeline, nested group or
+secondary provider request. Empty optional operation means unrestricted
+operation within the explicit related service.
+
+Captured clauses are immutable and displayed separately from drafts. Provider
+changes discard submissions and retain the draft for explicit disabling on
+Jaeger. Verification passed **484 focused tests in seven files** and normal
+type/lint/i18n/build/generation checks. Three stock-hosted groups made nine
+intercepted searches across all six operators, quoted query-like operations,
+draft/provider isolation, denial/retry and return to primary-only Jaeger.
+Primary ID/offset regressions also passed. Settings were restored durably;
+these are source/transport/UI checks, not independent parser execution or
+live-provider relationship matching.
+
 ### Exact tag filters and captured search time
 
 The search form now supports ten additional string tag equalities, explicit

@@ -6,6 +6,7 @@ import {
   tempoAttributeIdentifier,
 } from './traceFilters';
 import { tempoIntrinsicClauses, TempoIntrinsicFilter } from './traceIntrinsics';
+import { TempoRelatedSpan, tempoRelatedSpanClause } from './traceRelations';
 
 export interface TraceWindow {
   start: number;
@@ -20,6 +21,7 @@ export interface TraceQuery extends TraceWindow {
   tags?: readonly TraceTagFilter[];
   tempoFilters?: readonly TempoAttributeFilter[];
   tempoIntrinsics?: readonly TempoIntrinsicFilter[];
+  tempoRelatedSpan?: TempoRelatedSpan;
 }
 export interface TraceTagFilter {
   key: string;
@@ -281,6 +283,9 @@ export function traceSearchPath(provider: TracingConfig['provider'], query: Trac
   const intrinsicClauses = tempoIntrinsicClauses(query.tempoIntrinsics);
   if (provider !== 'tempo' && intrinsicClauses.length)
     throw new Error('Intrinsic filters require Tempo; remove them before searching Jaeger');
+  const relatedSpan = tempoRelatedSpanClause(query.tempoRelatedSpan);
+  if (provider !== 'tempo' && relatedSpan)
+    throw new Error('Related span filters require Tempo; disable them before searching Jaeger');
   const params = new URLSearchParams({ limit: String(query.limit) });
   if (provider === 'jaeger') {
     const start = query.start * 1000000;
@@ -310,7 +315,7 @@ export function traceSearchPath(provider: TracingConfig['provider'], query: Trac
   }
   clauses.push(...attributeClauses);
   clauses.push(...intrinsicClauses);
-  params.set('q', `{ ${clauses.join(' && ')} }`);
+  params.set('q', `{ ${clauses.join(' && ')} }${relatedSpan ? ` ${relatedSpan}` : ''}`);
   params.set('start', String(query.start));
   params.set('end', String(query.end));
   params.set('spss', '1');

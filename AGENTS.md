@@ -224,6 +224,10 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   policy. Signed event offsets differ from nonnegative span/trace durations.
   The extreme negative int64 duration token is deliberately rejected: pinned
   duration subtraction coerces to float, so arithmetic is not an exact workaround.
+- Tempo spanset AND may match the same span and returns both groups. Structural
+  child/parent/descendant/ancestor/sibling operators return matching right-group
+  spans. Keep primary predicates on the left and related criteria on the right;
+  do not infer temporal order, causality or linked-trace traversal.
 - Service port checkers pool Pods across all managed namespaces and match labels
   without another namespace filter; empty selectors match that pool. Their
   sidecar predicate is all-Pod/vacuous-empty, with a separate any-ambient path,
