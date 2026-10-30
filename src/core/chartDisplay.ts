@@ -1,9 +1,17 @@
 import { isRecord } from './object';
 
 export type MetricChartType = 'line' | 'area' | 'bar' | 'scatter';
+export type MetricChartAxis = 'time' | 'series';
+
+export function validateMetricChartAxis(value: unknown): MetricChartAxis | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (value === 'time' || value === 'series') return value;
+  throw new Error('Chart xAxis must be time or series');
+}
 
 export function validateMetricChartType(value: unknown): MetricChartType | undefined {
-  if (value === undefined || value === null || value === '') return undefined;
+  if (value === undefined || value === null) return undefined;
+  if (value === '') return 'line';
   if (value === 'line' || value === 'area' || value === 'bar' || value === 'scatter') return value;
   throw new Error('Chart type must be line, area, bar or scatter');
 }

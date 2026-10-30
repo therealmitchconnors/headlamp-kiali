@@ -165,6 +165,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   Never merge groups made indistinguishable by removing a sort-only label.
   Native integer sorting rejects invalid/missing/out-of-range values rather
   than reproducing upstream's silent Atoi fallback.
+- A series-axis dashboard uses the latest finite sample of each series inside
+  the captured range, with its own timestamp; it is not an instant query or a
+  range average. Keep unavailable categories explicit and never connect different
+  series. Missing chartType defaults to bar on series axes, but an explicitly
+  empty chartType follows the pinned switch fallback to line.
 - VM application correlation follows the first matching WorkloadEntry's
   `spec.labels` in captured list order, otherwise group selector labels only
   after a complete entry read. Preserve group UID/resourceVersion separately

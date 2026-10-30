@@ -1,7 +1,9 @@
 import {
   ChartDisplay,
+  MetricChartAxis,
   MetricChartType,
   validateChartDisplay,
+  validateMetricChartAxis,
   validateMetricChartType,
 } from './chartDisplay';
 import {
@@ -26,6 +28,7 @@ const EFFECTIVE_DASHBOARD_BYTES = CUSTOM_DASHBOARD_BYTES * 2;
 export interface CustomChart extends ChartDisplay, DashboardSorting {
   name: string;
   chartType?: MetricChartType;
+  xAxis?: MetricChartAxis;
   metricName?: string;
   metrics?: CustomDashboardMetric[];
   unit?: string;
@@ -194,6 +197,7 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
         'sortLabel',
         'sortLabelParseAs',
         'chartType',
+        'xAxis',
       ],
       'Aggregate chart'
     );
@@ -237,10 +241,12 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
     if (typeof scale !== 'number' || !Number.isFinite(scale) || scale < 0 || scale > 1e12)
       throw new Error('Dashboard unitScale must be finite and between 0 and 1e12');
     const chartType = validateMetricChartType(raw.chartType);
+    const xAxis = validateMetricChartAxis(raw.xAxis);
     return {
       chart: {
         name,
         ...(chartType ? { chartType } : {}),
+        ...(xAxis ? { xAxis } : {}),
         ...validateChartDisplay(raw),
         ...validateDashboardSorting(raw, raw.dataType === 'histogram'),
         ...(legacyName ? { metricName: legacyName } : {}),

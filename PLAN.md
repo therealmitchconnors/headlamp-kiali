@@ -372,7 +372,14 @@ dashboards and integration/live/Desktop closure remain substantial work.
   visible; independent areas/bars are never stacked. Three hosted groups rendered
   eight scalar/grouped charts with eight metric GETs, checking real primitives,
   numeric rows, sort order and expanded styles. Expansion regressions passed.
-- Latest style increment: **385 focused tests in ten files**, plus
+- Series-category axes now select each visible series' latest finite sample
+  within the existing range, retaining actual sample times and unavailable
+  categories. Default/explicit-empty type semantics, sorting and independent
+  category geometry passed three hosted groups/six metric GETs. Expansion and
+  local filtering added no requests; eight-chart time-axis regressions passed.
+- Latest series-axis increment: **408 focused tests in twelve files**, plus
+  type/lint/i18n/build/package and source/catalog/resource/parity/hosted checks.
+- Previous style increment: **385 focused tests in ten files**, plus
   type/lint/i18n/build/package and resource/catalog/parity/hosted checks.
 - Previous expansion increment: **51 focused tests in five files**, plus
   type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
@@ -430,7 +437,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `521a2da4e980924dc62333b236d4b06b01ef49706c59cbf8eddd38c1cd9a87cb`.
+  `20aeda85c0390bc185b183d982ca5fe5e93170caa044964546a710883383c2fd`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1090,7 +1097,7 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is series-category axis/row-layout/link support and broader
+The dashboard continuation is row-layout/link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
 through an explicit inspector, reusing application recommendation/chart code
 while retaining paired app/version filters and a fresh workload overlay.
@@ -1100,6 +1107,9 @@ the new inspector intentionally does not duplicate them. Captured panels can
 now expand without refetching, using a native keyboard-accessible dialog rather
 than claiming full upstream viewport/row layout parity. Time-axis styles support
 line, area, bar and point presentation without reporter pairing or stacking.
+Series axes use latest-finite-per-series projection with exact selected times,
+explicit unavailable categories and independent placement. Missing chartType
+uses the axis default; explicitly empty chartType means line.
 Series sorting retains its captured query grouping,
 lexical/exact-int64 order and sort-only label-removal semantics. Invalid integer
 strings and indistinguishable displayed groups fail explicitly instead of

@@ -94,3 +94,24 @@ export function groupedMetricComparisons(
     );
   return result;
 }
+
+export function metricCategoryData(metrics: readonly ComparisonMetric[]) {
+  const { series } = metricComparisonData(metrics);
+  const points = series.map((item, index) => {
+    let latest: { timestamp: number; value: number | null } | undefined;
+    for (const sample of metrics[index].result.series[0]?.samples ?? [])
+      if (sample.value !== null) latest = sample;
+    return {
+      ...item,
+      category: index + 1,
+      timestamp: latest?.timestamp ?? null,
+      value: latest?.value ?? null,
+    };
+  });
+  return {
+    points,
+    mixedTimes:
+      new Set(points.flatMap(point => (point.timestamp === null ? [] : [point.timestamp]))).size >
+      1,
+  };
+}

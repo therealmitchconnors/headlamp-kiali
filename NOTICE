@@ -80,6 +80,7 @@ workload app/version dashboard selector pairs and workload-specific annotation o
 dashboard sort-label query grouping and lexical/integer series ordering,
 captured dashboard chart expansion without query replay,
 captured line, area, bar and point chart presentation choices,
+latest-finite series-category projection and independent category placement,
 Service traffic-generation shapes/defaults,
 TCP traffic-shifting wizard generation,
 circuit-breaker wizard capabilities,

@@ -42,7 +42,7 @@ it.each(
     ).toBe(chartType);
   }
 );
-it.each([undefined, null, ''])(
+it.each([undefined, null])(
   'keeps unspecified style absent instead of changing saved definitions: %j',
   chartType => {
     expect(validateMetricChartType(chartType)).toBeUndefined();
@@ -55,6 +55,9 @@ it.each([undefined, null, ''])(
     ).toBeUndefined();
   }
 );
+it('preserves an explicitly empty chart type as line instead of an axis-dependent default', () => {
+  expect(validateMetricChartType('')).toBe('line');
+});
 it.each(['pie', 'Line', 'stacked-area', 'line\n', true, 0, {}, []].map(input => ({ input })))(
   'rejects unsupported chart style $input instead of silently choosing line',
   ({ input }) => {

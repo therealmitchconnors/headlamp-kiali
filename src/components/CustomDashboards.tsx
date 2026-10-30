@@ -40,6 +40,7 @@ import ClusterScope from './ClusterScope';
 import DashboardAnnotations, { DashboardAnnotationState } from './DashboardAnnotations';
 import DashboardDiscovery from './DashboardDiscovery';
 import DashboardValueFilters from './DashboardValueFilters';
+import MetricCategoryChart from './MetricCategoryChart';
 import MetricChart from './MetricChart';
 import MetricComparisonChart from './MetricComparisonChart';
 import RequestStatus from './RequestStatus';
@@ -282,7 +283,17 @@ export function DashboardResults({
                         </Stack>
                       ))}
                       {successful.length > 0 &&
-                        (entries.length === 1 && !grouped ? (
+                        (chart.xAxis === 'series' ? (
+                          <MetricCategoryChart
+                            metrics={successful}
+                            title={title}
+                            unit={chart.unit ?? null}
+                            chartType={chart.chartType}
+                            min={chart.min}
+                            max={chart.max}
+                            height={height}
+                          />
+                        ) : entries.length === 1 && !grouped ? (
                           <MetricChart
                             result={successful[0].result}
                             title={title}

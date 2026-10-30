@@ -16,18 +16,8 @@ import {
 import { metricAxis, MetricChartType } from '../core/chartDisplay';
 import { ComparisonMetric, metricComparisonData } from '../core/metricComparison';
 import MetricAxisNotice from './MetricAxisNotice';
-import { metricSeries } from './metricSeries';
+import { metricSeries, metricSeriesColors } from './metricSeries';
 
-const colors = [
-  '#1976d2',
-  '#9c27b0',
-  '#ed6c02',
-  '#00838f',
-  '#c62828',
-  '#546e7a',
-  '#6d4c41',
-  '#4527a0',
-];
 export default function MetricComparisonChart({
   metrics,
   title,
@@ -109,7 +99,7 @@ export default function MetricComparisonChart({
                   type: chartType,
                   name: series.name,
                   dataKey: series.key,
-                  color: colors[series.colorIndex],
+                  color: metricSeriesColors[series.colorIndex],
                   dot: { r: 2 },
                   animate: false,
                 })
@@ -139,7 +129,7 @@ export default function MetricComparisonChart({
                   width: 16,
                   height: 3,
                   marginRight: 8,
-                  backgroundColor: colors[series.colorIndex],
+                  backgroundColor: metricSeriesColors[series.colorIndex],
                 }}
               />
               {series.name}

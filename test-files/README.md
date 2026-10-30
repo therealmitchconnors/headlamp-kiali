@@ -1112,6 +1112,24 @@ Three hosted groups rendered eight charts with eight metric GETs. Default-line
 expansion/focus/narrow-screen regressions also passed. All fixture settings and
 interceptors were restored. The increment passed 385 tests in ten files.
 
+For series-category axes, run `core/metricCategories.test.ts`, category-chart UI
+and shared schema/rendering suites. Verify latest finite selection after trailing
+nulls, zero at Unix epoch, empty/all-unavailable series, mixed/equal sample times,
+immutable input, invalid/bounded evidence and unchanged raw/rate/histogram
+query plans. Explicit empty `chartType` must mean line even with `xAxis: series`;
+omitted/null type uses bar there. Unknown axes remain errors.
+
+Hosted fixtures should return an earlier negative value followed by a newer
+negative value and nulls, a latest zero followed by null, and an all-null series.
+Check the selected value and exact timestamp in each numeric row, not just
+chart existence. Preserve captured sort order, disclose differing times, and
+leave missing values/timestamps unavailable. Inspect real default bars and
+isolated line/area/point geometry: do not connect unrelated series or manufacture
+positive-height bars for nulls. Expand and filter categories without refetching.
+Three hosted groups rendered six panels with six metric GETs; time-axis
+regressions rendered eight charts with eight GETs. The increment passed
+408 tests in twelve files. Restore settings and every handler.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

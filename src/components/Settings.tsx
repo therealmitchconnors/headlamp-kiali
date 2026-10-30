@@ -557,7 +557,7 @@ function ClusterSettingsForm({
       </Typography>
       <Typography variant="body2">
         {t(
-          'Optional chartType selects line, area, bar or scatter (points) for the existing time axis. Missing/null/empty uses line. Series remain independent, never stacked or summed for display; missing samples are not zero. Units, numeric tables, grouping, sorting, bounds and expansion retain the captured data. Other axis modes remain unsupported.'
+          'Optional chartType selects line, area, bar or scatter (points). Optional xAxis is time (default) or series. A series axis selects the latest finite sample of each series within the captured range and shows its timestamp; it is not an instant query. Missing/null chartType uses line for time or bar for series; an explicitly empty chartType means line. Series remain independent, never stacked or summed for display; missing samples are not zero. Units, numeric tables, grouping, sorting, bounds and expansion retain the captured data.'
         )}
       </Typography>
       <Typography variant="body2">

@@ -1089,10 +1089,23 @@ local filters and expansion stay unchanged. Named/grouped bars and filled
 areas remain independent, not stacked or summed; points have no connecting
 stroke. Missing samples stay unavailable, and isolated finite samples remain
 visible on line/area plots. Unknown styles are rejected instead of silently
-falling back. This does not add reporter-paired envelopes or a series-category
-axis.
+falling back. This does not add reporter-paired envelopes.
 
-This is **not full custom-dashboard parity**: alternate layouts, native histograms,
+`xAxis: "series"` compares the latest **finite** sample of each visible series
+within the captured range, preserving its actual sample timestamp. It does not
+switch to an instant query, sum or average the range, or substitute zero for
+missing data. Older finite values can be selected when later samples are
+unavailable; differing sample times are disclosed. Numeric rows retain
+all-unavailable categories without inventing timestamps.
+
+The series axis defaults to bars when `chartType` is absent/null. Explicit
+line/area/point styles keep each category independent rather than joining
+different series. An explicitly empty `chartType` is normalized to `line`,
+preserving the pinned caller's distinction from an axis-dependent default.
+`xAxis` omitted/null/empty or `"time"` retains the existing time-axis behavior.
+Captured sorting, local filters, units, bounds and expansion apply to both axes.
+
+This is **not full custom-dashboard parity**: row/viewport layouts, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate

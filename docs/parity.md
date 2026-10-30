@@ -1591,8 +1591,42 @@ grouped charts with eight metric GETs, verifying actual filled paths, point
 counts, absent connecting strokes, distinct non-stacked bar positions, unchanged
 negative/zero/unavailable numeric rows, sorting and expanded styles without
 refetching. Existing expansion/focus/narrow-screen regressions also passed with
-four metric GETs. No cluster writes occurred. Series-category axes and
-row/viewport layout remain separate gaps.
+four metric GETs. No cluster writes occurred. Row/viewport layout remains a
+separate gap; series-category support follows below.
+
+### Captured series-category axes
+
+The chart `xAxis` now accepts `time` and `series`. The series projection follows
+`toVCSinglePoint` in pinned `VictoryChartsUtils.ts`
+(`c299b98a5e90ef91fbadb4d89bf893574e965fa1`) and independent category placement in
+`ChartWithLegend.tsx` (`f2abf3dceb7e479b96ca2a406d68c4b4644832fa`).
+Each series selects its latest finite sample within the existing bounded
+range; it does not change PromQL, fetch an instant value, interpolate, sum or
+average across samples/series. Sample times remain explicit and differing
+times produce a warning.
+
+Unlike the upstream empty-array reduction, all-unavailable series remain
+explicit unavailable rows/categories with no invented value or timestamp.
+Zero, signed values, source order/colors and original data are retained.
+The existing bounds/units/sort/local-filter/expansion pipeline applies. Hidden
+series are removed locally before category placement without refetching.
+Numeric tables show the selected timestamp and value, not a misleading common
+range-end timestamp.
+
+An omitted/null chart type uses the source default bar for series axes and line
+for time axes. An explicitly empty chart type is normalized to **line**, not
+omitted: the pinned frontend's default switch case differs from its missing-type
+axis default. Unknown type/axis names still fail validation. Explicit
+line/area/point categories are rendered independently, with no segment or filled
+region joining different series. Reporter-paired envelopes remain unsupported.
+
+The increment passed **408 focused tests in twelve files** plus type/lint/i18n/
+build and source/catalog/resource/parity checks. Three hosted groups rendered
+six category panels with six metric GETs, verifying exact older sample times,
+latest zero/negative values rather than averages, all-missing rows, sort order,
+default/empty type semantics, independent actual SVG geometry, expanded samples
+and local filtering without new requests. Eight-chart/eight-GET time-axis style
+regressions also passed. No cluster writes occurred.
 
 ## Additional traffic counter signals
 

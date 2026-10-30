@@ -55,6 +55,17 @@ vi.mock('./MetricComparisonChart', () => ({
     </div>
   ),
 }));
+vi.mock('./MetricCategoryChart', () => ({
+  default: ({
+    title,
+    chartType = 'bar',
+    height = 260,
+  }: {
+    title: string;
+    chartType?: string;
+    height?: number;
+  }) => <div role="img" aria-label={title} data-chart-type={chartType} data-height={height} />,
+}));
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   SimpleTable: <T,>({
     data,
@@ -144,6 +155,21 @@ const open = () =>
       <CustomDashboards />
     </MemoryRouter>
   );
+it('routes captured series axes through category rendering, including expanded default bars', async () => {
+  const config = structuredClone(configured);
+  Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    xAxis: 'series',
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(config);
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-chart-type')).toBe('bar');
+  await userEvent.click(screen.getByRole('button', { name: 'Expand Memory' }));
+  await screen.findByRole('dialog', { name: 'Expanded chart: Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('520');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
 it('retains the declared chart style in normal and expanded views without new requests', async () => {
   const config = structuredClone(configured);
   Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {

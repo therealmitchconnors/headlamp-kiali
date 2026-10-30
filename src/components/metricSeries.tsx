@@ -1,6 +1,17 @@
 import { Area, Bar, Line } from 'recharts';
 import type { MetricChartType } from '../core/chartDisplay';
 
+export const metricSeriesColors = [
+  '#1976d2',
+  '#9c27b0',
+  '#ed6c02',
+  '#00838f',
+  '#c62828',
+  '#546e7a',
+  '#6d4c41',
+  '#4527a0',
+];
+
 export function metricSeries({
   type,
   name,
