@@ -562,6 +562,11 @@ function ClusterSettingsForm({
       </Typography>
       <Typography variant="body2">
         {t(
+          'Optional startCollapsed starts a chart presentation hidden after its data loads. Show/Hide and Expand use the captured data without requests; errors, warnings and unavailable-data notices stay visible. This does not skip metric queries or increase their budget. A new capture resets local visibility to the definition.'
+        )}
+      </Typography>
+      <Typography variant="body2">
+        {t(
           'To disable a template by name, save a declaration such as {"name":"go","items":[]} with no discoverOn metric. This removes that name from the effective catalog, not from Kubernetes. A nonempty discoverOn with no items remains discovery-only and cannot load charts. Remove or replace the declaration to restore the template.'
         )}
       </Typography>

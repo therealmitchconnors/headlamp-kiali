@@ -155,6 +155,87 @@ const open = () =>
       <CustomDashboards />
     </MemoryRouter>
   );
+it('honors initial collapse, shows and expands captured data locally, and resets visibility on a new capture', async () => {
+  const config = structuredClone(configured);
+  Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    startCollapsed: true,
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(config);
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: {
+        ok: true,
+        result: {
+          warnings: [],
+          series: [{ labels: {}, samples: [{ timestamp: query.end, value: 0 }] }],
+        },
+      },
+    })),
+  }));
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  const show = await screen.findByRole('button', { name: 'Show Memory' });
+  expect(show.getAttribute('aria-expanded')).toBe('false');
+  expect(document.getElementById(show.getAttribute('aria-controls')!)?.hidden).toBe(true);
+  expect(screen.queryByRole('img', { name: 'Memory' })).toBeNull();
+  expect(screen.queryByText(/No finite samples were returned/)).toBeNull();
+  await user.click(show);
+  expect(screen.getByRole('button', { name: 'Hide Memory' }).getAttribute('aria-expanded')).toBe(
+    'true'
+  );
+  expect(screen.getByRole('img', { name: 'Memory' })).toBeDefined();
+  await user.click(screen.getByRole('button', { name: 'Hide Memory' }));
+  await user.click(screen.getByRole('button', { name: 'Expand Memory' }));
+  await screen.findByRole('dialog', { name: 'Expanded chart: Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' })).toBeDefined();
+  await user.click(screen.getByRole('button', { name: 'Close expanded chart' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(screen.queryByRole('img', { name: 'Memory' })).toBeNull();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('button', { name: 'Show Memory' }));
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('button', { name: 'Show Memory' });
+  expect(screen.queryByRole('img', { name: 'Memory' })).toBeNull();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+});
+it('keeps per-metric errors, warnings and unavailable notices visible while presentation is collapsed', async () => {
+  const config = structuredClone(configured);
+  Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    startCollapsed: true,
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(config);
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: { ok: true, result: { warnings: ['Partial fixture samples'], series: [] } },
+    })),
+  }));
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByText('No finite samples were returned for Memory.');
+  expect(screen.getByText('Partial fixture samples')).toBeDefined();
+  expect(screen.queryByRole('img', { name: 'Memory' })).toBeNull();
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _provider, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: { ok: false, error: { kind: 'forbidden', message: 'Captured metric denied' } },
+    })),
+  }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByText('Captured metric denied');
+  expect(screen.queryByRole('img', { name: 'Memory' })).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: 'Show Memory' }));
+  expect(screen.getByText('Captured metric denied')).toBeDefined();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+});
 it('routes captured series axes through category rendering, including expanded default bars', async () => {
   const config = structuredClone(configured);
   Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {

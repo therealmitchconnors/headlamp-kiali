@@ -29,6 +29,7 @@ export interface CustomChart extends ChartDisplay, DashboardSorting {
   name: string;
   chartType?: MetricChartType;
   xAxis?: MetricChartAxis;
+  startCollapsed?: boolean;
   metricName?: string;
   metrics?: CustomDashboardMetric[];
   unit?: string;
@@ -198,6 +199,7 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
         'sortLabelParseAs',
         'chartType',
         'xAxis',
+        'startCollapsed',
       ],
       'Aggregate chart'
     );
@@ -242,11 +244,18 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
       throw new Error('Dashboard unitScale must be finite and between 0 and 1e12');
     const chartType = validateMetricChartType(raw.chartType);
     const xAxis = validateMetricChartAxis(raw.xAxis);
+    if (
+      raw.startCollapsed !== undefined &&
+      raw.startCollapsed !== null &&
+      typeof raw.startCollapsed !== 'boolean'
+    )
+      throw new Error('Chart startCollapsed must be a boolean');
     return {
       chart: {
         name,
         ...(chartType ? { chartType } : {}),
         ...(xAxis ? { xAxis } : {}),
+        ...(typeof raw.startCollapsed === 'boolean' ? { startCollapsed: raw.startCollapsed } : {}),
         ...validateChartDisplay(raw),
         ...validateDashboardSorting(raw, raw.dataType === 'histogram'),
         ...(legacyName ? { metricName: legacyName } : {}),

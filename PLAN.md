@@ -377,7 +377,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   categories. Default/explicit-empty type semantics, sorting and independent
   category geometry passed three hosted groups/six metric GETs. Expansion and
   local filtering added no requests; eight-chart time-axis regressions passed.
-- Latest series-axis increment: **408 focused tests in twelve files**, plus
+- Captured chart visibility now honors boolean startCollapsed and provides
+  local Show/Hide controls. Errors, warnings and no-data notices stay visible;
+  histogram summaries toggle independently and expansion preserves prior
+  visibility. Four hosted groups proved eight requests per explicit capture
+  (sixteen across reload), no requests for visibility/filter actions and
+  definition-default reset. Category-axis regressions passed.
+- Latest visibility increment: **421 focused tests in thirteen files**, plus
+  type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
+- Previous series-axis increment: **408 focused tests in twelve files**, plus
   type/lint/i18n/build/package and source/catalog/resource/parity/hosted checks.
 - Previous style increment: **385 focused tests in ten files**, plus
   type/lint/i18n/build/package and resource/catalog/parity/hosted checks.
@@ -437,7 +445,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `20aeda85c0390bc185b183d982ca5fe5e93170caa044964546a710883383c2fd`.
+  `56f98f132e584373d7d317fe94582fe069b63904ae486ae355f3f6ffb3f7053e`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1110,6 +1118,8 @@ line, area, bar and point presentation without reporter pairing or stacking.
 Series axes use latest-finite-per-series projection with exact selected times,
 explicit unavailable categories and independent placement. Missing chartType
 uses the axis default; explicitly empty chartType means line.
+Initial chart collapse is supported with local Show/Hide/Expand controls, without
+skipping queries or hiding failures. New captures reset visibility to definitions.
 Series sorting retains its captured query grouping,
 lexical/exact-int64 order and sort-only label-removal semantics. Invalid integer
 strings and indistinguishable displayed groups fail explicitly instead of

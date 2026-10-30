@@ -1628,6 +1628,32 @@ default/empty type semantics, independent actual SVG geometry, expanded samples
 and local filtering without new requests. Eight-chart/eight-GET time-axis style
 regressions also passed. No cluster writes occurred.
 
+### Captured chart visibility
+
+Chart `startCollapsed` now accepts a boolean and preserves explicit true/false
+through definitions/includes. Omitted/null keeps the normal expanded default;
+invalid types fail validation. The pinned `KChart.tsx` consumes this flag in its
+initial collapsed state. The native UI additionally provides explicit local
+Show/Hide controls rather than relying on upstream's data-empty transitions to
+reveal content.
+
+Visibility is scoped to the captured result and original chart/summary key.
+It never skips requests, modifies values, hides read errors/warnings, or raises
+the eight-expanded-query budget. Unavailable scalar notices remain exposed even
+when the plot/numeric table is collapsed. Histogram summaries toggle separately.
+Expansion can inspect a collapsed panel and returns to its previous visibility;
+local value filters survive hiding/showing. New captures or source changes
+discard local visibility instead of applying it to unrelated data. Controls have
+named buttons with `aria-expanded` and an associated controlled plot region.
+
+Verification passed **421 focused tests in thirteen files** plus type/lint/i18n/
+build and catalog/resource/parity checks. Four hosted groups issued exactly
+eight metric GETs per explicit load (sixteen total across a reload), proving
+initial flags, keyboard controls, unchanged errors/warnings/missing-data
+disclosures, independent histogram toggles, filtered category restoration,
+collapsed-panel expansion and capture reset. Six-chart category-axis regressions
+also passed. No cluster writes occurred.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

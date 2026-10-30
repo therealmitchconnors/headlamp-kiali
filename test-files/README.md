@@ -1130,6 +1130,22 @@ Three hosted groups rendered six panels with six metric GETs; time-axis
 regressions rendered eight charts with eight GETs. The increment passed
 408 tests in twelve files. Restore settings and every handler.
 
+For `startCollapsed`, test true/false, omitted/null and rejected non-booleans,
+include propagation and unchanged eight-versus-nine expanded-query limits in
+`core/chartVisibility.test.ts`. UI tests must exercise the actual captured result,
+ARIA relationship, Show/Hide, expanded inspection of a collapsed panel and reset
+on a new capture. Read errors, provider warnings and scalar no-finite-sample
+notices must remain visible rather than disappearing with the chart body.
+
+Hosted verification used seven charts/eight expanded queries: collapsed time
+and series plots, a denied metric, empty warned data, an explicitly visible
+chart, a two-summary histogram and another scalar. All eight queries still ran.
+Show/Hide/Expand and local filters added none; histogram summary visibility was
+independent. An explicit reload issued eight more requests and restored the
+definition defaults. Four groups observed sixteen metric GETs total and category
+regressions passed. The increment passed 421 tests in thirteen files; restore
+settings/interceptors and do not infer a data-request opt-out from collapse.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

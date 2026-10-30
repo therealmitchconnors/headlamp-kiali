@@ -1105,6 +1105,14 @@ preserving the pinned caller's distinction from an axis-dependent default.
 `xAxis` omitted/null/empty or `"time"` retains the existing time-axis behavior.
 Captured sorting, local filters, units, bounds and expansion apply to both axes.
 
+`startCollapsed: true` initially hides a chart's presentation after the captured
+reads finish. **Show chart** / **Hide chart** change only local visibility;
+**Expand chart** can inspect a collapsed panel without changing that preference.
+Errors, warnings and unavailable-data notices stay visible. Each histogram
+summary toggles independently, and existing display filters are retained.
+A new capture resets visibility to the definition. Collapsing does **not** skip
+queries, alter values or increase the eight-expanded-request limit.
+
 This is **not full custom-dashboard parity**: row/viewport layouts, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are

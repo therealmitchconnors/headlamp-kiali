@@ -71,7 +71,14 @@ export function DashboardResults({
     data: Awaited<ReturnType<typeof loadCustomDashboard>>;
     key: string;
   }>();
-  useEffect(() => setExpanded(undefined), [cluster, endpoint, query]);
+  const [visibility, setVisibility] = useState<{
+    data: Awaited<ReturnType<typeof loadCustomDashboard>>;
+    values: ReadonlyMap<string, boolean>;
+  }>();
+  useEffect(() => {
+    setExpanded(undefined);
+    setVisibility(undefined);
+  }, [cluster, endpoint, query]);
   const summaryNames = { avg: t('Average'), p50: 'P50', p90: 'P90', p95: 'P95', p99: 'P99' };
   const load = useCallback(
     (signal: AbortSignal) => loadCustomDashboard(clusterScope(cluster), endpoint, query, signal),
@@ -196,7 +203,14 @@ export function DashboardResults({
                         error instanceof Error ? error.message : t('Grouped chart is unavailable');
                     }
                   }
-                  const panel = (height?: number) => (
+                  const contentId = `kiali-chart-body-${data.query.dashboard.name}-${
+                    entries[0].chartIndex
+                  }-${summary ?? 'value'}`;
+                  const collapsed =
+                    visibility?.data === data
+                      ? visibility.values.get(key) ?? chart.startCollapsed === true
+                      : chart.startCollapsed === true;
+                  const panel = (height?: number, hidePlot = false, panelId = contentId) => (
                     <SectionBox title={title}>
                       {chart.chartType && (
                         <Typography variant="body2">
@@ -263,7 +277,7 @@ export function DashboardResults({
                               {!!read.result.warnings.length && (
                                 <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
                               )}
-                              {(entries.length > 1 || grouped) &&
+                              {(entries.length > 1 || grouped || hidePlot) &&
                                 !read.result.series.some(series =>
                                   series.samples.some(sample => sample.value !== null)
                                 ) && (
@@ -282,39 +296,49 @@ export function DashboardResults({
                           )}
                         </Stack>
                       ))}
-                      {successful.length > 0 &&
-                        (chart.xAxis === 'series' ? (
-                          <MetricCategoryChart
-                            metrics={successful}
-                            title={title}
-                            unit={chart.unit ?? null}
-                            chartType={chart.chartType}
-                            min={chart.min}
-                            max={chart.max}
-                            height={height}
-                          />
-                        ) : entries.length === 1 && !grouped ? (
-                          <MetricChart
-                            result={successful[0].result}
-                            title={title}
-                            unit={chart.unit ?? null}
-                            seriesName={entries[0].metric.displayName}
-                            min={chart.min}
-                            max={chart.max}
-                            height={height}
-                            chartType={chart.chartType}
-                          />
-                        ) : (
-                          <MetricComparisonChart
-                            metrics={successful}
-                            title={title}
-                            unit={chart.unit ?? null}
-                            min={chart.min}
-                            max={chart.max}
-                            height={height}
-                            chartType={chart.chartType}
-                          />
-                        ))}
+                      {hidePlot && (
+                        <Typography variant="body2">
+                          {t(
+                            'Chart presentation is collapsed. Its data has already been requested; showing it does not refetch.'
+                          )}
+                        </Typography>
+                      )}
+                      <Box id={panelId} hidden={hidePlot}>
+                        {!hidePlot &&
+                          successful.length > 0 &&
+                          (chart.xAxis === 'series' ? (
+                            <MetricCategoryChart
+                              metrics={successful}
+                              title={title}
+                              unit={chart.unit ?? null}
+                              chartType={chart.chartType}
+                              min={chart.min}
+                              max={chart.max}
+                              height={height}
+                            />
+                          ) : entries.length === 1 && !grouped ? (
+                            <MetricChart
+                              result={successful[0].result}
+                              title={title}
+                              unit={chart.unit ?? null}
+                              seriesName={entries[0].metric.displayName}
+                              min={chart.min}
+                              max={chart.max}
+                              height={height}
+                              chartType={chart.chartType}
+                            />
+                          ) : (
+                            <MetricComparisonChart
+                              metrics={successful}
+                              title={title}
+                              unit={chart.unit ?? null}
+                              min={chart.min}
+                              max={chart.max}
+                              height={height}
+                              chartType={chart.chartType}
+                            />
+                          ))}
+                      </Box>
                     </SectionBox>
                   );
                   const open = expanded?.data === data && expanded.key === key;
@@ -336,6 +360,25 @@ export function DashboardResults({
                       <Stack direction="row" justifyContent="flex-end">
                         <Button
                           size="small"
+                          aria-label={
+                            collapsed
+                              ? t('Show {{chart}}', { chart: title })
+                              : t('Hide {{chart}}', { chart: title })
+                          }
+                          aria-expanded={!collapsed}
+                          aria-controls={contentId}
+                          onClick={() =>
+                            setVisibility(current => {
+                              const values = new Map(current?.data === data ? current.values : []);
+                              values.set(key, !(values.get(key) ?? chart.startCollapsed === true));
+                              return { data, values };
+                            })
+                          }
+                        >
+                          {collapsed ? t('Show chart') : t('Hide chart')}
+                        </Button>
+                        <Button
+                          size="small"
                           onClick={() => setExpanded({ data, key })}
                           aria-label={t('Expand {{chart}}', { chart: title })}
                         >
@@ -343,9 +386,11 @@ export function DashboardResults({
                         </Button>
                       </Stack>
                       {open ? (
-                        <Typography>{t('Chart is open in the expanded view.')}</Typography>
+                        <Box id={contentId}>
+                          <Typography>{t('Chart is open in the expanded view.')}</Typography>
+                        </Box>
                       ) : (
-                        panel()
+                        panel(undefined, collapsed)
                       )}
                       <Dialog
                         open={open}
@@ -397,7 +442,7 @@ export function DashboardResults({
                                 'This expands the captured result without issuing requests. Close this view to change display filters or load new data.'
                               )}
                             </Typography>
-                            {open && panel(520)}
+                            {open && panel(520, false, `${contentId}-expanded`)}
                           </Stack>
                         </DialogContent>
                         <DialogActions>
