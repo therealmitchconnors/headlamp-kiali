@@ -399,6 +399,17 @@ dashboards and integration/live/Desktop closure remain substantial work.
   visibility. Four hosted groups proved eight requests per explicit capture
   (sixteen across reload), no requests for visibility/filter actions and
   definition-default reset. Category-axis regressions passed.
+- Captured template rows now support native viewport plot sizing with a local
+  no-fetch control. Explicit rows enable it; omitted/null preserves natural
+  heights. Selected templates retain their own preference across includes and
+  overlays. The source gap/floor/150 px minimum and default two are preserved,
+  but captions/errors/tables remain in normal flow rather than reproducing
+  upstream parent-container sizing. Four hosted groups measured exact plot
+  heights, narrow stacking, keyboard expansion and Settings hard-reload
+  persistence; three captures made five metric GETs each. Visibility and
+  workload/application dashboard regressions passed.
+- Latest dashboard-row increment: **433 focused tests in ten files**, plus
+  type/lint/i18n/build and generation checks. Original-Go evidence is unchanged.
 - Latest namespace-selection prerequisite: **1,713 focused tests in eight files**
   plus the full **21,564-test suite in 177 files**, type/lint/i18n/build/package and
   source/resource/catalog/parity/hosted checks. No Service port checker was
@@ -442,7 +453,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **21,932 tests in 178 files** after local tag
+  Latest full-suite checkpoint (before row sizing): **21,932 tests in 178 files** after local tag
   precedence; its focused suite passed **1,958 tests in five files**.
   Five hosted tag groups made 37 intercepted GETs without writes; namespace
   regressions made 18 GETs and measured a 15,049 ms deadline. Unintercepted
@@ -477,7 +488,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `2a3f2ecf9fc32758d4130bc9ee07bcc6120fa908dfaa36ae93a872b2f326707c`.
+  `c47b1fed6fbd523f5f2af8dd17433d09d56874263880f369d6c6d67b99cbdb84`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1153,7 +1164,7 @@ separate any-ambient path and annotation-derived proxy evidence. Deployment port
 mapping uses the first cluster-wide metadata-label match. Namespace-local
 approximations must not activate KIA0601/KIA0602/KIA0701.
 
-The dashboard continuation is row-layout/link support and broader
+The dashboard continuation is external link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
 through an explicit inspector, reusing application recommendation/chart code
 while retaining paired app/version filters and a fresh workload overlay.
@@ -1161,7 +1172,11 @@ Selected child controllers are rooted by UID without including sibling Pods.
 Native resource details remain the spec/status/conditions/events surface;
 the new inspector intentionally does not duplicate them. Captured panels can
 now expand without refetching, using a native keyboard-accessible dialog rather
-than claiming full upstream viewport/row layout parity. Time-axis styles support
+than claiming full upstream viewport/row layout parity. Optional captured rows
+now apply the pinned height formula to the browser viewport, preserving
+natural sizing unless explicitly enabled and leaving other content in normal
+flow. Rows do not inherit from included templates or change query budgets.
+Time-axis styles support
 line, area, bar and point presentation without reporter pairing or stacking.
 Series axes use latest-finite-per-series projection with exact selected times,
 explicit unavailable categories and independent placement. Missing chartType

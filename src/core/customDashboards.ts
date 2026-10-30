@@ -3,6 +3,7 @@ import {
   MetricChartAxis,
   MetricChartType,
   validateChartDisplay,
+  validateDashboardRows,
   validateMetricChartAxis,
   validateMetricChartType,
 } from './chartDisplay';
@@ -46,6 +47,7 @@ export interface CustomDashboardMetric {
 export interface CustomDashboard {
   name: string;
   title: string;
+  rows?: number;
   runtime?: string;
   discoverOn?: string;
   items: { chart: CustomChart }[];
@@ -123,7 +125,7 @@ export function dashboardLabel(value: unknown): string {
 }
 function dashboardHeader(value: unknown, maximum: number = 8, allowEmpty = false) {
   if (!isRecord(value)) throw new Error('A custom dashboard must be an object');
-  keys(value, ['name', 'title', 'runtime', 'discoverOn', 'items'], 'Custom dashboard');
+  keys(value, ['name', 'title', 'rows', 'runtime', 'discoverOn', 'items'], 'Custom dashboard');
   const name = text(value.name, 128, 'Dashboard name');
   if (/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.exec(name)?.[0] !== name)
     throw new Error('Dashboard names require letters, digits, dot, underscore or hyphen');
@@ -157,7 +159,9 @@ function dashboardHeader(value: unknown, maximum: number = 8, allowEmpty = false
       trimGoSpace(value.discoverOn) === '')
       ? undefined
       : metricName(value.discoverOn);
+  const rows = validateDashboardRows(value.rows);
   const metadata = {
+    ...(rows !== undefined ? { rows } : {}),
     ...(runtime !== undefined ? { runtime } : {}),
     ...(discoverOn !== undefined ? { discoverOn } : {}),
   };

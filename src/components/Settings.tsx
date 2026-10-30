@@ -567,6 +567,11 @@ function ClusterSettingsForm({
       </Typography>
       <Typography variant="body2">
         {t(
+          'Optional template rows is a safe integer; zero or negative values use the Kiali default of two. Explicit rows enables viewport-based plot sizing for that capture. Omitted/null rows keeps natural chart heights unless you enable the local sizing control. Plots use a 16 px row gap and 150 px minimum; captions, errors and tables stay in normal flow. This is not pagination or a query limit, and included templates do not override the selected template row preference.'
+        )}
+      </Typography>
+      <Typography variant="body2">
+        {t(
           'To disable a template by name, save a declaration such as {"name":"go","items":[]} with no discoverOn metric. This removes that name from the effective catalog, not from Kubernetes. A nonempty discoverOn with no items remains discovery-only and cannot load charts. Remove or replace the declaration to restore the template.'
         )}
       </Typography>

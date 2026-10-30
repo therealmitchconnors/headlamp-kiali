@@ -1215,6 +1215,25 @@ definition defaults. Four groups observed sixteen metric GETs total and category
 regressions passed. The increment passed 421 tests in thirteen files; restore
 settings/interceptors and do not infer a data-request opt-out from collapse.
 
+For template `rows`, cover omitted/null metadata, nonpositive-to-two
+normalization, positive safe integers and explicit rejection of invalid values.
+Included layouts must not override their parent's preference; annotation and
+saved-catalog layers must retain their own values. `core/dashboardRows.test.ts`
+checks exact gap/floor/minimum calculations, no-query differences and rejection
+of the inactive `rowSpans` field. The reader must clone rows before awaiting and
+reject malformed values before transport.
+
+Hosted checks use three finite plot variants plus a denied metric (five GETs per
+capture). At viewport heights 1000/600/300/900 and rows=3, verify actual plot
+heights 322/189/150/289. Narrow screens keep full-width spans. Keyboard toggle,
+resize and expansion add no requests; natural sizes remain 220/260 and expanded
+row sizing uses one viewport. Save zero through the actual Settings editor,
+wait for positive ConfigStore/storage persistence and hard reload to confirm
+two. Remove rows, reload and verify natural sizing plus the optional local
+two-row mode. Four groups made fifteen metric GETs total. Visibility/workload/
+application regressions passed, alongside 433 focused tests in ten files.
+Restore fixture settings and interceptors before teardown.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

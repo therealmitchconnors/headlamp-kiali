@@ -1654,6 +1654,44 @@ disclosures, independent histogram toggles, filtered category restoration,
 collapsed-panel expansion and capture reset. Six-chart category-axis regressions
 also passed. No cluster writes occurred.
 
+### Captured dashboard row sizing
+
+Template `rows` follows the pinned configuration and response models, including
+the `< 1` default of two in `business/dashboards.go`
+(`2707361491dc93e769f363c6bdb9122af230bd20`). Configuration declarations are pinned
+at `config/dashboards/dashboards_config.go`
+(`1eace997db22287475c17be2763c838334f1304e`); the height formula comes from
+`frontend/src/components/Charts/Dashboard.tsx`
+(`5bae5eaea3a39924d1015382e19064fbcb61b798`). These files and the frontend model
+were checked against their exact source blobs.
+
+The native plot calculation retains the sixteen-pixel gap, floor operation and
+150-pixel minimum. Expanded plots use one viewport. Unlike upstream's measured
+parent container, native sizing uses the browser viewport and leaves captions,
+controls, errors and numeric tables in normal flow. This is intentionally a
+plot-height preference, not pagination, grid row spans or exact upstream
+container layout. The frontend `rowSpans` declaration is not consumed by that
+renderer or supplied by its custom-dashboard backend; it remains unsupported.
+
+Explicit safe-integer rows enable the captured layout; nonpositive values
+normalize to two. Omitted/null metadata preserves existing natural heights
+unless the user enables the local two-row control. A new capture resets the
+control, and changes to viewport height never replay metric requests. The
+selected template owns the preference; included templates do not replace it.
+Saved, bundled and Namespace/workload annotation definitions share validation,
+and data capture clones the preference before awaiting. Invalid rows fail before
+transport. This affects no query, chart-selection or expanded-request budget.
+
+Four stock-hosted groups measured 322, 189, 150 and 289 px plots at different
+viewport heights, checked narrow-screen stacking, keyboard toggle/expansion,
+independent errors and real Settings save/hard-reload normalization. Three
+explicit captures made five metric GETs each; layout actions added none.
+Existing visibility and workload/application-inspection regressions also passed.
+The increment passed **433 focused tests in ten files**, type/lint/i18n/build
+and resource/catalog/parity checks. The preceding full-suite checkpoint remains
+21,932 tests in 178 files; it predates this increment.
+This is source-inspected TypeScript/UI evidence, not a new Go-oracle count.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

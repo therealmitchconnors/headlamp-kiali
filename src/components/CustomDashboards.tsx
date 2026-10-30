@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useKialiConfig } from '../config';
+import { dashboardPlotHeight, validateDashboardRows } from '../core/chartDisplay';
 import { getClusterConfig, ServiceEndpoint } from '../core/config';
 import {
   CustomChart,
@@ -45,7 +46,8 @@ import MetricChart from './MetricChart';
 import MetricComparisonChart from './MetricComparisonChart';
 import RequestStatus from './RequestStatus';
 
-type DashboardRead = Awaited<ReturnType<typeof loadCustomDashboard>>['charts'][number];
+type DashboardCapture = Awaited<ReturnType<typeof loadCustomDashboard>>;
+type DashboardRead = DashboardCapture['charts'][number];
 function groupedCharts<T extends DashboardRead>(charts: readonly T[]) {
   const groups = new Map<string, T[]>();
   for (const chart of charts) {
@@ -67,17 +69,30 @@ export function DashboardResults({
   query: CustomDashboardQuery;
 }) {
   const { t } = useTranslation();
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [layout, setLayout] = useState<{ data: DashboardCapture; enabled: boolean }>();
+  const rowSizingEnabled = (data: DashboardCapture) =>
+    layout?.data === data
+      ? layout.enabled
+      : validateDashboardRows(data.query.dashboard.rows) !== undefined;
+  useEffect(() => {
+    const measure = () => setViewportHeight(window.innerHeight);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
   const [expanded, setExpanded] = useState<{
-    data: Awaited<ReturnType<typeof loadCustomDashboard>>;
+    data: DashboardCapture;
     key: string;
   }>();
   const [visibility, setVisibility] = useState<{
-    data: Awaited<ReturnType<typeof loadCustomDashboard>>;
+    data: DashboardCapture;
     values: ReadonlyMap<string, boolean>;
   }>();
   useEffect(() => {
     setExpanded(undefined);
     setVisibility(undefined);
+    setLayout(undefined);
   }, [cluster, endpoint, query]);
   const summaryNames = { avg: t('Average'), p50: 'P50', p90: 'P90', p95: 'P95', p99: 'P99' };
   const load = useCallback(
@@ -166,6 +181,21 @@ export function DashboardResults({
                 </details>
               )}
               {filters}
+              <FormControlLabel
+                label={t('Size plots by viewport rows')}
+                control={
+                  <Checkbox
+                    checked={rowSizingEnabled(data)}
+                    onChange={event => setLayout({ data, enabled: event.target.checked })}
+                  />
+                }
+              />
+              <Typography variant="body2">
+                {t(
+                  'Row-based sizing uses {{rows}} plot rows per browser viewport, a 16 px gap and a 150 px minimum. Captions, errors and tables stay in normal flow. Rows do not paginate charts or change requests; expanded plots use one viewport.',
+                  { rows: validateDashboardRows(data.query.dashboard.rows) ?? 2 }
+                )}
+              </Typography>
               <Box
                 sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 2 }}
               >
@@ -390,7 +420,12 @@ export function DashboardResults({
                           <Typography>{t('Chart is open in the expanded view.')}</Typography>
                         </Box>
                       ) : (
-                        panel(undefined, collapsed)
+                        panel(
+                          rowSizingEnabled(data)
+                            ? dashboardPlotHeight(viewportHeight, data.query.dashboard.rows)
+                            : undefined,
+                          collapsed
+                        )
                       )}
                       <Dialog
                         open={open}
@@ -442,7 +477,18 @@ export function DashboardResults({
                                 'This expands the captured result without issuing requests. Close this view to change display filters or load new data.'
                               )}
                             </Typography>
-                            {open && panel(520, false, `${contentId}-expanded`)}
+                            {open &&
+                              panel(
+                                rowSizingEnabled(data)
+                                  ? dashboardPlotHeight(
+                                      viewportHeight,
+                                      data.query.dashboard.rows,
+                                      true
+                                    )
+                                  : 520,
+                                false,
+                                `${contentId}-expanded`
+                              )}
                           </Stack>
                         </DialogContent>
                         <DialogActions>

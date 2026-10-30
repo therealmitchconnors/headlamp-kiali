@@ -1121,7 +1121,19 @@ summary toggles independently, and existing display filters are retained.
 A new capture resets visibility to the definition. Collapsing does **not** skip
 queries, alter values or increase the eight-expanded-request limit.
 
-This is **not full custom-dashboard parity**: row/viewport layouts, native histograms,
+Template-level `rows: 3` enables **Size plots by viewport rows** for the captured
+dashboard. Plot height follows `max(floor((viewportHeight - (rows - 1) * 16) / rows), 150)`.
+Zero/negative integers use two rows; omitted/null rows preserve natural heights
+unless you opt in locally. Included templates do not override the selected
+template's row preference. The control and browser resizing never refetch;
+new captures reset to their definition. Expanded plots use one viewport when
+enabled, otherwise the existing 520 px height.
+
+This is native **plot sizing**, not pagination: captions, errors, controls and
+numeric tables remain in normal page flow. Chart spans still stack below
+900 pixels, and row preferences never drop charts or change request budgets.
+
+This is **not full custom-dashboard parity**: exact upstream parent-container layout, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate

@@ -44,8 +44,16 @@ vi.mock('./MetricChart', () => ({
   ),
 }));
 vi.mock('./MetricComparisonChart', () => ({
-  default: ({ title, metrics }: { title: string; metrics: { name: string; group?: string }[] }) => (
-    <div role="img" aria-label={title}>
+  default: ({
+    title,
+    metrics,
+    height = 260,
+  }: {
+    title: string;
+    metrics: { name: string; group?: string }[];
+    height?: number;
+  }) => (
+    <div role="img" aria-label={title} data-height={height}>
       {metrics.map((metric, index) => (
         <span key={index}>
           {metric.name}
@@ -148,13 +156,78 @@ beforeEach(() => {
       ),
     }));
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 const open = () =>
   render(
     <MemoryRouter initialEntries={['/dashboards?namespace=bookinfo']}>
       <CustomDashboards />
     </MemoryRouter>
   );
+it.each(['scalar', 'comparison', 'series'] as const)(
+  'sizes captured %s plots from rows without refetching on resize or local layout changes',
+  async kind => {
+    vi.stubGlobal('innerHeight', 800);
+    const config = structuredClone(configured);
+    const dashboard = config.config.clusters.alpha.customDashboards.dashboards[0];
+    Object.assign(dashboard, { rows: 3 });
+    if (kind === 'comparison')
+      Object.assign(dashboard.items[0].chart, {
+        metrics: [
+          { metricName: 'memory', displayName: 'One' },
+          { metricName: 'other', displayName: 'Two' },
+        ],
+      });
+    if (kind === 'series') Object.assign(dashboard.items[0].chart, { xAxis: 'series' });
+    vi.mocked(useKialiConfig).mockReturnValue(config);
+    open();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('256')
+    );
+    const sizing = () =>
+      screen.getByRole('checkbox', { name: 'Size plots by viewport rows' }) as HTMLInputElement;
+    expect(sizing().checked).toBe(true);
+    vi.stubGlobal('innerHeight', 500);
+    fireEvent(window, new Event('resize'));
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('156')
+    );
+    await user.click(screen.getByRole('button', { name: 'Expand Memory' }));
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('500')
+    );
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await user.click(sizing());
+    expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe(
+      kind === 'scalar' ? '220' : '260'
+    );
+    expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+    await waitFor(() => expect(sizing().checked).toBe(true));
+    expect(loadCustomDashboard).toHaveBeenCalledTimes(2);
+  }
+);
+it('preserves natural sizing for omitted rows and allows a local two-row opt-in', async () => {
+  vi.stubGlobal('innerHeight', 800);
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await waitFor(() =>
+    expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('220')
+  );
+  const sizing = screen.getByRole('checkbox', {
+    name: 'Size plots by viewport rows',
+  }) as HTMLInputElement;
+  expect(sizing.checked).toBe(false);
+  await user.click(sizing);
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('392');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
 it('honors initial collapse, shows and expands captured data locally, and resets visibility on a new capture', async () => {
   const config = structuredClone(configured);
   Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {

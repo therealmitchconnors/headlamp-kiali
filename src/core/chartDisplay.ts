@@ -3,6 +3,21 @@ import { isRecord } from './object';
 export type MetricChartType = 'line' | 'area' | 'bar' | 'scatter';
 export type MetricChartAxis = 'time' | 'series';
 
+export function validateDashboardRows(value: unknown): number | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'number' || !Number.isSafeInteger(value))
+    throw new Error('Dashboard rows must be a safe integer');
+  return value > 0 ? value : 2;
+}
+
+export function dashboardPlotHeight(height: number, rows?: number, expanded = false): number {
+  const count = validateDashboardRows(rows) ?? 2;
+  if (!Number.isFinite(height) || height < 0 || height > Number.MAX_SAFE_INTEGER)
+    throw new Error('Dashboard plot sizing requires a finite nonnegative viewport height');
+  if (expanded) return Math.max(height, 150);
+  return Math.max(Math.floor((height - (count - 1) * 16) / count), 150);
+}
+
 export function validateMetricChartAxis(value: unknown): MetricChartAxis | undefined {
   if (value === undefined || value === null || value === '') return undefined;
   if (value === 'time' || value === 'series') return value;

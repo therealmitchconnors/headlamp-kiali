@@ -38,6 +38,14 @@ const matrix = (
 beforeEach(() => {
   vi.mocked(ApiProxy.request).mockReset();
 });
+it('rejects invalid row metadata before sending any metric request', async () => {
+  const input = query();
+  input.dashboard.rows = 0.5;
+  await expect(
+    loadCustomDashboard({ cluster: 'alpha' }, provider, input, new AbortController().signal)
+  ).rejects.toThrow('safe integer');
+  expect(ApiProxy.request).not.toHaveBeenCalled();
+});
 it('sorts each captured response after checking hidden-label scope and before removing sort-only labels', async () => {
   const input = query();
   input.dashboard.items = [
@@ -140,6 +148,7 @@ it('captures settings/range and bounds eight jobs to three workers with independ
   const scope = { cluster: 'alpha' };
   const endpoint = { ...provider };
   const input = query();
+  input.dashboard.rows = 3;
   input.templateReferences = [
     { name: 'runtime', title: 'Runtime' },
     { name: 'shared', title: 'Shared charts' },
@@ -149,6 +158,7 @@ it('captures settings/range and bounds eight jobs to three workers with independ
   scope.cluster = 'other';
   endpoint.service = 'other';
   input.dashboard.items.length = 0;
+  input.dashboard.rows = 1;
   input.templateReferences[1].title = 'mutated';
   input.end = 0;
   const result = await pending;

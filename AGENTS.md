@@ -213,6 +213,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   aliases or fall back on an explicit empty tag. Missing controller revisions
   remain empty, although empty/default ConfigMap names are both unsuffixed.
   This does not implement full managed-cluster tag assignment or membership.
+- Dashboard rows belong to the selected template, not included templates.
+  Nonpositive values use two; native viewport plot sizing is opt-in unless rows
+  are explicit. It must not alter query budgets or hide captions/errors/tables.
+  The pinned frontend rowSpans type is not consumed by the chart renderer or
+  supplied by custom-dashboard configuration; do not activate it from types alone.
 - Service port checkers pool Pods across all managed namespaces and match labels
   without another namespace filter; empty selectors match that pool. Their
   sidecar predicate is all-Pod/vacuous-empty, with a separate any-ambient path,
