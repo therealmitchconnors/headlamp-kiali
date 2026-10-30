@@ -41,6 +41,7 @@ import Topology from './components/Topology';
 import Traces from './components/Traces';
 import Traffic from './components/Traffic';
 import TrafficSignals from './components/TrafficSignals';
+import WorkloadDashboards from './components/WorkloadDashboards';
 import WorkloadHealth from './components/WorkloadHealth';
 import { kialiConfigurationSource } from './mapView';
 import { configurationDefinitions } from './resources/registry';
@@ -86,6 +87,13 @@ for (const page of pages) {
 }
 
 registerPluginSettings('kiali', Settings, false);
+registerRoute({
+  name: 'kiali-workload-dashboards',
+  path: '/kiali/workload-dashboards',
+  sidebar: 'kiali-workloads',
+  exact: true,
+  component: WorkloadDashboards,
+});
 registerRoute({
   name: 'kiali-service-traffic',
   path: '/kiali/service-traffic',

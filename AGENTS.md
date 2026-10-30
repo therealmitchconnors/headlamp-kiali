@@ -154,6 +154,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   replace whole runtime groups, not union them. Explicit references do not select
   a telemetry label: require a choice when multiple conventions exist. Preserve
   the winning discovered selector when loading embedded application charts.
+- Workload dashboards differ from applications: they pass paired app/version
+  values and the workload annotation overlay. An empty version means no version
+  filter. Root the read-only ownership projection at the selected UID for child
+  controllers/Pods, and require the later annotation source to match the captured
+  UID/resourceVersion. Do not inherit sibling Pods or fall back after stale reads.
 - Dashboard sort labels join the query grouping if not already present, then
   are hidden only in that case. Sort per metric/summary before conversion;
   do not re-sort the resulting legend by its remaining label captions.

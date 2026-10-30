@@ -941,6 +941,36 @@ results without replay. Recommendations and matching metric names do not prove
 runtime, telemetry ownership or health. VM entries are not treated as Pods, and
 arbitrary custom-controller provenance remains incomplete.
 
+**Workload dashboard recommendations**
+
+Use **Inspect dashboards** from Kiali Workloads or an application's associated
+workloads, or open `/kiali/workload-dashboards`. The link carries the resource
+kind/name/namespace/UID without changing Headlamp's native resource-name links.
+Choose **Read workload dashboard evidence**, then **Inspect workload dashboard
+recommendations**. These are separate explicit operations; navigation alone
+does not read ownership or query metrics.
+
+The inspector supports Deployment, DaemonSet, StatefulSet, ReplicaSet,
+ReplicationController, Pod, Job and CronJob. Ownership is rooted at the selected
+UID even when it has a parent, so a selected ReplicaSet or Job does not inherit
+its siblings' Pods. The workload's app and version values feed the three paired
+label conventions, or the configured custom pair. An absent/empty version adds
+no version filter; it is never guessed. Sanitized app/version-key collisions
+are rejected. Other workloads with the same labels can still contribute metrics.
+
+Namespace templates apply first and the selected workload's templates last.
+Supported controllers prefer their non-null pod-template annotation map; Job,
+CronJob and Pod use their own metadata. The annotation read must match the
+captured workload UID and resourceVersion. If it changed, read ownership again;
+a denied/stale source never falls back to a Namespace/base definition.
+
+The shared recommendation policy, captured chart scope, grouping, sorting and
+request limits apply. Ownership collection and the later annotation/discovery
+inspection each have their own fifteen-second deadline. Draft/configuration
+changes discard captures without replay. This is a focused dashboard inspector,
+not a replacement for native spec/status/conditions/events pages. VM and
+arbitrary custom-controller annotation sources remain unsupported.
+
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
 samples; the pinned zero default means one. Overflow/underflow is an error,
@@ -1044,7 +1074,7 @@ within a time series. Local display filtering preserves the captured order;
 charts without sorting retain their existing deterministic label ordering.
 
 This is **not full custom-dashboard parity**: alternate layouts, native histograms,
-background application discovery, workload-specific recommendation integration
+background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget

@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
-import { Namespaces, Services } from './Resources';
+import { Namespaces, Services, Workloads } from './Resources';
 
 const selection = vi.hoisted(() => ({ clusters: ['alpha'] }));
 
@@ -18,6 +18,11 @@ class Namespace {
   metadata = { name: 'bookinfo', labels: { 'istio.io/rev': 'asm-1-30' } };
   jsonData = { status: { phase: 'Active' } };
 }
+class Deployment {
+  kind = 'Deployment';
+  metadata = { name: 'reviews', namespace: 'bookinfo', uid: 'dep-uid' };
+  jsonData = { spec: { replicas: 1 }, status: { replicas: 1, readyReplicas: 1 } };
+}
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   K8s: {
@@ -28,6 +33,9 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
       },
       get Namespace() {
         return Namespace;
+      },
+      get Deployment() {
+        return Deployment;
       },
     },
   },
@@ -40,8 +48,20 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
-  Link: ({ routeName, children }: { routeName: string; children: ReactNode }) => (
-    <a href={routeName}>{children}</a>
+  Link: ({
+    routeName,
+    children,
+    search,
+    params,
+  }: {
+    routeName: string;
+    children: ReactNode;
+    search?: string;
+    params?: { cluster?: string };
+  }) => (
+    <a href={`${routeName}${search ? `?${search}` : ''}`} data-cluster={params?.cluster}>
+      {children}
+    </a>
   ),
   SectionBox: ({ children }: { children: ReactNode }) => <section>{children}</section>,
   StatusLabel: ({ children }: { children: ReactNode }) => <span>{children}</span>,
@@ -53,7 +73,10 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
     headerProps,
   }: {
     resourceClass: new () => T;
-    columns: (string | { id: string; getValue: (item: T) => ReactNode })[];
+    columns: (
+      | string
+      | { id: string; getValue: (item: T) => ReactNode; render?: (item: T) => ReactNode }
+    )[];
     enableRowActions: boolean;
     enableRowSelection: boolean;
     headerProps: { titleSideActions: ReactNode[] };
@@ -65,7 +88,13 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
     return (
       <div>
         {columns.map((column, index) => (
-          <span key={index}>{typeof column === 'string' ? column : column.getValue(item)}</span>
+          <span key={index}>
+            {typeof column === 'string'
+              ? column
+              : column.render
+              ? column.render(item)
+              : column.getValue(item)}
+          </span>
         ))}
       </div>
     );
@@ -82,6 +111,15 @@ it('renders Service data without requiring newer Headlamp class helper methods',
   expect(screen.getByText('9080/TCP')).toBeDefined();
   expect(screen.getByText('app=productpage')).toBeDefined();
   expect(screen.getByText('10.0.0.1')).toBeDefined();
+  expect(screen.queryByRole('link', { name: 'Inspect dashboards' })).toBeNull();
+});
+it('links workloads to a single-cluster UID-bound dashboard inspector without changing native names', () => {
+  render(<Workloads />);
+  const link = screen.getByRole('link', { name: 'Inspect dashboards' });
+  expect(link.getAttribute('data-cluster')).toBe('alpha');
+  expect(link.getAttribute('href')).toBe(
+    'kiali-workload-dashboards?kind=Deployment&namespace=bookinfo&name=reviews&uid=dep-uid'
+  );
 });
 
 it('renders namespace revision and phase from the public resource model', () => {

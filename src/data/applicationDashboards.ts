@@ -49,15 +49,39 @@ export async function inspectApplicationDashboards(
   const end = Math.floor(Date.now() / 1000);
   return withDiagnosticDeadline(
     signal,
-    'Application dashboard inspection exceeded 15 seconds',
+    evidence.workload
+      ? 'Workload dashboard inspection exceeded 15 seconds'
+      : 'Application dashboard inspection exceeded 15 seconds',
     async requestSignal => {
       const annotation = await loadDashboardAnnotations(
         clusterScope(evidence.cluster),
         definitions,
-        { namespace: evidence.namespace },
+        {
+          namespace: evidence.namespace,
+          ...(evidence.workload
+            ? {
+                workload: {
+                  kind: evidence.workload.kind,
+                  name: evidence.workload.name,
+                },
+              }
+            : {}),
+        },
         requestSignal
       );
       requestSignal.throwIfAborted();
+      if (evidence.workload) {
+        const source = annotation.sources[annotation.sources.length - 1];
+        if (
+          source.kind !== evidence.workload.kind ||
+          source.name !== evidence.workload.name ||
+          source.uid !== evidence.workload.uid ||
+          source.resourceVersion !== evidence.workload.resourceVersion
+        )
+          throw new Error(
+            'Workload changed since its ownership snapshot; refresh the workload before inspecting dashboards'
+          );
+      }
       const explicit = explicitApplicationDashboards(evidence, annotation.catalog);
       const scopeQuery: CustomDashboardScopeQuery = {
         namespace: evidence.namespace,

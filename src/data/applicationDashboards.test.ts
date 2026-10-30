@@ -188,6 +188,88 @@ it('never falls back after Namespace denial, and refuses already cancelled reads
   await expect(inspect(evidence(), settings(), controller.signal)).rejects.toThrow();
   expect(ApiProxy.request).toHaveBeenCalledTimes(1);
 });
+it('applies workload annotations after Namespace sources while verifying the captured UID/version', async () => {
+  const input = evidence();
+  input.refs = ['first'];
+  input.workload = {
+    kind: 'Deployment',
+    name: 'reviews',
+    uid: 'dep-uid',
+    resourceVersion: '17',
+    version: 'v1',
+  };
+  const workload = {
+    kind: 'Deployment',
+    apiVersion: 'apps/v1',
+    metadata: { name: 'reviews', namespace: 'bookinfo', uid: 'dep-uid', resourceVersion: '17' },
+    spec: {
+      template: {
+        metadata: {
+          annotations: {
+            [DASHBOARD_ANNOTATION]: JSON.stringify([
+              {
+                name: 'first',
+                title: 'Workload override',
+                items: [{ chart: { name: 'C', metricName: 'workload_metric', dataType: 'raw' } }],
+              },
+            ]),
+          },
+        },
+      },
+    },
+  };
+  vi.mocked(ApiProxy.request).mockResolvedValueOnce(ns).mockResolvedValueOnce(workload);
+  const result = await inspect(input);
+  expect(result.refs).toMatchObject([{ title: 'Workload override' }]);
+  expect(result.catalog.origins.get('first')).toBe('workload');
+  expect(vi.mocked(ApiProxy.request).mock.calls.map(([path]) => path)).toEqual([
+    '/api/v1/namespaces/bookinfo',
+    '/apis/apps/v1/namespaces/bookinfo/deployments/reviews',
+  ]);
+  for (const metadata of [
+    { ...workload.metadata, uid: 'replacement' },
+    { ...workload.metadata, resourceVersion: '18' },
+  ]) {
+    vi.mocked(ApiProxy.request)
+      .mockReset()
+      .mockResolvedValueOnce(ns)
+      .mockResolvedValueOnce({ ...workload, metadata });
+    await expect(inspect(input)).rejects.toThrow('changed since its ownership snapshot');
+    expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+  }
+});
+it('preserves captured workload version constraints throughout metric discovery', async () => {
+  const input = evidence();
+  input.workload = {
+    kind: 'Pod',
+    name: 'reviews',
+    uid: 'pod-uid',
+    resourceVersion: '17',
+    version: 'v1',
+  };
+  input.selectors = [
+    {
+      label: 'app',
+      metricLabel: 'app',
+      versionLabel: 'version',
+      metricVersionLabel: 'version',
+      filters: { app: 'reviews', version: 'v1' },
+    },
+  ];
+  vi.mocked(ApiProxy.request)
+    .mockResolvedValueOnce(ns)
+    .mockResolvedValueOnce({
+      kind: 'Pod',
+      apiVersion: 'v1',
+      metadata: { name: 'reviews', namespace: 'bookinfo', uid: 'pod-uid', resourceVersion: '17' },
+    })
+    .mockResolvedValueOnce(vector(['first_info']));
+  const result = await inspect(input);
+  expect(result.refs[0].selector?.filters).toEqual({ app: 'reviews', version: 'v1' });
+  expect(decodeURIComponent(vi.mocked(ApiProxy.request).mock.calls[2][0])).toContain(
+    'version="v1"'
+  );
+});
 it('enforces one whole-inspection deadline even when a later selector ignores abort', async () => {
   vi.useFakeTimers();
   try {

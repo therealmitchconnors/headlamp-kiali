@@ -1,4 +1,5 @@
 import type { Application } from './correlation';
+import type { DashboardWorkloadKind } from './dashboardAnnotations';
 import type { DashboardCatalog } from './dashboardCatalog';
 import { trimGoSpace } from './goStrings';
 import { APP_LABELS, AppLabels, isLabelKey, isLabelValue } from './labels';
@@ -12,6 +13,8 @@ export interface ApplicationDashboardSelector {
   label: string;
   metricLabel: string;
   filters: Record<string, string>;
+  versionLabel?: string;
+  metricVersionLabel?: string;
 }
 export interface ApplicationDashboardEvidence {
   cluster: string;
@@ -21,6 +24,13 @@ export interface ApplicationDashboardEvidence {
   pods: { name: string; uid: string; resourceVersion: string; refs: string[] }[];
   refs: string[];
   selectors: ApplicationDashboardSelector[];
+  workload?: {
+    kind: DashboardWorkloadKind;
+    name: string;
+    uid: string;
+    resourceVersion: string;
+    version: string;
+  };
 }
 export interface ApplicationDashboardRef {
   name: string;

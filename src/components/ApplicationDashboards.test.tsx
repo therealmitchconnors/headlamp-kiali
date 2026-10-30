@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 import { useKialiConfig } from '../config';
 import { correlateResources, CorrelationResource } from '../core/correlation';
 import { CustomDashboardQuery } from '../core/customDashboards';
-import ApplicationDashboards from './ApplicationDashboards';
+import ApplicationDashboards, { InspectionResults } from './ApplicationDashboards';
 import { DashboardResults } from './CustomDashboards';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
@@ -234,4 +234,59 @@ it('uses the discovered winning selector without a new guess or version constrai
     app: 'reviews',
   });
   expect(ApiProxy.request).toHaveBeenCalledTimes(4);
+});
+it('loads workload charts with the captured app/version pair and workload annotation identity', async () => {
+  vi.mocked(ApiProxy.request)
+    .mockResolvedValueOnce({
+      kind: 'Namespace',
+      apiVersion: 'v1',
+      metadata: { name: 'bookinfo', uid: 'ns-uid', resourceVersion: '3' },
+    })
+    .mockResolvedValueOnce({
+      kind: 'Pod',
+      apiVersion: 'v1',
+      metadata: { name: 'reviews', namespace: 'bookinfo', uid: 'pod-uid', resourceVersion: '17' },
+    });
+  render(
+    <InspectionResults
+      settings={configured.config.clusters.alpha}
+      query={{
+        metricCluster: 'east',
+        confirmed: false,
+        evidence: {
+          cluster: 'alpha',
+          namespace: 'bookinfo',
+          application: 'reviews',
+          complete: true,
+          pods: [],
+          refs: ['go'],
+          workload: {
+            kind: 'Pod',
+            name: 'reviews',
+            uid: 'pod-uid',
+            resourceVersion: '17',
+            version: 'v2',
+          },
+          selectors: [
+            {
+              label: 'app',
+              metricLabel: 'app',
+              versionLabel: 'version',
+              metricVersionLabel: 'version',
+              filters: { app: 'reviews', version: 'v2' },
+            },
+          ],
+        },
+      }}
+    />
+  );
+  await screen.findByRole('button', { name: 'Inspect go charts' });
+  await choose();
+  await userEvent.click(screen.getByRole('button', { name: 'Load captured workload dashboard' }));
+  const query = vi.mocked(DashboardResults).mock.calls[0][0].query;
+  expect(query.labelsFilters).toEqual({ app: 'reviews', version: 'v2' });
+  expect(query.annotationSources).toMatchObject([
+    { uid: 'ns-uid' },
+    { uid: 'pod-uid', resourceVersion: '17' },
+  ]);
 });

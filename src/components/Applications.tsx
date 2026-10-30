@@ -100,6 +100,26 @@ function ApplicationDetails({
             },
             { label: t('Kind'), getter: (workload: CorrelatedWorkload) => workload.identity.kind },
             {
+              label: t('Runtime dashboards'),
+              getter: (workload: CorrelatedWorkload) =>
+                workload.identity.kind === 'WorkloadGroup' ? (
+                  t('VM annotation source unsupported')
+                ) : (
+                  <Link
+                    routeName="kiali-workload-dashboards"
+                    params={{ cluster: workload.identity.cluster }}
+                    search={new URLSearchParams({
+                      namespace: workload.identity.namespace,
+                      kind: workload.identity.kind,
+                      name: workload.identity.name,
+                      uid: workload.identity.uid,
+                    }).toString()}
+                  >
+                    {t('Inspect dashboards')}
+                  </Link>
+                ),
+            },
+            {
               label: t('Observed Pod accounts'),
               getter: (workload: CorrelatedWorkload) => <WorkloadAccounts workload={workload} />,
             },

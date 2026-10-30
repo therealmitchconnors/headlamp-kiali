@@ -1494,6 +1494,51 @@ tests are TypeScript evidence, not new original-Go oracle cases.
 The final increment passed **380 focused tests in eight files** plus
 type/lint/i18n/build/package and catalog/resource/parity checks.
 
+### Workload-specific dashboard recommendations
+
+The new `/kiali/workload-dashboards` inspector follows pinned
+`business/workloads.go` (`e0b704c0b299d19b50fbe9ae1d19cab1272a15cc`) and
+`config/config.go` (`fbde570684b760495782fce1df801d9c0046723e`):
+`GetWorkload` passes both selected app/version values and the workload to the
+dashboard service. App/version selectors use the three paired conventions,
+or one configured pair; selected values are not inferred from other Pods.
+An empty/missing version omits its constraint. Collisions after metric-label
+sanitization fail explicitly.
+
+The supported eight Kubernetes kinds use the existing bounded correlation
+reader. A read-only projection roots ownership at the selected resource UID,
+allowing child ReplicaSet/Job and managed Pod inspection without inheriting
+ancestor/sibling Pods. Original owner metadata is preserved. Linked UID changes,
+missing identity/version, malformed references and unsupported app-label scope
+remain errors. Incomplete supported-source evidence can retain positive refs,
+but cannot initiate absence-based discovery. This is not complete arbitrary
+custom-controller workload attribution.
+
+Shared inspection applies Namespace then workload annotation overlays, checking
+the workload source against the captured UID/resourceVersion before resolving
+refs or querying metrics. Controller template-map precedence and Job/CronJob/Pod
+own-metadata semantics remain unchanged. No Namespace/base fallback is allowed
+on denied or stale workload reads. The explicit ownership phase and subsequent
+annotation/discovery phase each share a fifteen-second deadline, not a separate
+deadline for every request. Captured chart queries preserve the winning or
+explicitly chosen app/version pair and source evidence.
+
+Workloads and associated application-workload tables add UID-bound links without
+replacing native resource-name links. This inspector intentionally does not
+duplicate spec/status/conditions/events; those remain native resource details.
+VM/custom-controller annotation sources are explicitly unsupported. Application
+recommendations still use no version or workload overlay.
+
+Verification passed **175 focused tests in twelve files**, type/lint/i18n/build,
+resource/catalog/parity checks and five stock hosted scenario groups:
+78 intercepted resource GETs, twelve metric GETs and a **15,251 ms** deadline.
+Cases covered child ownership, app/version scope, workload-over-Namespace
+precedence, Job metadata, denied/stale source blocking, refresh/retry and
+non-resurrection. An actual Bookinfo application-to-workload link captured
+`Deployment/reviews-v1`, its one owned Pod, app/version and Namespace/workload
+source identity in 22 unintercepted resource GETs. Application regressions
+passed separately (15,049 ms deadline). No Kubernetes writes occurred.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

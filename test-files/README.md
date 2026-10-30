@@ -1055,6 +1055,31 @@ Five hosted groups issued nine metric GETs; the application regression also
 passed with the unchanged shared renderer. Restore settings/interceptors.
 The final sorting suite passed 380 tests in eight files.
 
+For workload recommendations, run `core/workloadDashboards.test.ts`, shared
+application core/data/UI, `components/WorkloadDashboards.test.tsx`, correlation,
+annotation and resource-link tests. Exercise Deployment→ReplicaSet→Pod and
+CronJob→Job→Pod trees, then select a child and verify sibling Pods are excluded.
+Preserve original owners and validate the selected UID/API group/resourceVersion.
+Check paired default/custom app/version keys, empty-version omission and
+post-sanitization key collisions. Applications must still omit version filters.
+
+In hosted Headlamp, navigate through **Inspect dashboards** or the explicit
+workload route. Navigation does not read; ownership loading does not inspect
+annotations or query metrics. Supply Namespace and workload definitions and
+verify the workload wins, with app/version equality in every request.
+Change only the individual workload response's resourceVersion: inspection must
+fail until ownership is recaptured. Denied workload reads must not fall back.
+Check child ReplicaSet and Job scopes; Job's own annotation must win over its
+template. Return unknown Pod refs to exercise paired-selector discovery, hold a
+metric read for the shared deadline, retry and change/return the target to rule
+out resurrection. Restore settings and every handler.
+
+Five hosted groups observed 78 intercepted resource GETs, twelve metric GETs and
+a 15,251 ms timeout. Actual Bookinfo navigation captured reviews-v1's one Pod and
+Namespace/workload provenance in 22 unintercepted GETs. Application-only
+regressions passed. The focused increment passed 175 tests in twelve files.
+No fixture resources were applied and no cluster writes occurred.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

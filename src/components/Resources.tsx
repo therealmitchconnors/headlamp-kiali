@@ -204,6 +204,25 @@ export function Workloads() {
               columns={[
                 'name',
                 'namespace',
+                {
+                  id: 'dashboards',
+                  label: t('Runtime dashboards'),
+                  getValue: () => t('Inspect dashboards'),
+                  render: (item: InstanceType<KubeObjectClass>) => (
+                    <Link
+                      routeName="kiali-workload-dashboards"
+                      params={{ cluster: scope.cluster }}
+                      search={new URLSearchParams({
+                        kind: item.kind,
+                        namespace: item.metadata.namespace ?? '',
+                        name: item.metadata.name,
+                        ...(item.metadata.uid ? { uid: item.metadata.uid } : {}),
+                      }).toString()}
+                    >
+                      {t('Inspect dashboards')}
+                    </Link>
+                  ),
+                },
                 ...(choice.replicas
                   ? [
                       {

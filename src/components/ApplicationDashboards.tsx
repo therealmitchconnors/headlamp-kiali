@@ -32,7 +32,7 @@ import { DashboardResults } from './CustomDashboards';
 import RequestStatus from './RequestStatus';
 
 type Inspection = Awaited<ReturnType<typeof inspectApplicationDashboards>>;
-interface InspectionQuery {
+export interface InspectionQuery {
   evidence: ApplicationDashboardEvidence;
   metricCluster: string;
   confirmed: boolean;
@@ -46,6 +46,7 @@ function ApplicationTemplate({
   reference: ApplicationDashboardRef;
 }) {
   const { t } = useTranslation();
+  const workload = data.evidence.workload;
   const [scopeIndex, setScopeIndex] = useState(
     reference.selector ? 'matched' : data.evidence.selectors.length === 1 ? '0' : ''
   );
@@ -72,13 +73,21 @@ function ApplicationTemplate({
     (scopeIndex === '' ? undefined : data.evidence.selectors[Number(scopeIndex)]);
   return (
     <SectionBox
-      title={t('Application dashboard: {{name}}', { name: reference.title || reference.name })}
+      title={
+        workload
+          ? t('Workload dashboard: {{name}}', { name: reference.title || reference.name })
+          : t('Application dashboard: {{name}}', { name: reference.title || reference.name })
+      }
     >
       <Stack spacing={2}>
         <Alert severity="info">
-          {t(
-            'This view retains the inspected application namespace, metric-cluster selector, template sources and end instant. Different label conventions are not merged or summed. Reinspect the application to refresh the capture.'
-          )}
+          {workload
+            ? t(
+                'Charts retain the captured workload app/version labels, annotation sources, namespace, metric cluster and end instant. Labels may also match other workloads; these are not workload-name or Pod-UID metric filters.'
+              )
+            : t(
+                'This view retains the inspected application namespace, metric-cluster selector, template sources and end instant. Different label conventions are not merged or summed. Reinspect the application to refresh the capture.'
+              )}
         </Alert>
         {resolutionError ? (
           <Alert severity="error">{resolutionError}</Alert>
@@ -90,11 +99,17 @@ function ApplicationTemplate({
                   metric: reference.selector.metricLabel,
                   label: reference.selector.label,
                 })}
+                {reference.selector.versionLabel &&
+                  `; ${reference.selector.versionLabel} → ${reference.selector.metricVersionLabel}`}
               </Typography>
             ) : (
               <TextField
                 select
-                label={t('Application metric label convention')}
+                label={
+                  workload
+                    ? t('Workload metric label convention')
+                    : t('Application metric label convention')
+                }
                 value={scopeIndex}
                 onChange={event => setScopeIndex(event.target.value)}
               >
@@ -102,6 +117,8 @@ function ApplicationTemplate({
                 {data.evidence.selectors.map((selector, index) => (
                   <MenuItem key={selector.label} value={String(index)}>
                     {selector.label} → {selector.metricLabel}
+                    {selector.versionLabel &&
+                      `; ${selector.versionLabel} → ${selector.metricVersionLabel}`}
                   </MenuItem>
                 ))}
               </TextField>
@@ -112,14 +129,24 @@ function ApplicationTemplate({
               )}
             </Typography>
             <details open={(dashboard?.items.length ?? 0) > 8}>
-              <summary>{t('Choose application dashboard charts')}</summary>
+              <summary>
+                {workload
+                  ? t('Choose workload dashboard charts')
+                  : t('Choose application dashboard charts')}
+              </summary>
               <Button onClick={() => setSelected([])}>
-                {t('Clear application chart selection')}
+                {workload
+                  ? t('Clear workload chart selection')
+                  : t('Clear application chart selection')}
               </Button>
               {dashboard?.items.map(({ chart }) => (
                 <FormControlLabel
                   key={chart.name}
-                  label={t('Include application chart {{name}}', { name: chart.name })}
+                  label={
+                    workload
+                      ? t('Include workload chart {{name}}', { name: chart.name })
+                      : t('Include application chart {{name}}', { name: chart.name })
+                  }
                   control={
                     <Checkbox
                       checked={names.includes(chart.name)}
@@ -142,7 +169,11 @@ function ApplicationTemplate({
                 {aggregations.map(option => (
                   <FormControlLabel
                     key={option.label}
-                    label={t('Group application metrics by {{name}}', { name: option.displayName })}
+                    label={
+                      workload
+                        ? t('Group workload metrics by {{name}}', { name: option.displayName })
+                        : t('Group application metrics by {{name}}', { name: option.displayName })
+                    }
                     control={
                       <Checkbox
                         checked={byLabels.includes(option.label)}
@@ -164,9 +195,15 @@ function ApplicationTemplate({
                 {HISTOGRAM_SUMMARIES.map(summary => (
                   <FormControlLabel
                     key={summary}
-                    label={t('Application histogram {{name}}', {
-                      name: summary === 'avg' ? t('Average') : summary.toUpperCase(),
-                    })}
+                    label={
+                      workload
+                        ? t('Workload histogram {{name}}', {
+                            name: summary === 'avg' ? t('Average') : summary.toUpperCase(),
+                          })
+                        : t('Application histogram {{name}}', {
+                            name: summary === 'avg' ? t('Average') : summary.toUpperCase(),
+                          })
+                    }
                     control={
                       <Checkbox
                         checked={summaries.includes(summary)}
@@ -185,7 +222,11 @@ function ApplicationTemplate({
             )}
             {!data.settings.prometheus && (
               <Alert severity="info">
-                {t('Configure an existing Prometheus Service before loading application charts.')}
+                {workload
+                  ? t('Configure an existing Prometheus Service before loading workload charts.')
+                  : t(
+                      'Configure an existing Prometheus Service before loading application charts.'
+                    )}
               </Alert>
             )}
             <Button
@@ -194,7 +235,11 @@ function ApplicationTemplate({
               onClick={() => {
                 try {
                   if (!resolved || !dashboard || !selector)
-                    throw new Error(t('Choose an explicit application metric label convention'));
+                    throw new Error(
+                      workload
+                        ? t('Choose an explicit workload metric label convention')
+                        : t('Choose an explicit application metric label convention')
+                    );
                   const next: CustomDashboardQuery = {
                     ...structuredClone(data.scopeQuery),
                     dashboard: structuredClone(dashboard),
@@ -225,7 +270,9 @@ function ApplicationTemplate({
                 }
               }}
             >
-              {t('Load captured application dashboard')}
+              {workload
+                ? t('Load captured workload dashboard')
+                : t('Load captured application dashboard')}
             </Button>
           </>
         )}
@@ -242,7 +289,7 @@ function ApplicationTemplate({
   );
 }
 
-function InspectionResults({
+export function InspectionResults({
   query,
   settings,
 }: {
@@ -267,7 +314,14 @@ function InspectionResults({
   );
   const state = useRequest(JSON.stringify([query, settings]), load);
   return (
-    <RequestStatus state={state} loadingLabel={t('Inspecting application dashboards...')}>
+    <RequestStatus
+      state={state}
+      loadingLabel={
+        query.evidence.workload
+          ? t('Inspecting workload dashboards...')
+          : t('Inspecting application dashboards...')
+      }
+    >
       {data => (
         <Stack spacing={2}>
           <Typography>
@@ -280,6 +334,19 @@ function InspectionResults({
               }
             )}
           </Typography>
+          {data.evidence.workload && (
+            <Typography>
+              {t(
+                'Captured workload: {{kind}} {{name}}; UID: {{uid}}; resource version: {{version}}',
+                {
+                  kind: data.evidence.workload.kind,
+                  name: data.evidence.workload.name,
+                  uid: data.evidence.workload.uid,
+                  version: data.evidence.workload.resourceVersion,
+                }
+              )}
+            </Typography>
+          )}
           <Alert severity="info">
             {t(
               'Template references and matching metric names do not prove an application runtime, ownership of telemetry or health. Pod references take precedence when any resolve; unresolved names are reported. Metric selectors are evaluated in pinned order, with later matches replacing the same runtime group.'
@@ -322,7 +389,11 @@ function InspectionResults({
             </Alert>
           )}
           <details>
-            <summary>{t('Show captured Namespace dashboard source')}</summary>
+            <summary>
+              {data.evidence.workload
+                ? t('Show captured workload dashboard sources')
+                : t('Show captured Namespace dashboard source')}
+            </summary>
             <SimpleTable
               data={data.annotationSources}
               columns={[
@@ -352,7 +423,11 @@ function InspectionResults({
                 {
                   label: t('Evidence'),
                   getter: item =>
-                    item.selector ? item.selector.metricLabel : t('Captured Pod annotation'),
+                    item.selector
+                      ? [item.selector.metricLabel, item.selector.metricVersionLabel]
+                          .filter(Boolean)
+                          .join(', ')
+                      : t('Captured Pod annotation'),
                 },
                 {
                   label: t('Action'),

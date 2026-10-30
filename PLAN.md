@@ -354,7 +354,16 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Five hosted groups/nine metric GETs verified legend/table order, precision,
   local filters, label retention, errors and histogram summaries. Application
   dashboard regressions passed (15,052 ms shared deadline). No writes occurred.
-- Latest sorting increment: **380 focused tests in eight files**, plus
+- Workload dashboard recommendations now support eight Kubernetes kinds through
+  explicit ownership then annotation/discovery phases. Selected child controllers
+  retain only their UID-owned Pods; namespace/workload overlays require freshness.
+  Paired app/version selectors and captured charts passed five hosted groups
+  (78 resource/twelve metric GETs, 15,251 ms deadline). Actual Bookinfo linking,
+  Deployment/one-Pod evidence and source identity passed in 22 read-only GETs.
+  Native resource-name/spec/status/conditions/events views remain unchanged.
+- Latest workload increment: **175 focused tests in twelve files**, plus
+  type/lint/i18n/build/package, resource/catalog/parity and hosted checks.
+- Previous sorting increment: **380 focused tests in eight files**, plus
   type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
 - Previous application increment: **429 focused tests in ten files**, plus
   type/lint/i18n/build/package, catalog/resource/parity and hosted checks.
@@ -406,7 +415,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `e62cc73416c59217374226620b8202ed9b07ec7fd7cbda4ba4cdc026c9cbf51b`.
+  `d8343d095b0f412516f364548c515c41cecf82479563a889c293da514fd6aaf3`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1045,7 +1054,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; workload recommendation integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -1066,8 +1075,13 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is workload-specific integration and remaining
-layout/link support. Series sorting now retains its captured query grouping,
+The dashboard continuation is remaining layout/link support and broader
+VM/custom-controller attribution. Workload recommendations are now integrated
+through an explicit inspector, reusing application recommendation/chart code
+while retaining paired app/version filters and a fresh workload overlay.
+Selected child controllers are rooted by UID without including sibling Pods.
+Native resource details remain the spec/status/conditions/events surface;
+the new inspector intentionally does not duplicate them. Series sorting retains its captured query grouping,
 lexical/exact-int64 order and sort-only label-removal semantics. Invalid integer
 strings and indistinguishable displayed groups fail explicitly instead of
 upstream's silent fallback or ambiguous series. Application recommendations now explicitly
