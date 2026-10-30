@@ -14,7 +14,16 @@ export const TEMPO_SPAN_INTRINSICS = [
   'kind',
 ] as const;
 export const TEMPO_TRACE_INTRINSICS = ['traceDuration', 'rootName', 'rootServiceName'] as const;
-export const TEMPO_INTRINSICS = [...TEMPO_SPAN_INTRINSICS, ...TEMPO_TRACE_INTRINSICS] as const;
+export const TEMPO_METADATA_INTRINSICS = [
+  'eventName',
+  'instrumentationName',
+  'instrumentationVersion',
+] as const;
+export const TEMPO_INTRINSICS = [
+  ...TEMPO_SPAN_INTRINSICS,
+  ...TEMPO_TRACE_INTRINSICS,
+  ...TEMPO_METADATA_INTRINSICS,
+] as const;
 export const TEMPO_SPAN_STATUSES = ['ok', 'error', 'unset'] as const;
 export const TEMPO_SPAN_KINDS = [
   'unspecified',
@@ -48,6 +57,9 @@ export function traceIntrinsicName(field: TempoIntrinsicFilter['field']): string
   if (field === 'traceDuration') return 'trace:duration';
   if (field === 'rootName') return 'trace:rootName';
   if (field === 'rootServiceName') return 'trace:rootService';
+  if (field === 'eventName') return 'event:name';
+  if (field === 'instrumentationName') return 'instrumentation:name';
+  if (field === 'instrumentationVersion') return 'instrumentation:version';
   return `span:${field}`;
 }
 

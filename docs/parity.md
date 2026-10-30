@@ -3127,8 +3127,36 @@ unsupported regex were rejected before transport; denial and explicit retry
 retained distinct zero-valued span/trace predicates. The captured table and
 console were inspected. Settings were restored durably and no provider was
 installed. This is contract/UI evidence, not an independent Tempo parser run
-or live-provider matching proof. Trace ID, event/link/instrumentation intrinsics,
+or live-provider matching proof. Trace ID, event-offset and link intrinsics,
 cross-span expressions and Desktop evidence remain open.
+
+### Event and instrumentation string intrinsics
+
+The separate intrinsic controls now also expose canonical `event:name`,
+`instrumentation:name` and `instrumentation:version`. Grammar, intrinsic mapping,
+validation and operand typing were inspected at the same pinned Tempo commit;
+`pkg/traceql/ast.go` has blob `3a603618aab784ec0b7ca6f2fb7fecea1d9c3fda`.
+Event name is a string intrinsic; instrumentation fields retain the generic
+attribute operand type in that source and are deliberately offered here only
+as bounded string predicates. This is not a new parser or Go oracle.
+
+These predicates share quoting, 1024-character values, 512-character RE2
+validation, ten combined intrinsic predicates, the 16 KiB URL bound and captured
+deadline behavior. Eleven selectable fields do not raise the predicate limit.
+Literal/range comparisons of versions do not imply semantic-version ordering.
+Colon intrinsics stay distinct from same-named dot attributes. Multiple event
+conditions do not claim a same-event join, and reporting-library names do not
+become Kubernetes identities. Event offsets, ID/link intrinsics and cross-span
+expressions are not activated by this increment.
+
+Verification passed **382 focused tests in five files**, type/lint/i18n/build
+and resource/catalog/parity checks. Four stock-hosted groups made three
+intercepted search GETs, verifying exact canonical queries with query-like
+quoted strings, captured-versus-draft isolation, provider invalidation,
+invalid/oversized RE2 rejection, denial/retry with an empty version and the
+unchanged predicate limit. Settings were restored with persistence awaited.
+No live provider was installed or queried, and no matching/backend-storage
+support is inferred from intercepted responses.
 
 ### Exact tag filters and captured search time
 

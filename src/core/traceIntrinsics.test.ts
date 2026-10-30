@@ -1,6 +1,7 @@
 import { tempoAttributeClauses, TRACE_ATTRIBUTE_OPERATORS } from './traceFilters';
 import {
   TEMPO_INTRINSICS,
+  TEMPO_METADATA_INTRINSICS,
   TEMPO_SPAN_KINDS,
   TEMPO_SPAN_STATUSES,
   tempoIntrinsicClauses,
@@ -11,6 +12,64 @@ import { traceSearchPath } from './tracing';
 
 const filter: TempoIntrinsicFilter = { field: 'duration', operator: '>=', value: '1.5ms' };
 const query = { service: 'reviews', start: 1700000000, end: 1700000900, limit: 20 };
+
+it.each([
+  ['eventName', 'event:name', 'event'],
+  ['instrumentationName', 'instrumentation:name', 'instrumentation'],
+  ['instrumentationVersion', 'instrumentation:version', 'instrumentation'],
+] as const)(
+  'serializes metadata intrinsic %s without confusing it with an attribute',
+  (field, name, scope) => {
+    const key = name.split(':')[1];
+    const value = 'library" } || { true }\\\n';
+    expect(traceIntrinsicName(field)).toBe(name);
+    expect(tempoIntrinsicClauses([{ field, operator: '=', value }])).toEqual([
+      `${name} = ${JSON.stringify(value)}`,
+    ]);
+    expect(
+      tempoAttributeClauses([{ scope, key, type: 'string', operator: '=', value: 'attribute' }])
+    ).toEqual([`${scope}.${key} = "attribute"`]);
+    expect(tempoIntrinsicClauses([{ field, operator: '!=', value: '' }])).toEqual([
+      `${name} != ""`,
+    ]);
+  }
+);
+it.each(TEMPO_METADATA_INTRINSICS)(
+  'applies shared value, regex and request boundaries to %s',
+  field => {
+    expect(
+      tempoIntrinsicClauses([{ field, operator: '>=', value: 'x'.repeat(1024) }])
+    ).toHaveLength(1);
+    expect(() =>
+      tempoIntrinsicClauses([{ field, operator: '=', value: 'x'.repeat(1025) }])
+    ).toThrow('1024');
+    expect(tempoIntrinsicClauses([{ field, operator: '=~', value: 'x'.repeat(512) }])).toHaveLength(
+      1
+    );
+    expect(() =>
+      tempoIntrinsicClauses([{ field, operator: '=~', value: 'x'.repeat(513) }])
+    ).toThrow('512');
+    expect(() => tempoIntrinsicClauses([{ field, operator: '=~', value: '(?=event)' }])).toThrow(
+      'RE2'
+    );
+    expect(() =>
+      traceSearchPath('jaeger', {
+        ...query,
+        tempoIntrinsics: [{ field, operator: '=', value: 'v' }],
+      })
+    ).toThrow('require Tempo');
+    expect(() =>
+      traceSearchPath('tempo', {
+        ...query,
+        tempoIntrinsics: Array.from({ length: 10 }, () => ({
+          field,
+          operator: '=' as const,
+          value: '\n'.repeat(1024),
+        })),
+      })
+    ).toThrow('16 KiB');
+  }
+);
 
 it.each([
   ['0ns', '0'],

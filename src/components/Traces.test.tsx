@@ -410,6 +410,43 @@ it('captures trace-wide fields separately from span fields without relabeling su
   expect(searchTraces).toHaveBeenCalledTimes(1);
 });
 
+it('captures event and instrumentation intrinsics separately from attributes and later drafts', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  const view = open('/traces?service=reviews');
+  const user = userEvent.setup();
+  for (const [index, label, value] of [
+    [1, 'Event name', 'exception'],
+    [2, 'Instrumentation scope name', 'otel.library'],
+    [3, 'Instrumentation scope version', '2.10'],
+  ] as const) {
+    await user.click(screen.getByRole('button', { name: 'Add intrinsic filter' }));
+    await user.click(screen.getByLabelText(`Intrinsic field ${index}`));
+    await user.click(screen.getByRole('option', { name: label }));
+    await user.type(screen.getByLabelText(`Intrinsic value ${index}`), value);
+  }
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await screen.findByText('Show captured intrinsic filters');
+  for (const name of ['event:name', 'instrumentation:name', 'instrumentation:version'])
+    expect(screen.getByText(name)).toBeDefined();
+  const captured = vi.mocked(searchTraces).mock.calls[0][2];
+  expect(captured.tempoIntrinsics).toEqual([
+    { field: 'eventName', operator: '=', value: 'exception' },
+    { field: 'instrumentationName', operator: '=', value: 'otel.library' },
+    { field: 'instrumentationVersion', operator: '=', value: '2.10' },
+  ]);
+  await user.clear(screen.getByLabelText('Intrinsic value 1'));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), 'changed');
+  await user.click(screen.getByLabelText('Intrinsic field 2'));
+  await user.click(screen.getByRole('option', { name: 'Span name' }));
+  expect(captured.tempoIntrinsics?.[0].value).toBe('exception');
+  expect(captured.tempoIntrinsics?.[1].field).toBe('instrumentationName');
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  expect(view.history.location.search).toBe('?service=reviews');
+});
 it('captures event, link and instrumentation scopes and preserves them after draft edits', async () => {
   const tempo = structuredClone(configured);
   if (!tempo.valid || !tempo.config.clusters.alpha.tracing)

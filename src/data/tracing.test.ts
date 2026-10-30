@@ -172,6 +172,9 @@ it('captures intrinsic predicates before awaiting and blocks invalid or Jaeger s
       { field: 'traceDuration' as const, operator: '>=' as const, value: '2s' },
       { field: 'rootName' as const, operator: '=' as const, value: 'GET /productpage' },
       { field: 'rootServiceName' as const, operator: '=' as const, value: 'productpage' },
+      { field: 'eventName' as const, operator: '=~' as const, value: 'exception.*' },
+      { field: 'instrumentationName' as const, operator: '=' as const, value: 'otel.library' },
+      { field: 'instrumentationVersion' as const, operator: '>=' as const, value: '2.10' },
     ],
   };
   vi.mocked(ApiProxy.request).mockResolvedValue(fixtures.tempoSearch);
@@ -184,12 +187,18 @@ it('captures intrinsic predicates before awaiting and blocks invalid or Jaeger s
   query.tempoIntrinsics[0].value = '0.1ns';
   query.tempoIntrinsics[1].value = '0ns';
   query.tempoIntrinsics[2].value = 'changed';
+  query.tempoIntrinsics[4].value = 'changed-event';
+  query.tempoIntrinsics[5].value = 'changed-library';
+  query.tempoIntrinsics[6].value = 'changed-version';
   await pending;
   const url = new URL(String(vi.mocked(ApiProxy.request).mock.calls[0][0]), 'http://example.test');
   expect(url.searchParams.get('q')).toContain('span:duration >= 9007199254740993ns');
   expect(url.searchParams.get('q')).toContain('trace:duration >= 2000000000ns');
   expect(url.searchParams.get('q')).toContain('trace:rootName = "GET /productpage"');
   expect(url.searchParams.get('q')).toContain('trace:rootService = "productpage"');
+  expect(url.searchParams.get('q')).toContain('event:name =~ "exception.*"');
+  expect(url.searchParams.get('q')).toContain('instrumentation:name = "otel.library"');
+  expect(url.searchParams.get('q')).toContain('instrumentation:version >= "2.10"');
   await expect(
     searchTraces(
       clusterScope('alpha'),

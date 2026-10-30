@@ -245,6 +245,13 @@ dashboards and integration/live/Desktop closure remain substantial work.
   is shared. Five hosted scenario groups exercised all eight fields with three
   intercepted searches, historical capture, provider invalidation and denial/retry.
   No live provider matching is claimed.
+- Event-name and instrumentation scope name/version intrinsics now share the
+  bounded literal/range/RE2 path. Canonical colon names remain distinct from
+  dot attributes; versions are not semver and event conditions do not claim
+  same-event joins. Four hosted groups issued three intercepted GETs and
+  preserved capture/provider isolation, denial/retry and the ten-predicate cap.
+  The increment passed **382 focused tests in five files** and normal gates;
+  no live provider was queried. Event offsets and ID/link intrinsics remain open.
 - Event/link/instrumentation attribute scopes now share typed filtering,
   exact literals, nil predicates and bounded captured reads. Five hosted
   groups covered the three scopes/five scalar types, mixed trace intrinsics,
@@ -488,7 +495,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `c47b1fed6fbd523f5f2af8dd17433d09d56874263880f369d6c6d67b99cbdb84`.
+  `2b617df99fb429181640f6e191d65160a870b846711387f942baef8b975ea697`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1249,8 +1256,9 @@ panel and query cardinality limits.
    workflows using existing correlation and guarded mutation adapters.
    Multi-object proposals require per-object outcomes; no blind retry or rollback.
 4. Continue tracing workload/graph correlations and remaining
-   event/link/remaining intrinsic and cross-span filters. Trace-wide root/duration
-   intrinsics and event/link/instrumentation attribute scopes are now implemented.
+   event-offset, ID/link intrinsic and cross-span filters. Trace-wide root/duration,
+   event-name and instrumentation name/version intrinsics and
+   event/link/instrumentation attribute scopes are now implemented.
    Literal attribute names,
    typed attribute comparisons,
    span name/status-message/duration/status/kind predicates and bounded RE2 are

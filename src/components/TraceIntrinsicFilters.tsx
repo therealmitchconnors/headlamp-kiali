@@ -36,17 +36,25 @@ export default function TraceIntrinsicFilters({
     traceDuration: t('Whole trace duration'),
     rootName: t('Trace root span name'),
     rootServiceName: t('Trace root service name'),
+    eventName: t('Event name'),
+    instrumentationName: t('Instrumentation scope name'),
+    instrumentationVersion: t('Instrumentation scope version'),
   };
   return (
     <Stack spacing={2}>
       <Typography variant="h6" component="h3">
-        {t('Tempo span and trace intrinsic filters')}
+        {t('Tempo intrinsic filters')}
       </Typography>
       <Alert severity="info">
         {t(
           'Intrinsics are reported fields, not similarly named attributes. All predicates are ANDed with existing filters. Span fields apply to the same matched span; trace fields describe its whole trace and reported root. A root service may differ from the matched span service. Span duration and whole trace duration are distinct. Conflicting filters can return no traces. Status is not a health verdict. Regexes match the whole string; string ranges are lexicographic.'
         )}
       </Alert>
+      <Typography variant="body2">
+        {t(
+          'Event and instrumentation fields describe records attached to the matched span. Multiple event conditions do not prove a match on the same event. Instrumentation identifies the reporting library, not a workload or Kubernetes Service. Version comparisons are literal or lexicographic, not semantic-version ordering.'
+        )}
+      </Typography>
       {!enabled && (
         <Alert severity="warning">
           {t('Intrinsic filters require Tempo; remove them before searching Jaeger.')}

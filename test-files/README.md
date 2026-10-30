@@ -2003,9 +2003,9 @@ replay, return 403 and retry with zero. Five groups observed three search GETs
 with no writes or plugin errors. Restore settings durably and remove handlers.
 These are not same-event/link join tests or live provider matching evidence.
 
-### Tempo span and trace intrinsic filters
+### Tempo intrinsic filters
 
-`core/traceIntrinsics.test.ts` exercises the eight span/trace intrinsic fields and every
+`core/traceIntrinsics.test.ts` exercises eleven span/trace/event/instrumentation fields and every
 comparison operator, enum tokens versus same-named attributes, string quoting,
 shared RE2 limits and exact duration normalization. Units ns/us/ms/s/m/h use
 integer arithmetic; tests cover zero, fractional units, whole-nanosecond
@@ -2033,6 +2033,25 @@ value; after provider switching, reject `0.1ns` for trace duration too. The
 explicit retry must contain distinct zero-valued span and trace durations.
 Five hosted groups issued three GETs with no writes, and the original settings
 were restored after the combined eight-field run.
+
+The metadata extension adds `event:name`, `instrumentation:name` and
+`instrumentation:version`. Test dot attributes separately, literal strings and
+lexicographic versions, empty values, 1024-character values, 512-character RE2,
+the ten-predicate cap and shared URL/Jaeger rejection. Change metadata values
+while the reader awaits and retain the original request; edit field/value
+drafts after submission without changing the captured table.
+
+Four hosted groups made three intercepted search GETs. They combined the three
+new intrinsics with same-named attributes, quoted query-like library text and a
+version range. Provider changes must remove captured results without replay;
+invalid regex stays local, denial remains an error and explicit retry preserves
+an empty version. Eleven selectable fields still allow at most ten predicates.
+The increment passed 382 tests in five files. It does not execute the Tempo
+parser, join individual event records or prove backend storage/live matching.
+When choosing stock-host Select options, wait for the prior listbox transition
+to finish; both the closing listbox and its control can share an accessible
+label. Remove unrelated invalid-provider drafts before asserting which
+validation family supplies the submission error.
 
 ### Trace name discovery
 

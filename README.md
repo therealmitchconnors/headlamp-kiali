@@ -1245,9 +1245,10 @@ size limits. These controls do not express a same-event/link join, follow
 linked traces, or infer scope from an attribute name. Backend storage/version
 and array semantics still determine matching behavior.
 
-**Tempo span and trace intrinsic filters** expose up to ten combined comparisons
+**Tempo intrinsic filters** expose up to ten combined comparisons
 on reported span name, status message, duration, status and kind, plus whole-trace
-duration, root span name and root service name. The intrinsic
+duration, root span name, root service name, event name and instrumentation
+scope name/version. The intrinsic
 `span:status` is different from an attribute named `span.status`. Name/message
 strings support ranges and whole-string RE2; status/kind accept only their
 reported enum names with `=`/`!=`, not arbitrary strings or health assessments.
@@ -1261,6 +1262,13 @@ from the matched span's service. Captured rows show the exact scope independentl
 of draft edits, and no root-service-to-Kubernetes association is inferred. Intrinsic drafts
 remain visible on Jaeger for explicit removal; connection changes never replay
 them automatically.
+
+`event:name`, `instrumentation:name` and `instrumentation:version` are reported
+metadata, distinct from attributes such as `event.name`. They support the same
+bounded literal-string/range/RE2 comparisons. Version ordering is lexicographic,
+not semantic-version ordering. Multiple event conditions do not establish that
+the same event matched them all; instrumentation names are reporting-library
+identities, not Kubernetes workload or Service identities.
 
 Open a trace to inspect relative
 span timing, parents, references, attributes and events. Trace-ID URLs load
@@ -1301,7 +1309,7 @@ searches are not health verdicts. Trace attributes may contain sensitive
 application data; they are not saved in plugin settings.
 
 This is bounded HTTP trace browsing, not full tracing parity. Broader workload/
-graph correlations, event/link/remaining intrinsic Tempo filters and
+graph correlations, event-offset and ID/link intrinsic Tempo filters and
 cross-span expressions,
 external-auth/tenant headers, gRPC-only
 backends, Tempo v2 partial/pruned-trace envelopes and a lossless raw trace viewer
