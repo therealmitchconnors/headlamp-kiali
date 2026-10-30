@@ -105,6 +105,52 @@ it('uses only first-container configuration references without reading a later d
       .mock.calls.some(([path]) => String(path).includes('/ignored-shared'))
   ).toBe(false);
 });
+it('uses final cluster/shared assignments and never requests a superseded shared source', async () => {
+  const deployment = structuredClone(controller);
+  Object.assign(deployment.spec.template.spec.containers[0], {
+    env: [
+      { name: 'CLUSTER_ID', value: 'old-cluster' },
+      { name: 'CLUSTER_ID', value: 'last-cluster' },
+      { name: 'SHARED_MESH_CONFIG', value: 'old-shared' },
+      { name: 'SHARED_MESH_CONFIG', value: 'last-shared' },
+    ],
+  });
+  vi.mocked(ApiProxy.request).mockImplementation(async path =>
+    response(String(path), [deployment])
+  );
+  const result = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  expect(result.controlPlanes[0].controller.clusterId).toBe('last-cluster');
+  expect(result.controlPlanes[0].shared).toMatchObject({ status: 'ready', name: 'last-shared' });
+  expect(
+    vi.mocked(ApiProxy.request).mock.calls.some(([path]) => String(path).includes('/last-shared'))
+  ).toBe(true);
+  expect(
+    vi.mocked(ApiProxy.request).mock.calls.some(([path]) => String(path).includes('/old-shared'))
+  ).toBe(false);
+});
+it.each(['true', '1', 'TRUE'])(
+  'does not erase EXTERNAL_ISTIOD=%s with a later false declaration',
+  async value => {
+    const deployment = structuredClone(controller);
+    Object.assign(deployment.spec.template.spec.containers[0], {
+      env: [
+        { name: 'EXTERNAL_ISTIOD', value },
+        { name: 'EXTERNAL_ISTIOD', value: 'false' },
+        { name: 'SHARED_MESH_CONFIG', value: 'not-read' },
+      ],
+    });
+    vi.mocked(ApiProxy.request).mockImplementation(async path =>
+      response(String(path), [deployment])
+    );
+    const result = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+    expect(result.controlPlanes[0].controller.managesExternal).toBe(value === 'true' ? true : null);
+    expect(result.controlPlanes[0].effective?.status).toBe('unavailable');
+    expect(namespaceMeshConfiguration(result, 'bookinfo').status).toBe('unavailable');
+    expect(
+      vi.mocked(ApiProxy.request).mock.calls.some(([path]) => String(path).includes('/not-read'))
+    ).toBe(false);
+  }
+);
 it('captures its cluster before awaiting discovery and retains one whole-read deadline', async () => {
   const scope = { cluster: 'alpha' };
   const pending = loadMeshSnapshot(scope, new AbortController().signal);

@@ -2770,12 +2770,39 @@ is `discovery`, with its actual captured image. No settings or cluster objects
 were changed.
 
 This corrects container selection, not complete control-plane discovery.
-The source audit also found environment-loop semantics still needing
-reconciliation before managed-scope certification: last `CLUSTER_ID`/
-`SHARED_MESH_CONFIG` assignment, exact-string-true accumulation and indirection/
-noncanonical-value guards. Local self-management compares the observed ID to
+Local self-management compares the observed ID to
 the logical cluster name independently of `ManagesExternal`; do not infer that
 logical name from the Headlamp context or saved telemetry identity.
+
+### Ordered controller environment observations
+
+The literal environment projection now follows the active first-container loop:
+the last `CLUSTER_ID` and `SHARED_MESH_CONFIG` assignments win, including omitted/
+empty values that clear earlier declarations. Exact `EXTERNAL_ISTIOD=true`
+declarations accumulate; later false values do not undo them. The original loop,
+constants and `kubernetes.EnvVarIsTrue` execute offline in **211 new Go cases**,
+bringing independent Go evidence to **19,733 cases**. The oracle compares these
+three projected fields; retaining the original gateway branch in the harness
+does not claim native gateway-scope behavior.
+
+The additional source pins are `istio/constants.go`
+(`90de803c8c48862ba48b34fcfcb5c633a12c3956`) and `kubernetes/kubernetes.go`
+(`b7e149defa6ac6705c089fa3445f0c6c0f388820`). Native guards deliberately remain
+stricter than the literal Go model: a final indirect assignment is unknown,
+not an earlier-value fallback; superseded indirection does not replace a final
+literal. Any unresolved external indirection or noncanonical flag string
+blocks configuration eligibility. General Go boolean aliases are not promoted
+to pinned true or trusted as resolved runtime topology. Malformed environment
+lists/records fail discovery instead of silently dropping entries.
+
+Verification passed **277 focused tests in four files**, the full **22,340-test/
+182-file** suite and normal gates. Four stock-hosted groups made forty
+intercepted GETs across assignment/clear, indirection, exact-true accumulation,
+noncanonical flags and malformed-input cases. No superseded or indirect source
+was read. Unintercepted managed Istiod first-container image/name and final
+literal cluster ID matched the UI. No settings or cluster objects changed.
+Logical-cluster mapping, complete managed scope and Service checker activation
+remain separate prerequisites.
 
 ### Declared managed-revision selection
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from

@@ -391,6 +391,25 @@ actual managed Istiod first-container name/image matched the UI. Focused tests
 passed 1,961 cases in five files; the full suite passed 22,108 in 181 files.
 No Secret, settings or cluster mutation was needed.
 
+Reproduce the ordered controller environment oracle with:
+
+```sh
+node scripts/parity/controller-environment-oracle.mjs --source /path/to/pinned/kiali --check
+```
+
+Its 211 cases execute the original discovery environment loop and exact-true
+helper for the three projected ID/shared/external fields. Native guard tests
+separately cover final versus superseded indirection, noncanonical booleans
+and malformed records. Do not equate general Go boolean parsing with the
+caller's exact `true` check or implement false as undoing a prior true.
+
+Hosted checks use duplicate ID/shared assignments, explicit clears, final and
+superseded indirection, true/false flag order, noncanonical/indirect flags and
+malformed entries. Reject every read to an old or indirect ConfigMap. Four
+groups made forty GETs, with no writes/settings changes; actual managed Istiod
+first-container and final literal cluster-ID provenance matched. The increment
+passed 277 focused tests in four files and 22,340 tests in 182 files overall.
+
 Same-context revision-tag selection has a separate source-pinned oracle:
 
 ```sh

@@ -197,6 +197,11 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
             'Discovery selects Deployments labeled app=istiod. Configuration observations use the first declared container, matching pinned Kiali discovery, not a search for a discovery-named container. Standard revision ConfigMaps are inspected without applying Istio defaults or reading Secrets.'
           )}
         </Typography>
+        <Typography variant="body2">
+          {t(
+            'Environment order is preserved: the last CLUSTER_ID and SHARED_MESH_CONFIG declarations win, including empty clears. Exact EXTERNAL_ISTIOD=true declarations accumulate; later false values do not undo them. Indirect or noncanonical external values remain unresolved. These observations do not certify managed-cluster membership.'
+          )}
+        </Typography>
         <SimpleTable
           data={snapshot.controlPlanes}
           emptyMessage={

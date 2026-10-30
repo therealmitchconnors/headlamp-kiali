@@ -212,27 +212,50 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
   const container = isRecord(first) ? first : undefined;
   const configurationWarnings: string[] = [];
   let effectiveConfigBlocked = !container;
-  const env = container && Array.isArray(container.env) ? container.env.filter(isRecord) : [];
+  const rawEnv = container?.env;
+  if (rawEnv !== undefined && rawEnv !== null && !Array.isArray(rawEnv))
+    throw new Error('Malformed istiod environment list');
+  const env = (Array.isArray(rawEnv) ? rawEnv : []).map(entry => {
+    if (
+      !isRecord(entry) ||
+      typeof entry.name !== 'string' ||
+      !entry.name ||
+      (entry.value !== undefined && typeof entry.value !== 'string') ||
+      (entry.valueFrom !== undefined && entry.valueFrom !== null && !isRecord(entry.valueFrom))
+    )
+      throw new Error('Malformed istiod environment variable');
+    return { name: entry.name, value: entry.value, valueFrom: entry.valueFrom };
+  });
+  const assignments = new Map(env.map(entry => [entry.name, entry]));
   const literal = (name: string) => {
-    const entry = env.find(entry => entry.name === name);
-    if (entry?.valueFrom !== undefined) {
+    const entry = assignments.get(name);
+    if (!entry) return undefined;
+    if (entry.valueFrom !== undefined && entry.valueFrom !== null) {
       configurationWarnings.push(`${name} uses indirection and was not resolved`);
       if (name !== 'CLUSTER_ID') effectiveConfigBlocked = true;
+      return undefined;
     }
-    return typeof entry?.value === 'string' ? entry.value : undefined;
+    return typeof entry.value === 'string' ? entry.value : '';
   };
   const clusterId = literal('CLUSTER_ID');
   const shared = literal('SHARED_MESH_CONFIG');
-  const external = literal('EXTERNAL_ISTIOD');
-  const managesExternal = env.some(
-    entry => entry.name === 'EXTERNAL_ISTIOD' && entry.valueFrom !== undefined
-  )
-    ? null
-    : !external || ['false', 'False', 'FALSE', '0', 'f', 'F'].includes(external)
-    ? false
-    : ['true', 'True', 'TRUE', '1', 't', 'T'].includes(external)
-    ? true
-    : null;
+  const external = env.filter(entry => entry.name === 'EXTERNAL_ISTIOD');
+  const indirectExternal = external.some(
+    entry => entry.valueFrom !== undefined && entry.valueFrom !== null
+  );
+  const noncanonicalExternal = external.some(
+    entry => !['', 'true', 'false'].includes(typeof entry.value === 'string' ? entry.value : '')
+  );
+  if (indirectExternal)
+    configurationWarnings.push('EXTERNAL_ISTIOD uses indirection and was not resolved');
+  if (noncanonicalExternal)
+    configurationWarnings.push(
+      'Noncanonical EXTERNAL_ISTIOD values are not interpreted as resolved topology'
+    );
+  const managesExternal =
+    indirectExternal || noncanonicalExternal
+      ? null
+      : external.some(entry => entry.value === 'true');
   if (managesExternal !== false) {
     configurationWarnings.push('External control-plane topology is not resolved');
     effectiveConfigBlocked = true;

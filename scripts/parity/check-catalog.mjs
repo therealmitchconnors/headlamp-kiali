@@ -86,6 +86,9 @@ const histograms = JSON.parse(await readFile('test-files/parity/histogram-oracle
 const trafficSignals = JSON.parse(
   await readFile('test-files/parity/traffic-signals-oracle.json', 'utf8')
 );
+const controllerEnvironment = JSON.parse(
+  await readFile('test-files/parity/controller-environment-oracle.json', 'utf8')
+);
 const commit = '0e8be887b8217bbcac5e3ae0bfcd258073949cca';
 for (const artifact of [
   upstream,
@@ -94,6 +97,7 @@ for (const artifact of [
   labels,
   namespaceRevisions,
   revisionTags,
+  controllerEnvironment,
   calculator,
   hosts,
   mtls,
@@ -202,6 +206,12 @@ assert.equal(labels.sources['config/config.go'], 'fbde570684b760495782fce1df801d
 assert.equal(Object.keys(labels.sources).length, 4);
 assert.equal(namespaceRevisions.cases.length, 1538);
 assert.equal(revisionTags.cases.length, 364);
+assert.equal(controllerEnvironment.cases.length, 211);
+assert.deepEqual(controllerEnvironment.sources, {
+  'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
+  'istio/constants.go': '90de803c8c48862ba48b34fcfcb5c633a12c3956',
+  'kubernetes/kubernetes.go': 'b7e149defa6ac6705c089fa3445f0c6c0f388820',
+});
 assert.deepEqual(revisionTags.sources, {
   'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
   'models/mesh.go': '518a4242407e27452bb199b91344456d89908ad4',
@@ -432,5 +442,5 @@ for (const fixture of health.workloads) {
 }
 console.log(
   'Pinned inventory and oracle consistent: 508 sources, 616 inventory entries, ' +
-    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 216 custom-dashboard query, 72 validation-exclusion, 1538 namespace-revision, 364 revision-tag and 75 label Go oracle cases.'
+    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 216 custom-dashboard query, 72 validation-exclusion, 1538 namespace-revision, 364 revision-tag, 211 controller-environment and 75 label Go oracle cases.'
 );

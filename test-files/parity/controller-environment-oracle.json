@@ -1,0 +1,4079 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "istio/discovery.go": "60f6f7ab41a65acc5f40ca1095ce279433e62dce",
+    "istio/constants.go": "90de803c8c48862ba48b34fcfcb5c633a12c3956",
+    "kubernetes/kubernetes.go": "b7e149defa6ac6705c089fa3445f0c6c0f388820"
+  },
+  "cases": [
+    {
+      "input": {
+        "env": []
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "CLUSTER_ID"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "SHARED_MESH_CONFIG"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "EXTERNAL_ISTIOD"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "blue"
+          }
+        ]
+      },
+      "expected": {
+        "id": "blue",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": "green"
+          }
+        ]
+      },
+      "expected": {
+        "id": "green",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "CLUSTER_ID"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "first"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "first",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": "second"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "second",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "SHARED_MESH_CONFIG"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": true,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": "false"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD",
+            "value": ""
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "EXTERNAL_ISTIOD"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": true
+      }
+    },
+    {
+      "input": {
+        "env": [
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          },
+          {
+            "name": "UNRELATED",
+            "value": "true"
+          }
+        ]
+      },
+      "expected": {
+        "id": "",
+        "shared": "",
+        "external": false,
+        "gateway": false
+      }
+    }
+  ]
+}

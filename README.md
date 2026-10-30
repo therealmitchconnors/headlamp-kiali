@@ -1439,6 +1439,13 @@ first declared container, even if a later container is named `discovery`.
 Malformed first entries are not skipped; missing containers keep configuration
 unresolved. This is observation provenance, not proof of which process runs Istiod.
 
+Within that container, the final `CLUSTER_ID` and `SHARED_MESH_CONFIG`
+declarations win, including empty clears. A final indirect value is not replaced
+by an earlier literal. Exact `EXTERNAL_ISTIOD=true` declarations accumulate;
+a later `false` does not undo one. Noncanonical flag values and indirection stay
+explicitly unresolved and block configuration eligibility rather than being
+silently interpreted or dereferenced.
+
 The **Pinned Kiali revision candidate** column separately follows the pinned
 managed-revision label selector. Maistra membership takes precedence unless the
 ignore label is present (even with value `false`); enabled legacy injection takes

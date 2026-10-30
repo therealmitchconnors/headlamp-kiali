@@ -83,7 +83,10 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Controller observation now follows the pinned first-container choice and
   exposes its provenance, rather than preferring a discovery-named sibling.
   First-only shared reads, ordering, malformed/missing inputs and actual managed
-  Istiod were verified; complete environment and managed-scope semantics remain open.
+  Istiod were verified. Ordered literal environment semantics now have a
+  211-case original-Go oracle: final ID/shared assignments, exact-true accumulation,
+  explicit clears and conservative indirection/noncanonical guards. Four hosted
+  groups made forty GETs; complete managed scope remains open.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -480,7 +483,9 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **22,108 tests in 181 files** after first-container
+  Latest full-suite checkpoint: **22,340 tests in 182 files** after ordered
+  controller environment handling; its focused suite passed **277 tests in
+  four files**. The previous **22,108-test/181-file** suite covered first-container
   provenance and the accumulated dashboard/tracing increments. Its focused
   mesh suite passed **1,961 tests in five files**; three hosted groups made
   twenty GETs and actual managed Istiod first-container provenance matched.
@@ -493,7 +498,8 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Earlier checkpoints at `08b4021` (19,978/176) and before it (19,415/155)
   remain historical evidence.
   Comparison metrics reject unexpected aggregation labels and mixed times.
-  Independent original-Go evidence totals 19,522 cases, including 364 revision-tag,
+  Independent original-Go evidence totals 19,733 cases, including 211 controller-environment,
+  364 revision-tag,
   1,538 namespace-revision
   and 216 custom-dashboard
   queries, 228 WorkloadEntry
@@ -519,7 +525,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `77f8225f98a942bb42ab65d6504ecd15a7817e041141a33e8f69e90ae711f7ea`.
+  `921ea1afab689980f6225020f3c833ce0c4268dbf3a4b805c29a7ef0f6488e3e`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1188,11 +1194,11 @@ including replacement/empty semantics and raw controller revisions. Do not
 mistake it for the full managed-cluster assignment loop: logical cluster
 identity, managed-cluster relationships, Kiali visibility and cross-cluster
 last-assignment behavior remain prerequisites.
-The first-container choice is now aligned with the pinned caller. Next reconcile
-its environment loop: last CLUSTER_ID/SHARED_MESH_CONFIG assignment and
-exact-string-true accumulation, while keeping indirect/noncanonical values
-explicitly guarded. Self-management is ID == logical cluster name, independent
-of ManagesExternal. Only then add explicit logical-context mappings; never
+The first-container choice and supported literal environment loop are now
+source-aligned: last CLUSTER_ID/SHARED_MESH_CONFIG assignment and exact-string-true
+accumulation, with indirect/noncanonical values explicitly guarded.
+Self-management is ID == logical cluster name, independent
+of ManagesExternal. Next add explicit logical-context mappings; never
 silently reuse the Headlamp context name or saved telemetry identity.
 Service checks in the pinned caller pool Pods across all managed namespaces,
 match selectors without another namespace filter, and treat empty selectors
