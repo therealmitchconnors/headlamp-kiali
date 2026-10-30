@@ -16,7 +16,7 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-29
+### Resume status — 2026-10-30
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -341,7 +341,16 @@ dashboards and integration/live/Desktop closure remain substantial work.
   masking, Job metadata, sanitized errors, no fallback/resurrection and a
   15,103 ms deadline/retry. Real Bookinfo Namespace and reviews-v1 Deployment
   reads also passed without interception. No cluster writes occurred.
-- Latest annotation increment: **366 focused tests in eight files**, plus a
+- Application dashboard recommendations now use captured Pod references before
+  namespace-overlaid metric discovery, preserve auto/enabled/disabled policy
+  and ordered whole-runtime replacement, and embed scoped chart loading.
+  Six hosted groups verified 78 intercepted resource GETs, 12 metric GETs and
+  a 15,081 ms shared deadline. An actual Bookinfo read captured three owned
+  reviews Pods plus Namespace evidence in eleven unintercepted GETs. Browser
+  settings-only policy survived hard reload. No Kubernetes writes occurred.
+- Latest application increment: **429 focused tests in ten files**, plus
+  type/lint/i18n/build/package, catalog/resource/parity and hosted checks.
+  Previous annotation increment: **366 focused tests in eight files**, plus a
   final 27-test UI rerun, type/lint/i18n/build/package/catalog and hosted checks.
   Previous disabling increment: **409 focused tests in eight files**, plus
   type/lint/i18n/build/package, catalog-check and hosted gates passed.
@@ -389,7 +398,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `ed3ef974830bd8f6747ce6935ed63a7622fb8925e206f4a2f3089256329a3668`.
+  `72000a32e46313a67f60009dba479a16342fa50b00ffcf196745734a62448332`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1028,7 +1037,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, grouping/value controls, display bounds/spans and explicit chart batches implemented; automatic app discovery, annotations, per-template disabling, sorting and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application recommendations, annotation overlays, per-template disabling, grouping/value controls, display bounds/spans and explicit chart batches implemented; workload recommendation integration, background discovery, sorting and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -1049,14 +1058,24 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is application/workload integration and automatic
-discovery. Explicit Namespace/workload annotation overrides are now implemented
+The dashboard continuation is workload-specific integration, sorting and
+remaining layout/link support. Application recommendations now explicitly
+inspect captured UID-owned Pod references, then use namespace-overlaid
+discovery only when no references resolve and complete supported-source
+correlation permits the configured policy (auto threshold 10 by default).
+The three default app labels retain source order and punctuation sanitization;
+a full configured app/version pair uses only the app key. The application
+caller has no version filter or workload overlay. Later discovery matches
+replace whole runtime groups. Embedded charts preserve the winning app selector,
+or require an explicit choice for ambiguous reference-only conventions.
+Settings/evidence changes clear captures without replay. Do not generalize this
+into background fan-out or VM/telemetry-ownership/health inference.
+Explicit Namespace/workload annotation overrides are now implemented
 for supported Kubernetes kinds, without writes or silent fallback. Built-in definitions and explicit saved-template
 discovery, composition and label grouping are implemented for their documented
 bounded subsets. Literal includes are now preserved in settings for discovery;
-composition still trims them. App auto-discovery depends on explicit Pod
-annotations, complete workload attribution and configured application-label
-selectors.
+composition still trims them. Broader automatic/background discovery still
+depends on complete workload attribution and configured label-policy semantics.
 Per-template disabling is implemented: empty items and a Go-trimmed empty
 discoverOn remove a name after override precedence. Declaration records remain
 saved, and dependent includes fail rather than reviving a bundled default.

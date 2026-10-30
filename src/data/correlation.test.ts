@@ -44,6 +44,26 @@ beforeEach(() => {
 });
 
 describe('normalized correlation resources', () => {
+  it('keeps dashboard annotation errors local to Pod evidence without losing the resource', () => {
+    const raw = {
+      ...object('Pod'),
+      metadata: {
+        ...object('Pod').metadata,
+        annotations: { 'kiali.io/runtimes': 'go', 'kiali.io/dashboards': 42 },
+      },
+      spec: { containers: [{ name: 'app' }] },
+    };
+    const resource = decodeCorrelationResource(raw, source('Pod'), scope);
+    expect(resource.identity.name).toBe('one');
+    expect(resource.dashboardRefs).toMatchObject({ ok: false });
+    expect(
+      decodeCorrelationResource(
+        { ...raw, metadata: { ...raw.metadata, annotations: {} } },
+        source('Pod'),
+        scope
+      ).dashboardRefs
+    ).toEqual({ ok: true, refs: [], bytes: 0 });
+  });
   it('captures account names only from the actual Pod spec without defaulting missing or malformed names', () => {
     const raw = {
       ...object('Pod'),

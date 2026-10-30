@@ -96,6 +96,38 @@ async function fillEndpoint() {
 }
 
 describe('native per-cluster settings', () => {
+  it('retains discovery-only policy settings even with no saved templates or catalog', async () => {
+    render(<Settings />);
+    fireEvent.change(screen.getByLabelText('Custom aggregate dashboards (JSON)'), {
+      target: {
+        value: JSON.stringify({
+          namespaceLabel: 'namespace',
+          clusterLabel: 'cluster',
+          dashboards: [],
+          discoveryMode: 'disabled',
+          discoveryAutoThreshold: 0,
+        }),
+      },
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: {
+          customDashboards: {
+            discoveryMode: 'disabled',
+            discoveryAutoThreshold: 0,
+            dashboards: [],
+          },
+        },
+      },
+    });
+    cleanup();
+    render(<Settings />);
+    expect(
+      (screen.getByLabelText('Custom aggregate dashboards (JSON)') as HTMLInputElement).value
+    ).toContain('"discoveryAutoThreshold": 0');
+    expect(state.request).not.toHaveBeenCalled();
+  });
   it('preserves a name-only disable declaration without erasing its intent or touching the cluster', async () => {
     render(<Settings />);
     fireEvent.change(screen.getByLabelText('Custom aggregate dashboards (JSON)'), {

@@ -889,8 +889,9 @@ only when its **literal direct include** equals the child's name. `"child"`
 suppresses it; `" child "` and `"child$Chart"` do not. Include text is now
 preserved when saving and trimmed only for composition; previously saved
 canonical includes remain valid. Discovery does not resolve includes, so a
-matched definition can still have an error when loaded. No built-in catalog,
-Pod annotations or automatic application discovery is implied.
+matched definition can still have an error when loaded. The namespace dashboard
+page does not implicitly inspect application Pods; application recommendations
+use the separate explicit workflow below.
 
 Discovery accepts the same twenty saved definitions, protected equality filters
 and 16 KiB encoded-query bound, with at most 2,000 returned metric names and a
@@ -900,6 +901,45 @@ raw selectors/PromQL and regex discovery expressions are not accepted.
 An actual Bookinfo discovery read matched `istio_requests_total` using explicit
 destination namespace, cluster `Kubernetes` and reporter selectors; no backend
 or new cluster component was installed.
+
+**Application dashboard recommendations**
+
+On an application's detail page, **Inspect application dashboard recommendations**
+captures its UID-attributed Pods and reads the Namespace's
+`dashboards.kiali.io/templates` overlay. This does not write cluster resources or
+start background discovery across applications. Captured Pod UIDs/versions and
+Namespace definition provenance are inspectable.
+
+Pod `kiali.io/runtimes` references are followed by `kiali.io/dashboards`,
+comma-split, Go-trimmed and deduplicated. Any resolved reference takes precedence
+over metric discovery. Unknown/disabled names remain visible; malformed or
+uncollected reference evidence blocks inspection rather than becoming absence.
+Incomplete supported-source correlation can show positive explicit references,
+but cannot initiate absence-based fallback.
+
+Optional per-cluster dashboard JSON settings control fallback:
+`discoveryMode` is `"auto"` (default), `"enabled"` or `"disabled"`;
+`discoveryAutoThreshold` is an integer 0..1000 (default 10).
+Auto skips applications above the observed Pod threshold, enabled bypasses that
+threshold, and disabled still permits explicit references. Settings are local to
+the browser profile, including when no templates are saved.
+
+Fallback sequentially tries the three pinned app-label conventions
+(`service.istio.io/canonical-name`, `app.kubernetes.io/name`, `app`), or only the
+configured application key when an app/version override pair exists.
+Punctuation maps to underscores for metric-label names; invalid/protected
+mapped labels are rejected before metric transport. Application version is not
+added. Later matches replace an entire runtime group rather than unioning it.
+Namespace and discovery reads share a fifteen-second deadline.
+
+**Inspect … charts** retains the Namespace overlay, endpoint, end instant and
+application scope. A discovered candidate uses its winning selector. Explicit
+references require a metric-label choice when multiple conventions exist.
+Charts reuse bounded chart selection, grouping, histograms and the eight-expanded-
+request cap. Changes to configuration or captured application evidence invalidate
+results without replay. Recommendations and matching metric names do not prove
+runtime, telemetry ownership or health. VM entries are not treated as Pods, and
+arbitrary custom-controller provenance remains incomplete.
 
 Raw charts support `sum`, `avg`, `min` and `max`, preserving signed values.
 Rate charts use `sum(rate(metric{...}[5m]))`. `unitScale` multiplies finite
@@ -990,7 +1030,8 @@ the draft selection. Only selected charts receive query-specific grouping and
 histogram-summary expansion; declarations are still validated as a whole.
 
 This is **not full custom-dashboard parity**: sorting, native histograms,
-automatic application/runtime discovery and Grafana/Perses links remain unsupported. Unsupported fields are
+background application discovery, workload-specific recommendation integration
+and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget
 scenarios were fixture-backed.

@@ -52,7 +52,7 @@ function groupedCharts<T extends DashboardRead>(charts: readonly T[]) {
   return [...groups];
 }
 
-function DashboardResults({
+export function DashboardResults({
   cluster,
   endpoint,
   query,

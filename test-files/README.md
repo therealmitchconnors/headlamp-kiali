@@ -1003,6 +1003,38 @@ corrected retry and explicit annotation opt-out. Five hosted groups observed
 Actual Bookinfo Namespace/reviews-v1 Deployment reads also passed without
 interception. No annotation or other resource was written to Kubernetes.
 
+For application recommendations, exercise `core/applicationDashboards.test.ts`,
+`data/applicationDashboards.test.ts` and `components/ApplicationDashboards.test.tsx`
+alongside correlation, settings and shared dashboard suites. Capture real or
+intercepted UID-owned Pods with `kiali.io/runtimes`/`kiali.io/dashboards` references.
+Open an Application before clicking inspection: there must be no Namespace
+overlay/discovery request yet. A matching explicit reference suppresses metrics;
+unknown-only refs fall through only on complete supported-source correlation.
+
+Keep all fixture resource responses under an owned fake namespace and metric
+responses under a dedicated fake Service proxy. Show Pod/Namespace UID/version
+evidence. Choose an app metric label for explicit references and verify embedded
+queries contain the application, namespace and metric-cluster constraints.
+For discovered refs, return differing templates under the same runtime for each
+selector: the final group replaces earlier groups, and its label is used by the
+chart. Never test scope with a namespace-wide template-only navigation.
+
+Check disabled policy, the default threshold at ten/eleven Pods, enabled
+bypass, unknown names, malformed Pod annotation evidence and Namespace denial.
+Change configuration and return: old results/acknowledgments must not resurrect
+or replay. Hold a metric read for the whole-inspection deadline, then retry.
+Save a discovery-only JSON policy with no templates and threshold zero through
+Settings; wait for the public ConfigStore/localStorage values to match before
+hard reload and after restoring the exact previous settings slice.
+
+Six hosted groups observed 78 intercepted resource GETs, 12 metric GETs and a
+15,081 ms deadline. The live Bookinfo check captured three owned reviews Pods
+and the Namespace in eleven unintercepted GETs, without discovery templates.
+Discovery-only settings survived the UI save/reload check. All fixture
+interceptors/settings were removed/restored and no Kubernetes writes occurred.
+The focused increment passed 429 tests in ten files; this is not a new
+full-suite or original-Go oracle count.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

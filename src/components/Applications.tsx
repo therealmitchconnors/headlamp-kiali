@@ -21,13 +21,22 @@ import { isDnsLabel } from '../core/object';
 import { namespaceScope } from '../core/scope';
 import { loadCorrelationSnapshot } from '../data/correlation';
 import { useRequest } from '../hooks/useRequest';
+import ApplicationDashboards from './ApplicationDashboards';
 import ClusterScope from './ClusterScope';
 import ResourceName from './CorrelatedResourceName';
 import RequestStatus from './RequestStatus';
 import WorkloadAccounts from './WorkloadAccounts';
 import WorkloadLabelSource from './WorkloadLabelSource';
 
-function ApplicationDetails({ app, complete }: { app: Application; complete: boolean }) {
+function ApplicationDetails({
+  app,
+  complete,
+  labels,
+}: {
+  app: Application;
+  complete: boolean;
+  labels: AppLabels | null;
+}) {
   const { t } = useTranslation();
   return (
     <>
@@ -59,6 +68,12 @@ function ApplicationDetails({ app, complete }: { app: Application; complete: boo
           </Alert>
         )}
       </SectionBox>
+      <ApplicationDashboards
+        key={JSON.stringify([app.id, app.pods.map(pod => [pod.identity.uid, pod.resourceVersion])])}
+        app={app}
+        complete={complete}
+        labels={labels}
+      />
       <SectionBox title={t('Associated workloads')}>
         <Alert severity="info">
           {t(
@@ -276,7 +291,7 @@ function ApplicationSnapshot({
             )}
             {selected !== null ? (
               app ? (
-                <ApplicationDetails app={app} complete={complete} />
+                <ApplicationDetails app={app} complete={complete} labels={labels} />
               ) : (
                 <Alert severity={complete ? 'info' : 'warning'}>
                   {complete

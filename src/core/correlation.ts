@@ -1,3 +1,4 @@
+import type { PodDashboardReferences } from './applicationDashboards';
 import { AppLabels, applicationLabels, labelIndex, Labels, LabelValue } from './labels';
 import { ResourceIdentity, resourceKey } from './scope';
 import type { WorkloadHealthResource } from './workloadHealth';
@@ -31,6 +32,7 @@ export interface CorrelationResource {
   proxyMode: 'sidecar' | 'native-sidecar' | 'none';
   resourceVersion?: string;
   podAccount?: { ok: true; name: string } | { ok: false; message: string };
+  dashboardRefs?: PodDashboardReferences;
   virtualMachine?: {
     labelSource: 'group' | 'entry';
     matchingEntries: number;

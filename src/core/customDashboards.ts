@@ -47,6 +47,8 @@ export interface CustomDashboardSettings {
   clusterLabel: string | null;
   dashboards: CustomDashboardTemplate[];
   includeBuiltins?: boolean;
+  discoveryMode?: 'auto' | 'enabled' | 'disabled';
+  discoveryAutoThreshold?: number;
 }
 export interface CustomDashboardScopeQuery extends MetricTimeRange {
   namespace: string;
@@ -364,11 +366,35 @@ export function validateCustomDashboardSettings(value: unknown): CustomDashboard
   if (!isRecord(value)) throw new Error('Custom dashboard settings must be an object');
   keys(
     value,
-    ['namespaceLabel', 'clusterLabel', 'dashboards', 'includeBuiltins'],
+    [
+      'namespaceLabel',
+      'clusterLabel',
+      'dashboards',
+      'includeBuiltins',
+      'discoveryMode',
+      'discoveryAutoThreshold',
+    ],
     'Custom dashboard settings'
   );
   if (value.includeBuiltins !== undefined && typeof value.includeBuiltins !== 'boolean')
     throw new Error('includeBuiltins must be a boolean');
+  if (
+    value.discoveryMode !== undefined &&
+    value.discoveryMode !== 'auto' &&
+    value.discoveryMode !== 'enabled' &&
+    value.discoveryMode !== 'disabled'
+  )
+    throw new Error('Application dashboard discoveryMode must be auto, enabled or disabled');
+  if (
+    value.discoveryAutoThreshold !== undefined &&
+    (typeof value.discoveryAutoThreshold !== 'number' ||
+      !Number.isInteger(value.discoveryAutoThreshold) ||
+      value.discoveryAutoThreshold < 0 ||
+      value.discoveryAutoThreshold > 1000)
+  )
+    throw new Error(
+      'Application dashboard discoveryAutoThreshold must be an integer from 0 to 1000'
+    );
   const namespaceLabel = dashboardLabel(value.namespaceLabel);
   const clusterLabel = value.clusterLabel === null ? null : dashboardLabel(value.clusterLabel);
   if (clusterLabel === namespaceLabel)
@@ -380,6 +406,14 @@ export function validateCustomDashboardSettings(value: unknown): CustomDashboard
     dashboards,
     ...(value.includeBuiltins !== undefined
       ? { includeBuiltins: value.includeBuiltins === true }
+      : {}),
+    ...(value.discoveryMode === 'auto' ||
+    value.discoveryMode === 'enabled' ||
+    value.discoveryMode === 'disabled'
+      ? { discoveryMode: value.discoveryMode }
+      : {}),
+    ...(typeof value.discoveryAutoThreshold === 'number'
+      ? { discoveryAutoThreshold: value.discoveryAutoThreshold }
       : {}),
   };
 }

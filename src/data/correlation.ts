@@ -1,3 +1,4 @@
+import { observedPodDashboardReferences } from '../core/applicationDashboards';
 import { CorrelationKind, CorrelationResource, OwnerReference } from '../core/correlation';
 import { Labels } from '../core/labels';
 import { isRecord } from '../core/object';
@@ -186,7 +187,12 @@ export function decodeCorrelationResource(
     owners: owners(value.metadata.ownerReferences),
     serviceSelector: source.kind === 'Service' ? labels(value.spec.selector) : null,
     proxyMode: source.kind === 'Pod' ? proxyMode(value.spec) : 'none',
-    ...(source.kind === 'Pod' ? { podAccount: observedPodAccount(value.spec) } : {}),
+    ...(source.kind === 'Pod'
+      ? {
+          podAccount: observedPodAccount(value.spec),
+          dashboardRefs: observedPodDashboardReferences(value.metadata.annotations),
+        }
+      : {}),
     ...(typeof value.metadata.resourceVersion === 'string'
       ? { resourceVersion: value.metadata.resourceVersion }
       : {}),

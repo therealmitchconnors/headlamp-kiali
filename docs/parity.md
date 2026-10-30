@@ -1402,6 +1402,61 @@ catalog regressions passed. Gates passed **366 focused tests in eight files**
 plus a final 27-test UI rerun, type/lint/i18n/build/package/catalog checks.
 Settings and handlers were restored with no Kubernetes writes.
 
+### Application-scoped dashboard recommendations
+
+The application detail now invokes an explicit inspection following pinned
+`business/apps.go` (Git blob `9c2d919d2629fefb5d2719fcc6212a91fb55731c`)
+and `business/dashboards.go` (`2707361491dc93e769f363c6bdb9122af230bd20`):
+`GetCustomDashboardRefs(namespace, appName, "", pods)`, Pod-reference extraction,
+resolved-reference precedence, configured discovery policy and per-runtime
+last-writer replacement across sequential app-label selectors.
+These new policy/evidence tests are TypeScript tests, not additional independent
+original-Go executions; the existing oracle total remains 17,620.
+
+Only narrow reference evidence is retained from Pod annotations. Each annotation
+has a 4 KiB UTF-8 limit, names are bounded to 128 characters, each Pod/application
+to 64 distinct names, and the application capture to 1,000 Pods/64 KiB annotation
+text. UID/name/scope/version, workload labels and captured Pod ownership coverage
+are checked. Malformed annotations are local evidence failures, not a failure of
+the general relationship snapshot and not a successful empty reference list.
+Positive refs can remain visible on partial supported-source snapshots; fallback
+requires complete correlation. VM entries remain separate from Pods.
+
+The Namespace overlay is mandatory for this application caller; workload
+overlays are not passed. A denied or malformed Namespace source blocks the
+whole inspection. Auto defaults to a ten-observed-Pod threshold; enabled
+bypasses it and disabled suppresses metric fallback only. Explicit native
+invocation, bounded settings and no background fan-out are intentional deviations
+from the backend caller.
+
+The default canonical/recommended/legacy app selectors retain their source
+order; a complete custom app/version pair selects only the app key. Metric-label
+sanitization preserves punctuation-to-underscore mapping without repairing an
+invalid first character. Protected scope collisions and invalid mapped labels
+fail before transport. Version is deliberately empty for applications. Three
+selector requests at most share the Namespace read's fifteen-second deadline.
+Provider failures stay visible beside successful candidates; expiry cancels
+the whole capture instead of returning a success-shaped partial result.
+
+Embedded charts use the captured effective catalog, Namespace UID/version,
+endpoint, end instant, namespace/cluster labels and app equality filter.
+Discovery supplies the winning runtime selector; explicit references require
+a user choice if multiple label conventions exist. Existing composition and
+chart/metric/summary limits remain unchanged. Settings, workload identity/version
+and Pod-reference changes invalidate captures without replay or resurrection.
+No recommendation establishes runtime, telemetry ownership or health.
+
+Verification passed **429 focused tests in ten files**, type/lint/i18n/build and
+catalog/resource/parity checks. Six stock hosted groups observed 78 intercepted
+resource GETs and 12 metric GETs, covering explicit/discovered precedence,
+runtime replacement, scoped embedded charts, settings invalidation, auto/
+enabled/disabled policies, Namespace denial, malformed annotations and the
+**15,081 ms** deadline with retry. An unintercepted Bookinfo read captured three
+owned reviews Pods and Namespace evidence (11 resource GETs). A separate
+Settings UI exercise retained discovery-only policy through a hard reload.
+No cluster writes occurred; settings/interceptors were restored. Desktop and
+workload-specific recommendations remain open.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

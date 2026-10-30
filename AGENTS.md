@@ -148,6 +148,12 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   ReplicationController models prefer every non-null template annotation map,
   even empty. Pod, Job and CronJob use resource metadata. Failed/stale override
   reads must block metrics rather than fall back to base definitions.
+- Application dashboard recommendations use Pod `kiali.io/runtimes` before
+  `kiali.io/dashboards`; any resolved reference preempts discovery. The application
+  caller passes no version or workload overlay. Sequential app-label matches
+  replace whole runtime groups, not union them. Explicit references do not select
+  a telemetry label: require a choice when multiple conventions exist. Preserve
+  the winning discovered selector when loading embedded application charts.
 - VM application correlation follows the first matching WorkloadEntry's
   `spec.labels` in captured list order, otherwise group selector labels only
   after a complete entry read. Preserve group UID/resourceVersion separately
