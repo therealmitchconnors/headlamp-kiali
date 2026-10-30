@@ -3127,8 +3127,8 @@ unsupported regex were rejected before transport; denial and explicit retry
 retained distinct zero-valued span/trace predicates. The captured table and
 console were inspected. Settings were restored durably and no provider was
 installed. This is contract/UI evidence, not an independent Tempo parser run
-or live-provider matching proof. Trace ID, event-offset and link intrinsics,
-cross-span expressions and Desktop evidence remain open.
+or live-provider matching proof. Subsequent sections add metadata, ID and
+event-offset intrinsics; cross-span expressions and Desktop evidence remain open.
 
 ### Event and instrumentation string intrinsics
 
@@ -3157,6 +3157,47 @@ invalid/oversized RE2 rejection, denial/retry with an empty version and the
 unchanged predicate limit. Settings were restored with persistence awaited.
 No live provider was installed or queried, and no matching/backend-storage
 support is inferred from intercepted responses.
+
+### ID predicates and signed event offsets
+
+The native filter catalog now includes `trace:id`, `span:id`, `span:parentID`,
+`link:traceID`, `link:spanID` and `event:timeSinceStart`. The pinned parser is not
+the whole contract: the active vParquet4 byte predicates only support equality/
+inequality for IDs, despite generic string operand typing. The inspected
+`tempodb/encoding/vparquet4/block_traceql.go` has blob
+`13e26320e47d71fbe3ceec1a42ba0b09057206be`, and `pkg/util/traceid.go` has
+`6718e7a79606942486f805ab20c04daa47e2ec63`. Native inputs reject malformed IDs
+before transport instead of relying on the source's nil-predicate result for
+hex parse failures.
+
+ID literals are bounded to 32 trace/16 span hex characters, without prefixes,
+whitespace or base64. Empty literals and zero values are accepted separately
+from the stricter trace-detail identity decoder. Case and leading zeros are
+preserved, not normalized into an unverified identity. The bounded span input
+does not accept arbitrarily long zero prefixes just because the source utility
+trims them. Empty/zero predicates do not claim parent absence or identity
+existence. Link filters neither traverse a link nor issue a trace-detail read.
+
+Event offsets use the active signed integer/duration storage path. Single-unit
+positive or negative inputs retain exact whole nanoseconds; negative zero
+serializes as zero while the captured input remains original. Magnitude is
+limited to 9223372036854775807ns. The negative int64 extreme cannot be emitted
+as a positive duration token followed by unary negation. Duration subtraction
+in the pinned executor falls through to floating-point arithmetic, so the
+native builder rejects that edge instead of constructing a lossy workaround.
+Span/trace duration restrictions remain unchanged. This is span-relative event
+time, not trace-relative time or a timestamp, and multiple predicates still do
+not claim a same-event/link join.
+
+Seventeen available fields retain the ten-predicate, 16 KiB URL and fifteen-
+second read bounds. Field changes preserve incompatible drafts until the user
+corrects them. The increment passed **461 focused tests in six files** plus
+type/lint/i18n/build and generation checks. Four stock-hosted groups made three
+intercepted GETs, verifying all six canonical fields, exact negative values
+above JavaScript safe-integer range, empty parent literals, local invalid-input
+rejection, provider isolation and denial/retry. Metadata-string regressions
+made three more GETs. No provider or cluster objects were installed, and no
+live-provider matching or independent Tempo parser execution is claimed.
 
 ### Exact tag filters and captured search time
 

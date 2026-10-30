@@ -1248,7 +1248,7 @@ and array semantics still determine matching behavior.
 **Tempo intrinsic filters** expose up to ten combined comparisons
 on reported span name, status message, duration, status and kind, plus whole-trace
 duration, root span name, root service name, event name and instrumentation
-scope name/version. The intrinsic
+scope name/version, trace/span/parent/link IDs and event time since span start. The intrinsic
 `span:status` is different from an attribute named `span.status`. Name/message
 strings support ranges and whole-string RE2; status/kind accept only their
 reported enum names with `=`/`!=`, not arbitrary strings or health assessments.
@@ -1269,6 +1269,20 @@ bounded literal-string/range/RE2 comparisons. Version ordering is lexicographic,
 not semantic-version ordering. Multiple event conditions do not establish that
 the same event matched them all; instrumentation names are reporting-library
 identities, not Kubernetes workload or Service identities.
+
+ID intrinsics use `trace:id`, `span:id`, `span:parentID`, `link:traceID` and
+`link:spanID`, with only `=`/`!=`. Native inputs allow at most 32 hex characters
+for trace IDs and 16 for span IDs, without prefixes, whitespace or base64.
+Case, leading zeros and empty literals are preserved; zero/empty IDs do not
+automatically mean a missing parent or valid object. These predicates do not
+traverse links or load other traces.
+
+`event:timeSinceStart` accepts signed single-unit offsets relative to **span**
+start, including `-1.5ms`. Whole-nanosecond precision and a magnitude limit of
+9223372036854775807ns apply. The extreme negative int64 value is rejected because
+its positive duration token is not parseable; no floating-point arithmetic
+workaround is used. Span and whole-trace durations remain nonnegative.
+Seventeen selectable fields still share the ten-intrinsic-predicate limit.
 
 Open a trace to inspect relative
 span timing, parents, references, attributes and events. Trace-ID URLs load
@@ -1309,7 +1323,7 @@ searches are not health verdicts. Trace attributes may contain sensitive
 application data; they are not saved in plugin settings.
 
 This is bounded HTTP trace browsing, not full tracing parity. Broader workload/
-graph correlations, event-offset and ID/link intrinsic Tempo filters and
+graph correlations, structural/count intrinsic Tempo filters and
 cross-span expressions,
 external-auth/tenant headers, gRPC-only
 backends, Tempo v2 partial/pruned-trace envelopes and a lossless raw trace viewer

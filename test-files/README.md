@@ -2005,7 +2005,7 @@ These are not same-event/link join tests or live provider matching evidence.
 
 ### Tempo intrinsic filters
 
-`core/traceIntrinsics.test.ts` exercises eleven span/trace/event/instrumentation fields and every
+`core/traceIntrinsics.test.ts` exercises seventeen span/trace/event/instrumentation/ID fields and every
 comparison operator, enum tokens versus same-named attributes, string quoting,
 shared RE2 limits and exact duration normalization. Units ns/us/ms/s/m/h use
 integer arithmetic; tests cover zero, fractional units, whole-nanosecond
@@ -2052,6 +2052,29 @@ When choosing stock-host Select options, wait for the prior listbox transition
 to finish; both the closing listbox and its control can share an accessible
 label. Remove unrelated invalid-provider drafts before asserting which
 validation family supplies the submission error.
+
+`core/traceIdentityIntrinsics.test.ts` adds the five scoped ID fields and
+`event:timeSinceStart`. Check every operator: IDs permit only equality/
+inequality, not generic string ranges or regexes. Reject malformed/oversized
+hex before requests; retain case, leading zeros, zero and explicit empty
+literals. Do not reuse the trace-detail ID decoder, which has different
+normalization and nonzero requirements.
+
+Event offset tests cover exact negative fractional-unit conversion, negative
+zero, above-safe-integer values, both supported magnitude endpoints and
+rejected fractional-nanosecond/overflow inputs. The negative int64 extreme is
+deliberately rejected rather than serialized through float duration arithmetic.
+The same negative inputs must remain invalid for span/whole-trace durations.
+
+Four hosted identity/offset groups issued three searches. Submit all five ID
+scopes plus `event:timeSinceStart <= -9007199254740993ns`; inspect the exact
+request and captured table. Field switches must retain invalid operator/value
+drafts until corrected. Invalid hex, fractional nanoseconds and the unsupported
+negative extreme must not reach transport. Provider switching must not replay
+captures; denial/retry with `-1.5ms` must serialize `-1500000ns`. Count seventeen
+field options but at most ten predicates, and forbid trace-detail/link traversal
+requests in the fixture. The increment passed 461 focused tests in six files
+and metadata regressions; restore settings and remove every interceptor.
 
 ### Trace name discovery
 

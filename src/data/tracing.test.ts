@@ -214,6 +214,44 @@ it('captures intrinsic predicates before awaiting and blocks invalid or Jaeger s
   expect(ApiProxy.request).toHaveBeenCalledTimes(1);
 });
 
+it('captures ID/offset literals and rejects invalid byte predicates before transport', async () => {
+  const query = {
+    service: 'reviews',
+    start: 1700000000,
+    end: 1700000900,
+    limit: 20,
+    tempoIntrinsics: [
+      { field: 'linkTraceId' as const, operator: '=' as const, value: '000AbC' },
+      {
+        field: 'eventTimeSinceStart' as const,
+        operator: '<' as const,
+        value: '-9007199254740993ns',
+      },
+    ],
+  };
+  vi.mocked(ApiProxy.request).mockResolvedValue(fixtures.tempoSearch);
+  const pending = searchTraces(
+    clusterScope('alpha'),
+    { ...config, provider: 'tempo' },
+    query,
+    new AbortController().signal
+  );
+  query.tempoIntrinsics[0].value = 'invalid ID';
+  query.tempoIntrinsics[1].value = '1ns';
+  await pending;
+  const url = new URL(String(vi.mocked(ApiProxy.request).mock.calls[0][0]), 'http://example.test');
+  expect(url.searchParams.get('q')).toContain('link:traceID = "000AbC"');
+  expect(url.searchParams.get('q')).toContain('event:timeSinceStart < -9007199254740993ns');
+  await expect(
+    searchTraces(
+      clusterScope('alpha'),
+      { ...config, provider: 'tempo' },
+      query,
+      new AbortController().signal
+    )
+  ).rejects.toThrow('hexadecimal');
+  expect(ApiProxy.request).toHaveBeenCalledTimes(1);
+});
 it('captures punctuation and Unicode attribute keys without interpreting them as query structure', async () => {
   const key = 'k8s.io/label"\\\u00e9';
   const query = {

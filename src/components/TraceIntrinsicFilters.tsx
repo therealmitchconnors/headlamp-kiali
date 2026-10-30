@@ -9,6 +9,8 @@ import { TRACE_ATTRIBUTE_OPERATORS } from '../core/traceFilters';
 import {
   TEMPO_INTRINSICS,
   TempoIntrinsicFilter,
+  traceIntrinsicIdWidth,
+  traceIntrinsicIsDuration,
   traceIntrinsicOperatorAllowed,
 } from '../core/traceIntrinsics';
 
@@ -37,13 +39,24 @@ export default function TraceIntrinsicFilters({
     rootName: t('Trace root span name'),
     rootServiceName: t('Trace root service name'),
     eventName: t('Event name'),
+    eventTimeSinceStart: t('Event time since span start'),
     instrumentationName: t('Instrumentation scope name'),
     instrumentationVersion: t('Instrumentation scope version'),
+    traceId: t('Trace ID'),
+    spanId: t('Span ID'),
+    parentId: t('Parent span ID'),
+    linkTraceId: t('Linked trace ID'),
+    linkSpanId: t('Linked span ID'),
   };
   return (
     <Stack spacing={2}>
       <Typography variant="h6" component="h3">
         {t('Tempo intrinsic filters')}
+      </Typography>
+      <Typography variant="body2">
+        {t(
+          'ID predicates compare reported hexadecimal values using = or != only; they do not follow a link or prove identity existence. Empty and zero IDs are literal provider values, not an automatic missing-parent test. Event offsets may be negative and are measured from span start, not trace start or wall-clock time.'
+        )}
       </Typography>
       <Alert severity="info">
         {t(
@@ -109,10 +122,20 @@ export default function TraceIntrinsicFilters({
             value={filter.value}
             inputProps={{
               maxLength:
-                filter.field === 'duration' || filter.field === 'traceDuration' ? 64 : 1024,
+                traceIntrinsicIdWidth(filter.field) ??
+                (traceIntrinsicIsDuration(filter.field) ? 64 : 1024),
             }}
             helperText={
-              filter.field === 'duration' || filter.field === 'traceDuration'
+              traceIntrinsicIdWidth(filter.field) !== undefined
+                ? t(
+                    'At most {{width}} hex characters, without 0x, whitespace or base64. Case and leading zeros are preserved; an empty literal is allowed. Only = and != are supported.',
+                    { width: traceIntrinsicIdWidth(filter.field) }
+                  )
+                : filter.field === 'eventTimeSinceStart'
+                ? t(
+                    'One signed quantity with ns, us, ms, s, m or h, for example -1.5ms. Whole-nanosecond precision and magnitude at most 9223372036854775807ns; never rounded.'
+                  )
+                : traceIntrinsicIsDuration(filter.field)
                 ? t(
                     'One nonnegative quantity with ns, us, ms, s, m or h; for example 1.5ms. Whole-nanosecond precision, up to 9223372036854775807ns; never rounded.'
                   )

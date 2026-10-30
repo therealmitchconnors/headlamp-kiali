@@ -1,5 +1,6 @@
 import { tempoAttributeClauses, TRACE_ATTRIBUTE_OPERATORS } from './traceFilters';
 import {
+  TEMPO_ID_INTRINSICS,
   TEMPO_INTRINSICS,
   TEMPO_METADATA_INTRINSICS,
   TEMPO_SPAN_KINDS,
@@ -120,17 +121,19 @@ it.each(
   )
 )('enforces field/operator compatibility: $field $operator', ({ field, operator }) => {
   const value =
-    field === 'duration' || field === 'traceDuration'
+    field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
       ? '1ns'
+      : TEMPO_ID_INTRINSICS.some(id => id === field)
+      ? 'AbC'
       : field === 'kind'
       ? 'server'
       : field === 'status'
       ? 'error'
       : 'name';
   const supported =
-    field === 'kind' || field === 'status'
+    field === 'kind' || field === 'status' || TEMPO_ID_INTRINSICS.some(id => id === field)
       ? ['=', '!='].includes(operator)
-      : field === 'duration' || field === 'traceDuration'
+      : field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
       ? !['=~', '!~'].includes(operator)
       : true;
   if (supported) expect(tempoIntrinsicClauses([{ field, operator, value }])).toHaveLength(1);

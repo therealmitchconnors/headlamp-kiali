@@ -447,6 +447,44 @@ it('captures event and instrumentation intrinsics separately from attributes and
   expect(searchTraces).toHaveBeenCalledTimes(1);
   expect(view.history.location.search).toBe('?service=reviews');
 });
+it('retains signed offset and ID drafts while enforcing the storage operator and value contract', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  open('/traces?service=reviews');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Add intrinsic filter' }));
+  await user.click(screen.getByLabelText('Intrinsic field 1'));
+  await user.click(screen.getByRole('option', { name: 'Event time since span start' }));
+  await user.click(screen.getByLabelText('Intrinsic comparison 1'));
+  await user.click(screen.getByRole('option', { name: '>=' }));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '-1.5ms');
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await screen.findByText('event:timeSinceStart');
+  expect(vi.mocked(searchTraces).mock.calls[0][2].tempoIntrinsics).toEqual([
+    { field: 'eventTimeSinceStart', operator: '>=', value: '-1.5ms' },
+  ]);
+  await user.click(screen.getByLabelText('Intrinsic field 1'));
+  await user.click(screen.getByRole('option', { name: 'Linked trace ID' }));
+  expect((screen.getByLabelText('Intrinsic value 1') as HTMLInputElement).value).toBe('-1.5ms');
+  expect(screen.getByText('Choose a comparison supported by this field.')).toBeDefined();
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByLabelText('Intrinsic comparison 1'));
+  await user.click(screen.getByRole('option', { name: '=' }));
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(screen.getByText(/hexadecimal characters/)).toBeDefined();
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  await user.clear(screen.getByLabelText('Intrinsic value 1'));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '000AbC');
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await screen.findByText('link:traceID');
+  expect(vi.mocked(searchTraces).mock.calls[1][2].tempoIntrinsics).toEqual([
+    { field: 'linkTraceId', operator: '=', value: '000AbC' },
+  ]);
+});
 it('captures event, link and instrumentation scopes and preserves them after draft edits', async () => {
   const tempo = structuredClone(configured);
   if (!tempo.valid || !tempo.config.clusters.alpha.tracing)

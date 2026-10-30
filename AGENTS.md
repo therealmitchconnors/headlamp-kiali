@@ -218,6 +218,12 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   are explicit. It must not alter query budgets or hide captions/errors/tables.
   The pinned frontend rowSpans type is not consumed by the chart renderer or
   supplied by custom-dashboard configuration; do not activate it from types alone.
+- Tempo ID intrinsics have generic string operand types, but the pinned byte
+  predicate caller accepts only equality/inequality. Reject malformed hex before
+  transport; do not reuse the trace-detail ID decoder's normalization/nonzero
+  policy. Signed event offsets differ from nonnegative span/trace durations.
+  The extreme negative int64 duration token is deliberately rejected: pinned
+  duration subtraction coerces to float, so arithmetic is not an exact workaround.
 - Service port checkers pool Pods across all managed namespaces and match labels
   without another namespace filter; empty selectors match that pool. Their
   sidecar predicate is all-Pod/vacuous-empty, with a separate any-ambient path,
