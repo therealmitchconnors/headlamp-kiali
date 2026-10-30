@@ -381,6 +381,32 @@ fixture initialization must positively verify the seeded schema/cluster slice
 as well as ConfigStore/localStorage equality; two undefined values are not a
 successful persistence check.
 
+Same-context revision-tag selection has a separate source-pinned oracle:
+
+```sh
+node scripts/parity/revision-tag-oracle.mjs --source /path/to/pinned/kiali --check
+```
+
+Its 364 cases execute the original collection and assignment loops from
+`Discovery.setTags` with one managed context. Type shims replace client/model
+dependencies; no source algorithm is rewritten. Cases retain webhook order,
+duplicate revisions, missing/empty revisions and explicit empty tags.
+The native namespace-consumer tests separately prove that selected tags replace
+raw revisions, ignored aliases do not match, equal tags across revisions remain
+ambiguous, and empty tags prevent fallback. This does not cover cross-cluster
+last-assignment behavior, complete managed membership or Service checker scope.
+
+Hosted tag checks should reverse first/later webhooks, create equal-tag ambiguity,
+retain missing-revision unsuffixed ConfigMap reads, inspect empty tags, and deny
+tag reads. Inspect own/root assessment links for explicit context and serialized
+query parameters, including Maistra-labelled own/root namespaces. Expanding
+precedence details must work by keyboard without fetching. Do not apply any of
+these synthetic webhooks or controllers to the cluster.
+Five hosted groups made 37 intercepted GETs; the earlier namespace fixture also
+passed with 18 GETs and a 15,049 ms deadline. The actual Bookinfo candidate
+remained `asm-1-30`. Focused tests passed 1,958 cases in five files and the full
+shared-consumer suite passed 21,932 cases in 178 files.
+
 ServiceEntry KIA1211/KIA1212 tests cover complete-source and UID/spec freshness
 gates, exact case-insensitive host/port groups, differing protocols, namespace
 exports/defaults, ambient source/viewer behavior, Sidecar import filtering and

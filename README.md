@@ -1400,6 +1400,15 @@ Istio configuration automatically. Own/root namespace exceptions remain intact,
 and resolved-configuration links are offered only for ready contexts. Malformed
 relevant label values remain unavailable rather than becoming a fallback.
 
+**Show captured revision-tag precedence** lists the observed webhooks in capture
+order. Following pinned Kiali behavior, the first tag for each raw revision wins;
+its tag replaces the revision as a namespace lookup key. Later aliases are shown
+but not combined, and distinct revisions sharing a selected tag remain ambiguous.
+Empty tags suppress raw-revision fallback. Missing controller revision labels
+stay empty rather than becoming `default`; empty/default ConfigMap suffixes
+still use standard names. This is same-context evidence, not complete
+cross-cluster tag assignment or managed-namespace membership.
+
 The **Namespace configuration context** table separately evaluates configured
 Istio discovery selectors after resolving a local controller. Selectors are
 OR-combined, with AND semantics within each selector; control-plane and root

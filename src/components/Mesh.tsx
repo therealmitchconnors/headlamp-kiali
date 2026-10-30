@@ -12,7 +12,12 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useCallback, useMemo, useState } from 'react';
-import { MeshConfigFields, NamespaceAssociation, namespaceAssociations } from '../core/mesh';
+import {
+  MeshConfigFields,
+  NamespaceAssociation,
+  namespaceAssociations,
+  selectedRevisionTags,
+} from '../core/mesh';
 import { namespaceRevisionSelection } from '../core/namespaceRevision';
 import { clusterScope } from '../core/scope';
 import {
@@ -68,6 +73,7 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
     value === undefined ? t('Not reported') : value === '' ? t('Empty string') : value;
   const complete =
     snapshot.namespaces.complete && snapshot.controllers.complete && snapshot.tags.complete;
+  const tagSelection = selectedRevisionTags(snapshot.tags.items);
   const namespaceContexts = useMemo(
     () =>
       new Map(
@@ -349,6 +355,32 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
               'The pinned Kiali revision selector is a separate label projection, not a resolved controller or managed-namespace inventory. It preserves Maistra membership/ignore presence, enabled-injection precedence and the ambient default. Control-plane/root namespace exceptions and actual injection require separate evidence.'
             )}
           </Typography>
+          <Typography variant="body2">
+            {t(
+              'Same-context tag matching selects the first captured webhook for each revision. A selected tag replaces that revision as the namespace lookup key; later aliases are not combined. This is not complete cross-cluster tag assignment or mesh membership.'
+            )}
+          </Typography>
+          <details>
+            <summary>{t('Show captured revision-tag precedence')}</summary>
+            <SimpleTable
+              data={snapshot.tags.items}
+              columns={[
+                { label: t('Webhook'), getter: tag => tag.name },
+                {
+                  label: t('Revision label'),
+                  getter: tag => tag.revision || t('Empty or missing'),
+                },
+                { label: t('Tag label'), getter: tag => tag.tag || t('Explicit empty tag') },
+                {
+                  label: t('Selection'),
+                  getter: tag =>
+                    tagSelection.selected.get(tag.revision) === tag
+                      ? t('First webhook (selected)')
+                      : t('Later webhook (ignored)'),
+                },
+              ]}
+            />
+          </details>
           <FormControlLabel
             label={t('Show only mesh-labeled namespaces')}
             control={
@@ -432,24 +464,32 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
               },
               {
                 label: t('Configuration assessment'),
-                getter: (row: NamespaceAssociation) =>
-                  row.complete &&
-                  row.controllers.length === 1 &&
-                  namespaceContexts.get(row.namespace.name)?.status === 'ready' ? (
+                getter: (row: NamespaceAssociation) => {
+                  const context = namespaceContexts.get(row.namespace.name);
+                  const plane =
+                    context?.status === 'ready'
+                      ? snapshot.controlPlanes.find(
+                          plane =>
+                            `${plane.controller.namespace}/${plane.controller.name}` ===
+                            context.controller
+                        )
+                      : undefined;
+                  return row.complete && plane ? (
                     <Link
                       routeName="kiali-mtls"
-                      activeCluster={snapshot.cluster}
+                      params={{ cluster: snapshot.cluster }}
                       search={new URLSearchParams({
                         namespace: row.namespace.name,
-                        controllerNamespace: row.controllers[0].namespace,
-                        controller: row.controllers[0].name,
+                        controllerNamespace: plane.controller.namespace,
+                        controller: plane.controller.name,
                       }).toString()}
                     >
                       {t('Inspect configured mTLS')}
                     </Link>
                   ) : (
                     t('Select a controller explicitly')
-                  ),
+                  );
+                },
               },
             ]}
           />

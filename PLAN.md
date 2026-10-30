@@ -75,6 +75,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
   links require ready contexts. Mesh reads capture cluster scope and share a
   fifteen-second deadline. Four hosted groups/eighteen GETs measured 15,544 ms;
   actual Bookinfo labels rendered `asm-1-30` without interception.
+  Same-context revision tags now select the first captured webhook per raw
+  revision, replacing rather than unioning lookup aliases. A new 364-case Go
+  oracle preserves missing/empty revisions and explicit empty tags. The mesh
+  table exposes ignored aliases; ready own/root contexts retain scoped links.
+  This does not resolve full cross-cluster tag assignment or managed membership.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -437,11 +442,17 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **21,564 tests in 177 files**.
+  Latest full-suite checkpoint: **21,932 tests in 178 files** after local tag
+  precedence; its focused suite passed **1,958 tests in five files**.
+  Five hosted tag groups made 37 intercepted GETs without writes; namespace
+  regressions made 18 GETs and measured a 15,049 ms deadline. Unintercepted
+  Bookinfo revision evidence remains `asm-1-30`.
+  The preceding namespace-revision checkpoint passed 21,564 tests in 177 files.
   Earlier checkpoints at `08b4021` (19,978/176) and before it (19,415/155)
   remain historical evidence.
   Comparison metrics reject unexpected aggregation labels and mixed times.
-  Independent original-Go evidence totals 19,158 cases, including 1,538 namespace-revision
+  Independent original-Go evidence totals 19,522 cases, including 364 revision-tag,
+  1,538 namespace-revision
   and 216 custom-dashboard
   queries, 228 WorkloadEntry
   health and 96 VM-label selection,
@@ -466,7 +477,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `2af561a618d22ac25b27fc640e50e8e8853ca32cb02943d81575a69224844280`.
+  `2a3f2ecf9fc32758d4130bc9ee07bcc6120fa908dfaa36ae93a872b2f326707c`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1130,6 +1141,11 @@ The current validation prerequisite is complete managed-namespace/controller
 evidence. The new pinned GetRevision label projection is not that inventory,
 nor the Namespace DTO injection-revision field. Preserve its literal/empty/
 Maistra/injection/ambient precedence without automatically resolving controllers.
+Same-context first-webhook tag selection is now implemented and source-tested,
+including replacement/empty semantics and raw controller revisions. Do not
+mistake it for the full managed-cluster assignment loop: logical cluster
+identity, managed-cluster relationships, Kiali visibility and cross-cluster
+last-assignment behavior remain prerequisites.
 Service checks in the pinned caller pool Pods across all managed namespaces,
 match selectors without another namespace filter, and treat empty selectors
 as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a

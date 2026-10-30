@@ -208,6 +208,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   ignore key is present; enabled injection wins over revision; ambient defaults
   only when the revision key is absent. Empty values retain presence semantics.
   Do not resolve Maistra membership through coincident Istiod label hints.
+- Same-context revision tags use the first captured webhook per raw revision.
+  The selected tag replaces the raw revision lookup key; do not union later
+  aliases or fall back on an explicit empty tag. Missing controller revisions
+  remain empty, although empty/default ConfigMap names are both unsuffixed.
+  This does not implement full managed-cluster tag assignment or membership.
 - Service port checkers pool Pods across all managed namespaces and match labels
   without another namespace filter; empty selectors match that pool. Their
   sidecar predicate is all-Pod/vacuous-empty, with a separate any-ambient path,

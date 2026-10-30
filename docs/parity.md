@@ -2764,6 +2764,38 @@ exclusion is namespace-only across control-plane clusters. Namespace-local Pod/
 Deployment approximations are therefore insufficient for KIA0601/KIA0602/KIA0701.
 These checks remain deferred pending complete managed-scope evidence.
 
+### Same-context revision-tag precedence
+
+The local projection now follows the original `Discovery.setTags` collection
+and assignment loops in pinned `istio/discovery.go`
+(`60f6f7ab41a65acc5f40ca1095ce279433e62dce`). The first captured webhook for each
+raw revision wins. A selected tag replaces the raw revision for namespace
+matching; later aliases are retained for inspection but never unioned. Different
+revisions with the same selected tag remain ambiguous. An explicit empty tag
+blocks raw-revision fallback; missing/empty controller revisions are preserved
+as empty rather than synthesized `default`. ConfigMap naming separately treats
+empty/default as unsuffixed.
+
+The new offline oracle executes **364 original-Go cases**, bringing total
+independent Go evidence to **19,522 cases**. Its single managed context isolates
+local precedence, not full cross-cluster assignment. Production Kiali can
+overwrite a control plane's tag from a later managed cluster; that topology,
+logical cluster identity and full managed-namespace membership remain open.
+
+Mesh inventory lists first/ignored captured webhooks with their raw revision
+and tag values. Assessment links derive from a ready configuration context,
+preserving own/root namespace exceptions even without ordinary label matches.
+Links carry an explicit target context and serialized query parameters.
+Malformed/incomplete evidence, conservative conflicting-label guards, Maistra
+membership and discovery-selector exclusions still block automatic resolution.
+No new finding code or Service checker is enabled.
+
+Verification passed **1,958 focused tests in five files**, the full **21,932-test/
+178-file** suite and type/lint/i18n/build/generation checks. Five stock-hosted
+scenario groups made 37 intercepted GETs; namespace regressions made 18 GETs
+with a 15,049 ms timeout/retry. An unintercepted Bookinfo read still rendered
+`asm-1-30`. No settings or cluster objects were changed.
+
 ### Configured namespace discovery
 
 The shared mesh context now evaluates valid discovery selectors instead of

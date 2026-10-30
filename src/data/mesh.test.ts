@@ -166,16 +166,30 @@ it('does not resolve Maistra membership through coincident Istiod revision label
     discovery: 'implicit',
   });
 });
-it('keeps declared ambient defaults separate from actual controller resolution and rejects malformed label evidence', async () => {
+it('resolves an ambient default only through its captured selected tag and rejects malformed labels', async () => {
   const mesh = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
   mesh.namespaces.items[0].labels = { 'istio.io/dataplane-mode': 'ambient' };
   mesh.tags.items.push({ name: 'tag-default', tag: 'default', revision: 'blue' });
-  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('unavailable');
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('ready');
   mesh.namespaces.items[0].labels = { 'istio.io/rev': 'bad value' };
   expect(namespaceMeshConfiguration(mesh, 'bookinfo')).toMatchObject({
     status: 'unavailable',
     message: expect.stringContaining('bounded Kubernetes label values'),
   });
+});
+it('does not resolve ignored tag aliases or the replaced raw revision', async () => {
+  const mesh = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  mesh.tags.items = [
+    { name: 'first', tag: 'stable', revision: 'blue' },
+    { name: 'later', tag: 'canary', revision: 'blue' },
+  ];
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('unavailable');
+  mesh.namespaces.items[0].labels = { 'istio.io/rev': 'stable' };
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('ready');
+  mesh.namespaces.items[0].labels = { 'istio.io/rev': 'canary' };
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('unavailable');
+  mesh.tags.items.reverse();
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('ready');
 });
 it('keeps own/root namespace exceptions without assigning unrelated unlabelled namespaces', async () => {
   const mesh = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);

@@ -1,6 +1,7 @@
 import { JSON_SCHEMA, load, YAMLException } from 'js-yaml';
 import { WorkloadStatus } from './health';
-import { decodeLabelSelector, matchesSelector } from './labels';
+import { decodeLabelSelector, isLabelValue, matchesSelector } from './labels';
+import { namespaceRevisionSelection } from './namespaceRevision';
 import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import { workloadHealthResource } from './workloadHealth';
 
@@ -154,12 +155,26 @@ export function namespaceObservation(value: Record<string, unknown>): NamespaceO
 }
 
 export function revisionTag(value: Record<string, unknown>): RevisionTag {
-  if (!isRecord(value.metadata) || typeof value.metadata.name !== 'string')
+  if (!isRecord(value.metadata) || !isDnsSubdomain(value.metadata.name))
     throw new Error('Malformed revision-tag identity');
   const found = labels(value.metadata.labels);
-  if (!found['istio.io/tag'] || !found['istio.io/rev'])
-    throw new Error('Revision tag is missing its tag or revision label');
-  return { name: value.metadata.name, tag: found['istio.io/tag'], revision: found['istio.io/rev'] };
+  if (!Object.prototype.hasOwnProperty.call(found, 'istio.io/tag'))
+    throw new Error('Revision tag is missing its tag label');
+  const tag = found['istio.io/tag'];
+  const revision = found['istio.io/rev'] ?? '';
+  if (!isLabelValue(tag) || !isLabelValue(revision))
+    throw new Error('Revision tag values must be bounded Kubernetes labels');
+  return { name: value.metadata.name, tag, revision };
+}
+
+export function selectedRevisionTags(tags: readonly RevisionTag[]) {
+  const selected = new Map<string, RevisionTag>();
+  const ignored: RevisionTag[] = [];
+  for (const tag of tags) {
+    if (selected.has(tag.revision)) ignored.push(tag);
+    else selected.set(tag.revision, tag);
+  }
+  return { selected, ignored };
 }
 
 export function revisionConfigMapName(
@@ -187,7 +202,7 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
   const found = labels(value.metadata.labels);
   if (found.app !== 'istiod')
     throw new Error('Deployment did not match the istiod discovery selector');
-  const revision = found['istio.io/rev'] ?? 'default';
+  const revision = found['istio.io/rev'] ?? '';
   const pod = value.spec.template.spec;
   const containers = Array.isArray(pod.containers) ? pod.containers.filter(isRecord) : [];
   const container =
@@ -459,6 +474,7 @@ export function namespaceAssociations(
   tags: readonly RevisionTag[],
   discoveryComplete: boolean
 ): NamespaceAssociation[] {
+  const tagsByRevision = selectedRevisionTags(tags).selected;
   return namespaces.map(namespace => {
     const injection = namespace.labels['istio-injection'];
     const revision = namespace.labels['istio.io/rev'];
@@ -477,25 +493,23 @@ export function namespaceAssociations(
         : injection !== undefined
         ? 'unknown'
         : 'unselected';
+    const selection = namespaceRevisionSelection(namespace.labels);
     const requestedRevision =
-      mode === 'revision' || (mode === 'ambient' && revision !== undefined)
-        ? revision
-        : mode === 'default'
-        ? 'default'
+      selection.ok &&
+      selection.basis !== 'maistra-member' &&
+      ['revision', 'ambient', 'default'].includes(mode)
+        ? selection.revision
         : undefined;
-    const revisions = new Set(
-      requestedRevision
-        ? [
-            requestedRevision,
-            ...tags.filter(tag => tag.tag === requestedRevision).map(tag => tag.revision),
-          ]
-        : []
-    );
     return {
       namespace,
       mode,
       requestedRevision,
-      controllers: controllers.filter(controller => revisions.has(controller.revision)),
+      controllers: controllers.filter(
+        controller =>
+          !!requestedRevision &&
+          requestedRevision ===
+            (tagsByRevision.get(controller.revision)?.tag ?? controller.revision)
+      ),
       complete: discoveryComplete,
     };
   });

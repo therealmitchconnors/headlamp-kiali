@@ -8,6 +8,7 @@ import {
   resolvedMeshRoot,
   revisionConfigMapName,
   revisionTag,
+  selectedRevisionTags,
   validationMeshRoot,
   validationOutboundPolicy,
 } from './mesh';
@@ -241,13 +242,64 @@ it('validates namespace/tag labels without treating absent namespace injection a
     labels: {},
   });
   expect(() =>
-    revisionTag({ metadata: { name: 'bad', labels: { 'istio.io/tag': 'default' } } })
+    revisionTag({ metadata: { name: 'bad', labels: { 'istio.io/rev': 'blue' } } })
   ).toThrow('missing');
+  expect(revisionTag({ metadata: { name: 'empty', labels: { 'istio.io/tag': '' } } })).toEqual({
+    name: 'empty',
+    tag: '',
+    revision: '',
+  });
   expect(
     revisionTag({
       metadata: { name: 'tag', labels: { 'istio.io/tag': 'default', 'istio.io/rev': 'blue' } },
     })
   ).toEqual({ name: 'tag', tag: 'default', revision: 'blue' });
+});
+
+it('retains the first captured tag per revision and does not union later aliases or raw revisions', () => {
+  const blue = controlPlaneObservation(controller);
+  const tags = [
+    { name: 'first', tag: 'stable', revision: 'blue' },
+    { name: 'later', tag: 'canary', revision: 'blue' },
+  ];
+  const chosen = selectedRevisionTags(tags);
+  expect(chosen.selected.get('blue')).toBe(tags[0]);
+  expect(chosen.ignored).toEqual([tags[1]]);
+  const rows = namespaceAssociations(
+    ['blue', 'stable', 'canary'].map(revision => ({
+      name: revision,
+      labels: { 'istio.io/rev': revision },
+    })),
+    [blue],
+    tags,
+    true
+  );
+  expect(rows.map(row => row.controllers.length)).toEqual([0, 1, 0]);
+  expect(selectedRevisionTags([...tags].reverse()).selected.get('blue')).toBe(tags[1]);
+  expect(
+    namespaceAssociations(
+      [{ name: 'raw', labels: { 'istio.io/rev': 'blue' } }],
+      [blue],
+      [{ name: 'empty', tag: '', revision: 'blue' }],
+      true
+    )[0].controllers
+  ).toEqual([]);
+});
+it('preserves raw missing controller revisions and applies an explicit empty-revision tag', () => {
+  const input = { ...controller, metadata: { ...controller.metadata, labels: { app: 'istiod' } } };
+  const plane = controlPlaneObservation(input);
+  expect(plane.revision).toBe('');
+  expect(revisionConfigMapName('istio', plane.revision)).toBe('istio');
+  const namespace = { name: 'ambient', labels: { 'istio.io/dataplane-mode': 'ambient' } };
+  expect(namespaceAssociations([namespace], [plane], [], true)[0].controllers).toEqual([]);
+  expect(
+    namespaceAssociations(
+      [namespace],
+      [plane],
+      [{ name: 'default-tag', tag: 'default', revision: '' }],
+      true
+    )[0].controllers
+  ).toEqual([plane]);
 });
 
 it('projects local precedence, explicit false and sorted alias union without applying runtime defaults', () => {

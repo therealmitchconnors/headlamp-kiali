@@ -1,0 +1,8207 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "istio/discovery.go": "60f6f7ab41a65acc5f40ca1095ce279433e62dce",
+    "models/mesh.go": "518a4242407e27452bb199b91344456d89908ad4",
+    "config/config.go": "fbde570684b760495782fce1df801d9c0046723e"
+  },
+  "cases": [
+    {
+      "input": {
+        "revision": "",
+        "webhooks": []
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "default",
+        "revision": ""
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": []
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "canary",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "blue",
+        "revision": "blue"
+      }
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "blue",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": []
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "stable",
+        "revision": "green"
+      }
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "green",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": []
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-0",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-1",
+            "labels": {
+              "istio.io/tag": "canary",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-2",
+            "labels": {
+              "istio.io/tag": "stable",
+              "istio.io/rev": "green"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-3",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-4",
+            "labels": {
+              "istio.io/tag": "default",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-5",
+            "labels": {
+              "istio.io/tag": "",
+              "istio.io/rev": ""
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-6",
+            "labels": {
+              "istio.io/tag": "blue",
+              "istio.io/rev": "blue"
+            }
+          }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-7",
+            "labels": {
+              "istio.io/tag": "same",
+              "istio.io/rev": "default"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "cluster": "fixture",
+        "name": "same",
+        "revision": "default"
+      }
+    },
+    {
+      "input": {
+        "revision": "default",
+        "webhooks": [
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          },
+          {
+            "name": "webhook-8",
+            "labels": {
+              "istio.io/tag": "default"
+            }
+          }
+        ]
+      },
+      "expected": null
+    }
+  ]
+}

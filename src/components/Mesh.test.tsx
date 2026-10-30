@@ -23,7 +23,21 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
       {children}
     </section>
   ),
-  Link: ({ children }: { children: ReactNode }) => <a href="/resource">{children}</a>,
+  Link: ({
+    children,
+    routeName,
+    params,
+    search,
+  }: {
+    children: ReactNode;
+    routeName: string;
+    params?: { cluster?: string };
+    search?: string;
+  }) => (
+    <a href={`/${routeName}?${search ?? ''}`} data-cluster={params?.cluster}>
+      {children}
+    </a>
+  ),
   StatusLabel: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   SimpleTable: <T,>({
     data,
@@ -34,17 +48,30 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
     columns: { label: string; getter: (row: T) => ReactNode }[];
     emptyMessage?: string;
   }) => (
-    <div>
-      {data.length
-        ? data.map((row, i) => (
-            <div key={i}>
+    <table>
+      <thead>
+        <tr>
+          {columns.map((column, j) => (
+            <th key={j}>{column.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.length ? (
+          data.map((row, i) => (
+            <tr key={i}>
               {columns.map((column, j) => (
-                <span key={j}>{column.getter(row)}</span>
+                <td key={j}>{column.getter(row)}</td>
               ))}
-            </div>
+            </tr>
           ))
-        : emptyMessage}
-    </div>
+        ) : (
+          <tr>
+            <td colSpan={columns.length}>{emptyMessage}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   ),
 }));
 afterEach(cleanup);
@@ -71,7 +98,10 @@ it('shows source revision candidates and provenance without resolving controller
   const section = screen
     .getByRole('heading', { name: 'Namespace injection labels and revision hints' })
     .closest('section')!;
-  expect(within(section).getAllByText('default')).toHaveLength(2);
+  for (const name of ['both-labels', 'ambient-default']) {
+    const row = within(section).getByRole('link', { name }).closest('tr')!;
+    expect(within(row).getAllByRole('cell')[3].textContent).toContain('default');
+  }
   expect(within(section).getByText('Conflicting injection labels')).toBeDefined();
   expect(within(section).getByText('Enabled injection takes precedence')).toBeDefined();
   expect(within(section).getByText('Ambient without a revision uses default')).toBeDefined();
@@ -83,6 +113,63 @@ it('shows source revision candidates and provenance without resolving controller
   expect(
     screen.getByText(/not a resolved controller or managed-namespace inventory/)
   ).toBeDefined();
+});
+it('shows first-tag precedence and preserves assessment links for selected aliases and own/root namespaces', () => {
+  const controller = {
+    name: 'istiod',
+    namespace: 'istio-system',
+    uid: 'cp',
+    revision: 'blue',
+    replicas: null,
+    stale: false,
+    configurationWarnings: [],
+    managesExternal: false,
+    effectiveConfigBlocked: false,
+  };
+  const fields = { rootNamespace: 'policies', hasDiscoverySelectors: false };
+  const snapshot: MeshSnapshot = {
+    cluster: 'alpha',
+    namespaces: {
+      complete: true,
+      items: [
+        ...['blue', 'stable', 'canary'].map(name => ({
+          name,
+          labels: { 'istio.io/rev': name },
+        })),
+        ...['istio-system', 'policies'].map(name => ({
+          name,
+          labels: { 'maistra.io/member-of': 'mesh' },
+        })),
+      ],
+    },
+    controllers: { complete: true, items: [controller] },
+    tags: {
+      complete: true,
+      items: [
+        { name: 'first', tag: 'stable', revision: 'blue' },
+        { name: 'later', tag: 'canary', revision: 'blue' },
+      ],
+    },
+    controlPlanes: [
+      {
+        controller,
+        mesh: { status: 'ready', name: 'istio-blue', value: fields },
+        injector: { status: 'ready', name: 'injector', value: {} },
+        effective: { status: 'ready', sharedAbsent: false, value: fields },
+      },
+    ],
+  };
+  render(<MeshResults snapshot={snapshot} />);
+  expect(screen.getByText('First webhook (selected)')).toBeDefined();
+  expect(screen.getByText('Later webhook (ignored)')).toBeDefined();
+  const links = screen.getAllByRole('link', { name: 'Inspect configured mTLS' });
+  expect(links).toHaveLength(3);
+  for (const [index, namespace] of ['stable', 'istio-system', 'policies'].entries()) {
+    expect(links[index].getAttribute('data-cluster')).toBe('alpha');
+    expect(links[index].getAttribute('href')).toBe(
+      `/kiali-mtls?namespace=${namespace}&controllerNamespace=istio-system&controller=istiod`
+    );
+  }
 });
 it('loads only on request, retains partial evidence and does not refetch for fresh translator functions', async () => {
   vi.mocked(loadMeshSnapshot).mockResolvedValue({
