@@ -542,12 +542,17 @@ function ClusterSettingsForm({
         }}
         inputProps={{ maxLength: 131072 }}
         helperText={t(
-          'Use namespaceLabel, clusterLabel, dashboards and optional includeBuiltins. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Background app discovery, sorting and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
+          'Use namespaceLabel, clusterLabel, dashboards and optional includeBuiltins. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Background app discovery and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
         )}
       />
       <Typography variant="body2">
         {t(
           'Application inspection accepts optional discoveryMode ("auto", "enabled" or "disabled", default "auto") and discoveryAutoThreshold (integer 0..1000, default 10). These govern metric-name fallback only after an explicit inspection with no resolved Pod references. Auto skips applications above the observed Pod threshold; enabled bypasses it; disabled still allows explicit references. Namespace annotation reads remain required. This does not start background queries.'
+        )}
+      </Typography>
+      <Typography variant="body2">
+        {t(
+          'Charts accept sortLabel and optional sortLabelParseAs: "int". Ordering is lexical by default or exact signed 64-bit integer order. A sort label not already grouped is added to the query and hidden from displayed groups, within the existing four-label limit. Invalid integer values or indistinguishable groups after hiding the label fail explicitly; include the label in groupLabels to retain it. Sorting never merges series.'
         )}
       </Typography>
       <Typography variant="body2">

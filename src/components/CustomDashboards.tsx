@@ -175,9 +175,11 @@ export function DashboardResults({
                   let groupingError: string | undefined;
                   if (grouped) {
                     try {
-                      successful = groupedMetricComparisons(successful, groupLabels).map(
-                        (metric, index) => ({ ...metric, colorIndex: index })
-                      );
+                      successful = groupedMetricComparisons(
+                        successful,
+                        groupLabels,
+                        !!chart.sortLabel
+                      ).map((metric, index) => ({ ...metric, colorIndex: index }));
                     } catch (error) {
                       successful = [];
                       groupingError =
@@ -196,6 +198,20 @@ export function DashboardResults({
                       }}
                     >
                       <SectionBox title={title}>
+                        {chart.sortLabel && (
+                          <Typography variant="body2">
+                            {t(
+                              'Captured series ordering: {{label}} ({{mode}}). Sort-only labels are omitted from displayed groups; series are never merged.',
+                              {
+                                label: chart.sortLabel,
+                                mode:
+                                  chart.sortLabelParseAs === 'int'
+                                    ? t('signed integer')
+                                    : t('lexical'),
+                              }
+                            )}
+                          </Typography>
+                        )}
                         {grouped && (
                           <Typography variant="body2">
                             {t(

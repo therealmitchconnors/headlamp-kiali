@@ -1457,6 +1457,43 @@ Settings UI exercise retained discovery-only policy through a hard reload.
 No cluster writes occurred; settings/interceptors were restored. Desktop and
 workload-specific recommendations remain open.
 
+### Captured sort-label series ordering
+
+Charts now accept `sortLabel` and optional `sortLabelParseAs: "int"`, following
+the pinned `business/dashboards.go` grouping/conversion caller and
+`models/metrics.go` (Git blob `0244185be0f0c5947a9bf7d28a83749b2ce62ef7`).
+The sort label is added after fixed/optional query groups only when absent.
+Only automatically added sort labels are removed from displayed labels.
+This extra query dimension counts toward the existing four-label budget and
+does not increase the eight-series/expanded-request limits.
+
+Ordering is ascending UTF-8 lexical or exact signed 64-bit decimal comparison,
+without converting integer text to JavaScript floating point. Sorting occurs
+independently for each metric and histogram summary. Legend/table conversion
+retains that order, including after local display filtering; unsorted charts
+retain their previous canonical label ordering. Captured inputs and sample
+timestamps/values are never mutated, merged or re-aggregated.
+
+Native guards intentionally differ from upstream's ignored `strconv.Atoi`
+errors: missing/invalid/out-of-range integer values fail the affected chart,
+rather than sorting them as zero or saturated extrema. Equal keys keep the
+observed order. Removal of a sort-only label must not produce indistinguishable
+displayed groups; that is an explicit error with guidance to retain the label
+in `groupLabels` or narrow the query. Query scope consistency is checked before
+removing hidden labels.
+
+Five stock hosted scenario groups made nine intercepted metric GETs and proved
+lexical/integer ordering in both legend and numeric table, exact ordering above
+JavaScript's safe-integer range, fixed sort-label retention, independent
+histogram ordering, failure/recovery and local keyboard display filtering.
+Every reload awaited its new response; wide-integer fixtures used distinct
+series identities to exclude a stale-result false positive. The application
+dashboard regression also passed (78 resource/12 metric GETs, 15,052 ms deadline).
+Settings and routes were restored with no cluster writes. Source/helper/caller
+tests are TypeScript evidence, not new original-Go oracle cases.
+The final increment passed **380 focused tests in eight files** plus
+type/lint/i18n/build/package and catalog/resource/parity checks.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

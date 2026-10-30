@@ -63,7 +63,8 @@ export function metricComparisonData(metrics: readonly ComparisonMetric[]) {
 
 export function groupedMetricComparisons(
   metrics: readonly ComparisonMetric[],
-  groupLabels: readonly string[]
+  groupLabels: readonly string[],
+  preserveSeriesOrder = false
 ): ComparisonMetric[] {
   const groups = metricGroupLabels(groupLabels);
   if (!groups.length) throw new Error('Choose explicit grouping labels for grouped comparisons');
@@ -72,12 +73,11 @@ export function groupedMetricComparisons(
   const result = metrics.flatMap(metric => {
     if (metric.result.series.length > 8)
       throw new Error('Grouped comparison exceeds 8 series per metric');
-    const series = metric.result.series
-      .map(series => ({
-        ...metricGroupIdentity(series.labels, groups),
-        series,
-      }))
-      .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    const series = metric.result.series.map(series => ({
+      ...metricGroupIdentity(series.labels, groups),
+      series,
+    }));
+    if (!preserveSeriesOrder) series.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
     if (new Set(series.map(item => item.key)).size !== series.length)
       throw new Error('Grouped comparison contains duplicate label groups');
     return series.map(

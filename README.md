@@ -1029,7 +1029,21 @@ edits neither refetch nor relabel that capture. Source/template changes reset
 the draft selection. Only selected charts receive query-specific grouping and
 histogram-summary expansion; declarations are still validated as a whole.
 
-This is **not full custom-dashboard parity**: sorting, native histograms,
+Chart `sortLabel` adds ascending ordering within each metric/summary.
+Ordering is UTF-8 lexical unless `sortLabelParseAs: "int"` selects exact signed
+64-bit decimal comparison, including values outside JavaScript's safe-integer
+range. A label already in fixed or selected optional groups remains visible;
+otherwise it is appended to the query grouping and removed from display labels
+after sorting. The four-label/eight-series bounds still apply.
+
+Unlike upstream's ignored integer-conversion errors, invalid, missing or
+out-of-range integer values fail the affected chart explicitly. Hiding a sort
+label must not make series indistinguishable: include it in `groupLabels` or
+narrow filters if that happens. No samples are merged, summed or reordered
+within a time series. Local display filtering preserves the captured order;
+charts without sorting retain their existing deterministic label ordering.
+
+This is **not full custom-dashboard parity**: alternate layouts, native histograms,
 background application discovery, workload-specific recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate

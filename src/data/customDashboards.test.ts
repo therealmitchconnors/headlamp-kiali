@@ -38,6 +38,86 @@ const matrix = (
 beforeEach(() => {
   vi.mocked(ApiProxy.request).mockReset();
 });
+it('sorts each captured response after checking hidden-label scope and before removing sort-only labels', async () => {
+  const input = query();
+  input.dashboard.items = [
+    {
+      chart: {
+        name: 'Sorted',
+        metricName: 'memory',
+        dataType: 'raw',
+        groupLabels: ['pod'],
+        sortLabel: 'rank',
+        sortLabelParseAs: 'int',
+      },
+    },
+  ];
+  vi.mocked(ApiProxy.request).mockResolvedValue({
+    status: 'success',
+    data: {
+      resultType: 'matrix',
+      result: [
+        { metric: { pod: 'a', rank: '10' }, values: [[10000, '11']] },
+        { metric: { pod: 'z', rank: '2' }, values: [[10000, '22']] },
+      ],
+    },
+  });
+  const result = await loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  expect(decodeURIComponent(vi.mocked(ApiProxy.request).mock.calls[0][0])).toContain(
+    'by+(pod,rank)'
+  );
+  expect(result.charts[0].read).toMatchObject({
+    ok: true,
+    result: {
+      series: [
+        { labels: { pod: 'z' }, samples: [{ value: 22 }] },
+        { labels: { pod: 'a' }, samples: [{ value: 11 }] },
+      ],
+    },
+  });
+  input.labelsFilters = { rank: '10' };
+  const failed = await loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  expect(failed.charts[0].read).toMatchObject({
+    ok: false,
+    error: { message: expect.stringContaining('contradicts') },
+  });
+});
+it('isolates integer sorting errors rather than returning an empty successful chart', async () => {
+  const input = query();
+  input.dashboard.items = [
+    {
+      chart: {
+        name: 'Sorted',
+        metricName: 'memory',
+        dataType: 'raw',
+        groupLabels: ['pod'],
+        sortLabel: 'rank',
+        sortLabelParseAs: 'int',
+      },
+    },
+  ];
+  vi.mocked(ApiProxy.request).mockResolvedValue(matrix([[10000, '1']], { pod: 'p', rank: 'bad' }));
+  const result = await loadCustomDashboard(
+    { cluster: 'alpha' },
+    provider,
+    input,
+    new AbortController().signal
+  );
+  expect(result.charts[0].read).toMatchObject({
+    ok: false,
+    error: { message: expect.stringContaining('base-ten') },
+  });
+});
 it('captures settings/range and bounds eight jobs to three workers with independent errors', async () => {
   let active = 0;
   let peak = 0;

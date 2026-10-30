@@ -1,5 +1,6 @@
 import { ServiceEndpoint } from '../core/config';
 import { customDashboardJobs, CustomDashboardQuery } from '../core/customDashboards';
+import { sortDashboardSeries } from '../core/dashboardSorting';
 import { decodeGroupedRange } from '../core/metricRanges';
 import { ClusterScope } from '../core/scope';
 import { loadMetricRanges } from './metricRanges';
@@ -22,7 +23,7 @@ export async function loadCustomDashboard(
     (response, range, key) => {
       const job = jobs.find(job => job.key === key);
       if (!job) throw new Error('Custom dashboard chart is missing from its captured request');
-      const groups = job.groupLabels;
+      const groups = job.queryGroupLabels ?? job.groupLabels;
       const metric = decodeGroupedRange(
         response,
         range,
@@ -48,19 +49,23 @@ export async function loadCustomDashboard(
           throw new Error('Returned metric group contradicts a captured equality filter');
       }
       const scale = job.chart.unitScale ?? 1;
-      return {
-        ...metric,
-        series: metric.series.map(series => ({
-          ...series,
-          samples: series.samples.map(sample => {
-            if (sample.value === null) return sample;
-            const value = sample.value * scale;
-            if (!Number.isFinite(value) || (sample.value !== 0 && value === 0))
-              throw new Error('Dashboard unit scaling overflowed or underflowed a finite sample');
-            return { ...sample, value };
-          }),
-        })),
-      };
+      return sortDashboardSeries(
+        {
+          ...metric,
+          series: metric.series.map(series => ({
+            ...series,
+            samples: series.samples.map(sample => {
+              if (sample.value === null) return sample;
+              const value = sample.value * scale;
+              if (!Number.isFinite(value) || (sample.value !== 0 && value === 0))
+                throw new Error('Dashboard unit scaling overflowed or underflowed a finite sample');
+              return { ...sample, value };
+            }),
+          })),
+        },
+        job.chart,
+        job.groupLabels
+      );
     },
     'Custom dashboard reads exceeded 15 seconds'
   );

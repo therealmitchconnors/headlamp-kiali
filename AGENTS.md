@@ -154,6 +154,12 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   replace whole runtime groups, not union them. Explicit references do not select
   a telemetry label: require a choice when multiple conventions exist. Preserve
   the winning discovered selector when loading embedded application charts.
+- Dashboard sort labels join the query grouping if not already present, then
+  are hidden only in that case. Sort per metric/summary before conversion;
+  do not re-sort the resulting legend by its remaining label captions.
+  Never merge groups made indistinguishable by removing a sort-only label.
+  Native integer sorting rejects invalid/missing/out-of-range values rather
+  than reproducing upstream's silent Atoi fallback.
 - VM application correlation follows the first matching WorkloadEntry's
   `spec.labels` in captured list order, otherwise group selector labels only
   after a complete entry read. Preserve group UID/resourceVersion separately

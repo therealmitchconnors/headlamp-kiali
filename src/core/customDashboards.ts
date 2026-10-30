@@ -5,6 +5,7 @@ import {
   validateDashboardAggregations,
 } from './dashboardAggregations';
 import type { DashboardAnnotationSource } from './dashboardAnnotations';
+import { DashboardSorting, validateDashboardSorting } from './dashboardSorting';
 import { trimGoSpace } from './goStrings';
 import { histogramExpressions, HistogramSummary } from './histograms';
 import { metricGroupLabels } from './metricGroups';
@@ -17,7 +18,7 @@ export const MAX_RESOLVED_DASHBOARD_CHARTS = MAX_EFFECTIVE_DASHBOARD_TEMPLATES *
 const CUSTOM_DASHBOARD_BYTES = 65536;
 // Separate 64 KiB budgets for the saved-user definitions and pinned bundled catalog.
 const EFFECTIVE_DASHBOARD_BYTES = CUSTOM_DASHBOARD_BYTES * 2;
-export interface CustomChart extends ChartDisplay {
+export interface CustomChart extends ChartDisplay, DashboardSorting {
   name: string;
   metricName?: string;
   metrics?: CustomDashboardMetric[];
@@ -78,6 +79,7 @@ export interface CustomDashboardJob {
   chartIndex: number;
   metric: CustomDashboardMetric;
   groupLabels: string[];
+  queryGroupLabels?: string[];
 }
 
 function keys(value: Record<string, unknown>, allowed: readonly string[], label: string) {
@@ -183,6 +185,8 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
         'max',
         'spans',
         'aggregations',
+        'sortLabel',
+        'sortLabelParseAs',
       ],
       'Aggregate chart'
     );
@@ -229,6 +233,7 @@ function validateChartDashboard(value: unknown, maximum: number): CustomDashboar
       chart: {
         name,
         ...validateChartDisplay(raw),
+        ...validateDashboardSorting(raw, raw.dataType === 'histogram'),
         ...(legacyName ? { metricName: legacyName } : {}),
         ...(raw.metrics !== undefined ? { metrics } : {}),
         ...(raw.groupLabels !== undefined ? { groupLabels } : {}),
@@ -449,15 +454,23 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
   const charts = dashboard.items
     .map(({ chart }, chartIndex) => ({ chart, chartIndex }))
     .filter(item => selected.has(item.chart.name))
-    .map(({ chart, chartIndex }) => ({
-      chart,
-      chartIndex,
-      metrics: customChartMetrics(chart),
-      groupLabels: metricGroupLabels(
+    .map(({ chart, chartIndex }) => {
+      const groupLabels = metricGroupLabels(
         [...(chart.groupLabels ?? []), ...byLabels],
         chart.dataType === 'histogram'
-      ),
-    }));
+      );
+      const queryGroupLabels =
+        chart.sortLabel && !groupLabels.includes(chart.sortLabel)
+          ? metricGroupLabels([...groupLabels, chart.sortLabel], chart.dataType === 'histogram')
+          : groupLabels;
+      return {
+        chart,
+        chartIndex,
+        metrics: customChartMetrics(chart),
+        groupLabels,
+        queryGroupLabels,
+      };
+    });
   const count = charts.reduce(
     (sum, { chart, metrics }) =>
       sum +
@@ -467,38 +480,41 @@ export function customDashboardJobs(query: CustomDashboardQuery): CustomDashboar
   const budgetMessage =
     'Custom dashboards support at most 8 metric queries after expanding histogram summaries and metric declarations; reduce charts, metrics or selected summaries';
   if (count > 8) throw new Error(budgetMessage);
-  const jobs = charts.flatMap<CustomDashboardJob>(({ chart, chartIndex, metrics, groupLabels }) =>
-    metrics.flatMap<CustomDashboardJob>((metric, metricIndex) =>
-      chart.dataType === 'histogram'
-        ? histogramExpressions(
-            metric.metricName,
-            labels,
-            query.histogramSummaries ?? ['avg', 'p95'],
-            groupLabels
-          ).map(({ summary, expression }) => ({
-            key: `${chartIndex}:${metricIndex}:${summary}`,
-            chart,
-            chartIndex,
-            groupLabels,
-            metric,
-            summary,
-            expression,
-          }))
-        : [
-            {
-              key: `${chartIndex}:${metricIndex}:value`,
+  const jobs = charts.flatMap<CustomDashboardJob>(
+    ({ chart, chartIndex, metrics, groupLabels, queryGroupLabels }) =>
+      metrics.flatMap<CustomDashboardJob>((metric, metricIndex) =>
+        chart.dataType === 'histogram'
+          ? histogramExpressions(
+              metric.metricName,
+              labels,
+              query.histogramSummaries ?? ['avg', 'p95'],
+              queryGroupLabels
+            ).map(({ summary, expression }) => ({
+              key: `${chartIndex}:${metricIndex}:${summary}`,
               chart,
               chartIndex,
               groupLabels,
+              ...(chart.sortLabel ? { queryGroupLabels } : {}),
               metric,
-              expression:
-                (chart.dataType === 'rate'
-                  ? `sum(rate(${metric.metricName}${selector}[5m]))`
-                  : `${chart.aggregator}(${metric.metricName}${selector})`) +
-                (groupLabels.length ? ` by (${groupLabels.join(',')})` : ''),
-            },
-          ]
-    )
+              summary,
+              expression,
+            }))
+          : [
+              {
+                key: `${chartIndex}:${metricIndex}:value`,
+                chart,
+                chartIndex,
+                groupLabels,
+                ...(chart.sortLabel ? { queryGroupLabels } : {}),
+                metric,
+                expression:
+                  (chart.dataType === 'rate'
+                    ? `sum(rate(${metric.metricName}${selector}[5m]))`
+                    : `${chart.aggregator}(${metric.metricName}${selector})`) +
+                  (queryGroupLabels.length ? ` by (${queryGroupLabels.join(',')})` : ''),
+              },
+            ]
+      )
   );
   if (jobs.length > 8) throw new Error(budgetMessage);
   jobs.forEach(job => metricRangeParameters(query, job.expression));

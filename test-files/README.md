@@ -1035,6 +1035,26 @@ interceptors/settings were removed/restored and no Kubernetes writes occurred.
 The focused increment passed 429 tests in ten files; this is not a new
 full-suite or original-Go oracle count.
 
+For chart sorting, run `core/dashboardSorting.test.ts`, shared custom-dashboard
+core/data/UI, metric-group and aggregation tests. Capture sort-only query
+labels separately from displayed groups. Check raw/rate/histogram grouping,
+fixed/optional sort-label retention, the unchanged four-label budget, UTF-8
+lexical ordering and exact signed int64 boundaries above JavaScript precision.
+Reject invalid/missing/out-of-range integer strings and display-label collisions
+without zero defaults or merging; validate captured equality filters before
+hidden labels are removed.
+
+In hosted Headlamp, return `{pod:"alpha",rank:"10"}` before
+`{pod:"zeta",rank:"2"}` and compare lexical versus integer legends/tables.
+Use distinct Pod names for the above-safe-integer response to ensure a prior
+capture cannot satisfy the assertion. Wait for each explicit load's response.
+Toggle local display values using the keyboard after the layout changes and
+confirm no refetch/order change. Retain `rank` in `groupLabels` to resolve a
+collision after automatic removal. Repeat for both histogram summaries.
+Five hosted groups issued nine metric GETs; the application regression also
+passed with the unchanged shared renderer. Restore settings/interceptors.
+The final sorting suite passed 380 tests in eight files.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

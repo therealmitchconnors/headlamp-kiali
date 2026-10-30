@@ -151,6 +151,40 @@ it('captures definitions/time/scope and preserves results during draft edits wit
   expect(captured.namespace).toBe('bookinfo');
   expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
 });
+it('preserves captured sort order through the grouped renderer instead of re-sorting label captions', async () => {
+  const config = structuredClone(configured);
+  Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    groupLabels: ['pod'],
+    sortLabel: 'rank',
+    sortLabelParseAs: 'int',
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(config);
+  vi.mocked(loadCustomDashboard).mockImplementation(async (_scope, _endpoint, query) => ({
+    query,
+    metrics: [],
+    charts: customDashboardJobs(query).map(job => ({
+      ...job,
+      read: {
+        ok: true,
+        result: {
+          warnings: [],
+          series: [
+            { labels: { pod: 'z' }, samples: [{ timestamp: query.end, value: 2 }] },
+            { labels: { pod: 'a' }, samples: [{ timestamp: query.end, value: 10 }] },
+          ],
+        },
+      },
+    })),
+  }));
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  const plot = await screen.findByRole('img', { name: 'Memory' });
+  expect([...plot.querySelectorAll('span')].map(span => span.textContent)).toEqual([
+    'Memory {pod="z"}',
+    'Memory {pod="a"}',
+  ]);
+  expect(screen.getByText(/Captured series ordering: rank \(signed integer\)/)).toBeDefined();
+});
 it('requires explicit single-cluster acknowledgment and clears it on a source change', async () => {
   const single = structuredClone(configured);
   single.config.clusters.alpha.customDashboards.clusterLabel = null;
