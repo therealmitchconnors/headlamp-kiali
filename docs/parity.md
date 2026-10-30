@@ -3222,10 +3222,37 @@ six Bookinfo scrape targets are up, and a query before the reset returns no
 historical samples. Configuration and the 1 GiB memory cap are unchanged. This
 restores the backend but is not yet a new live chart-parity verification.
 
-The KIA0004 core check requires a complete workload universe. The current reader
-only covers standard Kubernetes workloads, so the UI deliberately marks that
-check incomplete instead of issuing false no-match warnings when WorkloadGroups,
-VMs or custom controllers might satisfy the selector.
+The KIA0004 core check requires a complete workload universe. The validation reader
+does not provide complete mesh-workload inclusion evidence, so the UI deliberately
+keeps it incomplete. Bounded application/resource correlation, including observed
+WorkloadGroup labels, is separate evidence and cannot justify absence findings
+for every mesh workload or custom controller.
+
+The caller-activation audit additionally restricts the helper to the four pinned
+production callers: AuthorizationPolicy, PeerAuthentication and
+RequestAuthentication in `security.istio.io` use `selector.matchLabels`; Sidecar
+in `networking.istio.io` uses `workloadSelector.labels`. The previous generic
+selector-shape detection could emit inappropriate deferrals for inactive kinds,
+and would have emitted inappropriate KIA0004 findings if given `complete: true`.
+DestinationRule, ServiceEntry, EnvoyFilter, Telemetry, WasmPlugin and unrelated
+groups do not activate this helper merely because a spec contains a selector.
+The Sidecar `matchLabels` fallback has been removed. Empty/null selectors need no
+workload evidence; malformed or oversized active selectors are explicitly deferred
+using the existing bounded Kubernetes selector decoder.
+
+All eight audited helper/caller/stub source files matched the pinned inventory
+Git blobs, including `common/workload_selector_checker.go`
+(`544efcbf0f0bd9abe3975f06b995bfead38c1193`). Four hosted scenarios/eight intercepted
+resource GETs verified inactive Telemetry/WasmPlugin behavior, preserved
+RequestAuthentication completeness gating, and malformed-input disclosure without
+claiming a healthy/valid object. Gates passed **334 focused tests in five files**
+plus type/lint/build and source/resource/catalog/parity checks. No cluster writes
+occurred. This adds no finding code or independent Go oracle cases.
+
+The broader dashboard checkpoint at `08b4021` passed the full suite:
+**19,978 tests in 176 files**. The selector activation correction above was
+subsequently checked with its targeted suite; historical full-suite counts in
+earlier increment descriptions refer to those earlier checkpoints.
 
 Hosted console observations retain the known host CRD-v1beta1 discovery 404 and
 watch-close diagnostics during route changes. No plugin execution failure

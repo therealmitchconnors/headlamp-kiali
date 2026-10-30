@@ -9,9 +9,12 @@ import { DestinationRule } from '../../resources/destination-rule';
 import { Gateway } from '../../resources/gateway';
 import { K8sGateway } from '../../resources/k8s-gateway';
 import { PeerAuthentication } from '../../resources/peer-authentication';
+import { RequestAuthentication } from '../../resources/request-authentication';
 import { ServiceEntry } from '../../resources/service-entry';
 import { Sidecar } from '../../resources/sidecar';
+import { Telemetry } from '../../resources/telemetry';
 import { VirtualService } from '../../resources/virtual-service';
+import { WasmPlugin } from '../../resources/wasm-plugin';
 import Validation from './Validation';
 const settingsState = vi.hoisted(() => ({
   gatewayClasses: undefined as GatewayClassSettings | undefined,
@@ -96,6 +99,60 @@ afterEach(() => {
   settingsState.skipWildcardGatewayHosts = false;
   vi.mocked(loadValidationSnapshot).mockReset();
 });
+
+it.each(['Telemetry', 'WasmPlugin', 'RequestAuthentication'] as const)(
+  'keeps workload-selector activation source-bound for %s without claiming complete inclusion',
+  async kind => {
+    const metadata = {
+      name: 'selected',
+      namespace: 'bookinfo',
+      uid: 'selected-uid',
+      resourceVersion: '1',
+      creationTimestamp: '2026-01-01T00:00:00Z',
+    };
+    const selector = { matchLabels: { app: 'missing' } };
+    const resource =
+      kind === 'Telemetry'
+        ? new Telemetry(
+            { apiVersion: 'telemetry.istio.io/v1', kind, metadata, spec: { selector } },
+            'alpha'
+          )
+        : kind === 'WasmPlugin'
+        ? new WasmPlugin(
+            {
+              apiVersion: 'extensions.istio.io/v1alpha1',
+              kind,
+              metadata,
+              spec: { selector, url: 'oci://example.invalid/plugin' },
+            },
+            'alpha'
+          )
+        : new RequestAuthentication(
+            { apiVersion: 'security.istio.io/v1', kind, metadata, spec: { selector } },
+            'alpha'
+          );
+    vi.mocked(loadValidationSnapshot).mockResolvedValueOnce({
+      sources: [],
+      context: {
+        cluster: 'alpha',
+        identityDomain: 'svc.cluster.local',
+        namespaces: { complete: false, items: [] },
+        sidecars: { complete: false, items: [] },
+        destinationRules: { complete: false, items: [] },
+      },
+    });
+    render(<Validation resource={resource} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Run initial checks' }));
+    await screen.findByText(
+      'No findings from these limited checks. This is not a validity or health verdict.'
+    );
+    expect(screen.queryByText('KIA0004')).toBeNull();
+    expect(
+      !!screen.queryByText('Workload-selector check requires a complete namespace snapshot')
+    ).toBe(kind === 'RequestAuthentication');
+    expect(loadValidationSnapshot).toHaveBeenCalledTimes(1);
+  }
+);
 
 it('passes configured Gateway classes and displays their provenance without triggering repeated reads', async () => {
   settingsState.gatewayClasses = {

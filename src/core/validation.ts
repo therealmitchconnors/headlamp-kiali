@@ -1,7 +1,7 @@
 import { configurationReferences } from './configuration';
 import { CorrelatedWorkload } from './correlation';
 import { getHost, hostString } from './hosts';
-import { Labels, matchesSelector } from './labels';
+import { decodeLabelSelector, matchesSelector } from './labels';
 import { localConfigurationChecks } from './localValidation';
 import { isRecord } from './object';
 import {
@@ -73,12 +73,6 @@ export interface InitialValidation {
   skipped: string[];
   suppressed: number;
   coverage: 'partial';
-}
-
-function stringLabels(value: unknown): Labels | null {
-  if (!isRecord(value) || Object.values(value).some(value => typeof value !== 'string'))
-    return null;
-  return Object.fromEntries(Object.entries(value).map(([key, value]) => [key, String(value)]));
 }
 
 /** Explicitly bounded checks, never the complete validator or a validity verdict. */
@@ -190,33 +184,43 @@ export function initialValidation({
     }
   }
   const selector =
-    isRecord(spec.selector) && isRecord(spec.selector.matchLabels)
-      ? { labels: stringLabels(spec.selector.matchLabels), path: 'spec/selector/matchLabels' }
-      : isRecord(spec.workloadSelector)
-      ? {
-          labels: stringLabels(spec.workloadSelector.labels ?? spec.workloadSelector.matchLabels),
-          path:
-            spec.workloadSelector.labels !== undefined
-              ? 'spec/workloadSelector/labels'
-              : 'spec/workloadSelector/matchLabels',
-        }
+    group === 'security.istio.io' &&
+    ['AuthorizationPolicy', 'PeerAuthentication', 'RequestAuthentication'].includes(kind)
+      ? { value: spec.selector, field: 'matchLabels', path: 'spec/selector/matchLabels' }
+      : group === 'networking.istio.io' && kind === 'Sidecar'
+      ? { value: spec.workloadSelector, field: 'labels', path: 'spec/workloadSelector/labels' }
       : null;
-  if (selector?.labels && Object.keys(selector.labels).length) {
-    if (!complete) skipped.push('Workload-selector check requires a complete namespace snapshot');
-    else if (
-      !workloads.some(
-        workload =>
-          workload.identity.cluster === cluster &&
-          workload.identity.namespace === namespace &&
-          matchesSelector(workload.resource.workloadLabels, { matchLabels: selector.labels! })
-      )
-    )
-      findings.push({
-        code: 'KIA0004',
-        severity: 'warning',
-        path: selector.path,
-        message: 'No matching workload found for the selector in this namespace',
+  if (selector && selector.value !== undefined && selector.value !== null) {
+    try {
+      if (!isRecord(selector.value)) throw new Error('Workload selector must be an object');
+      const parsedSelector = decodeLabelSelector({
+        matchLabels: selector.value[selector.field] ?? {},
       });
+      if (Object.keys(parsedSelector.matchLabels ?? {}).length) {
+        if (!complete)
+          skipped.push('Workload-selector check requires a complete namespace snapshot');
+        else if (
+          !workloads.some(
+            workload =>
+              workload.identity.cluster === cluster &&
+              workload.identity.namespace === namespace &&
+              matchesSelector(workload.resource.workloadLabels, parsedSelector)
+          )
+        )
+          findings.push({
+            code: 'KIA0004',
+            severity: 'warning',
+            path: selector.path,
+            message: 'No matching workload found for the selector in this namespace',
+          });
+      }
+    } catch (error) {
+      skipped.push(
+        `${selector.path}: ${
+          error instanceof Error ? error.message : 'Workload selector is unavailable'
+        }`
+      );
+    }
   }
   const references = referenceValidation(kind, group, namespace, spec, context, owner);
   findings.push(...references.findings);

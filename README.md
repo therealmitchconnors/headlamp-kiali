@@ -420,6 +420,14 @@ KIA1107 (missing subset), KIA1401 (HTTP/gRPC Gateway parent), KIA1402
 (ReferenceGrant namespace presence). It respects ignore annotations and reports
 incomplete context. This is not the full validator or a validity verdict.
 
+KIA0004 is restricted to the pinned active callers: AuthorizationPolicy,
+PeerAuthentication and RequestAuthentication use `selector.matchLabels`;
+Sidecar uses `workloadSelector.labels`. A selector-looking field on another
+kind/group does not activate this check. Malformed selectors are deferred
+explicitly. The current validation reader still lacks complete mesh-workload
+inclusion evidence, so it does not report workload absence from the bounded
+application/resource snapshots.
+
 Istio VirtualService Gateway checks add KIA1102 (missing Gateway) and KIA1108
 (legacy dotted reference syntax), including nested HTTP/TCP/TLS matches.
 Short names and explicit `namespace/name` references work without a DNS setting;

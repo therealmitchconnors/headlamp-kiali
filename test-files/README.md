@@ -338,6 +338,23 @@ KIA0601 on those CRDs. The 564 original-Go local-helper cases remain valid
 helper evidence; they do not enable a checker. Kubernetes Service port
 validation has different mesh/appProtocol guards and remains separate work.
 
+The KIA0004 caller audit gates the generic helper to security-group
+AuthorizationPolicy/PeerAuthentication/RequestAuthentication `selector.matchLabels`
+and networking-group Sidecar `workloadSelector.labels`. Test both complete and
+incomplete inputs for inactive kinds/wrong groups, exact field selection,
+empty/null selectors, malformed/oversized maps, and matching labels in the wrong
+cluster/namespace. The UI must keep active absence checks deferred until complete
+mesh-workload inclusion is supplied; do not substitute the bounded application
+snapshot's `complete` flag.
+
+Hosted checks intercept owned Telemetry, WasmPlugin and RequestAuthentication
+GETs. Inactive kinds must not claim a workload-selector deferral; the active
+RequestAuthentication still must. A malformed active selector must produce a
+specific deferred reason, not a finding or an ignored error. Retain the global
+partial-coverage disclaimer. Four scenarios/eight resource GETs passed with no
+settings or cluster mutations. The targeted suite passed 334 tests in five files.
+The preceding dashboard checkpoint `08b4021` passed 19,978 tests in 176 files.
+
 ServiceEntry KIA1211/KIA1212 tests cover complete-source and UID/spec freshness
 gates, exact case-insensitive host/port groups, differing protocols, namespace
 exports/defaults, ambient source/viewer behavior, Sidecar import filtering and

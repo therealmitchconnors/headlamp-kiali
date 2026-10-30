@@ -64,6 +64,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
 - 23 schema-derived configuration kinds and **38 bounded finding codes**.
   An activation audit removed unintended ServiceEntry KIA0601 enforcement:
   the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
+  A subsequent KIA0004 audit restricts generic workload-selector activation to
+  AuthorizationPolicy/PeerAuthentication/RequestAuthentication and Sidecar in
+  their exact groups/fields. Inactive kinds no longer get spurious deferrals;
+  malformed active selectors defer explicitly. Runtime absence checking remains
+  gated on a complete mesh-workload model, not bounded correlation.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -383,7 +388,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
   visibility. Four hosted groups proved eight requests per explicit capture
   (sixteen across reload), no requests for visibility/filter actions and
   definition-default reset. Category-axis regressions passed.
-- Latest visibility increment: **421 focused tests in thirteen files**, plus
+- Latest selector-caller correction: **334 focused tests in five files**, with
+  type/lint/build/package, source/resource/catalog/parity checks and four hosted cases
+  (eight resource GETs). All audited source blobs matched the pinned inventory;
+  no finding codes or Go oracle cases were added.
+- Previous visibility increment: **421 focused tests in thirteen files**, plus
   type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
 - Previous series-axis increment: **408 focused tests in twelve files**, plus
   type/lint/i18n/build/package and source/catalog/resource/parity/hosted checks.
@@ -418,8 +427,8 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Prior full-suite checkpoint: **19,415 tests in 155 files**, with
-  type/lint/schema/parity/i18n/build/package checks passing.
+  Latest full-suite checkpoint at `08b4021`: **19,978 tests in 176 files**.
+  The earlier 19,415-test/155-file checkpoint remains historical evidence.
   Comparison metrics reject unexpected aggregation labels and mixed times.
   Independent original-Go evidence totals 17,620 cases, including 216 custom-dashboard
   queries, 228 WorkloadEntry
@@ -445,7 +454,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `56f98f132e584373d7d317fe94582fe069b63904ae486ae355f3f6ffb3f7053e`.
+  `1ebdbd3721759fd2b1da39eec63f72c2e1ae49dbf46c24a0304edf73144ac3d7`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are

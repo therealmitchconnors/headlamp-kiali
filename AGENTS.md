@@ -124,6 +124,13 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - Verify the pinned caller pipeline before enabling a checker, not only its
   helper tests. ServiceEntry and Istio Gateway port-name helpers exist upstream
   but are not enabled by their checkers; do not turn dormant helpers into findings.
+- KIA0004 is enabled only by AuthorizationPolicy, PeerAuthentication and
+  RequestAuthentication (`selector.matchLabels`) and Sidecar
+  (`workloadSelector.labels`) in their exact Istio groups. Do not apply it to
+  arbitrary selector-looking specs or use a matchLabels fallback for Sidecar.
+  Complete supported-resource correlation is still not complete mesh-workload
+  inclusion evidence. DestinationRule's separate NoDestinationChecker is called
+  through NoServiceChecker, not DestinationRulesChecker; audit both pipelines.
 - PeerAuthentication checkers exclude every non-null selector, including an
   empty selector. The separate namespace mTLS indicator normalizes empty
   selectors differently. Preserve each caller's semantics.

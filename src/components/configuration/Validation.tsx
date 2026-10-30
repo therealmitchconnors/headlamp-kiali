@@ -145,8 +145,8 @@ function Checks({
           owner: metadata.uid ? { name: metadata.name, uid: metadata.uid } : undefined,
           annotations: metadata.annotations ?? {},
           workloads: [],
-          // This reader does not include WorkloadGroups or custom controllers.
-          // A complete Kubernetes snapshot cannot prove a selector misses all mesh workloads.
+          // This reader does not provide complete mesh-workload inclusion evidence.
+          // A complete supported-resource snapshot alone cannot prove workload absence.
           complete: false,
           context: { ...snapshot.context, skipWildcardGatewayHosts },
         }),
