@@ -5,6 +5,7 @@ import {
   readConfig,
   updateClusterConfig,
   validateIdentityDomain,
+  validateMeshClusterName,
   validateServiceEndpoint,
   validateTracingConfig,
 } from './config';
@@ -17,6 +18,43 @@ const endpoint = {
 };
 
 describe('versioned, cluster-scoped configuration', () => {
+  it('keeps logical mesh names explicit and separate from context and telemetry identities', () => {
+    const source: KialiConfig = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: { prometheus: null, telemetryCluster: 'metric-alpha' },
+        beta: { prometheus: null, meshClusterName: 'logical-beta' },
+      },
+    };
+    expect(getClusterConfig(source, 'alpha').meshClusterName).toBeUndefined();
+    const saved = updateClusterConfig(source, 'alpha', {
+      prometheus: null,
+      meshClusterName: 'logical-alpha',
+    });
+    expect(readConfig(saved)).toEqual({ valid: true, config: saved });
+    expect(saved.clusters.alpha.telemetryCluster).toBe('metric-alpha');
+    expect(saved.clusters.beta).toEqual(source.clusters.beta);
+    expect(
+      updateClusterConfig(saved, 'alpha', { prometheus: null }).clusters.alpha.meshClusterName
+    ).toBe('logical-alpha');
+    expect(
+      updateClusterConfig(saved, 'alpha', { prometheus: null, meshClusterName: null }).clusters
+        .alpha.meshClusterName
+    ).toBeNull();
+    expect(source.clusters.alpha.meshClusterName).toBeUndefined();
+    expect(validateMeshClusterName('x'.repeat(256))).toHaveLength(256);
+    expect(validateMeshClusterName('mesh-\u{1f680}')).toBe('mesh-\u{1f680}');
+  });
+  it.each(['', ' alpha', 'alpha ', 'alpha\n', 'a'.repeat(257), '\ud800', 1, {}])(
+    'rejects malformed logical mesh names %# without applying a fallback',
+    meshClusterName => {
+      expect(() => validateMeshClusterName(meshClusterName)).toThrow(ConfigurationError);
+      expect(
+        readConfig({ schemaVersion: 1, clusters: { alpha: { prometheus: null, meshClusterName } } })
+          .valid
+      ).toBe(false);
+    }
+  );
   it('validates, clones and preserves per-cluster custom dashboard definitions', () => {
     const definitions = {
       namespaceLabel: 'namespace',

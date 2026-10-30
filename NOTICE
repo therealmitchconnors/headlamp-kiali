@@ -56,6 +56,7 @@ application-label behavior and declared namespace managed-revision label precede
 same-context first-webhook revision-tag selection and raw revision preservation,
 first-declared control-plane container selection and configuration provenance,
 ordered controller environment assignments and exact-true external declarations,
+explicit logical-cluster identity and declared local controller-ID comparison,
 Gateway route checks, AuthorizationPolicy pattern and host-registry checks with namespace export filtering,
 WorkloadGroup-to-WorkloadEntry label-selector relationships,
 WorkloadGroup application-label selection and VM correlation provenance,

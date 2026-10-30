@@ -1,14 +1,20 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
+import { useKialiConfig } from '../config';
+import { readConfig } from '../core/config';
 import { loadMeshSnapshot, MeshSnapshot } from '../data/mesh';
 import Mesh, { MeshResults } from './Mesh';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   ApiProxy: { request: vi.fn() },
   K8s: { useSelectedClusters: () => ['alpha'], useClustersConf: () => ({ alpha: {} }) },
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, values: Record<string, unknown> = {}) =>
+      key.replace(/\{\{(\w+)\}\}/g, (_, name) => String(values[name] ?? '')),
+  }),
 }));
+vi.mock('../config', () => ({ useKialiConfig: vi.fn() }));
 vi.mock('../data/mesh', async importOriginal => ({
   ...(await importOriginal<typeof import('../data/mesh')>()),
   loadMeshSnapshot: vi.fn(),
@@ -75,6 +81,91 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   ),
 }));
 afterEach(cleanup);
+beforeEach(() => {
+  vi.mocked(useKialiConfig).mockReturnValue(
+    readConfig({
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null, telemetryCluster: 'alpha' } },
+    })
+  );
+  vi.mocked(loadMeshSnapshot).mockReset();
+});
+it('captures only explicit logical identity and invalidates relevant changes without replay or resurrection', async () => {
+  const controller = {
+    name: 'istiod',
+    namespace: 'system',
+    uid: 'cp',
+    revision: '',
+    clusterId: 'alpha',
+    managesExternal: true,
+    effectiveConfigBlocked: true,
+    replicas: null,
+    stale: false,
+    configurationWarnings: ['External control-plane topology is not resolved'],
+  };
+  vi.mocked(loadMeshSnapshot).mockResolvedValue({
+    cluster: 'alpha',
+    namespaces: { complete: true, items: [] },
+    controllers: { complete: true, items: [controller] },
+    tags: { complete: true, items: [] },
+    controlPlanes: [
+      {
+        controller,
+        mesh: { status: 'ready', name: 'istio', value: { hasDiscoverySelectors: false } },
+        injector: { status: 'ready', name: 'injector', value: {} },
+        effective: { status: 'unavailable', message: 'External mapping unresolved' },
+      },
+    ],
+  });
+  const view = render(<Mesh />);
+  const user = userEvent.setup();
+  const discover = () => user.click(screen.getByRole('button', { name: 'Discover mesh' }));
+  await discover();
+  await screen.findByText(/No logical mesh cluster name was captured/);
+  expect(screen.queryByText(/Declared controller ID matches/)).toBeNull();
+  const configure = (meshClusterName: string, telemetryCluster = 'alpha') => {
+    vi.mocked(useKialiConfig).mockReturnValue(
+      readConfig({
+        schemaVersion: 1,
+        clusters: { alpha: { prometheus: null, meshClusterName, telemetryCluster } },
+      })
+    );
+    view.rerender(<Mesh />);
+  };
+  configure('alpha');
+  expect(loadMeshSnapshot).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('heading', { name: 'Local control planes' })).toBeNull();
+  await discover();
+  await screen.findByText(/Declared controller ID matches/);
+  expect(screen.getByText('External mapping unresolved')).toBeDefined();
+  configure('alpha', 'unrelated-metric-id');
+  expect(screen.getByText(/Declared controller ID matches/)).toBeDefined();
+  expect(loadMeshSnapshot).toHaveBeenCalledTimes(2);
+  configure('other');
+  expect(screen.queryByText(/Declared controller ID matches/)).toBeNull();
+  configure('alpha');
+  expect(screen.queryByRole('heading', { name: 'Local control planes' })).toBeNull();
+  expect(loadMeshSnapshot).toHaveBeenCalledTimes(2);
+  await discover();
+  await screen.findByText(/Declared controller ID matches/);
+  expect(loadMeshSnapshot).toHaveBeenCalledTimes(3);
+});
+it('cancels a pending capture when the logical name changes instead of replaying its requests', async () => {
+  vi.mocked(loadMeshSnapshot).mockImplementation(() => new Promise(() => {}));
+  const view = render(<Mesh />);
+  await userEvent.setup().click(screen.getByRole('button', { name: 'Discover mesh' }));
+  await waitFor(() => expect(loadMeshSnapshot).toHaveBeenCalledTimes(1));
+  const signal = vi.mocked(loadMeshSnapshot).mock.calls[0][1];
+  vi.mocked(useKialiConfig).mockReturnValue(
+    readConfig({
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null, meshClusterName: 'new' } },
+    })
+  );
+  view.rerender(<Mesh />);
+  expect(signal.aborted).toBe(true);
+  expect(loadMeshSnapshot).toHaveBeenCalledTimes(1);
+});
 it('shows source revision candidates and provenance without resolving controllers or hiding Maistra labels', () => {
   const snapshot: MeshSnapshot = {
     cluster: 'alpha',

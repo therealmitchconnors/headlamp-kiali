@@ -29,6 +29,15 @@ export interface RevisionTag {
   tag: string;
   revision: string;
 }
+
+export function controllerLocalIdentity(
+  clusterId: string | undefined,
+  logicalName: string | undefined
+): 'matched' | 'different' | 'unavailable' {
+  if (clusterId === undefined || logicalName === undefined) return 'unavailable';
+  return clusterId === logicalName ? 'matched' : 'different';
+}
+
 export interface MeshConfigFields {
   rootNamespace?: string;
   trustDomain?: string;

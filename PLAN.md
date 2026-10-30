@@ -87,6 +87,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
   211-case original-Go oracle: final ID/shared assignments, exact-true accumulation,
   explicit clears and conservative indirection/noncanonical guards. Four hosted
   groups made forty GETs; complete managed scope remains open.
+  An optional explicit `meshClusterName` now supplies captured per-context
+  controller-ID comparison, distinct from telemetry/context names and independent
+  of external-management flags. Settings persistence, no fallback, no replay/
+  resurrection, pending cancellation and unchanged guards passed four hosted
+  groups/33 GETs. This does not certify managed namespaces or activate Service checks.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -483,7 +488,9 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **22,340 tests in 182 files** after ordered
+  Latest full-suite checkpoint: **22,359 tests in 182 files** after explicit
+  logical mesh identity; its focused suite passed **354 tests in six files**.
+  The preceding **22,340-test/182-file** suite covered ordered
   controller environment handling; its focused suite passed **277 tests in
   four files**. The previous **22,108-test/181-file** suite covered first-container
   provenance and the accumulated dashboard/tracing increments. Its focused
@@ -525,7 +532,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `921ea1afab689980f6225020f3c833ce0c4268dbf3a4b805c29a7ef0f6488e3e`.
+  `687bc9b71d9933665e0060dc2960df178347f074431384c7db4317f562d8101c`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1198,8 +1205,12 @@ The first-container choice and supported literal environment loop are now
 source-aligned: last CLUSTER_ID/SHARED_MESH_CONFIG assignment and exact-string-true
 accumulation, with indirect/noncanonical values explicitly guarded.
 Self-management is ID == logical cluster name, independent
-of ManagesExternal. Next add explicit logical-context mappings; never
-silently reuse the Headlamp context name or saved telemetry identity.
+of ManagesExternal. Explicit per-context `meshClusterName` and captured UI
+comparison are now implemented without implicit context/telemetry fallback.
+Next build the typed managed-scope evidence pipeline using those mappings and
+complete controller/tag/namespace, discovery/visibility and topology inputs.
+Do not promote the current comparison hint or label-based configuration
+inspection to complete managed membership.
 Service checks in the pinned caller pool Pods across all managed namespaces,
 match selectors without another namespace filter, and treat empty selectors
 as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a

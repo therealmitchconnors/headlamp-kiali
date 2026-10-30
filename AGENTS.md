@@ -221,6 +221,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   false does not undo true. Final indirection cannot fall back to earlier literals;
   noncanonical/indirect external values remain configuration-blocked natively.
   Do not substitute general boolean parsing for the caller's literal check.
+- meshClusterName is an explicit per-context logical name, separate from the
+  Headlamp context and telemetryCluster. Its exact controller-ID comparison is
+  independent of ManagesExternal and does not certify namespace membership or
+  clear configuration guards. Relevant setting changes invalidate captured mesh
+  evidence without replay; never silently use another identity as a default.
 - Dashboard rows belong to the selected template, not included templates.
   Nonpositive values use two; native viewport plot sizing is opt-in unless rows
   are explicit. It must not alter query budgets or hide captions/errors/tables.

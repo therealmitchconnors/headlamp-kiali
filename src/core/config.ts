@@ -23,6 +23,7 @@ export interface ClusterConfig {
   tracing?: TracingConfig | null;
   gatewayClasses?: GatewayClassSettings;
   telemetryCluster?: string | null;
+  meshClusterName?: string | null;
   skipWildcardGatewayHosts?: boolean;
   customDashboards?: CustomDashboardSettings;
 }
@@ -51,7 +52,7 @@ function customDashboardsSetting(value: unknown): CustomDashboardSettings {
   }
 }
 
-export function validateTelemetryCluster(value: unknown): string {
+function boundedClusterName(value: unknown, label: string): string {
   if (
     typeof value !== 'string' ||
     !value ||
@@ -60,9 +61,20 @@ export function validateTelemetryCluster(value: unknown): string {
     /[\u0000-\u001f\u007f]/.test(value)
   )
     throw new ConfigurationError(
-      'Metric cluster label must contain 1 to 256 characters without surrounding whitespace or control characters'
+      `${label} must contain 1 to 256 characters without surrounding whitespace or control characters`
     );
   return value;
+}
+
+export function validateTelemetryCluster(value: unknown): string {
+  return boundedClusterName(value, 'Metric cluster label');
+}
+
+export function validateMeshClusterName(value: unknown): string {
+  const name = boundedClusterName(value, 'Logical mesh cluster name');
+  if (/[\ud800-\udfff]/u.test(name))
+    throw new ConfigurationError('Logical mesh cluster name cannot contain unpaired surrogates');
+  return name;
 }
 
 export function validateIdentityDomain(value: unknown): string {
@@ -165,6 +177,7 @@ export function readConfig(value: unknown): ConfigResult {
         'tracing',
         'gatewayClasses',
         'telemetryCluster',
+        'meshClusterName',
         'skipWildcardGatewayHosts',
         'customDashboards',
       ]);
@@ -189,6 +202,14 @@ export function readConfig(value: unknown): ConfigResult {
                   settings.telemetryCluster === null
                     ? null
                     : validateTelemetryCluster(settings.telemetryCluster),
+              }),
+          ...(settings.meshClusterName === undefined
+            ? {}
+            : {
+                meshClusterName:
+                  settings.meshClusterName === null
+                    ? null
+                    : validateMeshClusterName(settings.meshClusterName),
               }),
           ...(settings.gatewayClasses === undefined
             ? {}
@@ -265,6 +286,14 @@ export function updateClusterConfig(
                 settings.telemetryCluster === null
                   ? null
                   : validateTelemetryCluster(settings.telemetryCluster),
+            }),
+        ...(settings.meshClusterName === undefined
+          ? {}
+          : {
+              meshClusterName:
+                settings.meshClusterName === null
+                  ? null
+                  : validateMeshClusterName(settings.meshClusterName),
             }),
         ...(settings.gatewayClasses === undefined
           ? {}

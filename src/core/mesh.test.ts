@@ -1,4 +1,5 @@
 import {
+  controllerLocalIdentity,
   controlPlaneObservation,
   injectorFields,
   mergeMeshFields,
@@ -12,6 +13,18 @@ import {
   validationMeshRoot,
   validationOutboundPolicy,
 } from './mesh';
+
+it.each<[string | undefined, string | undefined, string]>([
+  [undefined, undefined, 'unavailable'],
+  ['alpha', undefined, 'unavailable'],
+  [undefined, 'alpha', 'unavailable'],
+  ['Kubernetes', 'Kubernetes', 'matched'],
+  ['Kubernetes', 'kubernetes', 'different'],
+  ['', 'Kubernetes', 'different'],
+  ['remote', 'local', 'different'],
+])('compares only explicit logical and literal controller identities %#', (id, name, expected) => {
+  expect(controllerLocalIdentity(id, name)).toBe(expected);
+});
 
 it('resolves a known missing root from the observed controller namespace, not a conventional name', () => {
   for (const rootNamespace of [undefined, '']) {

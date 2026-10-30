@@ -275,6 +275,38 @@ describe('native per-cluster settings', () => {
     expect(state.stored).toMatchObject({ clusters: { alpha: { telemetryCluster: null } } });
     expect(state.request).not.toHaveBeenCalled();
   });
+  it('persists logical mesh identity independently and clears it without changing telemetry or other clusters', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: { prometheus: null, telemetryCluster: 'metric-alpha' },
+        beta: { prometheus: null, meshClusterName: 'logical-beta' },
+      },
+    };
+    render(<Settings />);
+    const user = userEvent.setup();
+    const field = screen.getByLabelText('Logical mesh cluster name (optional)');
+    expect((field as HTMLInputElement).value).toBe('');
+    await user.type(field, ' invalid');
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.clear(field);
+    await user.type(field, 'logical-alpha');
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: { meshClusterName: 'logical-alpha', telemetryCluster: 'metric-alpha' },
+        beta: { meshClusterName: 'logical-beta' },
+      },
+    });
+    await user.clear(field);
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: { alpha: { meshClusterName: null, telemetryCluster: 'metric-alpha' } },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+  });
   it('validates and saves Gateway class registry settings without issuing cluster mutations', async () => {
     render(<Settings />);
     const user = userEvent.setup();

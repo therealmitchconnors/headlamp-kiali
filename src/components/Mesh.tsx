@@ -11,8 +11,11 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKialiConfig } from '../config';
+import { getClusterConfig } from '../core/config';
 import {
+  controllerLocalIdentity,
   MeshConfigFields,
   NamespaceAssociation,
   namespaceAssociations,
@@ -66,7 +69,13 @@ function ConfigRead<T>({
   );
 }
 
-export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
+export function MeshResults({
+  snapshot,
+  logicalName,
+}: {
+  snapshot: MeshSnapshot;
+  logicalName?: string;
+}) {
   const { t } = useTranslation();
   const [labelledOnly, setLabelledOnly] = useState(true);
   const display = (value: string | undefined) =>
@@ -176,6 +185,16 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
           'Read-only local mesh inventory. Replica availability and configuration labels do not prove proxy synchronization, effective mTLS, certificates, connectivity or workload membership. Configured Istio discovery selectors are evaluated only for resolved local controller context. Remote control planes and Kiali-server discovery overrides are not resolved.'
         )}
       </Alert>
+      <Typography variant="body2">
+        {logicalName === undefined
+          ? t(
+              'No logical mesh cluster name was captured. Local-management comparison is unavailable; no context or telemetry identity is substituted.'
+            )
+          : t(
+              'Captured logical mesh cluster name: {{name}} (explicit setting). ID comparison is independent of EXTERNAL_ISTIOD and does not clear configuration or topology guards.',
+              { name: logicalName }
+            )}
+      </Typography>
       {(
         [
           [t('Namespaces'), snapshot.namespaces],
@@ -278,6 +297,21 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
           title={`${plane.controller.namespace}/${plane.controller.name}`}
         >
           <Stack spacing={2}>
+            <Typography variant="body2">
+              {
+                {
+                  matched: t(
+                    'Declared controller ID matches the captured logical cluster name. This is the pinned local-management comparison, not a complete managed-cluster or namespace inventory.'
+                  ),
+                  different: t(
+                    'Declared controller ID differs from the captured logical cluster name. No local-management association is inferred.'
+                  ),
+                  unavailable: t(
+                    'Local-management comparison is unavailable without both a captured logical cluster name and a literal controller ID.'
+                  ),
+                }[controllerLocalIdentity(plane.controller.clusterId, logicalName)]
+              }
+            </Typography>
             {plane.controller.configurationWarnings.map(message => (
               <Alert key={message} severity="warning">
                 {message}
@@ -554,7 +588,15 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
   );
 }
 
-function Results({ cluster, attempt }: { cluster: string; attempt: number }) {
+function Results({
+  cluster,
+  attempt,
+  logicalName,
+}: {
+  cluster: string;
+  attempt: number;
+  logicalName?: string;
+}) {
   const { t } = useTranslation();
   const load = useCallback(
     (signal: AbortSignal) => loadMeshSnapshot(clusterScope(cluster), signal),
@@ -563,14 +605,24 @@ function Results({ cluster, attempt }: { cluster: string; attempt: number }) {
   const state = useRequest(JSON.stringify([cluster, attempt]), load);
   return (
     <RequestStatus state={state} loadingLabel={t('Discovering mesh inventory...')}>
-      {snapshot => <MeshResults snapshot={snapshot} />}
+      {snapshot => <MeshResults snapshot={snapshot} logicalName={logicalName} />}
     </RequestStatus>
   );
 }
 
 function MeshScope({ cluster }: { cluster: string }) {
   const { t } = useTranslation();
-  const [attempt, setAttempt] = useState(0);
+  const configuration = useKialiConfig();
+  const logicalName = configuration.valid
+    ? getClusterConfig(configuration.config, cluster).meshClusterName ?? undefined
+    : undefined;
+  const identityKey = JSON.stringify([configuration.valid, logicalName]);
+  const [capture, setCapture] = useState<{
+    attempt: number;
+    identityKey: string;
+    logicalName?: string;
+  }>();
+  useEffect(() => setCapture(undefined), [identityKey]);
   return (
     <>
       <SectionBox title={t('Mesh inventory')} headerProps={{ headerStyle: 'main' }}>
@@ -580,16 +632,27 @@ function MeshScope({ cluster }: { cluster: string }) {
               'Discover readable namespace labels, local istiod Deployments, revision tags and standard configuration in the selected cluster. Nothing is installed or modified.'
             )}
           </Typography>
+          {configuration.valid === false && (
+            <Alert severity="warning">{configuration.message}</Alert>
+          )}
           <Button
             variant="contained"
             sx={{ alignSelf: 'flex-start' }}
-            onClick={() => setAttempt(value => value + 1)}
+            onClick={() =>
+              setCapture(current => ({
+                attempt: (current?.attempt ?? 0) + 1,
+                identityKey,
+                logicalName,
+              }))
+            }
           >
             {t('Discover mesh')}
           </Button>
         </Stack>
       </SectionBox>
-      {attempt > 0 && <Results cluster={cluster} attempt={attempt} />}
+      {capture && capture.identityKey === identityKey && (
+        <Results cluster={cluster} attempt={capture.attempt} logicalName={capture.logicalName} />
+      )}
     </>
   );
 }

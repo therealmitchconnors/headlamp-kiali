@@ -1446,6 +1446,21 @@ a later `false` does not undo one. Noncanonical flag values and indirection stay
 explicitly unresolved and block configuration eligibility rather than being
 silently interpreted or dereferenced.
 
+**Logical mesh cluster name (optional)** in Connection settings stores an
+explicit per-context name for Kiali's local-management comparison. It is
+separate from both the Headlamp context name and the metric cluster label;
+none is inferred from another. Mesh inventory captures it only when you select
+**Discover mesh**, then compares it exactly with each literal controller ID.
+Missing mappings or unresolved IDs remain unavailable.
+
+Changing or clearing the logical name discards the mesh capture, including
+pending reads, without refetching or resurrecting it when the old value returns.
+Unrelated metric settings do not invalidate that capture. Equality is independent
+of `EXTERNAL_ISTIOD` and does not clear topology/configuration guards. This
+setting currently supplies declared comparison evidence only: it does not
+certify managed namespaces, alter existing label-based configuration inspection,
+route Kubernetes requests, or enable Service port checks.
+
 The **Pinned Kiali revision candidate** column separately follows the pinned
 managed-revision label selector. Maistra membership takes precedence unless the
 ignore label is present (even with value `false`); enabled legacy injection takes

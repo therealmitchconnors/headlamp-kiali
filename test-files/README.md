@@ -410,6 +410,23 @@ groups made forty GETs, with no writes/settings changes; actual managed Istiod
 first-container and final literal cluster-ID provenance matched. The increment
 passed 277 focused tests in four files and 22,340 tests in 182 files overall.
 
+Logical mesh identity tests must keep `meshClusterName` separate from the
+context key and `telemetryCluster`: identical observed/context/metric names
+must still produce an unavailable comparison when no explicit mapping exists.
+Test exact case-sensitive matches, differences, missing/indirect IDs, external
+management independent of equality, validation boundaries, null clearing and
+other-context preservation.
+
+Use the actual Settings editor to save and clear the name, wait for positive
+ConfigStore/storage equality, and hard reload. On Mesh inventory, change the
+logical name while a capture is visible and while reads are pending. Results
+must disappear immediately without replacement queries or resurrection after
+restoring the old value. Unrelated telemetry changes must leave the capture
+alone. Four hosted groups made 33 GETs; environment regressions passed.
+The increment passed 354 focused tests in six files and 22,359 tests in 182
+files overall. This is a comparison prerequisite, not managed-namespace or
+Service-checker evidence. Restore the original setting's presence/value.
+
 Same-context revision-tag selection has a separate source-pinned oracle:
 
 ```sh

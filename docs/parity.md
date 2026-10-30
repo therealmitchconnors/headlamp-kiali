@@ -2804,6 +2804,38 @@ literal cluster ID matched the UI. No settings or cluster objects changed.
 Logical-cluster mapping, complete managed scope and Service checker activation
 remain separate prerequisites.
 
+### Explicit logical mesh identity
+
+An optional `meshClusterName` setting now maps a Headlamp context to an explicit
+logical mesh cluster name for captured local-ID comparison. The browser-local
+per-context value has no default, stays distinct from `telemetryCluster`, and
+requires 1..256 characters without surrounding whitespace, controls or unpaired
+surrogates. Absence remains absent; explicit clearing stores null. Other
+contexts and metric settings are preserved.
+
+Mesh inventory captures the name with an explicit discovery request. Only the
+relevant logical-name/config-validity signature invalidates it, synchronously
+hiding stale results and cancelling pending reads. Returning to a former value
+does not resurrect the capture; unrelated telemetry changes do not refetch.
+Comparison is exact and independent of external-management flags, following
+the pinned `controlPlane.ID == cluster.Name` local association condition.
+Unknown literal IDs/mappings stay unavailable, and matching does not clear
+existing external/configuration guards.
+
+This is declared comparison evidence, not a complete managed-context/namespace
+model. It deliberately does not change Kubernetes routing, prior label-based
+configuration inspection or Service checker activation. The following
+managed-scope implementation must consume explicit mappings and complete
+source/visibility/topology evidence rather than promoting this hint to proof.
+
+Verification passed **354 focused tests in six files**, the full **22,359-test/
+182-file** suite and normal gates. Four stock-hosted groups made 33 intercepted
+GETs, covering no implicit fallback despite equal context/metric/controller
+names, real Settings save/hard-reload/clear, exact comparison with external
+guards intact, unrelated-setting stability, invalidation/no resurrection and
+pending cancellation followed by explicit retry. Environment regressions also
+passed. Settings were restored durably; no cluster object was changed.
+
 ### Declared managed-revision selection
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
 `istio/kubernetes.go` (blob `1ae3f6611d27f964da9d3024ee339615cddd9f5b`),

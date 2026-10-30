@@ -17,6 +17,7 @@ import {
   TracingConfig,
   validateAppLabels,
   validateIdentityDomain,
+  validateMeshClusterName,
   validateServiceEndpoint,
   validateTelemetryCluster,
   validateTracingConfig,
@@ -84,6 +85,7 @@ function ClusterSettingsForm({
   initialTracing,
   initialGatewayClasses,
   initialTelemetryCluster,
+  initialMeshClusterName,
   initialSkipWildcardGatewayHosts,
   initialCustomDashboards,
 }: {
@@ -95,6 +97,7 @@ function ClusterSettingsForm({
   initialTracing?: TracingConfig | null;
   initialGatewayClasses?: GatewayClassSettings;
   initialTelemetryCluster?: string | null;
+  initialMeshClusterName?: string | null;
   initialSkipWildcardGatewayHosts?: boolean;
   initialCustomDashboards?: CustomDashboardSettings;
 }) {
@@ -109,6 +112,7 @@ function ClusterSettingsForm({
   );
   const [domainDraft, setDomainDraft] = useState(initialIdentityDomain ?? '');
   const [metricIdentity, setMetricIdentity] = useState(initialTelemetryCluster ?? '');
+  const [meshIdentity, setMeshIdentity] = useState(initialMeshClusterName ?? '');
   const [dashboardText, setDashboardText] = useState(
     JSON.stringify(
       initialCustomDashboards ?? {
@@ -201,6 +205,16 @@ function ClusterSettingsForm({
     }
   }
   let customDashboards: CustomDashboardSettings | undefined;
+  let meshClusterName: string | null = null;
+  let meshIdentityValidation: string | undefined;
+  if (meshIdentity) {
+    try {
+      meshClusterName = validateMeshClusterName(meshIdentity);
+    } catch (error) {
+      if (!(error instanceof ConfigurationError)) throw error;
+      meshIdentityValidation = error.message;
+    }
+  }
   let dashboardValidation: string | undefined;
   try {
     customDashboards = validateCustomDashboardSettings(JSON.parse(dashboardText));
@@ -216,6 +230,7 @@ function ClusterSettingsForm({
     tracingValidation ??
     gatewayValidation ??
     telemetryValidation ??
+    meshIdentityValidation ??
     dashboardValidation;
 
   function change(field: keyof ServiceEndpoint, value: string) {
@@ -259,6 +274,10 @@ function ClusterSettingsForm({
           initialTelemetryCluster === undefined && telemetryCluster === null
             ? undefined
             : telemetryCluster,
+        meshClusterName:
+          initialMeshClusterName === undefined && meshClusterName === null
+            ? undefined
+            : meshClusterName,
         gatewayClasses:
           initialGatewayClasses === undefined &&
           gatewayClasses &&
@@ -466,6 +485,18 @@ function ClusterSettingsForm({
         }}
         helperText={t(
           'Optional exact source_cluster/destination_cluster label used by this cluster in Istio telemetry. It is not inferred from the Headlamp context or Service DNS suffix. Metrics, health and graph forms use it as an editable default. Changing it or the Prometheus endpoint discards submitted queries and local identity overrides; load again explicitly.'
+        )}
+      />
+      <TextField
+        label={t('Logical mesh cluster name (optional)')}
+        value={meshIdentity}
+        inputProps={{ maxLength: 256 }}
+        onChange={event => {
+          setMeshIdentity(event.target.value);
+          setFeedback(undefined);
+        }}
+        helperText={t(
+          'Explicitly map this Headlamp context to the logical cluster name used by Kiali discovery. This is separate from the context name and metric cluster label; neither supplies a default. Mesh inventory captures it only on Discover mesh for a declared controller-ID comparison, not complete membership. Changing it discards that capture without fetching.'
         )}
       />
       <TextField
@@ -701,6 +732,9 @@ export default function Settings() {
                 initialGatewayClasses={getClusterConfig(state.config, activeCluster).gatewayClasses}
                 initialTelemetryCluster={
                   getClusterConfig(state.config, activeCluster).telemetryCluster
+                }
+                initialMeshClusterName={
+                  getClusterConfig(state.config, activeCluster).meshClusterName
                 }
               />
             ) : (
