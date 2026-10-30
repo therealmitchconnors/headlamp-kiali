@@ -120,6 +120,7 @@ it('shows first-tag precedence and preserves assessment links for selected alias
     namespace: 'istio-system',
     uid: 'cp',
     revision: 'blue',
+    configurationContainer: 'inspected-first',
     replicas: null,
     stale: false,
     configurationWarnings: [],
@@ -160,6 +161,8 @@ it('shows first-tag precedence and preserves assessment links for selected alias
     ],
   };
   render(<MeshResults snapshot={snapshot} />);
+  expect(screen.getByRole('columnheader', { name: 'First container' })).toBeDefined();
+  expect(screen.getByRole('cell', { name: 'inspected-first' })).toBeDefined();
   expect(screen.getByText('First webhook (selected)')).toBeDefined();
   expect(screen.getByText('Later webhook (ignored)')).toBeDefined();
   const links = screen.getAllByRole('link', { name: 'Inspect configured mTLS' });

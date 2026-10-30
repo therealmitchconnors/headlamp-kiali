@@ -2751,8 +2751,33 @@ No cluster mutation occurred. Expected HTTP diagnostics include this missing
 optional map and the host's CRD-v1beta1 probe, not plugin execution failures.
 Desktop verification and complete mesh/security parity remain open.
 
-### Declared managed-revision selection
+### Controller container provenance
 
+The active pinned discovery caller reads `istiod.Spec.Template.Spec.Containers[0]`
+for environment, arguments, mounts and resource fields. Native controller
+observation now uses that first declared container rather than preferentially
+selecting a later container named `discovery`. Image, cluster ID, shared source
+and override guards all use the same selected object. Mesh inventory identifies
+the inspected container explicitly. Malformed first records fail discovery;
+missing/empty containers remain configuration-blocked, without skipping ahead.
+
+Verification passed **1,961 focused tests in five files**, the full **22,108-test/
+181-file** suite and normal gates. Three hosted groups made twenty intercepted
+GETs, checking order reversal, first-only shared reads, malformed-first rejection
+and missing-source blocking. Revision-tag regressions also passed. Unintercepted
+managed `aks-istio-system/istiod-asm-1-30` confirmed the displayed first container
+is `discovery`, with its actual captured image. No settings or cluster objects
+were changed.
+
+This corrects container selection, not complete control-plane discovery.
+The source audit also found environment-loop semantics still needing
+reconciliation before managed-scope certification: last `CLUSTER_ID`/
+`SHARED_MESH_CONFIG` assignment, exact-string-true accumulation and indirection/
+noncanonical-value guards. Local self-management compares the observed ID to
+the logical cluster name independently of `ManagesExternal`; do not infer that
+logical name from the Headlamp context or saved telemetry identity.
+
+### Declared managed-revision selection
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
 `istio/kubernetes.go` (blob `1ae3f6611d27f964da9d3024ee339615cddd9f5b`),
 with the original ambient projection from `models/namespace.go`.

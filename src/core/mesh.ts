@@ -14,6 +14,7 @@ export interface ControlPlaneObservation {
   namespace: string;
   uid: string;
   revision: string;
+  configurationContainer?: string;
   image?: string;
   clusterId?: string;
   sharedMeshConfig?: string;
@@ -204,10 +205,11 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     throw new Error('Deployment did not match the istiod discovery selector');
   const revision = found['istio.io/rev'] ?? '';
   const pod = value.spec.template.spec;
-  const containers = Array.isArray(pod.containers) ? pod.containers.filter(isRecord) : [];
-  const container =
-    containers.find(container => container.name === 'discovery') ??
-    (containers.length === 1 ? containers[0] : undefined);
+  if (pod.containers !== undefined && !Array.isArray(pod.containers))
+    throw new Error('Malformed istiod container list');
+  const first: unknown = Array.isArray(pod.containers) ? pod.containers[0] : undefined;
+  if (first !== undefined && !isRecord(first)) throw new Error('Malformed first istiod container');
+  const container = isRecord(first) ? first : undefined;
   const configurationWarnings: string[] = [];
   let effectiveConfigBlocked = !container;
   const env = container && Array.isArray(container.env) ? container.env.filter(isRecord) : [];
@@ -235,7 +237,7 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     configurationWarnings.push('External control-plane topology is not resolved');
     effectiveConfigBlocked = true;
   }
-  if (!container) configurationWarnings.push('A unique discovery container was not found');
+  if (!container) configurationWarnings.push('The first declared container was not found');
   const args = container && Array.isArray(container.args) ? container.args : [];
   if (
     args.some(
@@ -287,6 +289,7 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     namespace: value.metadata.namespace,
     uid: value.metadata.uid,
     revision,
+    configurationContainer: typeof container?.name === 'string' ? container.name : undefined,
     image: typeof container?.image === 'string' ? container.image : undefined,
     clusterId,
     sharedMeshConfig: shared || undefined,

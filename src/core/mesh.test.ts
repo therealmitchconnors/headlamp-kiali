@@ -163,6 +163,59 @@ it('keeps shared, mounted, indirect and external configuration uncertainty visib
   for (const fragment of ['indirection', 'External', 'Explicit', 'Mounted'])
     expect(found.configurationWarnings.some(warning => warning.includes(fragment))).toBe(true);
 });
+it('observes the first declared container rather than preferring a discovery-named sibling', () => {
+  const first = {
+    name: 'first',
+    image: 'first:image',
+    env: [
+      { name: 'CLUSTER_ID', value: 'first-cluster' },
+      { name: 'SHARED_MESH_CONFIG', value: 'first-shared' },
+    ],
+  };
+  const input = {
+    ...controller,
+    spec: {
+      ...controller.spec,
+      template: {
+        spec: {
+          containers: [
+            first,
+            { ...controller.spec.template.spec.containers[0], args: ['--meshConfigFile=/ignored'] },
+          ],
+        },
+      },
+    },
+  };
+  const observed = controlPlaneObservation(input);
+  expect(observed).toMatchObject({
+    configurationContainer: 'first',
+    image: 'first:image',
+    clusterId: 'first-cluster',
+    sharedMeshConfig: 'first-shared',
+    effectiveConfigBlocked: false,
+  });
+  input.spec.template.spec.containers.reverse();
+  expect(controlPlaneObservation(input)).toMatchObject({
+    configurationContainer: 'discovery',
+    clusterId: 'mesh-east',
+    effectiveConfigBlocked: true,
+  });
+});
+it('does not skip malformed first containers and keeps missing-container configuration blocked', () => {
+  const input = (containers: unknown) => ({
+    ...controller,
+    spec: { ...controller.spec, template: { spec: { containers } } },
+  });
+  expect(() => controlPlaneObservation(input('invalid'))).toThrow('container list');
+  expect(() =>
+    controlPlaneObservation(input([null, controller.spec.template.spec.containers[0]]))
+  ).toThrow('first istiod container');
+  expect(controlPlaneObservation(input([]))).toMatchObject({
+    configurationContainer: undefined,
+    effectiveConfigBlocked: true,
+    configurationWarnings: ['The first declared container was not found'],
+  });
+});
 it('uses the pinned standard ConfigMap naming while validating API-safe names', () => {
   expect(revisionConfigMapName('istio', 'default')).toBe('istio');
   expect(revisionConfigMapName('istio', '')).toBe('istio');

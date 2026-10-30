@@ -194,7 +194,7 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
       <SectionBox title={t('Local control planes')}>
         <Typography variant="body2">
           {t(
-            'Discovery selects Deployments labeled app=istiod. Standard revision ConfigMaps are inspected without applying Istio defaults or reading Secrets.'
+            'Discovery selects Deployments labeled app=istiod. Configuration observations use the first declared container, matching pinned Kiali discovery, not a search for a discovery-named container. Standard revision ConfigMaps are inspected without applying Istio defaults or reading Secrets.'
           )}
         </Typography>
         <SimpleTable
@@ -218,6 +218,10 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
                   {plane.controller.namespace}/{plane.controller.name}
                 </Link>
               ),
+            },
+            {
+              label: t('First container'),
+              getter: (plane: MeshControlPlane) => display(plane.controller.configurationContainer),
             },
             {
               label: t('Revision'),

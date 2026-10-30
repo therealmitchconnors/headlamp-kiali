@@ -381,6 +381,16 @@ fixture initialization must positively verify the seeded schema/cluster slice
 as well as ConfigStore/localStorage equality; two undefined values are not a
 successful persistence check.
 
+Controller-container tests must put a differently named container before a
+`discovery` container and give them different images, cluster IDs and shared
+ConfigMap names. Assert that only the first source contributes; reverse order
+and require a new capture to replace it. A malformed first item must not be
+filtered away, while missing containers must retain an unresolved configuration.
+Three hosted groups made twenty GETs, revision-tag regressions passed, and the
+actual managed Istiod first-container name/image matched the UI. Focused tests
+passed 1,961 cases in five files; the full suite passed 22,108 in 181 files.
+No Secret, settings or cluster mutation was needed.
+
 Same-context revision-tag selection has a separate source-pinned oracle:
 
 ```sh

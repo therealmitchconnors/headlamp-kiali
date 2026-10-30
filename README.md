@@ -1433,6 +1433,12 @@ runtime health. Namespace/controller matches are explicitly label hints;
 conflicting labels, ambiguous tags and incomplete reads are not resolved
 automatically.
 
+The **First container** column identifies the source of controller image,
+`CLUSTER_ID` and shared/configuration observations. Pinned Kiali inspects the
+first declared container, even if a later container is named `discovery`.
+Malformed first entries are not skipped; missing containers keep configuration
+unresolved. This is observation provenance, not proof of which process runs Istiod.
+
 The **Pinned Kiali revision candidate** column separately follows the pinned
 managed-revision label selector. Maistra membership takes precedence unless the
 ignore label is present (even with value `false`); enabled legacy injection takes

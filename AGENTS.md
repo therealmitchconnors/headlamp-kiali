@@ -213,6 +213,9 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   aliases or fall back on an explicit empty tag. Missing controller revisions
   remain empty, although empty/default ConfigMap names are both unsuffixed.
   This does not implement full managed-cluster tag assignment or membership.
+- Pinned controller discovery reads the first declared container, not the first
+  container named discovery. Keep image/env/argument/mount provenance together;
+  never filter away a malformed first entry and inspect a later container.
 - Dashboard rows belong to the selected template, not included templates.
   Nonpositive values use two; native viewport plot sizing is opt-in unless rows
   are explicit. It must not alter query budgets or hide captions/errors/tables.

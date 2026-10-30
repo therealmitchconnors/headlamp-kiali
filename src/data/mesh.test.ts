@@ -74,6 +74,37 @@ it('uses explicit scope, standard revision sources and no Secret or write reques
   }
   expect(signal.aborted).toBe(false);
 });
+it('uses only first-container configuration references without reading a later discovery container source', async () => {
+  const deployment = structuredClone(controller);
+  Object.assign(deployment.spec.template.spec, {
+    containers: [
+      {
+        name: 'first',
+        image: 'first:image',
+        env: [{ name: 'SHARED_MESH_CONFIG', value: 'first-shared' }],
+      },
+      {
+        name: 'discovery',
+        image: 'second:image',
+        env: [{ name: 'SHARED_MESH_CONFIG', value: 'ignored-shared' }],
+      },
+    ],
+  });
+  vi.mocked(ApiProxy.request).mockImplementation(async path =>
+    response(String(path), [deployment])
+  );
+  const result = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  expect(result.controlPlanes[0].controller.configurationContainer).toBe('first');
+  expect(result.controlPlanes[0].shared).toMatchObject({ status: 'ready', name: 'first-shared' });
+  expect(
+    vi.mocked(ApiProxy.request).mock.calls.some(([path]) => String(path).includes('/first-shared'))
+  ).toBe(true);
+  expect(
+    vi
+      .mocked(ApiProxy.request)
+      .mock.calls.some(([path]) => String(path).includes('/ignored-shared'))
+  ).toBe(false);
+});
 it('captures its cluster before awaiting discovery and retains one whole-read deadline', async () => {
   const scope = { cluster: 'alpha' };
   const pending = loadMeshSnapshot(scope, new AbortController().signal);
