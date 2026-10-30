@@ -16,10 +16,17 @@ import {
   RevisionTag,
   revisionTag,
 } from '../core/mesh';
+import { namespaceRevisionSelection } from '../core/namespaceRevision';
 import { isDnsSubdomain, isRecord } from '../core/object';
-import { ClusterScope } from '../core/scope';
+import { ClusterScope, clusterScope } from '../core/scope';
 import { CollectionRead, readCollection } from './collections';
-import { InvalidResponseError, readCluster, ReadFailure, readFailure } from './requests';
+import {
+  InvalidResponseError,
+  readCluster,
+  ReadFailure,
+  readFailure,
+  withDiagnosticDeadline,
+} from './requests';
 
 export type ConfigurationRead<T> =
   | { status: 'ready'; name: string; value: T }
@@ -54,6 +61,8 @@ export function namespaceMeshConfiguration(
     return unavailable('Namespace, controller or revision-tag discovery is incomplete');
   const observed = snapshot.namespaces.items.find(item => item.name === namespace);
   if (!observed) return unavailable('Namespace was not returned by mesh discovery');
+  const revision = namespaceRevisionSelection(observed.labels);
+  if (revision.ok === false) return unavailable(revision.message);
   const association = namespaceAssociations(
     [observed],
     snapshot.controllers.items,
@@ -66,10 +75,15 @@ export function namespaceMeshConfiguration(
     plane =>
       plane.controller.namespace === namespace ||
       (plane.effective?.status === 'ready' && plane.effective.value.rootNamespace === namespace) ||
-      association.controllers.some(controller => controller.uid === plane.controller.uid)
+      (revision.basis !== 'maistra-member' &&
+        association.controllers.some(controller => controller.uid === plane.controller.uid))
   );
   if (candidates.length !== 1)
-    return unavailable('A unique local controller configuration could not be resolved');
+    return unavailable(
+      revision.basis === 'maistra-member'
+        ? 'Maistra membership cannot be resolved from local Istiod revision-label hints'
+        : 'A unique local controller configuration could not be resolved'
+    );
   const plane = candidates[0];
   if (plane.effective?.status !== 'ready')
     return unavailable(
@@ -127,6 +141,14 @@ export async function loadMeshSnapshot(
   scope: ClusterScope,
   signal: AbortSignal
 ): Promise<MeshSnapshot> {
+  signal.throwIfAborted();
+  const captured = clusterScope(scope.cluster);
+  return withDiagnosticDeadline(signal, 'Mesh discovery exceeded 15 seconds', requestSignal =>
+    readMeshSnapshot(captured, requestSignal)
+  );
+}
+
+async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promise<MeshSnapshot> {
   const [namespaces, controllers, tags] = await Promise.all([
     readCollection(
       scope,

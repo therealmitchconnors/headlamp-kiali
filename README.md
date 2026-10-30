@@ -1386,6 +1386,20 @@ runtime health. Namespace/controller matches are explicitly label hints;
 conflicting labels, ambiguous tags and incomplete reads are not resolved
 automatically.
 
+The **Pinned Kiali revision candidate** column separately follows the pinned
+managed-revision label selector. Maistra membership takes precedence unless the
+ignore label is present (even with value `false`); enabled legacy injection takes
+precedence over an Istio revision, and ambient without a revision selects
+`default`. Explicit empty revisions remain empty. This is not the Namespace
+DTO's injection-revision field, a resolved controller, or a complete managed-
+namespace inventory. Maistra-only/ignored labels remain inspectable in the
+mesh-labelled filter.
+
+Coincident Istiod revision labels no longer resolve a Maistra membership to an
+Istio configuration automatically. Own/root namespace exceptions remain intact,
+and resolved-configuration links are offered only for ready contexts. Malformed
+relevant label values remain unavailable rather than becoming a fallback.
+
 The **Namespace configuration context** table separately evaluates configured
 Istio discovery selectors after resolving a local controller. Selectors are
 OR-combined, with AND semantics within each selector; control-plane and root
@@ -1405,7 +1419,9 @@ Headlamp cluster name and metric cluster labels.
 
 No Secrets are read. Collections, configuration reads and parser input are
 bounded; at most 20 controllers receive configuration lookups, with three
-simultaneous requests. This is read-only inventory and selected-field projection,
+simultaneous requests and a shared fifteen-second discovery deadline. Cluster
+scope is captured before awaiting reads; timeout cancels outstanding work and
+requires an explicit retry. This is read-only inventory and selected-field projection,
 not observed mTLS, certificate, proxy-sync or full mesh-security parity.
 
 ## Configured mTLS assessment

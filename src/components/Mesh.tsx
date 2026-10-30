@@ -13,6 +13,7 @@ import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useCallback, useMemo, useState } from 'react';
 import { MeshConfigFields, NamespaceAssociation, namespaceAssociations } from '../core/mesh';
+import { namespaceRevisionSelection } from '../core/namespaceRevision';
 import { clusterScope } from '../core/scope';
 import {
   ConfigurationRead,
@@ -82,7 +83,12 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
     snapshot.controllers.items,
     snapshot.tags.items,
     complete
-  ).filter(association => !labelledOnly || association.mode !== 'unselected');
+  ).filter(
+    association =>
+      !labelledOnly ||
+      association.mode !== 'unselected' ||
+      namespaceRevisionSelection(association.namespace.labels).labelled
+  );
   const modeNames: Record<NamespaceAssociation['mode'], string> = {
     ambient: t('Ambient label'),
     revision: t('Revision label'),
@@ -338,6 +344,11 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
               'Matching labels and revision tags are hints, not proof of actual injection. Workload overrides, webhook selectors and discovery selectors may change behavior. Ambiguous or incomplete matches are not resolved automatically.'
             )}
           </Typography>
+          <Typography variant="body2">
+            {t(
+              'The pinned Kiali revision selector is a separate label projection, not a resolved controller or managed-namespace inventory. It preserves Maistra membership/ignore presence, enabled-injection precedence and the ambient default. Control-plane/root namespace exceptions and actual injection require separate evidence.'
+            )}
+          </Typography>
           <FormControlLabel
             label={t('Show only mesh-labeled namespaces')}
             control={
@@ -371,6 +382,37 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
                 getter: (row: NamespaceAssociation) => display(row.requestedRevision),
               },
               {
+                label: t('Pinned Kiali revision candidate'),
+                getter: (row: NamespaceAssociation) => {
+                  const selection = namespaceRevisionSelection(row.namespace.labels);
+                  if (selection.ok === false)
+                    return <Typography color="warning.main">{selection.message}</Typography>;
+                  const basis = {
+                    'maistra-member': t('Maistra membership label'),
+                    'injection-enabled': t('Enabled injection takes precedence'),
+                    'ambient-default': t('Ambient without a revision uses default'),
+                    'revision-label': t('Explicit revision label'),
+                    unselected: t('No revision selected by labels'),
+                  };
+                  return (
+                    <Stack spacing={0.5}>
+                      <Typography>
+                        {selection.revision ||
+                          (selection.basis === 'unselected'
+                            ? t('No candidate')
+                            : t('Explicit empty selection'))}
+                      </Typography>
+                      <Typography variant="caption">{basis[selection.basis]}</Typography>
+                      {selection.maistraIgnored && (
+                        <Typography variant="caption">
+                          {t('Maistra ignore label is present; its value is not a boolean switch.')}
+                        </Typography>
+                      )}
+                    </Stack>
+                  );
+                },
+              },
+              {
                 label: t('Matching local controller labels'),
                 getter: (row: NamespaceAssociation) =>
                   row.controllers
@@ -391,7 +433,9 @@ export function MeshResults({ snapshot }: { snapshot: MeshSnapshot }) {
               {
                 label: t('Configuration assessment'),
                 getter: (row: NamespaceAssociation) =>
-                  row.complete && row.controllers.length === 1 ? (
+                  row.complete &&
+                  row.controllers.length === 1 &&
+                  namespaceContexts.get(row.namespace.name)?.status === 'ready' ? (
                     <Link
                       routeName="kiali-mtls"
                       activeCluster={snapshot.cluster}

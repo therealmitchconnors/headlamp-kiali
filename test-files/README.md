@@ -355,6 +355,32 @@ partial-coverage disclaimer. Four scenarios/eight resource GETs passed with no
 settings or cluster mutations. The targeted suite passed 334 tests in five files.
 The preceding dashboard checkpoint `08b4021` passed 19,978 tests in 176 files.
 
+Namespace revision selection has an independent source-pinned oracle:
+
+```sh
+node scripts/parity/namespace-revision-oracle.mjs --source /path/to/pinned/kiali --check
+```
+
+Its 1,538 cases execute original `GetRevision` and ambient-label projection code.
+Test the native provenance separately: Maistra membership and ignore presence,
+enabled-injection precedence, ambient defaults and explicit empty revisions.
+Do not conflate this selector with Namespace DTO injection revision, actual
+injection, controller resolution or complete managed-namespace membership.
+
+Hosted checks use synthetic namespace/controller/configuration GETs only.
+Show revision candidates alongside existing conflicting-label diagnostics.
+Keep Maistra-only rows visible, block coincident Istiod assessment links unless
+the configuration context is ready, and preserve own/root exceptions. Toggle
+the local filter without requests; malformed relevant labels must not fall back.
+Hold discovery for its shared deadline and retry explicitly. Four groups made
+eighteen GETs and measured 15,544 ms. Actual Bookinfo labels matched the displayed
+`asm-1-30` candidate without interception. The focused increment passed
+1,713 tests in eight files. No settings or cluster resources were changed.
+The full shared mesh-consumer suite passed 21,564 tests in 177 files. Browser
+fixture initialization must positively verify the seeded schema/cluster slice
+as well as ConfigStore/localStorage equality; two undefined values are not a
+successful persistence check.
+
 ServiceEntry KIA1211/KIA1212 tests cover complete-source and UID/spec freshness
 gates, exact case-insensitive host/port groups, differing protocols, namespace
 exports/defaults, ambient source/viewer behavior, Sidecar import filtering and

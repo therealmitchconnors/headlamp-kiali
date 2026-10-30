@@ -2713,6 +2713,57 @@ No cluster mutation occurred. Expected HTTP diagnostics include this missing
 optional map and the host's CRD-v1beta1 probe, not plugin execution failures.
 Desktop verification and complete mesh/security parity remain open.
 
+### Declared managed-revision selection
+
+`core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
+`istio/kubernetes.go` (blob `1ae3f6611d27f964da9d3024ee339615cddd9f5b`),
+with the original ambient projection from `models/namespace.go`.
+The new offline Go oracle executes **1,538 independent cases** across absent,
+empty and explicit revision/injection/ambient/Maistra membership/ignore values.
+All four source files are checksum-pinned. Independent original-Go evidence now
+totals **19,158 cases**; this is not a full discovery or managed-namespace oracle.
+
+Maistra membership presence wins unless the ignore label is present, regardless
+of its string value. Enabled injection then wins over revision. Ambient uses
+default only when the revision label is absent; an explicit empty revision
+prevents that fallback. This helper is distinct from the Namespace DTO's
+injection-revision projection, which has different disabled-label behavior.
+Native provenance is shown alongside existing conservative injection/controller
+hints, not substituted for complete controller resolution.
+
+The mesh-labelled filter now retains Maistra-only/ignored labels. Coincident
+Istiod revision hints cannot resolve a Maistra membership automatically; explicit
+controller/root namespace exceptions are preserved. Assessment links require a
+ready configuration context. Relevant malformed labels defer explicitly.
+This does not activate Service port checks or infer runtime injection.
+
+The shared mesh loader now captures the cluster before awaiting and applies a
+fifteen-second whole-discovery deadline, including configuration enrichment.
+Timeout aborts outstanding reads instead of returning a success-shaped partial
+capture; caller-owned signals remain untouched. Existing partial per-source
+errors still remain distinct from timeout.
+
+Verification passed **1,713 focused tests in eight files**, type/lint/i18n/build
+and source/resource/catalog/parity checks. Four hosted groups/eighteen
+intercepted GETs checked precedence, empty values, ignored-label presence,
+Maistra resolution blocking, filter behavior, malformed inputs and deadline/
+retry (**15,544 ms**). An unintercepted Bookinfo read confirmed the rendered
+`asm-1-30` candidate. No settings or cluster objects were changed.
+The full shared-consumer regression suite also passed **21,564 tests in
+177 files** at this increment.
+
+The Service checker audit found an important remaining prerequisite:
+`IstioValidationsService.Validate` pools Pods across all managed namespaces,
+and `FilterPodsByService` matches labels without an additional namespace test.
+An empty selector matches the pooled set. `HasIstioSidecar` is an all-Pod test
+that returns true for an empty set; `HasAnyAmbient` is separate. Sidecar evidence
+comes from the parsed status annotation (including named native init containers),
+not the native correlation `proxyMode` field. Deployment port matching uses the
+first cluster-wide Deployment whose **metadata** labels match, and control-plane
+exclusion is namespace-only across control-plane clusters. Namespace-local Pod/
+Deployment approximations are therefore insufficient for KIA0601/KIA0602/KIA0701.
+These checks remain deferred pending complete managed-scope evidence.
+
 ### Configured namespace discovery
 
 The shared mesh context now evaluates valid discovery selectors instead of

@@ -59,6 +59,9 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   `new pluginLib.ConfigStore('kiali').get()` value before a hard reload,
   including after restoring test settings. Inspect only Kiali's slice; do not
   modify private Redux state or leave an intercepted fixture endpoint enabled.
+  After seeding fixture settings, also require the expected schemaVersion and
+  cluster slice to exist: equality between two undefined values is not proof
+  of a successful storage flush.
 - MUI dialogs can be visible while their fade transition is still running.
   Wait for dialog/ancestor opacity to reach 1, or disable screenshot animations,
   before diagnosing a transparent dialog from an image.
@@ -200,6 +203,19 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   namespace, following pinned Kiali discovery. Keep that provenance separate
   from raw configuration; never apply this fallback to denied, missing,
   ambiguous or unsupported configuration sources.
+- Pinned GetRevision is a managed-revision label selector, not Namespace DTO
+  injection revision or proof of injection. Maistra membership wins unless its
+  ignore key is present; enabled injection wins over revision; ambient defaults
+  only when the revision key is absent. Empty values retain presence semantics.
+  Do not resolve Maistra membership through coincident Istiod label hints.
+- Service port checkers pool Pods across all managed namespaces and match labels
+  without another namespace filter; empty selectors match that pool. Their
+  sidecar predicate is all-Pod/vacuous-empty, with a separate any-ambient path,
+  and derives sidecars from status annotations rather than correlation proxyMode.
+  Port matching selects the first cluster-wide Deployment by metadata labels.
+  Do not enable these checks with namespace-only approximations.
+  A declared revision candidate is not the complete managed-namespace set, and
+  Namespace DTO injection revision has different semantics from GetRevision.
 - Keep toolchain-owned build configuration intact. Use existing npm scripts.
 - Type-check, lint, and build changes. Before claiming runtime behavior works,
   check the actual contribution and browser console in Headlamp; a successful

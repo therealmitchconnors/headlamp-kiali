@@ -69,6 +69,12 @@ dashboards and integration/live/Desktop closure remain substantial work.
   their exact groups/fields. Inactive kinds no longer get spurious deferrals;
   malformed active selectors defer explicitly. Runtime absence checking remains
   gated on a complete mesh-workload model, not bounded correlation.
+  Declared namespace revision selection now has a 1,538-case original-Go oracle
+  and visible provenance separate from controller/injection hints. Maistra
+  membership cannot be resolved through coincident Istiod labels; assessment
+  links require ready contexts. Mesh reads capture cluster scope and share a
+  fifteen-second deadline. Four hosted groups/eighteen GETs measured 15,544 ms;
+  actual Bookinfo labels rendered `asm-1-30` without interception.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -388,7 +394,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
   visibility. Four hosted groups proved eight requests per explicit capture
   (sixteen across reload), no requests for visibility/filter actions and
   definition-default reset. Category-axis regressions passed.
-- Latest selector-caller correction: **334 focused tests in five files**, with
+- Latest namespace-selection prerequisite: **1,713 focused tests in eight files**
+  plus the full **21,564-test suite in 177 files**, type/lint/i18n/build/package and
+  source/resource/catalog/parity/hosted checks. No Service port checker was
+  activated: complete managed-namespace and pooled-Pod evidence remain prerequisites.
+- Previous selector-caller correction: **334 focused tests in five files**, with
   type/lint/build/package, source/resource/catalog/parity checks and four hosted cases
   (eight resource GETs). All audited source blobs matched the pinned inventory;
   no finding codes or Go oracle cases were added.
@@ -427,10 +437,12 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint at `08b4021`: **19,978 tests in 176 files**.
-  The earlier 19,415-test/155-file checkpoint remains historical evidence.
+  Latest full-suite checkpoint: **21,564 tests in 177 files**.
+  Earlier checkpoints at `08b4021` (19,978/176) and before it (19,415/155)
+  remain historical evidence.
   Comparison metrics reject unexpected aggregation labels and mixed times.
-  Independent original-Go evidence totals 17,620 cases, including 216 custom-dashboard
+  Independent original-Go evidence totals 19,158 cases, including 1,538 namespace-revision
+  and 216 custom-dashboard
   queries, 228 WorkloadEntry
   health and 96 VM-label selection,
   176 selectorless
@@ -454,7 +466,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `1ebdbd3721759fd2b1da39eec63f72c2e1ae49dbf46c24a0304edf73144ac3d7`.
+  `2af561a618d22ac25b27fc640e50e8e8853ca32cb02943d81575a69224844280`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1113,6 +1125,17 @@ Desktop debug target. These are development-environment milestones, not product
 installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
+
+The current validation prerequisite is complete managed-namespace/controller
+evidence. The new pinned GetRevision label projection is not that inventory,
+nor the Namespace DTO injection-revision field. Preserve its literal/empty/
+Maistra/injection/ambient precedence without automatically resolving controllers.
+Service checks in the pinned caller pool Pods across all managed namespaces,
+match selectors without another namespace filter, and treat empty selectors
+as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a
+separate any-ambient path and annotation-derived proxy evidence. Deployment port
+mapping uses the first cluster-wide metadata-label match. Namespace-local
+approximations must not activate KIA0601/KIA0602/KIA0701.
 
 The dashboard continuation is row-layout/link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated

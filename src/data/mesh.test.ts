@@ -66,9 +66,40 @@ it('uses explicit scope, standard revision sources and no Secret or write reques
   });
   expect(ApiProxy.request).toHaveBeenCalledTimes(5);
   for (const [path, options] of vi.mocked(ApiProxy.request).mock.calls) {
-    expect(options).toMatchObject({ cluster: 'alpha', signal });
+    expect(options?.cluster).toBe('alpha');
+    expect(options?.signal).toBeInstanceOf(AbortSignal);
+    expect(options?.signal?.aborted).toBe(true);
     expect(options?.method).toBeUndefined();
     expect(String(path)).not.toContain('/secrets/');
+  }
+  expect(signal.aborted).toBe(false);
+});
+it('captures its cluster before awaiting discovery and retains one whole-read deadline', async () => {
+  const scope = { cluster: 'alpha' };
+  const pending = loadMeshSnapshot(scope, new AbortController().signal);
+  scope.cluster = 'beta';
+  const result = await pending;
+  expect(result.cluster).toBe('alpha');
+  expect(
+    vi.mocked(ApiProxy.request).mock.calls.every(([, options]) => options?.cluster === 'alpha')
+  ).toBe(true);
+  vi.useFakeTimers();
+  try {
+    vi.mocked(ApiProxy.request)
+      .mockReset()
+      .mockImplementation(() => new Promise(() => {}));
+    const caller = new AbortController();
+    const waiting = loadMeshSnapshot(clusterScope('alpha'), caller.signal);
+    const failure = expect(waiting).rejects.toThrow('Mesh discovery exceeded 15 seconds');
+    await vi.advanceTimersByTimeAsync(15000);
+    await failure;
+    expect(ApiProxy.request).toHaveBeenCalledTimes(3);
+    expect(
+      vi.mocked(ApiProxy.request).mock.calls.every(([, options]) => options?.signal?.aborted)
+    ).toBe(true);
+    expect(caller.signal.aborted).toBe(false);
+  } finally {
+    vi.useRealTimers();
   }
 });
 it('resolves only unambiguous reported namespace-to-controller configuration', async () => {
@@ -109,6 +140,41 @@ it('resolves only unambiguous reported namespace-to-controller configuration', a
   expect(namespaceMeshConfiguration(mesh, 'bookinfo')).toMatchObject({
     status: 'unavailable',
     message: expect.stringContaining('require values'),
+  });
+});
+it('does not resolve Maistra membership through coincident Istiod revision labels', async () => {
+  const mesh = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  mesh.namespaces.items[0].labels = {
+    'maistra.io/member-of': 'mesh-other',
+    'istio.io/rev': 'blue',
+  };
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo')).toMatchObject({
+    status: 'unavailable',
+    message: expect.stringContaining('Maistra membership'),
+  });
+  mesh.namespaces.items[0].labels = {
+    ...mesh.namespaces.items[0].labels,
+    'maistra.io/ignore-namespace': 'false',
+  };
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('ready');
+  mesh.namespaces.items.push({
+    name: 'istio-system',
+    labels: { 'maistra.io/member-of': 'mesh-other', 'istio.io/rev': 'blue' },
+  });
+  expect(namespaceMeshConfiguration(mesh, 'istio-system')).toMatchObject({
+    status: 'ready',
+    discovery: 'implicit',
+  });
+});
+it('keeps declared ambient defaults separate from actual controller resolution and rejects malformed label evidence', async () => {
+  const mesh = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  mesh.namespaces.items[0].labels = { 'istio.io/dataplane-mode': 'ambient' };
+  mesh.tags.items.push({ name: 'tag-default', tag: 'default', revision: 'blue' });
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo').status).toBe('unavailable');
+  mesh.namespaces.items[0].labels = { 'istio.io/rev': 'bad value' };
+  expect(namespaceMeshConfiguration(mesh, 'bookinfo')).toMatchObject({
+    status: 'unavailable',
+    message: expect.stringContaining('bounded Kubernetes label values'),
   });
 });
 it('keeps own/root namespace exceptions without assigning unrelated unlabelled namespaces', async () => {

@@ -5,6 +5,9 @@ const upstream = JSON.parse(await readFile('test-files/parity/upstream.json', 'u
 const frontend = JSON.parse(await readFile('test-files/parity/frontend.json', 'utf8'));
 const health = JSON.parse(await readFile('test-files/parity/health-oracle.json', 'utf8'));
 const labels = JSON.parse(await readFile('test-files/correlation/label-oracle.json', 'utf8'));
+const namespaceRevisions = JSON.parse(
+  await readFile('test-files/parity/namespace-revision-oracle.json', 'utf8')
+);
 const calculator = JSON.parse(await readFile('test-files/parity/health-calculator.json', 'utf8'));
 const hosts = JSON.parse(await readFile('test-files/parity/host-oracle.json', 'utf8'));
 const mtls = JSON.parse(await readFile('test-files/parity/mtls-oracle.json', 'utf8'));
@@ -86,6 +89,7 @@ for (const artifact of [
   frontend,
   health,
   labels,
+  namespaceRevisions,
   calculator,
   hosts,
   mtls,
@@ -192,6 +196,13 @@ assert.equal(health.requests.length, 12);
 assert.equal(labels.cases.length, 75);
 assert.equal(labels.sources['config/config.go'], 'fbde570684b760495782fce1df801d9c0046723e');
 assert.equal(Object.keys(labels.sources).length, 4);
+assert.equal(namespaceRevisions.cases.length, 1538);
+assert.deepEqual(namespaceRevisions.sources, {
+  'istio/kubernetes.go': '1ae3f6611d27f964da9d3024ee339615cddd9f5b',
+  'config/config.go': 'fbde570684b760495782fce1df801d9c0046723e',
+  'models/mesh.go': '518a4242407e27452bb199b91344456d89908ad4',
+  'models/namespace.go': '0f5b43473ce9fe7f7de6592d405d9997515278da',
+});
 assert.equal(health.workloads[0].input, null);
 assert.equal(health.workloads[0].expected, 'NA');
 assert.equal(calculator.cases.length, 271);
@@ -411,5 +422,5 @@ for (const fixture of health.workloads) {
 }
 console.log(
   'Pinned inventory and oracle consistent: 508 sources, 616 inventory entries, ' +
-    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 216 custom-dashboard query, 72 validation-exclusion and 75 label Go oracle cases.'
+    '21 routes, 216 contract fields, 375 health-model, 271 health-calculator, 372 reporter, 627 host, 2600 mTLS, 760 import/export, 564 local-check, 1063 proxy-summary, 296 authorization-pattern, 960 authorization-host/visibility, 1728 graph-identity, 398 ServiceEntry grouping, 1087 DestinationRule conflict, 1800 TLS-override, 72 Sidecar root-selector, 288 Sidecar egress/registry, 576 VirtualService registry, 400 VirtualService conflict, 328 Istio Gateway conflict, 176 selectorless PeerAuthentication, 96 VM-label selection, 228 WorkloadEntry health, 348 PeerAuthentication, 984 DestinationRule peer-policy, 64 Gateway class membership, 508 Gateway collision, 180 histogram-query, 108 traffic-signal, 216 custom-dashboard query, 72 validation-exclusion, 1538 namespace-revision and 75 label Go oracle cases.'
 );

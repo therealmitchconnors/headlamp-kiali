@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { loadMeshSnapshot, MeshSnapshot } from '../data/mesh';
@@ -48,6 +48,42 @@ vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   ),
 }));
 afterEach(cleanup);
+it('shows source revision candidates and provenance without resolving controllers or hiding Maistra labels', () => {
+  const snapshot: MeshSnapshot = {
+    cluster: 'alpha',
+    namespaces: {
+      complete: true,
+      items: [
+        { name: 'both-labels', labels: { 'istio-injection': 'enabled', 'istio.io/rev': 'blue' } },
+        { name: 'ambient-default', labels: { 'istio.io/dataplane-mode': 'ambient' } },
+        { name: 'maistra', labels: { 'maistra.io/member-of': 'mesh-other' } },
+        {
+          name: 'ignored-maistra',
+          labels: { 'maistra.io/member-of': 'mesh-other', 'maistra.io/ignore-namespace': 'false' },
+        },
+      ],
+    },
+    controllers: { complete: true, items: [] },
+    tags: { complete: true, items: [] },
+    controlPlanes: [],
+  };
+  render(<MeshResults snapshot={snapshot} />);
+  const section = screen
+    .getByRole('heading', { name: 'Namespace injection labels and revision hints' })
+    .closest('section')!;
+  expect(within(section).getAllByText('default')).toHaveLength(2);
+  expect(within(section).getByText('Conflicting injection labels')).toBeDefined();
+  expect(within(section).getByText('Enabled injection takes precedence')).toBeDefined();
+  expect(within(section).getByText('Ambient without a revision uses default')).toBeDefined();
+  expect(within(section).getByText('mesh-other')).toBeDefined();
+  expect(
+    within(section).getByText('Maistra ignore label is present; its value is not a boolean switch.')
+  ).toBeDefined();
+  expect(within(section).queryByRole('link', { name: 'Inspect configured mTLS' })).toBeNull();
+  expect(
+    screen.getByText(/not a resolved controller or managed-namespace inventory/)
+  ).toBeDefined();
+});
 it('loads only on request, retains partial evidence and does not refetch for fresh translator functions', async () => {
   vi.mocked(loadMeshSnapshot).mockResolvedValue({
     cluster: 'alpha',
@@ -95,6 +131,10 @@ it('renders matched and excluded configured namespace contexts without claiming 
       items: [
         { name: 'bookinfo', labels: { 'istio.io/rev': 'blue', team: 'mesh' } },
         { name: 'other', labels: { 'istio.io/rev': 'blue', team: 'other' } },
+        {
+          name: 'maistra',
+          labels: { 'istio.io/rev': 'blue', team: 'mesh', 'maistra.io/member-of': 'other-mesh' },
+        },
       ],
     },
     controllers: { complete: true, items: [controller] },
@@ -111,5 +151,7 @@ it('renders matched and excluded configured namespace contexts without claiming 
   render(<MeshResults snapshot={snapshot} />);
   expect(screen.getByText('Matched configured discovery selector')).toBeDefined();
   expect(screen.getByText(/other: Namespace is excluded/)).toBeDefined();
+  expect(screen.getByText(/maistra: Maistra membership cannot be resolved/)).toBeDefined();
+  expect(screen.getAllByRole('link', { name: 'Inspect configured mTLS' })).toHaveLength(1);
   expect(screen.getByText(/not actual injection, traffic or health/)).toBeDefined();
 });
