@@ -361,7 +361,15 @@ dashboards and integration/live/Desktop closure remain substantial work.
   (78 resource/twelve metric GETs, 15,251 ms deadline). Actual Bookinfo linking,
   Deployment/one-Pod evidence and source identity passed in 22 read-only GETs.
   Native resource-name/spec/status/conditions/events views remain unchanged.
-- Latest workload increment: **175 focused tests in twelve files**, plus
+- Captured chart expansion now reuses scalar/grouped panel rendering in a
+  labelled dialog, including query scope, current sorting/value filters and
+  independent errors. Five hosted groups measured 220→520 px scalar expansion,
+  keyboard focus trap/restore, source invalidation and narrow-screen scrolling.
+  Opening/closing sent no requests (four metric GETs for explicit loads only).
+  Workload app/version expansion also passed without additional metric GETs.
+- Latest expansion increment: **51 focused tests in five files**, plus
+  type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
+- Previous workload increment: **175 focused tests in twelve files**, plus
   type/lint/i18n/build/package, resource/catalog/parity and hosted checks.
 - Previous sorting increment: **380 focused tests in eight files**, plus
   type/lint/i18n/build/package and catalog/resource/parity/hosted checks.
@@ -415,7 +423,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `d8343d095b0f412516f364548c515c41cecf82479563a889c293da514fd6aaf3`.
+  `2caf9be5142e77d8bb00029d56e844f6876afb63d1f62756d923891488811513`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1075,13 +1083,15 @@ installation requirements.
 
 ## Immediate next task: complete reusable validation and mesh context
 
-The dashboard continuation is remaining layout/link support and broader
+The dashboard continuation is remaining axis/row-layout/link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
 through an explicit inspector, reusing application recommendation/chart code
 while retaining paired app/version filters and a fresh workload overlay.
 Selected child controllers are rooted by UID without including sibling Pods.
 Native resource details remain the spec/status/conditions/events surface;
-the new inspector intentionally does not duplicate them. Series sorting retains its captured query grouping,
+the new inspector intentionally does not duplicate them. Captured panels can
+now expand without refetching, using a native keyboard-accessible dialog rather
+than claiming full upstream viewport/row layout parity. Series sorting retains its captured query grouping,
 lexical/exact-int64 order and sort-only label-removal semantics. Invalid integer
 strings and indistinguishable displayed groups fail explicitly instead of
 upstream's silent fallback or ambiguous series. Application recommendations now explicitly

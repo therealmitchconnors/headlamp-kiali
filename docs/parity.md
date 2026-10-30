@@ -1539,6 +1539,32 @@ non-resurrection. An actual Bookinfo application-to-workload link captured
 source identity in 22 unintercepted resource GETs. Application regressions
 passed separately (15,049 ms deadline). No Kubernetes writes occurred.
 
+### Captured chart expansion
+
+The pinned frontend `components/Charts/Dashboard.tsx` has a transient maximized
+chart state. The native equivalent now opens one captured panel in a labelled
+MUI dialog instead of replacing the entire dashboard grid. It reuses the same
+panel renderer and adds no data loader. Existing scalar/comparison heights
+remain 220/260 pixels; the expanded plot is 520 pixels with vertical dialog
+scrolling on constrained screens. This is an intentional native presentation,
+not complete upstream row/viewport-layout parity.
+
+Expansion retains captured namespace/cluster/time/equality filters and current
+sort/value-filter state. Errors, signed/zero values, units and display bounds
+are rendered identically. Query/source changes invalidate the dialog; closing
+does not refetch or resurrect prior results. Only the expanded instance of the
+panel is mounted, and Escape/Close restores focus to its unchanged expand
+control. MUI owns modal focus trapping and accessible title association.
+
+The increment passed **51 focused tests in five files** and type/lint/i18n/build,
+catalog/resource/parity checks. Five hosted groups issued only four metric
+GETs (initial load and explicit reload), measured scalar height **220→520 px**,
+and verified grouped sorting/filtering, negative/zero numeric values, scope
+display, source invalidation, error panels and keyboard trap/restore at a
+720×600 viewport without horizontal overflow. The workload regression also
+expanded captured app/version charts without increasing its twelve metric GETs
+(78 resource GETs, 15,228 ms inspection deadline). No cluster writes occurred.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

@@ -4,6 +4,10 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
@@ -62,6 +66,11 @@ export function DashboardResults({
   query: CustomDashboardQuery;
 }) {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState<{
+    data: Awaited<ReturnType<typeof loadCustomDashboard>>;
+    key: string;
+  }>();
+  useEffect(() => setExpanded(undefined), [cluster, endpoint, query]);
   const summaryNames = { avg: t('Average'), p50: 'P50', p90: 'P90', p95: 'P95', p99: 'P99' };
   const load = useCallback(
     (signal: AbortSignal) => loadCustomDashboard(clusterScope(cluster), endpoint, query, signal),
@@ -186,6 +195,104 @@ export function DashboardResults({
                         error instanceof Error ? error.message : t('Grouped chart is unavailable');
                     }
                   }
+                  const panel = (height?: number) => (
+                    <SectionBox title={title}>
+                      {chart.sortLabel && (
+                        <Typography variant="body2">
+                          {t(
+                            'Captured series ordering: {{label}} ({{mode}}). Sort-only labels are omitted from displayed groups; series are never merged.',
+                            {
+                              label: chart.sortLabel,
+                              mode:
+                                chart.sortLabelParseAs === 'int'
+                                  ? t('signed integer')
+                                  : t('lexical'),
+                            }
+                          )}
+                        </Typography>
+                      )}
+                      {grouped && (
+                        <Typography variant="body2">
+                          {t(
+                            'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
+                            { labels: groupLabels.join(', ') }
+                          )}
+                        </Typography>
+                      )}
+                      {groupingError && <Alert severity="error">{groupingError}</Alert>}
+                      {entries.map(({ key, metric, read, hiddenSeries }) => (
+                        <Stack key={key} spacing={1}>
+                          {(entries.length > 1 || metric.displayName !== chart.name) && (
+                            <Typography variant="subtitle2">{metric.displayName}</Typography>
+                          )}
+                          <Typography variant="body2">
+                            {t(
+                              'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                              {
+                                metric: metric.metricName,
+                                type: chart.dataType,
+                                aggregation: chart.aggregator ?? 'sum',
+                                scale: chart.unitScale ?? 1,
+                              }
+                            )}
+                          </Typography>
+                          {read.ok === false ? (
+                            <Alert severity="error">
+                              {entries.length > 1
+                                ? `${metric.displayName}: ${read.error.message}`
+                                : read.error.message}
+                            </Alert>
+                          ) : (
+                            <>
+                              {!!read.result.warnings.length && (
+                                <Alert severity="warning">{read.result.warnings.join('; ')}</Alert>
+                              )}
+                              {(entries.length > 1 || grouped) &&
+                                !read.result.series.some(series =>
+                                  series.samples.some(sample => sample.value !== null)
+                                ) && (
+                                  <Alert severity="info">
+                                    {hiddenSeries > 0
+                                      ? t(
+                                          'No finite samples are visible for {{metric}} with the current display filters.',
+                                          { metric: metric.displayName }
+                                        )
+                                      : t('No finite samples were returned for {{metric}}.', {
+                                          metric: metric.displayName,
+                                        })}
+                                  </Alert>
+                                )}
+                            </>
+                          )}
+                        </Stack>
+                      ))}
+                      {successful.length > 0 &&
+                        (entries.length === 1 && !grouped ? (
+                          <MetricChart
+                            result={successful[0].result}
+                            title={title}
+                            unit={chart.unit ?? null}
+                            seriesName={entries[0].metric.displayName}
+                            min={chart.min}
+                            max={chart.max}
+                            height={height}
+                          />
+                        ) : (
+                          <MetricComparisonChart
+                            metrics={successful}
+                            title={title}
+                            unit={chart.unit ?? null}
+                            min={chart.min}
+                            max={chart.max}
+                            height={height}
+                          />
+                        ))}
+                    </SectionBox>
+                  );
+                  const open = expanded?.data === data && expanded.key === key;
+                  const titleId = `kiali-expanded-${data.query.dashboard.name}-${
+                    entries[0].chartIndex
+                  }-${summary ?? 'value'}`;
                   return (
                     <Box
                       key={key}
@@ -194,101 +301,83 @@ export function DashboardResults({
                       sx={{
                         gridColumn: { xs: 'span 12', md: `span ${chart.spans ?? 12}` },
                         minWidth: 0,
+                        minHeight: open ? 360 : undefined,
                         overflowWrap: 'anywhere',
                       }}
                     >
-                      <SectionBox title={title}>
-                        {chart.sortLabel && (
-                          <Typography variant="body2">
-                            {t(
-                              'Captured series ordering: {{label}} ({{mode}}). Sort-only labels are omitted from displayed groups; series are never merged.',
-                              {
-                                label: chart.sortLabel,
-                                mode:
-                                  chart.sortLabelParseAs === 'int'
-                                    ? t('signed integer')
-                                    : t('lexical'),
-                              }
-                            )}
-                          </Typography>
-                        )}
-                        {grouped && (
-                          <Typography variant="body2">
-                            {t(
-                              'Captured grouping labels: {{labels}}. Groups are metric dimensions, not Kubernetes resource identities.',
-                              { labels: groupLabels.join(', ') }
-                            )}
-                          </Typography>
-                        )}
-                        {groupingError && <Alert severity="error">{groupingError}</Alert>}
-                        {entries.map(({ key, metric, read, hiddenSeries }) => (
-                          <Stack key={key} spacing={1}>
-                            {(entries.length > 1 || metric.displayName !== chart.name) && (
-                              <Typography variant="subtitle2">{metric.displayName}</Typography>
-                            )}
-                            <Typography variant="body2">
+                      <Stack direction="row" justifyContent="flex-end">
+                        <Button
+                          size="small"
+                          onClick={() => setExpanded({ data, key })}
+                          aria-label={t('Expand {{chart}}', { chart: title })}
+                        >
+                          {t('Expand chart')}
+                        </Button>
+                      </Stack>
+                      {open ? (
+                        <Typography>{t('Chart is open in the expanded view.')}</Typography>
+                      ) : (
+                        panel()
+                      )}
+                      <Dialog
+                        open={open}
+                        onClose={() => setExpanded(undefined)}
+                        fullWidth
+                        maxWidth="xl"
+                        aria-labelledby={titleId}
+                      >
+                        <DialogTitle id={titleId}>
+                          {t('Expanded chart: {{chart}}', { chart: title })}
+                        </DialogTitle>
+                        <DialogContent dividers>
+                          <Stack spacing={2}>
+                            <Typography>
                               {t(
-                                'Metric: {{metric}}; data type: {{type}}; aggregation: {{aggregation}}; unit scale: {{scale}}',
+                                'Captured dashboard: {{title}}; namespace {{namespace}}; ending {{time}}',
                                 {
-                                  metric: metric.metricName,
-                                  type: chart.dataType,
-                                  aggregation: chart.aggregator ?? 'sum',
-                                  scale: chart.unitScale ?? 1,
+                                  title: data.query.dashboard.title,
+                                  namespace: data.query.namespace,
+                                  time: new Date(data.query.end * 1000).toISOString(),
                                 }
                               )}
                             </Typography>
-                            {read.ok === false ? (
-                              <Alert severity="error">
-                                {entries.length > 1
-                                  ? `${metric.displayName}: ${read.error.message}`
-                                  : read.error.message}
-                              </Alert>
-                            ) : (
-                              <>
-                                {!!read.result.warnings.length && (
-                                  <Alert severity="warning">
-                                    {read.result.warnings.join('; ')}
-                                  </Alert>
-                                )}
-                                {(entries.length > 1 || grouped) &&
-                                  !read.result.series.some(series =>
-                                    series.samples.some(sample => sample.value !== null)
-                                  ) && (
-                                    <Alert severity="info">
-                                      {hiddenSeries > 0
-                                        ? t(
-                                            'No finite samples are visible for {{metric}} with the current display filters.',
-                                            { metric: metric.displayName }
-                                          )
-                                        : t('No finite samples were returned for {{metric}}.', {
-                                            metric: metric.displayName,
-                                          })}
-                                    </Alert>
+                            <Typography>
+                              {data.query.clusterLabel
+                                ? t('Captured metric cluster filter: {{label}} = {{value}}', {
+                                    label: data.query.clusterLabel,
+                                    value: data.query.metricCluster,
+                                  })
+                                : t(
+                                    'No dedicated metric-cluster filter; this capture uses the confirmed single-cluster source.'
                                   )}
-                              </>
+                            </Typography>
+                            {!!Object.keys(data.query.labelsFilters ?? {}).length && (
+                              <SimpleTable
+                                data={Object.entries(data.query.labelsFilters ?? {})}
+                                columns={[
+                                  { label: t('Metric label'), getter: ([key]) => key },
+                                  {
+                                    label: t('Literal value'),
+                                    getter: ([, value]) =>
+                                      value || t('Empty; also matches an omitted label'),
+                                  },
+                                ]}
+                              />
                             )}
+                            <Typography variant="body2">
+                              {t(
+                                'This expands the captured result without issuing requests. Close this view to change display filters or load new data.'
+                              )}
+                            </Typography>
+                            {open && panel(520)}
                           </Stack>
-                        ))}
-                        {successful.length > 0 &&
-                          (entries.length === 1 && !grouped ? (
-                            <MetricChart
-                              result={successful[0].result}
-                              title={title}
-                              unit={chart.unit ?? null}
-                              seriesName={entries[0].metric.displayName}
-                              min={chart.min}
-                              max={chart.max}
-                            />
-                          ) : (
-                            <MetricComparisonChart
-                              metrics={successful}
-                              title={title}
-                              unit={chart.unit ?? null}
-                              min={chart.min}
-                              max={chart.max}
-                            />
-                          ))}
-                      </SectionBox>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={() => setExpanded(undefined)}>
+                            {t('Close expanded chart')}
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
                     </Box>
                   );
                 })}

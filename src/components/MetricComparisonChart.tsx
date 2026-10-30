@@ -33,12 +33,14 @@ export default function MetricComparisonChart({
   unit,
   min,
   max,
+  height = 260,
 }: {
   metrics: ComparisonMetric[];
   title: string;
   unit: string | null;
   min?: number;
   max?: number;
+  height?: number;
 }) {
   const { t } = useTranslation();
   const grouped = metrics.some(metric => metric.group !== undefined);
@@ -86,7 +88,7 @@ export default function MetricComparisonChart({
       <MetricAxisNotice min={min} max={max} outside={axis?.outside ?? 0} error={axisError} />
       {!axisError && (
         <div role="img" aria-label={title}>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={height}>
             <LineChart data={data.rows}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis

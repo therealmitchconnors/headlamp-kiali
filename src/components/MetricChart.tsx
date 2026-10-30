@@ -23,6 +23,7 @@ export default function MetricChart({
   seriesName,
   min,
   max,
+  height = 220,
 }: {
   result: MetricResult;
   title: string;
@@ -30,6 +31,7 @@ export default function MetricChart({
   seriesName?: string;
   min?: number;
   max?: number;
+  height?: number;
 }) {
   const { t } = useTranslation();
   const points = result.series.flatMap(series => series.samples);
@@ -58,7 +60,7 @@ export default function MetricChart({
       <MetricAxisNotice min={min} max={max} outside={axis?.outside ?? 0} error={axisError} />
       {!axisError && (
         <div role="img" aria-label={title}>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={height}>
             <LineChart data={points}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis

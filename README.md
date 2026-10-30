@@ -1073,6 +1073,15 @@ narrow filters if that happens. No samples are merged, summed or reordered
 within a time series. Local display filtering preserves the captured order;
 charts without sorting retain their existing deterministic label ordering.
 
+**Expand chart** opens a larger, read-only view of a captured panel, including
+its current display filters, ordering, units, bounds, warnings and numeric
+values. The dialog shows the captured namespace, metric-cluster scope, end
+instant and equality filters. Opening or closing it sends no request and does
+not alter the query budget. Escape/Close returns focus to the expand control;
+new queries or source changes close it without replay. The same interaction
+works in custom, application and workload dashboards. Narrow screens use
+vertical dialog scrolling rather than horizontal overflow.
+
 This is **not full custom-dashboard parity**: alternate layouts, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are

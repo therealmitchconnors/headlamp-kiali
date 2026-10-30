@@ -1080,6 +1080,22 @@ Namespace/workload provenance in 22 unintercepted GETs. Application-only
 regressions passed. The focused increment passed 175 tests in twelve files.
 No fixture resources were applied and no cluster writes occurred.
 
+For chart expansion, load a scalar and a grouped/sorted panel with captured
+equality filters. Measure actual rendered plot height before/after expansion
+(220→520 px scalar, 260→520 px comparison), not just a dialog title. Inspect the
+same negative/zero values, units, display bounds, sort order and hidden-series
+choices. Count requests before opening/closing: no extra metric GETs are allowed.
+Use Escape and Close and assert focus returns to the original expand control.
+
+Change the public ConfigStore source while open; the dialog must close without
+replay or resurrection on returning to the old settings. Expand a captured error
+panel and verify no successful plot appears. At 720×600, tab through the dialog,
+check focus containment and absence of horizontal overflow, then restore the
+viewport. Test expansion on workload recommendations and inspect the version
+equality filter inside the dialog. Restore source settings and interceptors.
+Five hosted groups required four metric GETs; workload expansion added none to
+its existing twelve. The focused increment passed 51 tests in five files.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

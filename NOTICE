@@ -78,6 +78,7 @@ captured namespace/workload dashboard annotation precedence and source selection
 application Pod dashboard-reference precedence, discovery policy and ordered runtime replacement,
 workload app/version dashboard selector pairs and workload-specific annotation overlays,
 dashboard sort-label query grouping and lexical/integer series ordering,
+captured dashboard chart expansion without query replay,
 Service traffic-generation shapes/defaults,
 TCP traffic-shifting wizard generation,
 circuit-breaker wizard capabilities,

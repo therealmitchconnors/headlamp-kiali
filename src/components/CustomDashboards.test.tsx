@@ -27,8 +27,8 @@ vi.mock('../data/customDashboards', () => ({ loadCustomDashboard: vi.fn() }));
 vi.mock('../data/dashboardDiscovery', () => ({ discoverCustomDashboards: vi.fn() }));
 vi.mock('../data/dashboardAnnotations', () => ({ loadDashboardAnnotations: vi.fn() }));
 vi.mock('./MetricChart', () => ({
-  default: ({ title, unit }: { title: string; unit: string }) => (
-    <div role="img" aria-label={title}>
+  default: ({ title, unit, height = 220 }: { title: string; unit: string; height?: number }) => (
+    <div role="img" aria-label={title} data-height={height}>
       {unit}
     </div>
   ),
@@ -134,6 +134,47 @@ const open = () =>
       <CustomDashboards />
     </MemoryRouter>
   );
+it('expands a captured panel without refetching and restores focus and normal dimensions on Escape', async () => {
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  const expand = screen.getByRole('button', { name: 'Expand Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('220');
+  await user.click(expand);
+  await screen.findByRole('dialog', { name: 'Expanded chart: Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('520');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+  await user.keyboard('{Escape}');
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-height')).toBe('220');
+  expect(document.activeElement).toBe(expand);
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
+it('closes expanded results when definitions change without replay or reopening on return', async () => {
+  const view = open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  await userEvent.click(screen.getByRole('button', { name: 'Expand Memory' }));
+  await screen.findByRole('dialog', { name: 'Expanded chart: Memory' });
+  const changed = structuredClone(configured);
+  changed.config.clusters.alpha.customDashboards.dashboards[0].title = 'Changed';
+  vi.mocked(useKialiConfig).mockReturnValue(changed);
+  view.rerender(
+    <MemoryRouter>
+      <CustomDashboards />
+    </MemoryRouter>
+  );
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  vi.mocked(useKialiConfig).mockReturnValue(configured);
+  view.rerender(
+    <MemoryRouter>
+      <CustomDashboards />
+    </MemoryRouter>
+  );
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
 it('captures definitions/time/scope and preserves results during draft edits without replay', async () => {
   open();
   const user = userEvent.setup();
