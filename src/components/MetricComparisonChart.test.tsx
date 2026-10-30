@@ -45,6 +45,19 @@ vi.mock('recharts', () => ({
   Legend: () => null,
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  ComposedChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  Bar: ({ name, stackId }: { name: string; stackId?: string }) => (
+    <span data-testid={name} data-stack={stackId} />
+  ),
+  Area: ({
+    name,
+    connectNulls,
+    stackId,
+  }: {
+    name: string;
+    connectNulls: boolean;
+    stackId?: string;
+  }) => <span data-testid={name} data-stack={stackId} data-connect={String(connectNulls)} />,
   Line: ({
     name,
     connectNulls,
@@ -56,6 +69,38 @@ vi.mock('recharts', () => ({
   }) => <span data-testid={name} data-connect={String(connectNulls)} data-color={stroke} />,
 }));
 afterEach(cleanup);
+it.each(['bar', 'area'] as const)(
+  'keeps named %s series separate and retains exact numeric tables',
+  chartType => {
+    render(
+      <MetricComparisonChart
+        title="Independent"
+        unit={null}
+        chartType={chartType}
+        metrics={[
+          {
+            name: 'First',
+            result: {
+              warnings: [],
+              series: [{ labels: {}, samples: [{ timestamp: 1, value: -2 }] }],
+            },
+          },
+          {
+            name: 'Second',
+            result: {
+              warnings: [],
+              series: [{ labels: {}, samples: [{ timestamp: 1, value: 3 }] }],
+            },
+          },
+        ]}
+      />
+    );
+    expect(screen.getByTestId('First').getAttribute('data-stack')).toBeNull();
+    expect(screen.getByTestId('Second').getAttribute('data-stack')).toBeNull();
+    expect(screen.getByText('-2.0000')).toBeDefined();
+    expect(screen.getByText('3.0000')).toBeDefined();
+  }
+);
 it('renders distinct named series and a numeric table preserving gaps and zero', () => {
   render(
     <MetricComparisonChart

@@ -557,6 +557,11 @@ function ClusterSettingsForm({
       </Typography>
       <Typography variant="body2">
         {t(
+          'Optional chartType selects line, area, bar or scatter (points) for the existing time axis. Missing/null/empty uses line. Series remain independent, never stacked or summed for display; missing samples are not zero. Units, numeric tables, grouping, sorting, bounds and expansion retain the captured data. Other axis modes remain unsupported.'
+        )}
+      </Typography>
+      <Typography variant="body2">
+        {t(
           'To disable a template by name, save a declaration such as {"name":"go","items":[]} with no discoverOn metric. This removes that name from the effective catalog, not from Kubernetes. A nonempty discoverOn with no items remains discovery-only and cannot load charts. Remove or replace the declaration to restore the template.'
         )}
       </Typography>

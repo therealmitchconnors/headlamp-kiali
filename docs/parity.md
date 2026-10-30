@@ -1565,6 +1565,35 @@ display, source invalidation, error panels and keyboard trap/restore at a
 expanded captured app/version charts without increasing its twelve metric GETs
 (78 resource GETs, 15,228 ms inspection deadline). No cluster writes occurred.
 
+### Captured time-axis plot styles
+
+The optional chart `chartType` now accepts the pinned `KChart.tsx`
+(`164795d09bfd8060ca0ce6222bd5e90b27ada58d`) choices: line, area, bar and scatter.
+Missing/null/empty retains the native line default. Unknown styles fail
+validation rather than the upstream switch's silent line fallback. The native
+reader still does not create source/destination reporter-paired envelopes or
+infer area rendering from paired values.
+
+Style is preserved through definitions/includes/annotation overlays and captured
+jobs without changing raw/rate/histogram PromQL or request counts. The shared
+render primitive keeps named/grouped series independent: bars are side by side,
+areas are unstacked, and scatter is rendered as point-only line primitives to
+retain the existing time-axis tooltip and null handling. Values and numeric
+tables are not rescaled or recomputed for the chosen presentation. Expansion,
+sort order, local filters, units and bounds use the same captured panel.
+Scalar line/area plots now also mark isolated finite samples separated by gaps,
+not only the special case of a single finite sample in the entire result.
+
+Verification passed **385 focused tests in ten files**, including all four styles
+across raw/rate/histogram query plans, plus type/lint/i18n/build and catalog/
+resource/parity checks. Three hosted scenario groups rendered eight scalar/
+grouped charts with eight metric GETs, verifying actual filled paths, point
+counts, absent connecting strokes, distinct non-stacked bar positions, unchanged
+negative/zero/unavailable numeric rows, sorting and expanded styles without
+refetching. Existing expansion/focus/narrow-screen regressions also passed with
+four metric GETs. No cluster writes occurred. Series-category axes and
+row/viewport layout remain separate gaps.
+
 ## Additional traffic counter signals
 
 The native `/kiali/signals` explorer adds eight simple rate families from the

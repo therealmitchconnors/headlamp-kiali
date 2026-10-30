@@ -1,5 +1,13 @@
 import { isRecord } from './object';
 
+export type MetricChartType = 'line' | 'area' | 'bar' | 'scatter';
+
+export function validateMetricChartType(value: unknown): MetricChartType | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (value === 'line' || value === 'area' || value === 'bar' || value === 'scatter') return value;
+  throw new Error('Chart type must be line, area, bar or scatter');
+}
+
 export interface ChartDisplay {
   min?: number;
   max?: number;

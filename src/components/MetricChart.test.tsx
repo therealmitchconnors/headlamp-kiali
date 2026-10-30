@@ -40,19 +40,76 @@ vi.mock('recharts', () => ({
   Tooltip: () => null,
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Line: ({ dot, connectNulls, name }: { dot: boolean; connectNulls: boolean; name: string }) => (
+  ComposedChart: ({ children, data }: { children: ReactNode; data: unknown }) => (
+    <div data-testid="composed" data-values={JSON.stringify(data)}>
+      {children}
+    </div>
+  ),
+  Bar: ({ stackId }: { stackId?: string }) => <span data-testid="bar" data-stack={stackId} />,
+  Area: ({ connectNulls, stackId }: { connectNulls: boolean; stackId?: string }) => (
+    <span data-testid="area" data-connect={String(connectNulls)} data-stack={stackId} />
+  ),
+  Line: ({
+    dot,
+    connectNulls,
+    name,
+    stroke,
+  }: {
+    dot: boolean;
+    connectNulls: boolean;
+    name: string;
+    stroke: string;
+  }) => (
     <span
       data-testid="line"
       data-dot={String(dot)}
       data-connect={String(connectNulls)}
       data-name={name}
+      data-stroke={stroke}
     />
   ),
 }));
 afterEach(cleanup);
+it.each(['bar', 'area'] as const)(
+  'renders %s with unchanged signed/zero/missing samples and no stacking',
+  chartType => {
+    const samples = [
+      { timestamp: 1, value: -1 },
+      { timestamp: 2, value: null },
+      { timestamp: 3, value: 0 },
+    ];
+    render(
+      <MetricChart
+        title="Styled"
+        unit={null}
+        chartType={chartType}
+        result={{ warnings: [], series: [{ labels: {}, samples }] }}
+      />
+    );
+    expect(screen.getByTestId(chartType).getAttribute('data-stack')).toBeNull();
+    expect(JSON.parse(screen.getByTestId('composed').getAttribute('data-values')!)).toEqual(
+      samples
+    );
+    if (chartType === 'area')
+      expect(screen.getByTestId('area').getAttribute('data-connect')).toBe('false');
+  }
+);
+it('renders scatter as points without a connecting stroke or null interpolation', () => {
+  render(
+    <MetricChart
+      title="Points"
+      unit={null}
+      chartType="scatter"
+      result={{ warnings: [], series: [{ labels: {}, samples: [{ timestamp: 1, value: -1 }] }] }}
+    />
+  );
+  expect(screen.getByTestId('line').getAttribute('data-stroke')).toBe('none');
+  expect(screen.getByTestId('line').getAttribute('data-connect')).toBe('false');
+});
 it.each([
   [null, 0],
   [null, 2],
+  [0, null, 2],
 ])('shows an isolated finite sample visibly without connecting null gaps: %j', (...values) => {
   render(
     <MetricChart

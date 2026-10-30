@@ -5,17 +5,18 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import {
   CartesianGrid,
+  ComposedChart,
   Legend,
-  Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import { metricAxis } from '../core/chartDisplay';
+import { metricAxis, MetricChartType } from '../core/chartDisplay';
 import { ComparisonMetric, metricComparisonData } from '../core/metricComparison';
 import MetricAxisNotice from './MetricAxisNotice';
+import { metricSeries } from './metricSeries';
 
 const colors = [
   '#1976d2',
@@ -34,6 +35,7 @@ export default function MetricComparisonChart({
   min,
   max,
   height = 260,
+  chartType = 'line',
 }: {
   metrics: ComparisonMetric[];
   title: string;
@@ -41,8 +43,10 @@ export default function MetricComparisonChart({
   min?: number;
   max?: number;
   height?: number;
+  chartType?: MetricChartType;
 }) {
   const { t } = useTranslation();
+  const Plot = chartType === 'line' || chartType === 'scatter' ? LineChart : ComposedChart;
   const grouped = metrics.some(metric => metric.group !== undefined);
   let data: ReturnType<typeof metricComparisonData>;
   try {
@@ -89,7 +93,7 @@ export default function MetricComparisonChart({
       {!axisError && (
         <div role="img" aria-label={title}>
           <ResponsiveContainer width="100%" height={height}>
-            <LineChart data={data.rows}>
+            <Plot data={data.rows}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
@@ -100,18 +104,17 @@ export default function MetricComparisonChart({
                 labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
               />
               {!grouped && <Legend />}
-              {data.series.map(series => (
-                <Line
-                  key={series.key}
-                  name={series.name}
-                  dataKey={series.key}
-                  stroke={colors[series.colorIndex]}
-                  dot={{ r: 2 }}
-                  connectNulls={false}
-                  isAnimationActive={false}
-                />
-              ))}
-            </LineChart>
+              {data.series.map(series =>
+                metricSeries({
+                  type: chartType,
+                  name: series.name,
+                  dataKey: series.key,
+                  color: colors[series.colorIndex],
+                  dot: { r: 2 },
+                  animate: false,
+                })
+              )}
+            </Plot>
           </ResponsiveContainer>
         </div>
       )}

@@ -1096,6 +1096,22 @@ equality filter inside the dialog. Restore source settings and interceptors.
 Five hosted groups required four metric GETs; workload expansion added none to
 its existing twelve. The focused increment passed 51 tests in five files.
 
+For time-axis plot styles, run `core/chartTypes.test.ts`, custom-dashboard core/
+data/UI and scalar/comparison chart tests. Verify each style across raw, rate and
+histogram plans without changing expressions or expanded request counts.
+Missing/null/empty keeps line; unsupported names fail before transport.
+Include multiple isolated finite samples separated by missing points.
+
+Hosted verification should render eight panels in one bounded batch: each of
+line/area/bar/scatter in scalar and grouped form. Return negative, missing, zero
+and positive samples. Inspect actual area fills, finite dot counts, scatter's
+absent connecting stroke and non-stacked bar positions. Check numeric rows and
+captured sort order, then expand a bar panel without extra requests. Wait for
+line animation completion before counting dots and dialog opacity before images.
+Three hosted groups rendered eight charts with eight metric GETs. Default-line
+expansion/focus/narrow-screen regressions also passed. All fixture settings and
+interceptors were restored. The increment passed 385 tests in ten files.
+
 ### Additional traffic signals
 
 Reproduce the original metric-definition/rate-builder evidence with:

@@ -5,16 +5,17 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import {
   CartesianGrid,
-  Line,
+  ComposedChart,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import { metricAxis } from '../core/chartDisplay';
+import { metricAxis, MetricChartType } from '../core/chartDisplay';
 import { MetricResult } from '../core/telemetry';
 import MetricAxisNotice from './MetricAxisNotice';
+import { metricSeries } from './metricSeries';
 
 export default function MetricChart({
   result,
@@ -24,6 +25,7 @@ export default function MetricChart({
   min,
   max,
   height = 220,
+  chartType = 'line',
 }: {
   result: MetricResult;
   title: string;
@@ -32,10 +34,18 @@ export default function MetricChart({
   min?: number;
   max?: number;
   height?: number;
+  chartType?: MetricChartType;
 }) {
   const { t } = useTranslation();
+  const Plot = chartType === 'line' || chartType === 'scatter' ? LineChart : ComposedChart;
   const points = result.series.flatMap(series => series.samples);
   const available = points.reduce((count, point) => count + (point.value === null ? 0 : 1), 0);
+  const isolated = points.some(
+    (point, index) =>
+      point.value !== null &&
+      (index === 0 || points[index - 1].value === null) &&
+      (index === points.length - 1 || points[index + 1].value === null)
+  );
   let axis: ReturnType<typeof metricAxis> | undefined;
   let axisError: string | undefined;
   try {
@@ -61,7 +71,7 @@ export default function MetricChart({
       {!axisError && (
         <div role="img" aria-label={title}>
           <ResponsiveContainer width="100%" height={height}>
-            <LineChart data={points}>
+            <Plot data={points}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="timestamp"
@@ -71,14 +81,14 @@ export default function MetricChart({
               <Tooltip
                 labelFormatter={value => new Date(Number(value) * 1000).toLocaleTimeString()}
               />
-              <Line
-                name={seriesName ?? (unit || t('Value'))}
-                dataKey="value"
-                dot={available === 1}
-                connectNulls={false}
-                stroke="#1976d2"
-              />
-            </LineChart>
+              {metricSeries({
+                type: chartType,
+                name: seriesName ?? (unit || t('Value')),
+                dataKey: 'value',
+                dot: isolated,
+                color: '#1976d2',
+              })}
+            </Plot>
           </ResponsiveContainer>
         </div>
       )}

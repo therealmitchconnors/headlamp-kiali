@@ -27,8 +27,18 @@ vi.mock('../data/customDashboards', () => ({ loadCustomDashboard: vi.fn() }));
 vi.mock('../data/dashboardDiscovery', () => ({ discoverCustomDashboards: vi.fn() }));
 vi.mock('../data/dashboardAnnotations', () => ({ loadDashboardAnnotations: vi.fn() }));
 vi.mock('./MetricChart', () => ({
-  default: ({ title, unit, height = 220 }: { title: string; unit: string; height?: number }) => (
-    <div role="img" aria-label={title} data-height={height}>
+  default: ({
+    title,
+    unit,
+    height = 220,
+    chartType,
+  }: {
+    title: string;
+    unit: string;
+    height?: number;
+    chartType?: string;
+  }) => (
+    <div role="img" aria-label={title} data-height={height} data-chart-type={chartType}>
       {unit}
     </div>
   ),
@@ -134,6 +144,21 @@ const open = () =>
       <CustomDashboards />
     </MemoryRouter>
   );
+it('retains the declared chart style in normal and expanded views without new requests', async () => {
+  const config = structuredClone(configured);
+  Object.assign(config.config.clusters.alpha.customDashboards.dashboards[0].items[0].chart, {
+    chartType: 'area',
+  });
+  vi.mocked(useKialiConfig).mockReturnValue(config);
+  open();
+  await userEvent.click(screen.getByRole('button', { name: 'Load custom dashboard' }));
+  await screen.findByRole('img', { name: 'Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-chart-type')).toBe('area');
+  await userEvent.click(screen.getByRole('button', { name: 'Expand Memory' }));
+  await screen.findByRole('dialog', { name: 'Expanded chart: Memory' });
+  expect(screen.getByRole('img', { name: 'Memory' }).getAttribute('data-chart-type')).toBe('area');
+  expect(loadCustomDashboard).toHaveBeenCalledTimes(1);
+});
 it('expands a captured panel without refetching and restores focus and normal dimensions on Escape', async () => {
   open();
   const user = userEvent.setup();

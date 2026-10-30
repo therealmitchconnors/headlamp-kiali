@@ -197,6 +197,21 @@ export function DashboardResults({
                   }
                   const panel = (height?: number) => (
                     <SectionBox title={title}>
+                      {chart.chartType && (
+                        <Typography variant="body2">
+                          {t(
+                            'Captured chart style: {{style}}. Values remain independent; there is no stacking.',
+                            {
+                              style: {
+                                line: t('Line'),
+                                area: t('Area'),
+                                bar: t('Bar'),
+                                scatter: t('Points'),
+                              }[chart.chartType],
+                            }
+                          )}
+                        </Typography>
+                      )}
                       {chart.sortLabel && (
                         <Typography variant="body2">
                           {t(
@@ -276,6 +291,7 @@ export function DashboardResults({
                             min={chart.min}
                             max={chart.max}
                             height={height}
+                            chartType={chart.chartType}
                           />
                         ) : (
                           <MetricComparisonChart
@@ -285,6 +301,7 @@ export function DashboardResults({
                             min={chart.min}
                             max={chart.max}
                             height={height}
+                            chartType={chart.chartType}
                           />
                         ))}
                     </SectionBox>

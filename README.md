@@ -1082,6 +1082,16 @@ new queries or source changes close it without replay. The same interaction
 works in custom, application and workload dashboards. Narrow screens use
 vertical dialog scrolling rather than horizontal overflow.
 
+Optional `chartType` selects `line`, `area`, `bar` or `scatter` (points) for
+time-axis panels. Missing/null/empty retains the native line default. Styles
+change presentation only: queries, captured values, units, bounds, sorting,
+local filters and expansion stay unchanged. Named/grouped bars and filled
+areas remain independent, not stacked or summed; points have no connecting
+stroke. Missing samples stay unavailable, and isolated finite samples remain
+visible on line/area plots. Unknown styles are rejected instead of silently
+falling back. This does not add reporter-paired envelopes or a series-category
+axis.
+
 This is **not full custom-dashboard parity**: alternate layouts, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
 and Grafana/Perses links remain unsupported. Unsupported fields are
