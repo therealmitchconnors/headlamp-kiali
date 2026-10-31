@@ -2836,6 +2836,46 @@ guards intact, unrelated-setting stability, invalidation/no resurrection and
 pending cancellation followed by explicit retry. Environment regressions also
 passed. Settings were restored durably; no cluster object was changed.
 
+### Declared local managed-namespace scope
+
+`core/meshMembership.ts` and `localManagedNamespaceScope` supply typed evidence
+for an explicitly mapped local/default-visibility scope. All three source
+collections must be complete and versioned, every captured controller must have
+resolved configuration, and supported controllers must have matching literal
+logical IDs, known Maistra classification and no unresolved external topology.
+The projection retains source controller order and all matching controllers,
+rather than pretending to select a unique configuration.
+
+The default Kiali visibility rule follows the prefix regex in pinned
+`istio/discovery_selectors.go`: `kube-*`, `openshift*`, `ibm*`,
+`kiali-operator*` and `istio-operator*` are excluded. Visible controller/root
+namespaces retain `ControlPlaneForNamespace` exceptions. Other membership uses
+the source `GetRevision` projection, first selected tag replacement, observed
+Maistra namespace-key handling and validated Istio discovery selectors. This
+does not reuse conservative injection-label hints as a complete membership set.
+Coincident non-Maistra revision matches for Maistra membership defer rather than
+silently supplying an unsupported association.
+
+Controller Maistra classification uses presence of `maistra.io/owner`,
+`maistra.io/owner-name` or `maistra-version`, including empty values. The source
+is the pinned `models/mesh.go` classifier. Namespace/selector validation,
+complete controller-namespace presence and existing 20-controller/1000-namespace/
+200-tag bounds prevent truncated or malformed scope from becoming successful
+absence evidence.
+
+The Mesh view exposes eligible namespaces, ordered declaring controllers and
+separate unmanaged/default-hidden lists. The existing configuration-inspection
+path remains unchanged. Remote contexts, custom Kiali visibility overrides,
+full physical membership and Service port checker activation remain open.
+
+Verification passed **2,229 focused tests in eight files**, the full
+**22,377-test/183-file** suite and normal gates. Four stock-hosted groups made
+25 intercepted GETs, covering tag/selector/default visibility, own/root
+exceptions, declared revision precedence alongside conflicting-label diagnostics,
+Maistra presence, unsupported mappings and denied sources. No cluster objects
+were changed; settings were restored. The next implementation step is to consume
+this evidence for complete pooled-Pod and cluster-wide Deployment Service checks.
+
 ### Declared managed-revision selection
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
 `istio/kubernetes.go` (blob `1ae3f6611d27f964da9d3024ee339615cddd9f5b`),

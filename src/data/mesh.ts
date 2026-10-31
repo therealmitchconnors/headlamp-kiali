@@ -16,6 +16,7 @@ import {
   RevisionTag,
   revisionTag,
 } from '../core/mesh';
+import { localManagedNamespaceProjection } from '../core/meshMembership';
 import { namespaceRevisionSelection } from '../core/namespaceRevision';
 import { isDnsSubdomain, isRecord } from '../core/object';
 import { ClusterScope, clusterScope } from '../core/scope';
@@ -47,6 +48,47 @@ export interface MeshSnapshot {
   controllers: CollectionRead<ControlPlaneObservation>;
   tags: CollectionRead<RevisionTag>;
   controlPlanes: MeshControlPlane[];
+}
+
+export function localManagedNamespaceScope(
+  snapshot: MeshSnapshot,
+  logicalName: string | undefined
+) {
+  if (logicalName === undefined)
+    throw new Error(
+      'Configure an explicit logical mesh cluster name before evaluating managed namespace scope'
+    );
+  if (
+    [snapshot.namespaces, snapshot.controllers, snapshot.tags].some(
+      source => !source.complete || !source.resourceVersion
+    )
+  )
+    throw new Error(
+      'Complete versioned namespace, controller and revision-tag reads are required for managed scope'
+    );
+  if (snapshot.controlPlanes.length !== snapshot.controllers.items.length)
+    throw new Error('Managed scope requires configuration evidence for every captured controller');
+  const controllers = snapshot.controllers.items.map(controller => {
+    const plane = snapshot.controlPlanes.find(plane => plane.controller.uid === controller.uid);
+    if (
+      plane?.effective?.status !== 'ready' ||
+      plane.controller.name !== controller.name ||
+      plane.controller.namespace !== controller.namespace
+    )
+      throw new Error(
+        'Managed scope requires resolved configuration for every captured controller'
+      );
+    return { controller, fields: plane.effective.value };
+  });
+  return {
+    cluster: snapshot.cluster,
+    ...localManagedNamespaceProjection(
+      logicalName,
+      snapshot.namespaces.items,
+      controllers,
+      snapshot.tags.items
+    ),
+  };
 }
 
 export function namespaceMeshConfiguration(

@@ -26,6 +26,7 @@ import { clusterScope } from '../core/scope';
 import {
   ConfigurationRead,
   loadMeshSnapshot,
+  localManagedNamespaceScope,
   MeshControlPlane,
   MeshSnapshot,
   namespaceMeshConfiguration,
@@ -93,6 +94,18 @@ export function MeshResults({
       ),
     [snapshot]
   );
+  const managedScope = useMemo(() => {
+    if (logicalName === undefined) return undefined;
+    try {
+      return { ok: true as const, value: localManagedNamespaceScope(snapshot, logicalName) };
+    } catch (error) {
+      return {
+        ok: false as const,
+        message:
+          error instanceof Error ? error.message : 'Declared local namespace scope is unavailable',
+      };
+    }
+  }, [snapshot, logicalName]);
   const associations = namespaceAssociations(
     snapshot.namespaces.items,
     snapshot.controllers.items,
@@ -386,6 +399,85 @@ export function MeshResults({
           </Stack>
         </SectionBox>
       ))}
+      {managedScope && (
+        <SectionBox title={t('Declared local namespace scope')}>
+          <Stack spacing={1}>
+            <Typography variant="body2">
+              {t(
+                'This projection supports only fully captured, explicitly mapped local controllers and default Kiali namespace visibility. System namespaces are excluded before visible controller/root exceptions are applied. It does not discover remote contexts, apply custom Kiali visibility overrides, choose a unique controller, or prove runtime mesh membership.'
+              )}
+            </Typography>
+            {managedScope.ok === false ? (
+              <Alert severity="warning">{managedScope.message}</Alert>
+            ) : (
+              <>
+                <Typography>
+                  {t(
+                    'Captured local scope: {{managed}} eligible namespaces; {{unmanaged}} without a declared association; {{excluded}} excluded by default visibility.',
+                    {
+                      managed: managedScope.value.membership.length,
+                      unmanaged: managedScope.value.unmanagedNamespaces.length,
+                      excluded: managedScope.value.excludedSystemNamespaces.length,
+                    }
+                  )}
+                </Typography>
+                <SimpleTable
+                  data={managedScope.value.membership}
+                  columns={[
+                    {
+                      label: t('Namespace'),
+                      getter: item => (
+                        <Link
+                          routeName="namespace"
+                          params={{ cluster: snapshot.cluster, name: item.namespace }}
+                        >
+                          {item.namespace}
+                        </Link>
+                      ),
+                    },
+                    {
+                      label: t('Declaring controllers (captured order)'),
+                      getter: item =>
+                        item.controllers
+                          .map(
+                            controller =>
+                              `${controller.name}: ${
+                                {
+                                  'control-plane': t('Controller namespace'),
+                                  root: t('Configured root namespace'),
+                                  revision: t('Revision or selected tag'),
+                                  'maistra-key': t('Maistra namespace key'),
+                                }[controller.basis]
+                              }`
+                          )
+                          .join(', '),
+                    },
+                  ]}
+                />
+                <details>
+                  <summary>{t('Show namespaces outside the local projection')}</summary>
+                  <SimpleTable
+                    data={[
+                      ...managedScope.value.unmanagedNamespaces.map(namespace => ({
+                        namespace,
+                        reason: t('No declared local association'),
+                      })),
+                      ...managedScope.value.excludedSystemNamespaces.map(namespace => ({
+                        namespace,
+                        reason: t('Excluded by default Kiali visibility'),
+                      })),
+                    ]}
+                    columns={[
+                      { label: t('Namespace'), getter: item => item.namespace },
+                      { label: t('Reason'), getter: item => item.reason },
+                    ]}
+                  />
+                </details>
+              </>
+            )}
+          </Stack>
+        </SectionBox>
+      )}
       <SectionBox title={t('Namespace injection labels and revision hints')}>
         <Stack spacing={2}>
           <Typography>

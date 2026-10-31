@@ -427,6 +427,21 @@ The increment passed 354 focused tests in six files and 22,359 tests in 182
 files overall. This is a comparison prerequisite, not managed-namespace or
 Service-checker evidence. Restore the original setting's presence/value.
 
+Declared local namespace-scope tests live in `core/meshMembership.test.ts` and
+`data/mesh.test.ts`. Require complete versioned sources, all resolved local
+controllers, explicit logical mapping and observed Maistra classification.
+Cover the exact default system-namespace prefixes, first-tag replacement,
+GetRevision rather than injection DTO semantics, Istio selector exclusion,
+visible controller/root exceptions and ordered multiple-controller membership.
+Missing controller namespaces, malformed labels/selectors, unsupported topology
+and incomplete collections must fail explicitly.
+
+Four hosted groups made 25 GETs and verified the scope table and unavailable
+states without additional inspection requests. Tests passed 2,229 focused cases
+in eight files and 22,377 cases in 183 files overall. Service checker activation
+is deliberately not part of this checkpoint: its complete pooled-Pod and
+cluster-wide Deployment pipeline is the next task.
+
 Same-context revision-tag selection has a separate source-pinned oracle:
 
 ```sh

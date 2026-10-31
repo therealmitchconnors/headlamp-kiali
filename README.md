@@ -1461,6 +1461,17 @@ setting currently supplies declared comparison evidence only: it does not
 certify managed namespaces, alter existing label-based configuration inspection,
 route Kubernetes requests, or enable Service port checks.
 
+With an explicit mapping, **Declared local namespace scope** additionally
+projects eligible namespaces for the supported local/default-visibility case.
+It requires complete versioned namespace/controller/tag reads and resolved,
+mapped, non-external controller configuration. It preserves first-tag selection,
+Istio selectors, visible controller/root namespaces and observed Maistra
+classification. Default Kiali system-namespace exclusions are shown separately.
+Unsupported or incomplete evidence produces an unavailable result, not an
+empty successful inventory. This does not discover remote mesh contexts,
+apply custom Kiali visibility overrides, select a unique controller, or yet
+activate Service port checks.
+
 The **Pinned Kiali revision candidate** column separately follows the pinned
 managed-revision label selector. Maistra membership takes precedence unless the
 ignore label is present (even with value `false`); enabled legacy injection takes

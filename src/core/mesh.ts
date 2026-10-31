@@ -14,6 +14,7 @@ export interface ControlPlaneObservation {
   namespace: string;
   uid: string;
   revision: string;
+  isMaistra?: boolean;
   configurationContainer?: string;
   image?: string;
   clusterId?: string;
@@ -91,6 +92,26 @@ export type NamespaceDiscoveryAssessment =
   | { status: 'included'; basis: NamespaceDiscoveryBasis }
   | { status: 'excluded' | 'unavailable'; message: string };
 
+export function meshDiscoverySelectors(fields: MeshConfigFields) {
+  const raw = fields.discoverySelectors ?? [];
+  if (!Array.isArray(raw) || raw.length > 100 || fields.hasDiscoverySelectors !== raw.length > 0)
+    throw new Error('Discovery selector metadata is inconsistent or exceeds 100 selectors');
+  let budget = 0;
+  return raw.map(value => {
+    const selector = decodeLabelSelector(value);
+    budget +=
+      1 +
+      Object.keys(selector.matchLabels ?? {}).length +
+      (selector.matchExpressions ?? []).reduce(
+        (count, expression) => count + 1 + (expression.values?.length ?? 0),
+        0
+      );
+    if (budget > 1000)
+      throw new Error('Discovery selectors exceed 1000 combined requirements and values');
+    return selector;
+  });
+}
+
 export function namespaceDiscovery(
   namespace: NamespaceObservation,
   controllerNamespace: string,
@@ -104,23 +125,7 @@ export function namespaceDiscovery(
       controllerNamespace.trim() !== controllerNamespace
     )
       throw new Error('Namespace discovery requires explicit valid namespace identities');
-    const raw = fields.discoverySelectors ?? [];
-    if (!Array.isArray(raw) || raw.length > 100 || fields.hasDiscoverySelectors !== raw.length > 0)
-      throw new Error('Discovery selector metadata is inconsistent or exceeds 100 selectors');
-    let budget = 0;
-    const selectors = raw.map(value => {
-      const selector = decodeLabelSelector(value);
-      budget +=
-        1 +
-        Object.keys(selector.matchLabels ?? {}).length +
-        (selector.matchExpressions ?? []).reduce(
-          (count, expression) => count + 1 + (expression.values?.length ?? 0),
-          0
-        );
-      if (budget > 1000)
-        throw new Error('Discovery selectors exceed 1000 combined requirements and values');
-      return selector;
-    });
+    const selectors = meshDiscoverySelectors(fields);
     if (namespace.name === controllerNamespace || namespace.name === fields.rootNamespace)
       return { status: 'included', basis: 'implicit' };
     if (!selectors.length) return { status: 'included', basis: 'unrestricted' };
@@ -321,6 +326,9 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     namespace: value.metadata.namespace,
     uid: value.metadata.uid,
     revision,
+    isMaistra: ['maistra.io/owner', 'maistra.io/owner-name', 'maistra-version'].some(key =>
+      Object.prototype.hasOwnProperty.call(found, key)
+    ),
     configurationContainer: typeof container?.name === 'string' ? container.name : undefined,
     image: typeof container?.image === 'string' ? container.image : undefined,
     clusterId,

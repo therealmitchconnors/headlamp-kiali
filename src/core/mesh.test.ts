@@ -237,6 +237,18 @@ it('uses the pinned standard ConfigMap naming while validating API-safe names', 
   );
   expect(() => revisionConfigMapName('istio', '../unsafe')).toThrow();
 });
+it.each(['maistra.io/owner', 'maistra.io/owner-name', 'maistra-version'])(
+  'detects Maistra by %s presence even when its value is empty',
+  key => {
+    expect(
+      controlPlaneObservation({
+        ...controller,
+        metadata: { ...controller.metadata, labels: { ...controller.metadata.labels, [key]: '' } },
+      }).isMaistra
+    ).toBe(true);
+    expect(controlPlaneObservation(controller).isMaistra).toBe(false);
+  }
+);
 it('preserves reported false and absent fields instead of applying unobserved mesh defaults', () => {
   expect(
     meshConfigFields(

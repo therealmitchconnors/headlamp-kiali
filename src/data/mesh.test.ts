@@ -1,6 +1,6 @@
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { clusterScope } from '../core/scope';
-import { loadMeshSnapshot, namespaceMeshConfiguration } from './mesh';
+import { loadMeshSnapshot, localManagedNamespaceScope, namespaceMeshConfiguration } from './mesh';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({ ApiProxy: { request: vi.fn() } }));
 const controller = {
@@ -151,6 +151,32 @@ it.each(['true', '1', 'TRUE'])(
     ).toBe(false);
   }
 );
+it('requires complete versioned sources and all resolved configurations before projecting local membership', async () => {
+  const deployment = structuredClone(controller);
+  Object.assign(deployment.spec.template.spec.containers[0], {
+    env: [{ name: 'CLUSTER_ID', value: 'logical' }],
+  });
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (String(path).startsWith('/api/v1/namespaces?'))
+      return list('Namespace', 'v1', [
+        { metadata: { name: 'bookinfo', uid: 'ns', labels: { 'istio.io/rev': 'blue' } } },
+        { metadata: { name: 'istio-system', uid: 'control-ns', labels: {} } },
+      ]);
+    return response(String(path), [deployment]);
+  });
+  const snapshot = await loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  const projected = localManagedNamespaceScope(snapshot, 'logical');
+  expect(projected.cluster).toBe('alpha');
+  expect(projected.membership.map(item => item.namespace)).toEqual(['bookinfo', 'istio-system']);
+  expect(() => localManagedNamespaceScope(snapshot, undefined)).toThrow('explicit logical');
+  for (const key of ['namespaces', 'controllers', 'tags'] as const) {
+    const incomplete = structuredClone(snapshot);
+    incomplete[key].complete = false;
+    expect(() => localManagedNamespaceScope(incomplete, 'logical')).toThrow('Complete versioned');
+  }
+  snapshot.controlPlanes[0].effective = { status: 'unavailable', message: 'Blocked' };
+  expect(() => localManagedNamespaceScope(snapshot, 'logical')).toThrow('resolved configuration');
+});
 it('captures its cluster before awaiting discovery and retains one whole-read deadline', async () => {
   const scope = { cluster: 'alpha' };
   const pending = loadMeshSnapshot(scope, new AbortController().signal);

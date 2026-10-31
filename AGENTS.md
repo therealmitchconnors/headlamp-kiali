@@ -226,6 +226,11 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   independent of ManagesExternal and does not certify namespace membership or
   clear configuration guards. Relevant setting changes invalidate captured mesh
   evidence without replay; never silently use another identity as a default.
+- Declared local managed scope uses default Kiali system-namespace filtering
+  before visible controller/root exceptions, source GetRevision/tag/Maistra
+  rules and Istio selectors. It requires complete versioned reads and every
+  supported local controller. It is not the older injection-hint projection,
+  a unique controller selection or inferred cross-context mesh membership.
 - Dashboard rows belong to the selected template, not included templates.
   Nonpositive values use two; native viewport plot sizing is opt-in unless rows
   are explicit. It must not alter query budgets or hide captions/errors/tables.

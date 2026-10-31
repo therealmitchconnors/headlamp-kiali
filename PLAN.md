@@ -59,6 +59,49 @@ that test counts imply parity. Advanced graphs, full workload/capability
 provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
 dashboards and integration/live/Desktop closure remain substantial work.
 
+### Cloud continuation handoff — paused at the user's request
+
+The user requested stopping at the next published checkpoint, then continuing
+with cloud agents rather than keeping the laptop running. The working branch is
+`therealmitchconnors-kiali-plugin`; GitHub's default branch is `main`. A cloud
+task must explicitly use the working branch as its base or it will miss this
+port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
+
+The next ready milestone is **Service port validation**: consume the new typed
+declared local namespace scope, collect the complete pooled managed-namespace
+Pod input and cluster-wide Deployments, and port the pinned active caller's
+port-name/appProtocol/mapping checks. Do not activate them from a namespace-only
+snapshot, truncated lists or correlation `proxyMode`. No Service checker has
+been enabled by the stopping checkpoint.
+
+Independent cloud work can address advanced graph appenders or external
+dashboard integration, but keep assignments bounded and file ownership distinct.
+Open PRs against the working branch and integrate prerequisite PRs before
+starting dependent tasks. Do not treat a single open-ended prompt as a reliable
+weekend-long completion queue.
+
+The repository is public and `.github/` currently contains skills, not a CI or
+Copilot setup workflow. Cloud agents can install dependencies with `npm ci` and
+use the documented npm gates and committed oracle fixtures. For Actions-based
+agents, an optional `.github/workflows/copilot-setup-steps.yml` must be present
+on the default branch; it does not configure cloud-sandbox sessions. See
+[GitHub's environment guidance](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment).
+
+The local pinned-source checkout, browser runners/screenshots and kubeconfig
+are not in the repository. Cloud agents must not assume `/Users/...` paths
+exist or copy personal kube credentials. Fetch pinned public references when
+regenerating source evidence. Set up a repeatable hosted Headlamp fixture smoke
+environment in cloud if needed; unit/build success alone is not runtime proof.
+Actual AKS/provider/Desktop gates still require an authorized verification
+environment and approved fixtures. They must remain explicitly open otherwise.
+
+GitHub cloud tasks run without this laptop. Current built-in cloud automations
+are limited to private/internal repositories, so this public repository cannot
+use that scheduler directly. Queue normal cloud tasks or deliberately configure
+an approved Actions/API orchestrator, with spending limits and review boundaries.
+See [cloud sessions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/start-copilot-sessions)
+and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/create-automations).
+
 ### Latest verified checkpoint
 
 - 23 schema-derived configuration kinds and **38 bounded finding codes**.
@@ -92,6 +135,11 @@ dashboards and integration/live/Desktop closure remain substantial work.
   of external-management flags. Settings persistence, no fallback, no replay/
   resurrection, pending cancellation and unchanged guards passed four hosted
   groups/33 GETs. This does not certify managed namespaces or activate Service checks.
+  A typed declared local/default-visibility namespace scope is now exposed,
+  requiring complete versioned sources, mapped non-external controllers,
+  observed Maistra classification and resolved configuration. Four hosted
+  groups/25 GETs covered membership, selectors, visibility and unavailable
+  sources. The pooled Service validation pipeline remains the next task.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -488,7 +536,9 @@ dashboards and integration/live/Desktop closure remain substantial work.
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **22,359 tests in 182 files** after explicit
+  Latest full-suite checkpoint: **22,377 tests in 183 files** after declared
+  local namespace scope; its focused suite passed **2,229 tests in eight files**.
+  The preceding **22,359-test/182-file** suite covered explicit
   logical mesh identity; its focused suite passed **354 tests in six files**.
   The preceding **22,340-test/182-file** suite covered ordered
   controller environment handling; its focused suite passed **277 tests in
@@ -532,7 +582,7 @@ dashboards and integration/live/Desktop closure remain substantial work.
   hosted interception cases passed; all permission reviews and PUTs were
   intercepted. No exclusion was written to the live cluster.
 - Current `kiali-0.1.0.tar.gz` SHA-256:
-  `687bc9b71d9933665e0060dc2960df178347f074431384c7db4317f562d8101c`.
+  `85671f0ce0407d3549120839ec5e9f1212edc5193ac651a1afdaabcf972a0c63`.
 - This checkpoint includes the implemented work after `6753f8e`. No new cluster component,
   live routing/policy fixture or logging mutation was applied in these increments.
   Prometheus's latest state and the in-place memory/template distinction are
@@ -1207,10 +1257,11 @@ accumulation, with indirect/noncanonical values explicitly guarded.
 Self-management is ID == logical cluster name, independent
 of ManagesExternal. Explicit per-context `meshClusterName` and captured UI
 comparison are now implemented without implicit context/telemetry fallback.
-Next build the typed managed-scope evidence pipeline using those mappings and
-complete controller/tag/namespace, discovery/visibility and topology inputs.
-Do not promote the current comparison hint or label-based configuration
-inspection to complete managed membership.
+The typed local/default-visibility scope now requires complete controller/tag/
+namespace reads and configuration, with supported local topology and explicit
+mapping. Next consume it for pooled Service-validation inputs. Remote contexts
+and custom Kiali visibility remain unsupported; do not promote the comparison
+hint or prior label-based configuration inspection to complete membership.
 Service checks in the pinned caller pool Pods across all managed namespaces,
 match selectors without another namespace filter, and treat empty selectors
 as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a

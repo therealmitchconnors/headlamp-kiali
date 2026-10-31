@@ -166,6 +166,52 @@ it('cancels a pending capture when the logical name changes instead of replaying
   expect(signal.aborted).toBe(true);
   expect(loadMeshSnapshot).toHaveBeenCalledTimes(1);
 });
+it('renders declared local membership separately from label hints and default-hidden namespaces', () => {
+  const controller = {
+    name: 'istiod',
+    namespace: 'system',
+    uid: 'cp',
+    revision: 'blue',
+    clusterId: 'logical',
+    isMaistra: false,
+    managesExternal: false,
+    effectiveConfigBlocked: false,
+    replicas: null,
+    stale: false,
+    configurationWarnings: [],
+  };
+  const fields = { rootNamespace: 'system', hasDiscoverySelectors: false };
+  const snapshot: MeshSnapshot = {
+    cluster: 'alpha',
+    namespaces: {
+      complete: true,
+      resourceVersion: '1',
+      items: [
+        { name: 'system', labels: {} },
+        { name: 'app', labels: { 'istio.io/rev': 'blue' } },
+        { name: 'kube-system', labels: { 'istio.io/rev': 'blue' } },
+      ],
+    },
+    controllers: { complete: true, resourceVersion: '2', items: [controller] },
+    tags: { complete: true, resourceVersion: '3', items: [] },
+    controlPlanes: [
+      {
+        controller,
+        mesh: { status: 'ready', name: 'istio-blue', value: fields },
+        injector: { status: 'ready', name: 'injector', value: {} },
+        effective: { status: 'ready', sharedAbsent: false, value: fields },
+      },
+    ],
+  };
+  render(<MeshResults snapshot={snapshot} logicalName="logical" />);
+  const section = screen
+    .getByRole('heading', { name: 'Declared local namespace scope' })
+    .closest('section')!;
+  expect(within(section).getByRole('link', { name: 'system' })).toBeDefined();
+  expect(within(section).getByRole('link', { name: 'app' })).toBeDefined();
+  expect(within(section).queryByRole('link', { name: 'kube-system' })).toBeNull();
+  expect(within(section).getByText(/2 eligible namespaces/)).toBeDefined();
+});
 it('shows source revision candidates and provenance without resolving controllers or hiding Maistra labels', () => {
   const snapshot: MeshSnapshot = {
     cluster: 'alpha',
