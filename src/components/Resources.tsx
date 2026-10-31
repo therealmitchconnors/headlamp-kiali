@@ -70,6 +70,24 @@ export function Services() {
             { id: 'type', label: t('Type'), getValue: item => item.spec.type },
             { id: 'cluster-ip', label: t('Cluster IP'), getValue: item => item.spec.clusterIP },
             {
+              id: 'port-validation',
+              label: t('Port validation'),
+              getValue: () => t('Inspect port checks'),
+              render: item => (
+                <Link
+                  routeName="kiali-service-validation"
+                  params={{ cluster: scope.cluster }}
+                  search={new URLSearchParams({
+                    namespace: item.metadata.namespace ?? '',
+                    name: item.metadata.name,
+                    ...(item.metadata.uid ? { uid: item.metadata.uid } : {}),
+                  }).toString()}
+                >
+                  {t('Inspect port checks')}
+                </Link>
+              ),
+            },
+            {
               id: 'health',
               label: t('Request health'),
               getValue: () => t('Inspect health'),

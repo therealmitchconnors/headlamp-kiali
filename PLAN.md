@@ -16,7 +16,7 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-30
+### Resume status — 2026-10-31
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -67,12 +67,14 @@ with cloud agents rather than keeping the laptop running. The working branch is
 task must explicitly use the working branch as its base or it will miss this
 port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
 
-The next ready milestone is **Service port validation**: consume the new typed
-declared local namespace scope, collect the complete pooled managed-namespace
-Pod input and cluster-wide Deployments, and port the pinned active caller's
-port-name/appProtocol/mapping checks. Do not activate them from a namespace-only
-snapshot, truncated lists or correlation `proxyMode`. No Service checker has
-been enabled by the stopping checkpoint.
+The **Service port-validation milestone is implemented** on this branch:
+Service details link to an explicit, read-only inspector that requires declared
+local namespace scope, a complete pooled managed-namespace Pod snapshot and
+complete cluster-wide Deployments. It ports the active KIA0601/KIA0602/KIA0701
+checks and keeps denied, stale, malformed, truncated or unresolved evidence
+unavailable. The implementation uses status annotations, never correlation
+`proxyMode`. Hosted Headlamp, Desktop and live-cluster verification are
+unavailable in this session and remain open; see `docs/parity.md`.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -104,7 +106,20 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
-- 23 schema-derived configuration kinds and **38 bounded finding codes**.
+- **Service port validation (2026-10-31):** added the explicit Service inspector
+  and complete typed Pod/Deployment collection over the declared local scope.
+  Active caller semantics retain pooled selector matching without an extra
+  namespace filter, vacuous all-sidecar behavior, the independent any-ambient
+  test, appProtocol precedence, first cluster-wide Deployment metadata-label
+  match, exact mapping exclusions and the no-missing-Deployment behavior.
+  The selected Service is re-read and compared after the evidence capture;
+  source failures, truncation and timeouts cannot produce partial findings.
+  The focused set passed **118 tests in four files**, and the final full suite
+  passed **22,491 tests in 186 files**. Type, lint, production build, resource/
+  dashboard generation and catalog gates also pass. There is no new original-Go
+  oracle. Headlamp browser load/a11y, hosted fixture verification, Desktop and
+  live-cluster gates remain explicitly open.
+- 23 schema-derived configuration kinds and **41 bounded finding codes**.
   An activation audit removed unintended ServiceEntry KIA0601 enforcement:
   the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
   A subsequent KIA0004 audit restricts generic workload-selector activation to
@@ -139,7 +154,8 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   requiring complete versioned sources, mapped non-external controllers,
   observed Maistra classification and resolved configuration. Four hosted
   groups/25 GETs covered membership, selectors, visibility and unavailable
-  sources. The pooled Service validation pipeline remains the next task.
+  sources. At that checkpoint, the pooled Service validation pipeline was next;
+  it is implemented in the Service port-validation checkpoint above.
   Active ServiceEntry host/port conflict checks now add KIA1211/KIA1212 with
   export/import scope, UID/spec freshness and related-configuration inspection.
   DestinationRule KIA0201 now adds source-backed host/subset overlap with exact
@@ -1138,7 +1154,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
 | Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
-| Initial checks | Thirty-eight bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; dormant CRD port checks excluded; attachment/port/per-workload/registry/security context remains incomplete |
+| Initial checks | Forty-one bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, Service port checks, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; attachment/per-workload/principal context and remaining checkers are incomplete |
 | Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
@@ -1220,7 +1236,7 @@ the authority for individual behavior and platform claims.
 | `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
+| `basic-validation` | Partial / open | Forty-one bounded codes, including source-informed Service port checks over complete declared local namespace scope; attachment/per-workload/principal and broader checks remain | `config-views`, `mesh-security` |
 | `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
