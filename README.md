@@ -631,12 +631,11 @@ Denied or unresolved configuration never receives this fallback.
 Local checks also cover omitted Sidecar outbound mode (KIA1007) and current
 Gateway/controller conditions (GWAPI). ServiceEntry and Istio Gateway
 port-naming helpers are not enabled by the pinned Kiali checker pipeline, so
-the plugin does not enforce them. Active Kubernetes Service port checks remain
-separate from that configuration action. The Services list links to an explicit,
-read-only inspector for KIA0601/KIA0602/KIA0701. It requires the
-declared local namespace scope and complete Pod/Deployment reads; this bounded
-slice is not a reachability verdict and has not passed live browser/cluster
-verification in this environment.
+the plugin does not enforce them. Kubernetes Service port checks are a
+separate, explicit read-only inspector linked from the Services list. It
+implements KIA0601/KIA0602/KIA0701 over the declared local namespace scope and
+complete Pod/Deployment reads; this bounded slice is not a reachability verdict
+and has not passed live browser/cluster verification in this environment.
 Explicit JSON outbound modes remain unambiguous. Stale/missing condition
 generations are not treated as current configuration errors.
 
@@ -1462,9 +1461,8 @@ pending reads, without refetching or resurrecting it when the old value returns.
 Unrelated metric settings do not invalidate that capture. Equality is independent
 of `EXTERNAL_ISTIOD` and does not clear topology/configuration guards. This
 setting currently supplies declared comparison evidence only: it does not
-certify managed namespaces, alter existing label-based configuration inspection
-or route Kubernetes requests. The separate Service port inspector requires the
-explicit mapping and complete scope evidence below.
+certify managed namespaces, alter existing label-based configuration inspection,
+route Kubernetes requests, or enable Service port checks.
 
 With an explicit mapping, **Declared local namespace scope** additionally
 projects eligible namespaces for the supported local/default-visibility case.
@@ -1474,9 +1472,8 @@ Istio selectors, visible controller/root namespaces and observed Maistra
 classification. Default Kiali system-namespace exclusions are shown separately.
 Unsupported or incomplete evidence produces an unavailable result, not an
 empty successful inventory. This does not discover remote mesh contexts,
-apply custom Kiali visibility overrides or select a unique controller. The
-explicit Service inspector consumes this scope only for bounded local checks;
-browser/cluster behavior remains unverified in this environment.
+apply custom Kiali visibility overrides, select a unique controller, or yet
+activate Service port checks.
 
 The **Pinned Kiali revision candidate** column separately follows the pinned
 managed-revision label selector. Maistra membership takes precedence unless the
@@ -1549,19 +1546,19 @@ repository-local skill discovery directory. Each has its own `SKILL.md`.
 [AGENTS.md](AGENTS.md) supplies the always-on plugin guidance and compatibility
 notes for the upstream Claude-oriented workflows.
 
-| Skill               | Purpose                                               |
-| ------------------- | ----------------------------------------------------- |
-| `create-crd-plugin` | Orchestrate the initial CRD-plugin buildout           |
-| `plan-plugin`       | Plan resource coverage and navigation                 |
-| `define-resource`   | Model typed custom resources                          |
-| `add-list-view`     | Add list pages, routes, sidebar entries, and topology |
-| `add-detail-view`   | Add resource detail pages                             |
-| `add-settings`      | Add persisted plugin settings                         |
-| `ensure-dependency` | Check or install a project's cluster dependencies     |
-| `seed-test-data`    | Prepare cluster fixtures                              |
-| `run-and-verify`    | Verify the plugin in a running Headlamp instance      |
-| `document-plugin`   | Document implemented resource coverage                |
-| `pr-triage`         | Read-only repository PR triage                        |
+| Skill | Purpose |
+| --- | --- |
+| `create-crd-plugin` | Orchestrate the initial CRD-plugin buildout |
+| `plan-plugin` | Plan resource coverage and navigation |
+| `define-resource` | Model typed custom resources |
+| `add-list-view` | Add list pages, routes, sidebar entries, and topology |
+| `add-detail-view` | Add resource detail pages |
+| `add-settings` | Add persisted plugin settings |
+| `ensure-dependency` | Check or install a project's cluster dependencies |
+| `seed-test-data` | Prepare cluster fixtures |
+| `run-and-verify` | Verify the plugin in a running Headlamp instance |
+| `document-plugin` | Document implemented resource coverage |
+| `pr-triage` | Read-only repository PR triage |
 
 ### Source and compatibility
 

@@ -2494,7 +2494,8 @@ is pinned Kiali `K8sTrafficShifting.tsx`/`WizardActions.ts`; numeric/default/
 ratio semantics were checked in Gateway API `89b3b0c3fa63f9342f43ba0fb2cf93d6aab53af7`
 `apis/v1/shared_types.go` `BackendRef`.
 
-Weights default to 1, accept decimal integers 0..1,000,000, and need not total 100. Native controls use the full API range instead of the baseline slider's
+Weights default to 1, accept decimal integers 0..1,000,000, and need not total
+100. Native controls use the full API range instead of the baseline slider's
 0..100 convenience bound. Effective no-ops (including omitted/default1) and
 all-zero proposals are blocked; JSON remains available for an intentional
 all-zero rule. Limits are 16 rules and 16 backends per rule.
@@ -2800,8 +2801,8 @@ intercepted GETs across assignment/clear, indirection, exact-true accumulation,
 noncanonical flags and malformed-input cases. No superseded or indirect source
 was read. Unintercepted managed Istiod first-container image/name and final
 literal cluster ID matched the UI. No settings or cluster objects changed.
-Logical-cluster mapping, complete managed scope and Service checker activation
-remain separate prerequisites.
+At this prior checkpoint, logical-cluster mapping, complete managed scope and
+Service checker activation remained separate prerequisites.
 
 ### Explicit logical mesh identity
 
@@ -2905,8 +2906,8 @@ presence skips naming even when the value is empty.
 KIA0701 is independent of mesh naming. The checker skips mapping only for
 control-plane namespaces and the exact waypoint/gateway labels. It selects the
 first cluster-wide Deployment whose **metadata labels** match a nonempty
-Service selector; Deployment namespace, Pod ownership and template selector
-do not participate. An empty Service selector matches every Pod in the pool
+Service selector; Deployment namespace, Pod ownership and template selector do
+not participate. An empty Service selector matches every Pod in the pool
 but selects no Deployment. Named target ports compare against declared
 container-port names; positive integer targets compare numerically, while
 omitted/zero targets fall back to the Service port. Container protocols are
@@ -2929,11 +2930,10 @@ but this session had no running Headlamp target or configured Kubernetes
 CLI/context. Browser contribution/i18n/a11y and console checks, hosted fixtures,
 Desktop and live-cluster verification remain open; the inspector is not
 described as live-verified. The **118 focused tests in four files** and full
-**22,490-test/186-file** suite pass, as do type-check, lint, production build,
+**22,491-test/186-file** suite pass, as do type-check, lint, production build,
 resource/dashboard generation, catalog parity and formatting gates.
 
 ### Declared managed-revision selection
-
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
 `istio/kubernetes.go` (blob `1ae3f6611d27f964da9d3024ee339615cddd9f5b`),
 with the original ambient projection from `models/namespace.go`.
@@ -3584,17 +3584,17 @@ write success is claimed. The hosted Map filter showed all 23 opt-in leaves
 and real icons for the new kinds, but reference edges
 beyond Services and complete semantic Gateway checks remain open.
 
-| Surface                     | Implementation                                                                                                                             | Evidence                                                                                                                                                                                                                                                                                                             | Still incomplete                                                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 23 configuration models     | `src/resources/`, generated from two schema snapshots                                                                                      | Live Istio and pinned upstream Gateway/inference schemas; deterministic generation and model tests                                                                                                                                                                                                                   | Actual Gateway resources, additional server/schema release matrix                                                              |
-| Configuration lists/details | `components/configuration/Configuration.tsx`                                                                                               | Stock-host discovery and empty-list rendering; populated synthetic detail rendering, nested fields, unknown status, Conditions before Events                                                                                                                                                                         | Populated real CR integration and Desktop verification for this increment                                                      |
-| Discovery gate              | `data/configuration.ts`, `ConfigurationGate.tsx`                                                                                           | 401/403/404 distinction, resource scope validation, supported version selection, separate endpoint-cache ownership                                                                                                                                                                                                   | Additional cluster/server-version matrix                                                                                       |
-| Mutations                   | `data/mutations.ts`, `ConfigurationActions.tsx`                                                                                            | Spec CRUD and annotation-only validation exclusions, scoped confirmation, UID/version/acknowledgement guards and no retry; browser writes intercepted                                                                                                                                                                | Real write integration, YAML forms and broader workload/namespace mutations                                                    |
-| Initial checks              | `core/validation.ts`, reference/Gateway/local/policy/group and Service port modules, `data/validation.ts`, `data/servicePortValidation.ts` | Forty-one bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts/TLS patterns and KIA0601/KIA0602/KIA0701 over complete declared local scope; source-informed tests and hosted fixtures for earlier checks | Attachment/per-workload/principal context and remaining checkers remain; Service port browser/live/hosted verification is open |
-| Structural Map              | `mapView.tsx`                                                                                                                              | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested                                                                                                                                                                                                              | Populated live CR graph and reference edge families beyond Services                                                            |
-| Traffic metrics             | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx`                                                                                    | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data                                                                                                                                                                                                           | Live TCP series, custom dashboards, full upstream query/default parity                                                         |
-| Basic request graph         | `core/trafficGraph.ts`, `TrafficGraph.tsx`                                                                                                 | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges                                                                                                                                                                                                                            | Original request-only view; advanced work is on the separate topology route                                                    |
-| Traffic topology            | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates                                                          | Four projections, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; 1,728 Go identity cases; hosted Bookinfo and negative fixtures                                                                                                           | Mixed reporter pipeline, complete appenders, ambient/waypoint, historical resource identity/trace links and Desktop            |
+| Surface | Implementation | Evidence | Still incomplete |
+| --- | --- | --- | --- |
+| 23 configuration models | `src/resources/`, generated from two schema snapshots | Live Istio and pinned upstream Gateway/inference schemas; deterministic generation and model tests | Actual Gateway resources, additional server/schema release matrix |
+| Configuration lists/details | `components/configuration/Configuration.tsx` | Stock-host discovery and empty-list rendering; populated synthetic detail rendering, nested fields, unknown status, Conditions before Events | Populated real CR integration and Desktop verification for this increment |
+| Discovery gate | `data/configuration.ts`, `ConfigurationGate.tsx` | 401/403/404 distinction, resource scope validation, supported version selection, separate endpoint-cache ownership | Additional cluster/server-version matrix |
+| Mutations | `data/mutations.ts`, `ConfigurationActions.tsx` | Spec CRUD and annotation-only validation exclusions, scoped confirmation, UID/version/acknowledgement guards and no retry; browser writes intercepted | Real write integration, YAML forms and broader workload/namespace mutations |
+| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group and Service port modules, `data/validation.ts`, `data/servicePortValidation.ts` | Forty-one bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts/TLS patterns and KIA0601/KIA0602/KIA0701 over complete declared local scope; source-informed tests and hosted fixtures for earlier checks | Attachment/per-workload/principal context and remaining checkers remain; Service port browser/live/hosted verification is open |
+| Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
+| Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
+| Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |
+| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; 1,728 Go identity cases; hosted Bookinfo and negative fixtures | Mixed reporter pipeline, complete appenders, ambient/waypoint, historical resource identity/trace links and Desktop |
 
 These are **partial implementations**, not closure of their corresponding full
 milestones. The captured Istio kinds are VirtualService, DestinationRule, Gateway,
@@ -3665,15 +3665,15 @@ remained in the exercised final views.
 
 ## Verified initial native slice
 
-| Surface                   | Implementation                                                                 | Desktop and hosted-web evidence                                                                                                                                                                                | Remaining boundary                                                                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Overview                  | `components/Overview.tsx`                                                      | Istio served versions and Prometheus 3.10.0 shown; named controls and nonblank English labels                                                                                                                  | API presence is not control-plane health; no traffic charts                                                                                      |
-| Settings                  | `config.ts`, `core/config.ts`, `components/Settings.tsx`                       | Actual UI saved `istio-system/prometheus:9090`; connection succeeded in each profile; Desktop reload retained it                                                                                               | Explicit Service reference only; no automatic endpoint discovery or external-service credential support                                          |
-| Reactive connection state | `hooks/useRequest.ts`, `data/requests.ts`                                      | Desktop overview changed immediately when configuration was disabled or pointed at a missing Service, then recovered on restoration                                                                            | Restricted-user scenarios remain fixture-tested, not live-tested with a second identity                                                          |
-| Namespaces                | `components/Resources.tsx`                                                     | Native rows show Bookinfo's `asm-1-30` revision and Active phase                                                                                                                                               | No namespace mesh-health summary or custom namespace actions                                                                                     |
-| Services                  | `components/Resources.tsx`                                                     | Namespace filter restricted rows to the four Bookinfo Services; ports rendered; name opened native Service details                                                                                             | Not Kiali's service correlation, health or configuration detail view                                                                             |
-| Workloads                 | `components/Resources.tsx`, `core/readiness.ts`                                | Six Bookinfo Deployments show `1/1`; Jobs tab is honestly empty and retains kind/namespace in the URL                                                                                                          | Five native controller tabs; grouping now exists in the separate Applications view; OpenShift extensions and custom Kiali details remain planned |
-| Scope and errors          | `core/scope.ts`, `data/requests.ts`, `hooks/useRequest.ts`, cluster comparison | Explicit cluster requests; bounded read-only comparison and per-source errors, cancellation, late responses, malformed payloads, prototype-like cluster names and 401/403/404 classifications covered by tests | Configuration/mutations remain single-cluster; full graph/store normalization remains open                                                       |
+| Surface | Implementation | Desktop and hosted-web evidence | Remaining boundary |
+| --- | --- | --- | --- |
+| Overview | `components/Overview.tsx` | Istio served versions and Prometheus 3.10.0 shown; named controls and nonblank English labels | API presence is not control-plane health; no traffic charts |
+| Settings | `config.ts`, `core/config.ts`, `components/Settings.tsx` | Actual UI saved `istio-system/prometheus:9090`; connection succeeded in each profile; Desktop reload retained it | Explicit Service reference only; no automatic endpoint discovery or external-service credential support |
+| Reactive connection state | `hooks/useRequest.ts`, `data/requests.ts` | Desktop overview changed immediately when configuration was disabled or pointed at a missing Service, then recovered on restoration | Restricted-user scenarios remain fixture-tested, not live-tested with a second identity |
+| Namespaces | `components/Resources.tsx` | Native rows show Bookinfo's `asm-1-30` revision and Active phase | No namespace mesh-health summary or custom namespace actions |
+| Services | `components/Resources.tsx` | Namespace filter restricted rows to the four Bookinfo Services; ports rendered; name opened native Service details | Not Kiali's service correlation, health or configuration detail view |
+| Workloads | `components/Resources.tsx`, `core/readiness.ts` | Six Bookinfo Deployments show `1/1`; Jobs tab is honestly empty and retains kind/namespace in the URL | Five native controller tabs; grouping now exists in the separate Applications view; OpenShift extensions and custom Kiali details remain planned |
+| Scope and errors | `core/scope.ts`, `data/requests.ts`, `hooks/useRequest.ts`, cluster comparison | Explicit cluster requests; bounded read-only comparison and per-source errors, cancellation, late responses, malformed payloads, prototype-like cluster names and 401/403/404 classifications covered by tests | Configuration/mutations remain single-cluster; full graph/store normalization remains open |
 
 The production package was built once and the same main.js hash was installed
 into both test targets. The temporary watch process was stopped; the production
@@ -3735,42 +3735,42 @@ The native slices described here are explicitly partial implementations of the
 larger Kiali families; it does not mark an entire upstream handler or family as
 verified-parity.
 
-| Category                            | Records | Implementation tasks                         | Acceptance obligation                                                     |
-| ----------------------------------- | ------: | -------------------------------------------- | ------------------------------------------------------------------------- |
-| API operations                      |      88 | Feature family mapping below                 | Handler behavior/options and negative cases                               |
-| Resources and API versions          | 34 + 12 | `resource-access`, `config-views`            | Live served schema, scope, fields, links and version normalization        |
-| Checkers and diagnostic descriptors | 64 + 72 | `basic-validation`, `full-validation`        | Every check/code, severity, field path and incomplete-visibility behavior |
-| Graph appenders                     |      17 | `advanced-graph`                             | Ordering, enrichment and graph modes against upstream fixtures            |
-| Graph defaults and parameters       | 11 + 20 | `basic-graph`, `advanced-graph`              | Defaults, allowed values, validation and historical query behavior        |
-| Graph/health/wizard contract fields |     216 | Corresponding graph, health and wizard tasks | Meaning, optional/empty values and supported interactions                 |
-| Resolved frontend routes            |      21 | Corresponding native-view task               | Native equivalent, filter state and detail navigation                     |
-| Frontend contract source units      |      64 | Corresponding domain/view task               | Enumerate behavioral dependencies before use                              |
-| Page source units                   |     176 | Corresponding native-view task               | Tabs, filters, actions, errors, accessibility and data dependencies       |
-| Wizard source units                 |      45 | `basic-wizards`, `full-wizards`              | Exact proposed manifests, confirmation and partial-failure handling       |
-| Diagnostic source units             |       6 | `diagnostics`                                | Payload normalization and mode-specific endpoint access                   |
-| Health primitives                   |       7 | `parity-harness`, then `health`              | Independent output comparison plus later data/UI integration              |
+| Category | Records | Implementation tasks | Acceptance obligation |
+| --- | ---: | --- | --- |
+| API operations | 88 | Feature family mapping below | Handler behavior/options and negative cases |
+| Resources and API versions | 34 + 12 | `resource-access`, `config-views` | Live served schema, scope, fields, links and version normalization |
+| Checkers and diagnostic descriptors | 64 + 72 | `basic-validation`, `full-validation` | Every check/code, severity, field path and incomplete-visibility behavior |
+| Graph appenders | 17 | `advanced-graph` | Ordering, enrichment and graph modes against upstream fixtures |
+| Graph defaults and parameters | 11 + 20 | `basic-graph`, `advanced-graph` | Defaults, allowed values, validation and historical query behavior |
+| Graph/health/wizard contract fields | 216 | Corresponding graph, health and wizard tasks | Meaning, optional/empty values and supported interactions |
+| Resolved frontend routes | 21 | Corresponding native-view task | Native equivalent, filter state and detail navigation |
+| Frontend contract source units | 64 | Corresponding domain/view task | Enumerate behavioral dependencies before use |
+| Page source units | 176 | Corresponding native-view task | Tabs, filters, actions, errors, accessibility and data dependencies |
+| Wizard source units | 45 | `basic-wizards`, `full-wizards` | Exact proposed manifests, confirmation and partial-failure handling |
+| Diagnostic source units | 6 | `diagnostics` | Payload normalization and mode-specific endpoint access |
+| Health primitives | 7 | `parity-harness`, then `health` | Independent output comparison plus later data/UI integration |
 
 ### Feature families
 
-| Family / API path or source                                  | Target module and native surface                                                                 | Prerequisites                                                           | Current status, Desktop / web                                                                                                                        |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Overview, namespaces, namespace info/updates                 | `src/components/Overview.tsx`, `Resources.tsx`                                                   | Resource access and scoped permissions                                  | Partial read-only native slice / partial read-only native slice                                                                                      |
-| Apps, workloads, Services, pods                              | `Resources.tsx`, `Applications.tsx`, `core/correlation.ts`                                       | Typed resources and label/owner indexes                                 | Partial native browsing and scoped correlation / same                                                                                                |
-| Istio configuration, permissions and supported forms         | `src/resources`, configuration views/actions                                                     | API discovery and confirmed RBAC writes                                 | Implemented-unverified in Desktop / partial, hosted fixtures and real empty-list checks                                                              |
-| Metrics, dashboards, statistics, overview rates/latency      | `src/core/telemetry`, charts                                                                     | Existing Prometheus-compatible endpoint                                 | Implemented-unverified in Desktop / partial, fixture charts and real outage reporting                                                                |
-| Health and annotations                                       | `src/core/health.ts`, `healthCalculator.ts`, `WorkloadHealth.tsx`                                | Telemetry, normalized replica/proxy state                               | Calculator/workload view unverified in Desktop / partial, live Bookinfo and configurable rules verified                                              |
-| Validations, references and ignore annotations               | `src/core/validation`, configuration findings                                                    | Complete or explicitly partial snapshots                                | Initial checks implemented-unverified / partial, limited-check fixture verified                                                                      |
-| Traffic graphs and summaries                                 | `src/core/trafficGraph.ts`, `core/topology.ts`, `Topology.tsx`                                   | Telemetry and explicit metric identity                                  | Bounded four-mode projections verified hosted; broader graph pipeline remains partial                                                                |
-| Mesh graph, control planes, Istio status and TLS             | `core/mesh.ts`, `data/mesh.ts`, `Mesh.tsx`                                                       | Discovery, policy scope and observed data                               | Inventory unverified in Desktop / bounded real hosted inventory; full mesh graph/security remain                                                     |
-| Logs and read-only Envoy observations                        | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `data/proxyAdmin.ts`, `Diagnostics.tsx` | Pod reads/logs/port-forward permissions; public SDK WebSocket transport | Desktop unverified / hosted live logs, server state and config entries verified; full projections, sync, ztunnel and logging mutations remain        |
-| Traces, spans, error traces and tracing diagnostics          | `core/tracing.ts`, `data/tracing.ts`, `Traces.tsx`, `TraceMetadata.tsx`                          | Existing Jaeger/Tempo HTTP query Service                                | Desktop unverified / hosted search/detail/metadata fixture-verified; live provider, correlations, broader filters and authenticated transport remain |
-| Grafana and Perses                                           | Integration adapters and dashboard links                                                         | Existing endpoint and compatible auth                                   | Planned / planned                                                                                                                                    |
-| Cluster aggregation                                          | Scoped data adapters and cluster mapping                                                         | Headlamp cluster groups and telemetry labels                            | Planned / planned                                                                                                                                    |
-| Wizard source and action contracts                           | `core/trafficWeights.ts`, configuration action editor                                            | Confirmed writes and semantic validation                                | Initial editor unverified in Desktop / bounded existing-route editor fixture-verified; full wizards remain                                           |
-| API authenticate/logout/auth-info and frontend Login         | Headlamp's existing identity UI                                                                  | Host authentication                                                     | Replaced-by-Headlamp; integration unverified                                                                                                         |
-| Backend health endpoints and test instrumentation            | Host health and local tests                                                                      | No Kiali server shipped                                                 | Replaced by host/test responsibilities                                                                                                               |
-| `/api/chat*`, ChatSessionUsage, AI-specific source contracts | None                                                                                             | Explicit scope exclusion                                                | Excluded-by-user / excluded-by-user                                                                                                                  |
-| Offline and gather/import commands                           | None                                                                                             | Explicit scope exclusion                                                | Excluded-by-user / excluded-by-user                                                                                                                  |
+| Family / API path or source | Target module and native surface | Prerequisites | Current status, Desktop / web |
+| --- | --- | --- | --- |
+| Overview, namespaces, namespace info/updates | `src/components/Overview.tsx`, `Resources.tsx` | Resource access and scoped permissions | Partial read-only native slice / partial read-only native slice |
+| Apps, workloads, Services, pods | `Resources.tsx`, `Applications.tsx`, `core/correlation.ts` | Typed resources and label/owner indexes | Partial native browsing and scoped correlation / same |
+| Istio configuration, permissions and supported forms | `src/resources`, configuration views/actions | API discovery and confirmed RBAC writes | Implemented-unverified in Desktop / partial, hosted fixtures and real empty-list checks |
+| Metrics, dashboards, statistics, overview rates/latency | `src/core/telemetry`, charts | Existing Prometheus-compatible endpoint | Implemented-unverified in Desktop / partial, fixture charts and real outage reporting |
+| Health and annotations | `src/core/health.ts`, `healthCalculator.ts`, `WorkloadHealth.tsx` | Telemetry, normalized replica/proxy state | Calculator/workload view unverified in Desktop / partial, live Bookinfo and configurable rules verified |
+| Validations, references and ignore annotations | `src/core/validation`, configuration findings | Complete or explicitly partial snapshots | Initial checks implemented-unverified / partial, limited-check fixture verified |
+| Traffic graphs and summaries | `src/core/trafficGraph.ts`, `core/topology.ts`, `Topology.tsx` | Telemetry and explicit metric identity | Bounded four-mode projections verified hosted; broader graph pipeline remains partial |
+| Mesh graph, control planes, Istio status and TLS | `core/mesh.ts`, `data/mesh.ts`, `Mesh.tsx` | Discovery, policy scope and observed data | Inventory unverified in Desktop / bounded real hosted inventory; full mesh graph/security remain |
+| Logs and read-only Envoy observations | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `data/proxyAdmin.ts`, `Diagnostics.tsx` | Pod reads/logs/port-forward permissions; public SDK WebSocket transport | Desktop unverified / hosted live logs, server state and config entries verified; full projections, sync, ztunnel and logging mutations remain |
+| Traces, spans, error traces and tracing diagnostics | `core/tracing.ts`, `data/tracing.ts`, `Traces.tsx`, `TraceMetadata.tsx` | Existing Jaeger/Tempo HTTP query Service | Desktop unverified / hosted search/detail/metadata fixture-verified; live provider, correlations, broader filters and authenticated transport remain |
+| Grafana and Perses | Integration adapters and dashboard links | Existing endpoint and compatible auth | Planned / planned |
+| Cluster aggregation | Scoped data adapters and cluster mapping | Headlamp cluster groups and telemetry labels | Planned / planned |
+| Wizard source and action contracts | `core/trafficWeights.ts`, configuration action editor | Confirmed writes and semantic validation | Initial editor unverified in Desktop / bounded existing-route editor fixture-verified; full wizards remain |
+| API authenticate/logout/auth-info and frontend Login | Headlamp's existing identity UI | Host authentication | Replaced-by-Headlamp; integration unverified |
+| Backend health endpoints and test instrumentation | Host health and local tests | No Kiali server shipped | Replaced by host/test responsibilities |
+| `/api/chat*`, ChatSessionUsage, AI-specific source contracts | None | Explicit scope exclusion | Excluded-by-user / excluded-by-user |
+| Offline and gather/import commands | None | Explicit scope exclusion | Excluded-by-user / excluded-by-user |
 
 Source-unit inventories intentionally retain excluded source references so their
 absence is visible. A general endpoint such as `/api/config` may contain both
@@ -3890,14 +3890,14 @@ Application links now serialize their query parameters explicitly.
 
 `src/core/health.ts` ports the following exact model semantics:
 
-| Upstream symbol                                   | TypeScript equivalent     | Evidence                                                                    |
-| ------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------- |
-| `HealthStatusPriority`                            | `healthStatusPriority`    | Six statuses including unknown                                              |
-| `MergeHealthStatus`                               | `mergeHealthStatus`       | All 36 ordered pairs, including ties                                        |
-| `WorkloadStatusHealth`                            | `workloadStatusHealth`    | Null input and 320 replica/proxy combinations                               |
-| `RequestHealth.GetErrorRatio`                     | `simpleRequestErrorRatio` | No-data, HTTP errors, mixed directions, fractional rates and non-HTTP codes |
-| `GetInboundRequestRate`, `GetOutboundRequestRate` | `directionalRequestRate`  | Inbound/outbound oracle results                                             |
-| `GetTotalRequestRate`                             | `totalRequestRate`        | Combined oracle results                                                     |
+| Upstream symbol | TypeScript equivalent | Evidence |
+| --- | --- | --- |
+| `HealthStatusPriority` | `healthStatusPriority` | Six statuses including unknown |
+| `MergeHealthStatus` | `mergeHealthStatus` | All 36 ordered pairs, including ties |
+| `WorkloadStatusHealth` | `workloadStatusHealth` | Null input and 320 replica/proxy combinations |
+| `RequestHealth.GetErrorRatio` | `simpleRequestErrorRatio` | No-data, HTTP errors, mixed directions, fractional rates and non-HTTP codes |
+| `GetInboundRequestRate`, `GetOutboundRequestRate` | `directionalRequestRate` | Inbound/outbound oracle results |
+| `GetTotalRequestRate` | `totalRequestRate` | Combined oracle results |
 
 The simple error-ratio fallback is **not** Kiali's protocol-aware HealthCalculator:
 gRPC error tolerances, annotations, configurable thresholds, aggregation and UI
@@ -3943,18 +3943,18 @@ real native transport path, not all planned functionality or plugin UI parity.
 Restricted-RBAC, streaming/lifecycle, other integrations and hosted-web
 cluster-connected scenarios still need their own evidence.
 
-| Capability                                       | Offline evidence                                    | Desktop / hosted-web live evidence                                       |
-| ------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------ |
-| Native slice loading and listed SDK exports      | Installed stock Headlamp 0.35.0                     | Confirmed / confirmed against the selected cluster                       |
-| Desktop CDP and SDK availability                 | User-launched Desktop target on loopback 9222       | Confirmed / not applicable                                               |
-| Resource discovery/read/write and permissions    | SDK K8s / ApiProxy contracts                        | Initial reads confirmed; writes and restricted-user cases pending / same |
-| Existing HTTP Service access                     | ApiProxy plus official Prometheus example           | Prometheus query/build-info confirmed / build-info confirmed             |
-| Cancellation, streaming and session invalidation | Must exercise the actual host lifecycle             | Pending / pending                                                        |
-| Envoy, Istiod and ztunnel endpoints              | Reachability cannot be inferred from SDK types      | Pending / pending                                                        |
-| Port-forward listener use                        | SDK APIs exist; listener is backend-local           | Pending / pending; browser localhost is not server localhost             |
-| Tracing HTTP/auth equivalents                    | Provider-specific endpoint validation required      | Pending / pending                                                        |
-| gRPC-only operations                             | Browser cannot use native gRPC directly             | Gap unless an existing equivalent HTTP API is available                  |
-| Graph renderer                                   | Public structural Map registration only established | Pending / pending                                                        |
+| Capability | Offline evidence | Desktop / hosted-web live evidence |
+| --- | --- | --- |
+| Native slice loading and listed SDK exports | Installed stock Headlamp 0.35.0 | Confirmed / confirmed against the selected cluster |
+| Desktop CDP and SDK availability | User-launched Desktop target on loopback 9222 | Confirmed / not applicable |
+| Resource discovery/read/write and permissions | SDK K8s / ApiProxy contracts | Initial reads confirmed; writes and restricted-user cases pending / same |
+| Existing HTTP Service access | ApiProxy plus official Prometheus example | Prometheus query/build-info confirmed / build-info confirmed |
+| Cancellation, streaming and session invalidation | Must exercise the actual host lifecycle | Pending / pending |
+| Envoy, Istiod and ztunnel endpoints | Reachability cannot be inferred from SDK types | Pending / pending |
+| Port-forward listener use | SDK APIs exist; listener is backend-local | Pending / pending; browser localhost is not server localhost |
+| Tracing HTTP/auth equivalents | Provider-specific endpoint validation required | Pending / pending |
+| gRPC-only operations | Browser cannot use native gRPC directly | Gap unless an existing equivalent HTTP API is available |
+| Graph renderer | Public structural Map registration only established | Pending / pending |
 
 Unverified capabilities are not labeled impossible. Failed or unavailable
 stock-host paths must become explicit per-operation gaps, not a new backend,
