@@ -24,6 +24,9 @@ export type FindingReference = {
 
 export interface Finding {
   code:
+    | 'KIA0601'
+    | 'KIA0602'
+    | 'KIA0701'
     | 'KIA1104'
     | 'KIA1105'
     | 'KIA1106'

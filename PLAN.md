@@ -16,7 +16,7 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-30
+### Resume status — 2026-10-31
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -67,12 +67,14 @@ with cloud agents rather than keeping the laptop running. The working branch is
 task must explicitly use the working branch as its base or it will miss this
 port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
 
-The next ready milestone is **Service port validation**: consume the new typed
-declared local namespace scope, collect the complete pooled managed-namespace
-Pod input and cluster-wide Deployments, and port the pinned active caller's
-port-name/appProtocol/mapping checks. Do not activate them from a namespace-only
-snapshot, truncated lists or correlation `proxyMode`. No Service checker has
-been enabled by the stopping checkpoint.
+The **Service port-validation milestone is implemented** on this branch:
+Service details link to an explicit, read-only inspector that requires declared
+local namespace scope, a complete pooled managed-namespace Pod snapshot and
+complete cluster-wide Deployments. It ports the active KIA0601/KIA0602/KIA0701
+checks and keeps denied, stale, malformed, truncated or unresolved evidence
+unavailable. The implementation uses status annotations, never correlation
+`proxyMode`. Hosted Headlamp, Desktop and live-cluster verification are
+unavailable in this session and remain open; see `docs/parity.md`.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -104,7 +106,22 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
-- 23 schema-derived configuration kinds and **38 bounded finding codes**.
+- **Service port validation (2026-10-31):** added the explicit Service inspector
+  and complete typed Pod/Deployment collection over the declared local scope.
+  Active caller semantics retain pooled selector matching without an extra
+  namespace filter, vacuous all-sidecar behavior, the independent any-ambient
+  test, appProtocol precedence, first cluster-wide Deployment metadata-label
+  match, exact mapping exclusions and the no-missing-Deployment behavior.
+  The selected Service is re-read and compared after the evidence capture;
+  source failures, truncation and timeouts cannot produce partial findings.
+  The focused set passed **118 tests in four files**, and the final full suite
+  passed **22,490 tests in 186 files**. Type, lint, production build, resource/
+  dashboard generation and catalog gates also pass. There is no new original-Go
+  oracle. Headlamp browser load/a11y, hosted fixture verification, Desktop and
+  live-cluster gates remain explicitly open.
+
+- 23 schema-derived configuration kinds and **41 bounded finding codes** after
+  the Service port slice.
   An activation audit removed unintended ServiceEntry KIA0601 enforcement:
   the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
   A subsequent KIA0004 audit restricts generic workload-selector activation to
@@ -536,7 +553,7 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   Its expanded 216-case original-Go query oracle and parity catalog check passed.
   Previous template increment: **171 focused tests in six files**, plus
   type/lint/i18n/build/package and hosted checks passed.
-  Latest full-suite checkpoint: **22,377 tests in 183 files** after declared
+  Pre-Service full-suite checkpoint: **22,377 tests in 183 files** after declared
   local namespace scope; its focused suite passed **2,229 tests in eight files**.
   The preceding **22,359-test/182-file** suite covered explicit
   logical mesh identity; its focused suite passed **354 tests in six files**.
@@ -704,12 +721,12 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Git handoff boundary
 
-| Checkpoint | Contents |
-| --- | --- |
-| `06162d2` | Initial Kiali scaffold and extracted agent skills; scaffolding only |
-| `739260f` | Native resource browsing, scoped settings, parity infrastructure and reproducible development fixtures |
-| Correlation and handoff checkpoint after `739260f` | Application correlation, Applications list/detail UI, label settings, tests, oracle, related documentation and this plan |
-| Native port checkpoint after `6753f8e` | 23 configuration models, guarded CRUD, thirty-eight bounded finding codes, host/health/mTLS/import/local-check/proxy/policy/graph/grouping/registry oracles, mesh inventory, entity health, charts/histograms/graph/custom aggregate dashboards, native tracing, guided routing, VM/Pod account evidence and read-only diagnostics/current-resource candidates |
+| Checkpoint                                         | Contents                                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `06162d2`                                          | Initial Kiali scaffold and extracted agent skills; scaffolding only                                                                                                                                                                                                                                                                                            |
+| `739260f`                                          | Native resource browsing, scoped settings, parity infrastructure and reproducible development fixtures                                                                                                                                                                                                                                                         |
+| Correlation and handoff checkpoint after `739260f` | Application correlation, Applications list/detail UI, label settings, tests, oracle, related documentation and this plan                                                                                                                                                                                                                                       |
+| Native port checkpoint after `6753f8e`             | 23 configuration models, guarded CRUD, thirty-eight bounded finding codes, host/health/mTLS/import/local-check/proxy/policy/graph/grouping/registry oracles, mesh inventory, entity health, charts/histograms/graph/custom aggregate dashboards, native tracing, guided routing, VM/Pod account evidence and read-only diagnostics/current-resource candidates |
 
 At handoff the branch is `therealmitchconnors-kiali-plugin`.
 The original correlation/handoff checkpoint is `6753f8e`; the subsequent native
@@ -1124,27 +1141,27 @@ conditional mesh-wide defaults and full workload provenance remain open.
 
 ## What exists now
 
-| Surface | Current implementation | Important limit |
-| --- | --- | --- |
-| Kiali navigation | Overview, Applications, Mesh inventory, mTLS configuration, Traces, Mesh configuration, Traffic metrics/signals/histograms/graph, Custom aggregate dashboards, Cluster comparison, Health, Pod diagnostics, Namespaces, Services, Workloads, Connection settings | No links to unimplemented features; custom dashboards are a bounded raw/rate/classic-histogram subset |
-| Overview | Istio API discovery and existing Prometheus Service connectivity | API presence is not mesh/control-plane health |
-| Native resource browsing | Namespace/Service tables; Deployment, StatefulSet, DaemonSet, Job and CronJob tabs | No plugin list mutations; details delegate to Headlamp |
-| Settings | Version-1 cluster ConfigStore: Prometheus/tracing Service endpoints, app/version labels, health rules and explicit service DNS suffix | Browser-profile-local; unknown DNS suffix remains unset; no credentials |
-| Scoped reads | Explicit cluster, namespace validation, abort propagation, structured failures, stale-response suppression | No persistent derived-data cache |
-| Applications | List/detail grouping, versions, related Services, owned pods and native-sidecar detection | One cluster and one explicitly selected namespace |
-| Correlation core | Scoped label postings, selectors, UID owner chains, de-duplication, Service-host resolution | Configuration relationships, not measured traffic |
-| Health | Pinned calculator/reporter combination, cluster rules, five-kind workloads, correlated Applications and inbound-only Services | No proxy/ambient/security assessment; unknown-cluster/external and complete query coverage remain |
-| Mesh inventory and configured mTLS | Local discovery, selected config merge and namespace-wide policy indicator | Label hints/configuration only; not full effective/observed mesh security |
-| Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
-| WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
-| Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
-| Initial checks | Thirty-eight bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; dormant CRD port checks excluded; attachment/port/per-workload/registry/security context remains incomplete |
-| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
-| Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
-| Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
-| Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
-| Pod/proxy diagnostics | Container inventory, bounded logs, Envoy inspection, current-Service/configuration candidates and explicitly selected ztunnel registry tables | Envoy/Service hosted-live; configuration/ztunnel positives fixture-backed; broader metadata formats, authorized sync, ambient metrics, logging controls and Desktop remain |
-| Parity evidence | Source inventories, reproducible generators, synthetic fixtures and live Bookinfo checks | Inventoried does not mean implemented |
+| Surface                                           | Current implementation                                                                                                                                                                                                                                                                       | Important limit                                                                                                                                                            |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiali navigation                                  | Overview, Applications, Mesh inventory, mTLS configuration, Traces, Mesh configuration, Traffic metrics/signals/histograms/graph, Custom aggregate dashboards, Cluster comparison, Health, Pod diagnostics, Namespaces, Services, Workloads, Connection settings                             | No links to unimplemented features; custom dashboards are a bounded raw/rate/classic-histogram subset                                                                      |
+| Overview                                          | Istio API discovery and existing Prometheus Service connectivity                                                                                                                                                                                                                             | API presence is not mesh/control-plane health                                                                                                                              |
+| Native resource browsing                          | Namespace/Service tables; Deployment, StatefulSet, DaemonSet, Job and CronJob tabs                                                                                                                                                                                                           | No plugin list mutations; details delegate to Headlamp                                                                                                                     |
+| Settings                                          | Version-1 cluster ConfigStore: Prometheus/tracing Service endpoints, app/version labels, health rules and explicit service DNS suffix                                                                                                                                                        | Browser-profile-local; unknown DNS suffix remains unset; no credentials                                                                                                    |
+| Scoped reads                                      | Explicit cluster, namespace validation, abort propagation, structured failures, stale-response suppression                                                                                                                                                                                   | No persistent derived-data cache                                                                                                                                           |
+| Applications                                      | List/detail grouping, versions, related Services, owned pods and native-sidecar detection                                                                                                                                                                                                    | One cluster and one explicitly selected namespace                                                                                                                          |
+| Correlation core                                  | Scoped label postings, selectors, UID owner chains, de-duplication, Service-host resolution                                                                                                                                                                                                  | Configuration relationships, not measured traffic                                                                                                                          |
+| Health                                            | Pinned calculator/reporter combination, cluster rules, five-kind workloads, correlated Applications and inbound-only Services                                                                                                                                                                | No proxy/ambient/security assessment; unknown-cluster/external and complete query coverage remain                                                                          |
+| Mesh inventory and configured mTLS                | Local discovery, selected config merge and namespace-wide policy indicator                                                                                                                                                                                                                   | Label hints/configuration only; not full effective/observed mesh security                                                                                                  |
+| Mesh configuration                                | 23 schema-derived Istio/Gateway/inference models, list/detail views and references                                                                                                                                                                                                           | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain                                                                              |
+| WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates                                                                                                                                                                  | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported                           |
+| Configuration actions                             | Confirmed CRUD, existing-route weights and Service-driven two-object creation                                                                                                                                                                                                                | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain                                                                                 |
+| Initial checks                                    | Forty-one bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, Service port checks, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; attachment/per-workload/principal context and remaining checkers are incomplete                                                         |
+| Telemetry and graph                               | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check                                                                                                                                                                                   | Full queries/graph enrichments and new Desktop check remain                                                                                                                |
+| Traffic histograms                                | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results                                                                                                                                                                    | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open                                                                              |
+| Traffic signals                                   | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads                                                                                                                                                                  | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity                                                  |
+| Trace browsing                                    | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links                                                                                                                                                                               | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain                                        |
+| Pod/proxy diagnostics                             | Container inventory, bounded logs, Envoy inspection, current-Service/configuration candidates and explicitly selected ztunnel registry tables                                                                                                                                                | Envoy/Service hosted-live; configuration/ztunnel positives fixture-backed; broader metadata formats, authorized sync, ambient metrics, logging controls and Desktop remain |
+| Parity evidence                                   | Source inventories, reproducible generators, synthetic fixtures and live Bookinfo checks                                                                                                                                                                                                     | Inventoried does not mean implemented                                                                                                                                      |
 
 ### Application semantics to preserve
 
@@ -1172,28 +1189,28 @@ conditional mesh-wide defaults and full workload provenance remain open.
 
 ## Repository map
 
-| Path | Purpose |
-| --- | --- |
-| `src/index.tsx` | Registration only, with `kiali-` names and `/kiali/...` paths |
-| `src/config.ts`, `src/core/config.ts` | ConfigStore integration, schema validation and cluster-specific merging |
-| `src/core/tracing.ts`, `src/data/tracing.ts`, `src/components/Traces.tsx` | Bounded HTTP tracing normalization, scoped reads and native search/detail |
-| `src/core/scope.ts`, `object.ts` | Explicit scope, identity and shared guards |
-| `src/core/labels.ts`, `correlation.ts` | Pure selector, label, owner and application relationship logic |
-| `src/core/health.ts`, `readiness.ts` | Separate Kiali health primitives and Kubernetes readiness |
-| `src/data/requests.ts`, `correlation.ts` | Headlamp transport adapters, response validation and bounded snapshots |
-| `src/{core,data}/diagnostics.ts`, `core/proxyHttp.ts`, `core/proxyConfig.ts`, `data/proxyAdmin.ts` | Bounded pod logs and native WebSocket Envoy observations |
-| `src/hooks/useRequest.ts` | Scope/key-bound asynchronous state and cancellation |
-| `src/components/` | Current native views and settings |
-| `locales/en/translation.json` | Extracted nonempty English strings |
-| `scripts/parity/` | Inventory/oracle generation and consistency checks |
-| `test-files/parity/`, `test-files/correlation/` | Committed synthetic evidence; no production credentials |
-| `test-files/deploy/` | Pinned Bookinfo/Prometheus examples and local Kustomize overlays |
-| `docs/parity.md` | Feature evidence, partial coverage, limitations and provenance |
-| `src/resources/`, `src/mapView.tsx` | Generated Istio models and structural configuration topology |
-| `scripts/generate-resources.mjs`, `test-files/configuration/` | Sanitized live schemas, deterministic model generation and synthetic configuration fixtures |
-| `src/core/telemetry.ts`, `trafficGraph.ts`, `validation.ts` | Initial query/response/graph/checker core |
-| `src/data/mutations.ts`, `telemetry.ts`, `configuration.ts` | Guarded configuration changes, metric reads and API discovery |
-| `docs/OVERVIEW.md` | Planned permanent coverage/screenshot document; not implemented yet |
+| Path                                                                                               | Purpose                                                                                     |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `src/index.tsx`                                                                                    | Registration only, with `kiali-` names and `/kiali/...` paths                               |
+| `src/config.ts`, `src/core/config.ts`                                                              | ConfigStore integration, schema validation and cluster-specific merging                     |
+| `src/core/tracing.ts`, `src/data/tracing.ts`, `src/components/Traces.tsx`                          | Bounded HTTP tracing normalization, scoped reads and native search/detail                   |
+| `src/core/scope.ts`, `object.ts`                                                                   | Explicit scope, identity and shared guards                                                  |
+| `src/core/labels.ts`, `correlation.ts`                                                             | Pure selector, label, owner and application relationship logic                              |
+| `src/core/health.ts`, `readiness.ts`                                                               | Separate Kiali health primitives and Kubernetes readiness                                   |
+| `src/data/requests.ts`, `correlation.ts`                                                           | Headlamp transport adapters, response validation and bounded snapshots                      |
+| `src/{core,data}/diagnostics.ts`, `core/proxyHttp.ts`, `core/proxyConfig.ts`, `data/proxyAdmin.ts` | Bounded pod logs and native WebSocket Envoy observations                                    |
+| `src/hooks/useRequest.ts`                                                                          | Scope/key-bound asynchronous state and cancellation                                         |
+| `src/components/`                                                                                  | Current native views and settings                                                           |
+| `locales/en/translation.json`                                                                      | Extracted nonempty English strings                                                          |
+| `scripts/parity/`                                                                                  | Inventory/oracle generation and consistency checks                                          |
+| `test-files/parity/`, `test-files/correlation/`                                                    | Committed synthetic evidence; no production credentials                                     |
+| `test-files/deploy/`                                                                               | Pinned Bookinfo/Prometheus examples and local Kustomize overlays                            |
+| `docs/parity.md`                                                                                   | Feature evidence, partial coverage, limitations and provenance                              |
+| `src/resources/`, `src/mapView.tsx`                                                                | Generated Istio models and structural configuration topology                                |
+| `scripts/generate-resources.mjs`, `test-files/configuration/`                                      | Sanitized live schemas, deterministic model generation and synthetic configuration fixtures |
+| `src/core/telemetry.ts`, `trafficGraph.ts`, `validation.ts`                                        | Initial query/response/graph/checker core                                                   |
+| `src/data/mutations.ts`, `telemetry.ts`, `configuration.ts`                                        | Guarded configuration changes, metric reads and API discovery                               |
+| `docs/OVERVIEW.md`                                                                                 | Planned permanent coverage/screenshot document; not implemented yet                         |
 
 Keep pure core logic independent of React and transport. Keep adapters explicit,
 typed and testable. Stay within this package; do not create a monorepo, generic
@@ -1209,31 +1226,31 @@ It does not mean every upstream subfeature in that family has reached parity.
 **Partial / open** still has implementation work. The full-parity ledger remains
 the authority for individual behavior and platform claims.
 
-| ID | Status | Deliverable / remaining work | Prerequisites |
-| --- | --- | --- | --- |
-| `parity-catalog` | Done | Initial pinned source and behavior inventory | None |
-| `stock-host-spikes` | Done, bounded | Public APIs needed by native browsing/settings proved; advanced transport/renderer questions remain with their feature tasks | `parity-catalog` |
-| `parity-harness` | Done, foundation | Reproducible inventories/oracles; add fixtures for each new port | `parity-catalog` |
-| `shared-context` | Done | Scope, identity, settings, failure states and cancellation | `stock-host-spikes`, `parity-harness` |
-| `resource-access` | Done, initial | Typed built-in SDK models and explicit ApiProxy adapters; new CRD models belong to `config-views` | `shared-context` |
-| `resource-views` | Done, initial | Native read-only lists, readiness and native detail links | `resource-access` |
-| `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
-| `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
-| `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
-| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
-| `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
-| `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
-| `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
-| `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
-| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
-| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
-| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
-| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
-| `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
-| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
-| `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
-| `parity-release` | Pending | Close the ledger, verify live, document and package with explicit remaining gaps | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster` |
+| ID                  | Status             | Deliverable / remaining work                                                                                                                                                                                                                                                                                                                                                                                               | Prerequisites                                                                                |
+| ------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `parity-catalog`    | Done               | Initial pinned source and behavior inventory                                                                                                                                                                                                                                                                                                                                                                               | None                                                                                         |
+| `stock-host-spikes` | Done, bounded      | Public APIs needed by native browsing/settings proved; advanced transport/renderer questions remain with their feature tasks                                                                                                                                                                                                                                                                                               | `parity-catalog`                                                                             |
+| `parity-harness`    | Done, foundation   | Reproducible inventories/oracles; add fixtures for each new port                                                                                                                                                                                                                                                                                                                                                           | `parity-catalog`                                                                             |
+| `shared-context`    | Done               | Scope, identity, settings, failure states and cancellation                                                                                                                                                                                                                                                                                                                                                                 | `stock-host-spikes`, `parity-harness`                                                        |
+| `resource-access`   | Done, initial      | Typed built-in SDK models and explicit ApiProxy adapters; new CRD models belong to `config-views`                                                                                                                                                                                                                                                                                                                          | `shared-context`                                                                             |
+| `resource-views`    | Done, initial      | Native read-only lists, readiness and native detail links                                                                                                                                                                                                                                                                                                                                                                  | `resource-access`                                                                            |
+| `correlation`       | Done, initial      | Supported Kubernetes correlation core and first Applications consumer                                                                                                                                                                                                                                                                                                                                                      | `resource-access`                                                                            |
+| `config-views`      | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain                                                                                                                                                                                                                                                                                              | `resource-views`, `correlation`                                                              |
+| `safe-mutations`    | Partial / open     | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain                                                                                                                                                                                                                                                                                     | `config-views`                                                                               |
+| `basic-validation`  | Partial / open     | Forty-one bounded codes, including source-informed Service port checks over complete declared local namespace scope; attachment/per-workload/principal and broader checks remain                                                                                                                                                                                                                                           | `config-views`, `mesh-security`                                                              |
+| `telemetry`         | Partial / open     | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation`                                                              |
+| `health`            | Partial / open     | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain                                                                                                                                                                                                                                                                          | `telemetry`                                                                                  |
+| `basic-graph`       | Done, bounded      | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below                                                                                                                                                                                                                                                                               | `telemetry`, `correlation`, `stock-host-spikes`                                              |
+| `mesh-security`     | Partial / open     | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain                                                                                                                                                                                                                                               | `correlation`, `config-views`, `telemetry`                                                   |
+| `full-validation`   | Partial / open     | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain                                                                                                                                                                                                                                                                                              | `basic-validation`, `mesh-security`                                                          |
+| `basic-wizards`     | Partial / open     | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain                                                                                                                                                                                                                                                          | `safe-mutations`, `basic-validation`                                                         |
+| `full-wizards`      | Partial / open     | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain                                                                                                                                                                                                                                | `basic-wizards`, `full-validation`                                                           |
+| `diagnostics`       | Partial / open     | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain                                                                                                                                                                                   | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes`                     |
+| `integrations`      | Partial / open     | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain                                                                                                                                                                                                                                                                                            | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes`                               |
+| `multi-cluster`     | Partial / open     | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain                                                                                                                                                                                                                                                                            | `config-views`, `telemetry`, `mesh-security`                                                 |
+| `advanced-graph`    | Partial / open     | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain                                                                                                                                                                                                                                | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
+| `runtime-hardening` | Partial / open     | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain                                                                                                                                                                                                                                  | `advanced-graph`, `diagnostics`, `full-wizards`                                              |
+| `parity-release`    | Pending            | Close the ledger, verify live, document and package with explicit remaining gaps                                                                                                                                                                                                                                                                                                                                           | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster`      |
 
 The optional verification setup is also complete: managed Istio installation,
 Bookinfo/example Prometheus deployment, real metric verification and a supplied
@@ -1559,16 +1576,16 @@ substitute for meaningful detail presentation.
 
 Last verified local setup:
 
-| Item | Value / behavior |
-| --- | --- |
-| Kubernetes context | `mitch-auto`; verify it still exists and is the intended target |
-| AKS | Automatic; latest hosted discovery reports Kubernetes 1.36.4 |
-| Istio | Managed `asm-1-30`, CNI chaining, control plane in `aks-istio-system` |
-| Bookinfo | Six injected deployments in `bookinfo` |
-| Prometheus | Example Prometheus 3.10.0 in `istio-system`, Service port 9090 |
-| Sample source | Istio 1.30.6, commit `b85dac9587f2f997151d205e069e4f4ff091c7c5` |
-| Desktop | Headlamp 0.35.0, user-launched CDP on loopback port 9222 |
-| Temporary hosted checks | Used loopback port 4487; server is not left running |
+| Item                    | Value / behavior                                                      |
+| ----------------------- | --------------------------------------------------------------------- |
+| Kubernetes context      | `mitch-auto`; verify it still exists and is the intended target       |
+| AKS                     | Automatic; latest hosted discovery reports Kubernetes 1.36.4          |
+| Istio                   | Managed `asm-1-30`, CNI chaining, control plane in `aks-istio-system` |
+| Bookinfo                | Six injected deployments in `bookinfo`                                |
+| Prometheus              | Example Prometheus 3.10.0 in `istio-system`, Service port 9090        |
+| Sample source           | Istio 1.30.6, commit `b85dac9587f2f997151d205e069e4f4ff091c7c5`       |
+| Desktop                 | Headlamp 0.35.0, user-launched CDP on loopback port 9222              |
+| Temporary hosted checks | Used loopback port 4487; server is not left running                   |
 
 The AKS platform blocked self-managed injection webhooks and privileged
 `istio-init` capabilities. The supported managed mesh and CNI were used instead.
@@ -1652,21 +1669,21 @@ live coverage rather than extrapolating from the administrator/demo case.
 
 ## Known compatibility traps and open risks
 
-| Area | Evidence / required handling |
-| --- | --- |
-| Runtime values | Type-checking does not prove an externalized value exists in Headlamp. Use documented barrels; deep type imports are different from runtime imports. |
-| Service helpers | Headlamp 0.35.0 lacks `Service.getFormattedPorts`; the current renderer uses stable spec fields. Keep its regression test. |
-| Links | That host expects `CommonComponents.Link.search` to be a string. Serialize with URLSearchParams; do not trust newer declaration support for objects. |
-| Charts/graph internals | The probed generic CommonComponents Chart export was absent. Select documented/exported or compatible bundled renderers before using them; do not deep-import private GraphView internals. |
-| Proxy synchronization | `istioctl proxy-status` could not create RPC credentials in the protected managed namespace with this caller. Do not bypass that policy; investigate legitimate read-only transport separately. |
-| gRPC-only tracing | Requires an existing equivalent HTTP operation or an explicit stock-host parity gap, not a new bridge. |
-| Port forwarding | A listener belongs to the backend machine; hosted-browser localhost is not backend localhost. Track and clean up only forwards the plugin owns. |
-| External auth/CORS/TLS | Kubernetes proxy authorization does not automatically authenticate an application. No arbitrary credential forwarding or ConfigStore secrets. |
-| Visibility | A user's readable resources can differ from Kiali's service-account-wide view. Incomplete data cannot prove absence, health, security or valid configuration. |
-| Background lifecycle | A browser is not an always-on backend; explicitly define refresh, invalidation and cancellation semantics. |
-| Host diagnostics | Hosted Headlamp logged its deprecated CRD-v1beta1 discovery 404. Desktop also produced host release-fetch/permission-review or watch-close diagnostics in some runs. Do not misreport all host logs as clean, or confuse them with plugin execution failures. |
-| Screenshots | Desktop CDP screenshot capture timed out; DOM/console evidence and hosted Playwright snapshots/screenshots were used. Do not invent Desktop image evidence. |
-| Mutations | Freeze target identity, handle resourceVersion conflicts and permission changes, and expose partial multi-object outcomes. |
+| Area                   | Evidence / required handling                                                                                                                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime values         | Type-checking does not prove an externalized value exists in Headlamp. Use documented barrels; deep type imports are different from runtime imports.                                                                                                          |
+| Service helpers        | Headlamp 0.35.0 lacks `Service.getFormattedPorts`; the current renderer uses stable spec fields. Keep its regression test.                                                                                                                                    |
+| Links                  | That host expects `CommonComponents.Link.search` to be a string. Serialize with URLSearchParams; do not trust newer declaration support for objects.                                                                                                          |
+| Charts/graph internals | The probed generic CommonComponents Chart export was absent. Select documented/exported or compatible bundled renderers before using them; do not deep-import private GraphView internals.                                                                    |
+| Proxy synchronization  | `istioctl proxy-status` could not create RPC credentials in the protected managed namespace with this caller. Do not bypass that policy; investigate legitimate read-only transport separately.                                                               |
+| gRPC-only tracing      | Requires an existing equivalent HTTP operation or an explicit stock-host parity gap, not a new bridge.                                                                                                                                                        |
+| Port forwarding        | A listener belongs to the backend machine; hosted-browser localhost is not backend localhost. Track and clean up only forwards the plugin owns.                                                                                                               |
+| External auth/CORS/TLS | Kubernetes proxy authorization does not automatically authenticate an application. No arbitrary credential forwarding or ConfigStore secrets.                                                                                                                 |
+| Visibility             | A user's readable resources can differ from Kiali's service-account-wide view. Incomplete data cannot prove absence, health, security or valid configuration.                                                                                                 |
+| Background lifecycle   | A browser is not an always-on backend; explicitly define refresh, invalidation and cancellation semantics.                                                                                                                                                    |
+| Host diagnostics       | Hosted Headlamp logged its deprecated CRD-v1beta1 discovery 404. Desktop also produced host release-fetch/permission-review or watch-close diagnostics in some runs. Do not misreport all host logs as clean, or confuse them with plugin execution failures. |
+| Screenshots            | Desktop CDP screenshot capture timed out; DOM/console evidence and hosted Playwright snapshots/screenshots were used. Do not invent Desktop image evidence.                                                                                                   |
+| Mutations              | Freeze target identity, handle resourceVersion conflicts and permission changes, and expose partial multi-object outcomes.                                                                                                                                    |
 
 ## Parity accounting and completion
 
