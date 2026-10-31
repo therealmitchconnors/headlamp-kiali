@@ -16,7 +16,7 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-30
+### Resume status — 2026-10-31
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -67,12 +67,20 @@ with cloud agents rather than keeping the laptop running. The working branch is
 task must explicitly use the working branch as its base or it will miss this
 port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
 
-The next ready milestone is **Service port validation**: consume the new typed
-declared local namespace scope, collect the complete pooled managed-namespace
-Pod input and cluster-wide Deployments, and port the pinned active caller's
-port-name/appProtocol/mapping checks. Do not activate them from a namespace-only
-snapshot, truncated lists or correlation `proxyMode`. No Service checker has
-been enabled by the stopping checkpoint.
+The **Gateway listener/port/controller milestone is implemented as an
+active-caller-only, declared-scope increment** on this branch. Gateway details
+offer explicit scoped checks: Istio KIA0302 uses complete default workload
+inclusion and captured controller namespace-scope flags; existing Istio/Gateway
+API conflicts, listener/status and class checks reuse the same complete local
+scope. Dormant Gateway port-name helpers and new route-attachment/port rules
+remain disabled. Browser, hosted fixture, Desktop and live-cluster verification
+are unavailable here and remain open. Full Gateway/controller parity is not claimed.
+
+Service port validation was published separately and is not part of this
+branch's base. Integrate that milestone before dependent Service work; this
+Gateway increment depends only on the declared-local-scope baseline already
+in the working branch. Never substitute namespace-only inputs or correlation
+`proxyMode` for the Service checker's complete evidence.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -104,7 +112,22 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
-- 23 schema-derived configuration kinds and **38 bounded finding codes**.
+- **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
+  inspector, active Istio Gateway KIA0302 and captured exact-true controller
+  scope semantics. Complete versioned Gateway/default-workload/VM sources are
+  projected onto the declared local namespace scope. UID/version/field freshness,
+  ownership, pagination, malformed-source, denial and timeout guards fail closed.
+  Default workload inclusion is a separate source-informed projection, not
+  application correlation or full configurable workload coverage.
+  No new original-Go oracle or positive live Gateway fixture was added.
+  The final focused set passed **103 tests in three files**; the final full
+  run passed **22,480 tests in 186 files**, including the owner-version guard
+  and related-link provenance regression. Type/lint/production-build gates pass.
+  Resource/dashboard generation, catalog parity, i18n and code-format gates pass.
+  Browser contribution/i18n/a11y/console, hosted fixture, Desktop and live-cluster
+  gates remain open; local tests do not close them. See `docs/parity.md`.
+- 23 schema-derived configuration kinds and **39 bounded finding codes** on
+  this branch; the independent Service milestone adds its own codes when integrated.
   An activation audit removed unintended ServiceEntry KIA0601 enforcement:
   the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
   A subsequent KIA0004 audit restricts generic workload-selector activation to
@@ -1138,7 +1161,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
 | Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
-| Initial checks | Thirty-eight bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; dormant CRD port checks excluded; attachment/port/per-workload/registry/security context remains incomplete |
+| Initial checks | Thirty-nine bounded codes on this branch, including declared-scope Istio Gateway selector/controller validation, selectorless PeerAuthentication, host conflicts, registry/TLS patterns and Gateway API listeners/status/classes | No full semantic validity verdict; dormant CRD port checks excluded; attachment/per-workload/security context and Gateway runtime verification remain incomplete |
 | Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
@@ -1220,7 +1243,7 @@ the authority for individual behavior and platform claims.
 | `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
+| `basic-validation` | Partial / open | Thirty-nine bounded codes on this branch, including declared-scope Gateway selectors/controller flags and existing listener/status/class checks; attachment/port/principal and broader checks remain | `config-views`, `mesh-security` |
 | `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
@@ -1259,7 +1282,9 @@ of ManagesExternal. Explicit per-context `meshClusterName` and captured UI
 comparison are now implemented without implicit context/telemetry fallback.
 The typed local/default-visibility scope now requires complete controller/tag/
 namespace reads and configuration, with supported local topology and explicit
-mapping. Next consume it for pooled Service-validation inputs. Remote contexts
+mapping. The scoped Gateway inspector now consumes it for complete default
+workload inclusion and Gateway evidence. Service inputs are a separate published
+milestone, pending integration into this base. Remote contexts
 and custom Kiali visibility remain unsupported; do not promote the comparison
 hint or prior label-based configuration inspection to complete membership.
 Service checks in the pinned caller pool Pods across all managed namespaces,
@@ -1268,6 +1293,17 @@ as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a
 separate any-ambient path and annotation-derived proxy evidence. Deployment port
 mapping uses the first cluster-wide metadata-label match. Namespace-local
 approximations must not activate KIA0601/KIA0602/KIA0701.
+
+The bounded Gateway increment is complete locally, not live-verified. Its active
+caller adds KIA0302, while the existing listener/host/port/status/class predicates
+are reused without inventing new diagnostics. PILOT_SCOPE_GATEWAY_TO_NAMESPACE
+retains exact-true accumulation from the first declared container; unresolved
+flags or multiple eligible controllers block the scoped check. Custom workload
+owners, configured nondefault inclusion and full controller health remain open.
+Next validation work is remaining effective mesh-configuration sources before
+workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
+gates in an authorized environment independently; do not enable dormant port
+helpers or infer route attachment from this milestone.
 
 The dashboard continuation is external link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
@@ -1334,8 +1370,9 @@ requests/series remain independently bounded. Use `dashboards:generate`/
 Preserve strict scalar decoding for ungrouped callers and explicit response,
 panel and query cardinality limits.
 
-1. Extend remaining configuration checkers and Gateway listener/port/controller
-   semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar
+1. Extend remaining configuration checkers after their source/evidence
+   prerequisites. The bounded Gateway increment is complete locally; its runtime
+   gates remain open. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar
    import/export visibility now exist. Preserve strict group/name grants and
    conservative source boundaries; partial context must defer absence claims.
    The reusable Service host registry now preserves namespace export annotations

@@ -23,6 +23,7 @@ import { PeerAuthentication } from '../../resources/peer-authentication';
 import { ServiceEntry } from '../../resources/service-entry';
 import { VirtualService } from '../../resources/virtual-service';
 import RequestStatus from '../RequestStatus';
+import ScopedGatewayValidation from './ScopedGatewayValidation';
 
 function FindingReferences({
   cluster,
@@ -440,6 +441,10 @@ export default function Validation({ resource }: { resource: ConfigurationResour
           gatewayClasses={getClusterConfig(config.config, resource.cluster).gatewayClasses}
         />
       )}
+      {resource.kind === 'Gateway' &&
+        ['networking.istio.io', 'gateway.networking.k8s.io'].includes(
+          resource.jsonData.apiVersion?.split('/')[0] ?? ''
+        ) && <ScopedGatewayValidation resource={resource} />}
     </SectionBox>
   );
 }
