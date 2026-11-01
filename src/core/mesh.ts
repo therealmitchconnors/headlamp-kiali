@@ -397,7 +397,26 @@ export function emptyMeshNetworks(yaml: unknown): 'absent-key' | 'empty' {
 }
 
 export function meshConfigFields(yaml: unknown): MeshConfigFields {
-  const value = document(yaml, 'yaml');
+  const parsed = document(yaml, 'yaml');
+  // Pinned jsonpb accepts proto names, but a present JSON name wins even when null.
+  const value = Object.fromEntries(
+    [
+      'rootNamespace',
+      'trustDomain',
+      'trustDomainAliases',
+      'enableAutoMtls',
+      'discoverySelectors',
+      'defaultDestinationRuleExportTo',
+      'defaultVirtualServiceExportTo',
+      'defaultServiceExportTo',
+      'outboundTrafficPolicy',
+    ].map(field => [
+      field,
+      Object.prototype.hasOwnProperty.call(parsed, field)
+        ? parsed[field]
+        : parsed[field.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)],
+    ])
+  );
   const rootNamespace = text(value.rootNamespace, 'rootNamespace');
   if (rootNamespace !== undefined && rootNamespace !== '' && !isDnsLabel(rootNamespace))
     throw new Error('Invalid configured root namespace');

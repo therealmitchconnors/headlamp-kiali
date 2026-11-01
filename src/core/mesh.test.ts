@@ -93,6 +93,82 @@ it('preserves a zero-valued local mode over shared policy while null policy inhe
     expect(() => meshConfigFields(yaml)).toThrow(/outbound traffic policy/);
 });
 
+const projectedMeshFields = [
+  { field: 'rootNamespace', value: 'policies', other: 'other-policies' },
+  { field: 'trustDomain', value: 'mesh.test', other: 'other.test' },
+  { field: 'trustDomainAliases', value: ['alias.test'], other: [] },
+  { field: 'enableAutoMtls', value: false, other: true },
+  {
+    field: 'discoverySelectors',
+    value: [{ matchLabels: { team: 'mesh' } }],
+    other: [],
+  },
+  { field: 'defaultDestinationRuleExportTo', value: ['.'], other: ['*'] },
+  { field: 'defaultVirtualServiceExportTo', value: ['.'], other: [] },
+  { field: 'defaultServiceExportTo', value: ['.'], other: ['other'] },
+  { field: 'outboundTrafficPolicy', value: { mode: 'REGISTRY_ONLY' }, other: {} },
+].map(test => ({
+  ...test,
+  protoName: test.field.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`),
+}));
+
+it.each(projectedMeshFields)(
+  'accepts the pinned protobuf name $protoName for projected $field',
+  ({ field, protoName, value }) => {
+    expect(meshConfigFields(JSON.stringify({ [protoName]: value }))).toEqual(
+      meshConfigFields(JSON.stringify({ [field]: value }))
+    );
+  }
+);
+
+it.each(projectedMeshFields)(
+  'uses present JSON $field over $protoName independent of order, including null',
+  ({ field, protoName, value, other }) => {
+    for (const jsonValue of [other, null]) {
+      for (const entries of [
+        [
+          [protoName, value],
+          [field, jsonValue],
+        ],
+        [
+          [field, jsonValue],
+          [protoName, value],
+        ],
+      ]) {
+        expect(meshConfigFields(JSON.stringify(Object.fromEntries(entries)))).toEqual(
+          meshConfigFields(JSON.stringify({ [field]: jsonValue }))
+        );
+      }
+    }
+  }
+);
+
+it.each(projectedMeshFields)(
+  'validates $protoName instead of silently publishing missing fields',
+  ({ field, protoName, value }) => {
+    expect(() => meshConfigFields(JSON.stringify({ [protoName]: 42 }))).toThrow();
+    expect(meshConfigFields(JSON.stringify({ [protoName]: 42, [field]: value }))).toEqual(
+      meshConfigFields(JSON.stringify({ [field]: value }))
+    );
+    expect(() => meshConfigFields(JSON.stringify({ [protoName]: value, [field]: 42 }))).toThrow();
+  }
+);
+
+it('preserves shared/local precedence and explicit false across both field spellings', () => {
+  const local = meshConfigFields(
+    'root_namespace: policies\nenable_auto_mtls: false\ntrust_domain_aliases: [local.test]'
+  );
+  const shared = meshConfigFields(
+    'rootNamespace: shared-root\nenableAutoMtls: true\ntrust_domain: shared.test\ntrustDomainAliases: [shared.test]'
+  );
+  expect(mergeMeshFields(local, shared)).toMatchObject({
+    rootNamespace: 'policies',
+    enableAutoMtls: false,
+    trustDomain: 'shared.test',
+    trustDomainAliases: ['local.test', 'shared.test'],
+  });
+});
+
 const controller = {
   apiVersion: 'apps/v1',
   kind: 'Deployment',

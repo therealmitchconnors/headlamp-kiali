@@ -1525,7 +1525,11 @@ Supported mappings include the most-specific mount, item path-to-key mappings
 and exact-file `subPath`. A selected alternate map/key replaces the standard
 source, rather than merging both local sources. Local values take precedence,
 trust-domain aliases are combined, and explicit false automatic-mTLS values are
-preserved. Missing shared configuration is reported; denied/invalid sources
+preserved. Supported fields accept protobuf names such as `root_namespace` and
+`enable_auto_mtls` as well as `rootNamespace` and `enableAutoMtls`. When both
+spellings occur, the camelCase name wins even when null, regardless of key order.
+Selector and label-map keys are not renamed.
+Missing shared configuration is reported; denied/invalid sources
 block the merged projection. A missing or failed mounted file never silently
 falls back to the standard map. Mounted captures require complete discovery and
 versioned controller/ConfigMap evidence, rechecked within the shared deadline.

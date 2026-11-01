@@ -24,6 +24,10 @@ The selected source batch is same-context, direct ConfigMap-backed mounted mesh
 files, audited against the existing pinned Kiali discovery caller. Indirect
 environment resolution and cross-context configuration remain unsupported.
 See the source audit in `docs/parity.md` before extending this batch.
+The issue #3 continuation now accepts the audited protobuf field-name aliases
+without silently defaulting configured root/discovery/automatic-mTLS values,
+and closes the argument-parser oracle gap using pinned `parseArgsInto`/pflag.
+The batch remains a selected-field projection, not full effective configuration.
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -134,6 +138,22 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Issue #3 completion audit (2026-11-01):** the existing mounted-source batch
+  retains its no-fallback, bounded-read and source-revalidation guards. Fixed
+  silent omission of protobuf snake_case names for the nine projected mesh
+  fields, including disabled automatic mTLS and namespace discovery. Pinned
+  legacy jsonpb gives present camelCase names precedence even when null; nested
+  selectors and label-map keys are not recursively renamed. Unit/adapter/mTLS
+  regressions cover aliases, conflicting spellings, malformed values and
+  downstream scope/default behavior. Added 122 original-Go argument cases
+  (106 comparisons and 16 explicitly stricter guards) to the existing 141-case
+  path/reference artifact. The generator pins pflag through Kiali's go.mod/go.sum;
+  no plugin runtime dependency changed. Transport, networks parsing and full
+  protobuf fusion/default evidence remain gaps, not completed parity.
+  Focused verification passed **521 tests in five files**, type-check, lint,
+  production build and parity checks. Full-suite verification is pending below.
+  No Headlamp endpoint or configured Kubernetes context is available; contribution,
+  console, i18n/a11y, hosted fixture, Desktop and live-cluster gates remain open.
 - **Mounted mesh configuration sources (2026-11-01, issue #3):** integrated
   prerequisite #2 and added first-container `--meshConfig`/direct-volume
   resolution, selected map/key/path provenance and bounded shared/local merging.
@@ -142,7 +162,8 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   changed sources remain unavailable; no fallback or new validator is enabled.
   All relevant consumers retain captured provenance. The original-Go helper
   artifact has 116 source comparisons and 25 explicit native guard cases;
-  argument parsing, transport and full protobuf fusion/defaults remain oracle gaps.
+  argument parsing was still an oracle gap at this earlier checkpoint; it is
+  covered by the continuation above. Transport and full protobuf fusion/defaults remain gaps.
   Final local verification passed **22,785 tests in 188 files**, including
   **106 targeted consumer tests**. Type-check, lint, production build, changed-code
   formatting, parity/resource/dashboard checks and oracle regeneration passed.

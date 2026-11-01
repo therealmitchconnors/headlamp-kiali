@@ -239,6 +239,12 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   mounted batch accepts only absent keys or empty network configuration;
   nonempty/unsupported, denied or malformed dependencies must remain unavailable.
   Do not drop this guard merely because network topology is not projected.
+- Selected mesh fields accept their protobuf snake_case and JSON camelCase names.
+  Pinned legacy jsonpb gives a present JSON name precedence, including null,
+  independent of key order; do not use nullish fallback to the protobuf name.
+  This applies only to the audited top-level fields. Selector `matchLabels` and
+  `matchExpressions` are already protobuf names, not snake_case aliases; never
+  recursively rename selector or label-map keys.
 - Pinned controller environment handling uses final CLUSTER_ID/SHARED_MESH_CONFIG
   assignments and accumulates exact EXTERNAL_ISTIOD=true declarations. A later
   false does not undo true. Final indirection cannot fall back to earlier literals;

@@ -53,7 +53,11 @@ const parserSums = texts['go.sum']
   .split('\n')
   .filter(line => line.startsWith(`${parser.module} ${parser.version}`));
 assert.equal(parserSums.length, 2);
-const constants = ['defaultMeshConfigPath', 'defaultMeshNetworksConfigPath', 'defaultMonitoringPort']
+const constants = [
+  'defaultMeshConfigPath',
+  'defaultMeshNetworksConfigPath',
+  'defaultMonitoringPort',
+]
   .map(name => {
     const declaration = texts['istio/constants.go'].match(new RegExp(`^\\s*${name}\\s*=.*$`, 'm'));
     assert.ok(declaration, `Missing pinned constant ${name}`);

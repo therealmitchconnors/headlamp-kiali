@@ -136,6 +136,50 @@ describe('captured mounted mesh configuration', () => {
       sources: { local: { key: 'custom-mesh' }, shared: { key: 'mesh' } },
     });
   });
+  it('carries protobuf-named local/shared fields into namespace and managed-scope consumers', async () => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      const result = serve(String(path)) as { data: Record<string, string> };
+      if (String(path).endsWith('/configmaps/mounted'))
+        result.data['custom-mesh'] =
+          'root_namespace: policies\nenable_auto_mtls: false\ndiscovery_selectors: [{matchLabels: {team: mesh}}]\noutbound_traffic_policy: {mode: REGISTRY_ONLY}';
+      if (String(path).endsWith('/configmaps/shared'))
+        result.data.mesh =
+          'rootNamespace: shared-root\ntrust_domain: shared.test\nenableAutoMtls: true';
+      return result;
+    });
+    const snapshot = await load();
+    expect(snapshot.controlPlanes[0].effective).toMatchObject({
+      status: 'ready',
+      value: {
+        rootNamespace: 'policies',
+        enableAutoMtls: false,
+        trustDomain: 'shared.test',
+        hasDiscoverySelectors: true,
+        outboundTrafficPolicy: { mode: 'REGISTRY_ONLY', basis: 'explicit' },
+      },
+      sources: { local: { name: 'mounted', key: 'custom-mesh' }, shared: { name: 'shared' } },
+    });
+    expect(namespaceMeshConfiguration(snapshot, 'bookinfo')).toMatchObject({
+      status: 'unavailable',
+      message: expect.stringContaining('discovery selector'),
+    });
+    const managed = localManagedNamespaceScope(snapshot, 'logical');
+    expect(managed.membership.map(item => item.namespace)).toEqual(['istio-system']);
+    expect(managed.unmanagedNamespaces).toContain('bookinfo');
+  });
+  it.each(['mounted', 'shared'])('blocks malformed protobuf-named fields in %s', async name => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      const result = serve(String(path)) as { data: Record<string, string> };
+      if (String(path).endsWith(`/configmaps/${name}`))
+        result.data[name === 'mounted' ? 'custom-mesh' : 'mesh'] =
+          'enable_auto_mtls: not-a-boolean';
+      return result;
+    });
+    const snapshot = await load();
+    expect(snapshot.controlPlanes[0].effective?.status).toBe('unavailable');
+    expect(namespaceMeshConfiguration(snapshot, 'bookinfo').status).toBe('unavailable');
+    expect(() => localManagedNamespaceScope(snapshot, 'logical')).toThrow();
+  });
   it('retains standard-source equivalence while verifying a declared mount to the standard mesh key', async () => {
     const deployment = mountedController();
     deployment.spec.template.spec.volumes[0].configMap = {

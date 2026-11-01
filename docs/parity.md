@@ -2857,6 +2857,7 @@ runtime gates remain open. The source baseline is unchanged: **Kiali v2.33.0,
 | `istio/discovery_internal_test.go` | `3ec63ac4524f945bf7e231e8b311ec63fcbfe452` | Caller tests for arguments, mounts, file/shared precedence and failures |
 | `business/tls.go` | `fd8ff28c63de87e87cd655c35e10d7ba5faaaabc` | Existing namespace/mesh-wide TLS consumer differences retained as follow-up work |
 | `business/mesh.go` | `c8771bc4c0f63436b7cb47c199aa52f940f3ccb8` | Existing configured/mesh identity-domain consumer differences |
+| `go.mod` / `go.sum` | `4502633e3522dacba5e50bee4fb55ee232832d7f` / `b853c35ef129a5e8d20db91bd37c67b349f51706` | Exact pflag, Istio API and legacy jsonpb dependency pins |
 
 Pinned caller references:
 [first-container pipeline](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L809-L856),
@@ -2900,6 +2901,28 @@ Denied, malformed or missing selected local files never become standard
 fallback or successful defaults. Only a confirmed missing optional shared map
 keeps the documented local-only result; a later appearance invalidates capture.
 
+**Projected field-name decoding:** Kiali's `models.MeshConfig` embeds the Istio
+type and overrides only marshaling. Its inherited decoder uses legacy
+`github.com/golang/protobuf/jsonpb` **v1.5.4**, not protojson. The pinned Istio API
+revision is `23c54ad84d6e`:
+
+| Dependency source | Git blob | Evidence |
+| --- | --- | --- |
+| `istio/api/mesh/v1alpha1/config_json.gen.go` | `20a0af3f2d044d1ee8af6782f04afb35e0081b1e` | `MeshConfig.UnmarshalJSON`, `ConfigUnmarshaler` with unknown fields allowed |
+| `istio/api/mesh/v1alpha1/config.proto` | `efe2a169300f71bcad0bb17afda6a03d5b385772` | Supported top-level protobuf names; selector names already camelCase |
+| `golang/protobuf/jsonpb/decode.go` at v1.5.4 | `c6f66f10393d28df299086da373edf3ba8b1041e` | Field lookup at lines 320–340: protobuf name first, present JSON name wins |
+
+The nine projected top-level fields now accept both spellings. In particular,
+`enable_auto_mtls: false` is not silently discarded and replaced by an enabled
+default, and `root_namespace` / `discovery_selectors` affect the captured
+namespace context. A present camelCase key wins even when null or malformed;
+the snake_case value is not a fallback. Normalization occurs before the existing
+bounded validation and shared/local merge. Selector `matchLabels` and
+`matchExpressions` are the actual protobuf names; snake_case variants remain
+unsupported, and label-map keys stay literal. This is source-inspected regression
+evidence, not a full protobuf-unmarshaling oracle or an expansion of supported
+ProxyConfig/extensions.
+
 **Networks acceptance dependency:** pinned `setFileConfig` calls
 `setFileMeshNetworks` before declaring file success. For the new mounted-file
 branch, the native adapter resolves the direct networks-file reference
@@ -2921,13 +2944,24 @@ This remains a bounded snapshot, not a transactional or continuously watched
 proof of applied configuration.
 
 `scripts/parity/mesh-config-source-oracle.mjs` extracts original pinned Go path,
-reference and same-context file-selection helpers. Its **141 cases** comprise
-**116 comparisons plus 25 explicitly stricter native guard cases**. Run
+reference, same-context file-selection and `parseArgsInto` helpers. Its original
+**141 path/reference cases** comprise **116 comparisons plus 25 explicitly
+stricter native guard cases**. The continuation adds **122 argument cases**:
+**106 comparisons plus 16 native guards**, executing the original caller with
+its pinned **pflag v1.0.10** dependency. They cover split/equals flags, repeated
+assignments, positionals, ignored values, argument termination and explicit
+rejection instead of the upstream parse/path fallback. Native guards are not
+counted as matching upstream behavior.
+
+Cache the audited generator-only dependency with
+`go mod download github.com/spf13/pflag@v1.0.10`, then run
 `node scripts/parity/mesh-config-source-oracle.mjs --check` (or supply
-`--source <pinned-kiali>` for local source files). The generator checks the blob;
-`parity:check` verifies artifact identity/counts. Argument parsing, transport,
-networks parsing and complete protobuf parse→fusion→backend-default behavior
-are **oracle gaps**, not covered by these helper comparisons.
+`--source <pinned-kiali>` for local source files, including `go.mod`/`go.sum`).
+The generator checks all source blobs and the upstream module sums; its Go
+execution disables module/network lookup and uses a temporary module outside
+the repository. No plugin runtime dependency is added. `parity:check` verifies
+artifact identity/counts. Transport, networks parsing and complete protobuf
+parse→fusion→backend-default behavior remain **oracle gaps**.
 
 The next bounded milestone is nonempty networks acceptance and complete
 protobuf parse/fusion/default evidence, followed by separately audited
