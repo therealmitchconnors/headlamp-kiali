@@ -42,6 +42,9 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   },
 }));
 vi.mock('../../data/validation', () => ({ loadValidationSnapshot: vi.fn() }));
+vi.mock('./StructuredValue', () => ({
+  default: ({ value }: { value: unknown }) => <pre>{JSON.stringify(value)}</pre>,
+}));
 vi.mock('../../config', () => ({
   useKialiConfig: () => ({
     valid: true,
@@ -231,7 +234,21 @@ it('presents authorization registry findings as scoped hints rather than access 
       namespaceMesh: new Map([
         [
           'bookinfo',
-          { status: 'ready', controller: 'root/istiod', fields: { hasDiscoverySelectors: false } },
+          {
+            status: 'ready',
+            controller: 'root/istiod',
+            fields: { hasDiscoverySelectors: false },
+            sources: {
+              local: {
+                kind: 'mounted',
+                cluster: 'alpha',
+                namespace: 'root',
+                name: 'mounted',
+                key: 'custom-mesh',
+                path: '/custom/mesh',
+              },
+            },
+          },
         ],
       ]),
     },
@@ -239,6 +256,8 @@ it('presents authorization registry findings as scoped hints rather than access 
   render(<Validation resource={resource} />);
   await userEvent.setup().click(screen.getByRole('button', { name: 'Run initial checks' }));
   await screen.findByText('KIA0104');
+  expect(screen.getByText('Captured mesh configuration sources')).toBeDefined();
+  expect(screen.getByText(/"key":"custom-mesh"/)).toBeDefined();
   expect(screen.getByText('Warning')).toBeDefined();
   expect(screen.getByText('This host has no matching entry in the service registry')).toBeDefined();
   expect(

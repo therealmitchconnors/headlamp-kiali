@@ -1,0 +1,5057 @@
+{
+  "version": "v2.33.0",
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "sources": {
+    "istio/discovery.go": "60f6f7ab41a65acc5f40ca1095ce279433e62dce"
+  },
+  "helpers": [
+    "isValidContainerPath",
+    "cleanContainerPath",
+    "findMeshConfigFile",
+    "shouldLoadMeshConfigFile"
+  ],
+  "scope": "Original-Go path/reference and same-context shouldLoad helpers only; argument parsing, transport and merge are not covered.",
+  "cases": [
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "/etc//istio/config/./mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc//istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": false
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "istio-blue",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "istio-blue",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": []
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "direct/default/exact/normalized",
+      "input": {
+        "path": "./etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/config/mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/custom/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/custom/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/custom/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/custom/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/nested/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/nested/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/custom/nested/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/nested/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/nested/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/custom/nested/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/nested/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/nested/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/custom/nested/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/custom/nested/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/custom/nested/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/custom/nested/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/mesh",
+              "subPath": "mesh"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "exact subPath remapping",
+      "input": {
+        "path": "/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/mesh",
+              "subPath": "nested/settings.yaml"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/settings.yaml",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "items mapping order",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "items mapping order",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "first"
+                },
+                {
+                  "path": "config/./mesh",
+                  "key": "second"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "first",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "items mapping order",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "other",
+                  "key": "ignored"
+                },
+                {
+                  "path": "./config//mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "root mount",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "etc/istio/config/mesh",
+                  "key": "settings"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "settings",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "default without file reference",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": []
+        },
+        "volumes": [],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "prefix sibling is not a mount",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "volume",
+              "mountPath": "/etc/istio/configuration"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "volume",
+            "configMap": {
+              "name": "custom"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "longest mount order",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "secret": {
+              "secretName": "unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "projected": {
+              "sources": [
+                {
+                  "configMap": {
+                    "name": "unread"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "emptyDir": {}
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "hostPath": {
+              "path": "/unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "csi": {
+              "driver": "unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "unmapped",
+              "items": [
+                {
+                  "path": "other",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "longest mount order",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "secret": {
+              "secretName": "unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "projected": {
+              "sources": [
+                {
+                  "configMap": {
+                    "name": "unread"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "emptyDir": {}
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "hostPath": {
+              "path": "/unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "csi": {
+              "driver": "unread"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unsupported longer mask",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "unmapped",
+              "items": [
+                {
+                  "path": "other",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: do not fall through a masking unsupported/unmapped mount to a shorter valid source.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "equal mount ambiguity",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            },
+            {
+              "name": "other",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          },
+          {
+            "name": "other",
+            "configMap": {
+              "name": "other"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject equal-path mount ambiguity instead of selecting the first mount.",
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "duplicate volume ambiguity",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject duplicate volume identities instead of selecting the first volume.",
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "unresolved subPathExpr",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config",
+              "subPathExpr": "$(PATH)"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject unresolved subPathExpr, which the pinned helper does not inspect.",
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "directory subPath masks shorter mount",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "shorter",
+              "mountPath": "/etc/istio"
+            },
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config",
+              "subPath": "nested"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "shorter",
+            "configMap": {
+              "name": "shorter",
+              "items": [
+                {
+                  "path": "config/mesh",
+                  "key": "short"
+                }
+              ]
+            }
+          },
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject a covering directory subPath instead of skipping it.",
+      "expected": {
+        "reference": {
+          "name": "shorter",
+          "key": "short",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "missing volume",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: a declared covering mount must resolve, not fall back to standard.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "unknown explicit path",
+      "input": {
+        "path": "/custom/mesh",
+        "container": {
+          "volumeMounts": []
+        },
+        "volumes": [],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: a nondefault path requires an auditable direct ConfigMap mount.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid file path",
+      "input": {
+        "path": "",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject invalid paths instead of the caller defaulting or helper returning no source.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid file path",
+      "input": {
+        "path": "/",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject invalid paths instead of the caller defaulting or helper returning no source.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid file path",
+      "input": {
+        "path": "/a/../mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject invalid paths instead of the caller defaulting or helper returning no source.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid file path",
+      "input": {
+        "path": "relative/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject invalid paths instead of the caller defaulting or helper returning no source.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid file path",
+      "input": {
+        "path": "/etc/istio/config/..mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject invalid paths instead of the caller defaulting or helper returning no source.",
+      "expected": {
+        "reference": null,
+        "loadFile": false
+      }
+    },
+    {
+      "label": "invalid unprojected key",
+      "input": {
+        "path": "/etc/istio/config/nested/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "longer"
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject a relative path containing slash as an invalid ConfigMap data key.",
+      "expected": {
+        "reference": {
+          "name": "longer",
+          "key": "nested/mesh",
+          "path": "/etc/istio/config/nested/mesh"
+        },
+        "loadFile": true
+      }
+    },
+    {
+      "label": "item traversal",
+      "input": {
+        "path": "/etc/istio/config/mesh",
+        "container": {
+          "volumeMounts": [
+            {
+              "name": "longer",
+              "mountPath": "/etc/istio/config"
+            }
+          ]
+        },
+        "volumes": [
+          {
+            "name": "longer",
+            "configMap": {
+              "name": "custom",
+              "items": [
+                {
+                  "path": "nested/../mesh",
+                  "key": "mesh"
+                }
+              ]
+            }
+          }
+        ],
+        "standardName": "istio-blue"
+      },
+      "nativeGuard": "Native guard: reject traversal before cleaning an item path.",
+      "expected": {
+        "reference": {
+          "name": "custom",
+          "key": "mesh",
+          "path": "/etc/istio/config/mesh"
+        },
+        "loadFile": true
+      }
+    }
+  ]
+}

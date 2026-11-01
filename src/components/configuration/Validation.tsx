@@ -24,6 +24,7 @@ import { ServiceEntry } from '../../resources/service-entry';
 import { VirtualService } from '../../resources/virtual-service';
 import RequestStatus from '../RequestStatus';
 import ScopedGatewayValidation from './ScopedGatewayValidation';
+import StructuredValue from './StructuredValue';
 
 function FindingReferences({
   cluster,
@@ -135,6 +136,9 @@ function Checks({
       return {
         skipWildcardGatewayHosts,
         gatewayRegistry: snapshot.context.gatewayClassRegistry,
+        meshSources: [...(snapshot.context.namespaceMesh ?? [])].map(
+          ([namespace, configuration]) => ({ namespace, configuration })
+        ),
         result: initialValidation({
           cluster,
           namespace,
@@ -175,6 +179,19 @@ function Checks({
     <RequestStatus state={state} loadingLabel={t('Running initial configuration checks...')}>
       {data => (
         <>
+          {data.meshSources.length > 0 && (
+            <details>
+              <summary>{t('Captured mesh configuration sources')}</summary>
+              <StructuredValue
+                value={data.meshSources.map(({ namespace, configuration }) => ({
+                  namespace,
+                  ...(configuration.status === 'ready'
+                    ? { controller: configuration.controller, sources: configuration.sources }
+                    : { unavailable: configuration.message }),
+                }))}
+              />
+            </details>
+          )}
           {resource.kind === 'Gateway' && group === 'networking.istio.io' && (
             <Alert severity="info">
               {t(

@@ -16,7 +16,14 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-31
+### Resume status — 2026-11-01
+
+Issue #3 continues from the declared-scope Gateway prerequisite (#2), integrated
+into this implementation branch without merging either PR into the working base.
+The selected source batch is same-context, direct ConfigMap-backed mounted mesh
+files, audited against the existing pinned Kiali discovery caller. Indirect
+environment resolution and cross-context configuration remain unsupported.
+See the source audit in `docs/parity.md` before extending this batch.
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -75,6 +82,21 @@ API conflicts, listener/status and class checks reuse the same complete local
 scope. Dormant Gateway port-name helpers and new route-attachment/port rules
 remain disabled. Browser, hosted fixture, Desktop and live-cluster verification
 are unavailable here and remain open. Full Gateway/controller parity is not claimed.
+
+The configuration-source continuation selects supported mounted mesh files from
+the first container's `--meshConfig` arguments and direct ConfigMap volume
+mapping. It preserves shared/local precedence and reports selected map/key/path
+and captured identity through Mesh, namespace validation, scoped Gateway checks
+and the configured mTLS indicator. Selected-file failures do not fall back to the
+standard ConfigMap. New mounted captures verify controller and source versions;
+existing unsupported topology and completeness guards remain in force.
+
+The next bounded prerequisite is nonempty networks acceptance and complete
+protobuf parse/fusion/default evidence, followed by separately audited
+cross-context configuration-cluster association, not arbitrary environment
+expansion. Full ProxyConfig/extensions and runtime configuration remain separate
+work. Do not enable workload/port/subset mTLS or principal-absence checks from
+this selected-field projection.
 
 Service port validation was published separately and is not part of this
 branch's base. Integrate that milestone before dependent Service work; this
@@ -785,8 +807,10 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
 - Mesh inventory discovers local `app=istiod` controllers, namespace labels,
   revision tags and standard/shared configuration fields. It preserves unknown
   values and uses label hints rather than claiming actual injection or security.
-  Selected shared/local fields merge without runtime defaults; mounted files,
-  external config clusters and full ProxyConfig/extension merging remain open.
+  Selected shared/local fields merge without runtime defaults. Direct ConfigMap
+  mounted mesh files now have guarded source selection and empty-networks
+  acceptance; unsupported mounts, nonempty networks, external configuration
+  clusters and full ProxyConfig/extension merging remain open.
 - Configured mTLS has a reusable pinned composition engine with 2,600 independent
   Go cases and a namespace-wide consumer using an explicit controller. It
   suppresses output on partial policy reads, conflicts and unsupported contexts.
@@ -1300,8 +1324,11 @@ are reused without inventing new diagnostics. PILOT_SCOPE_GATEWAY_TO_NAMESPACE
 retains exact-true accumulation from the first declared container; unresolved
 flags or multiple eligible controllers block the scoped check. Custom workload
 owners, configured nondefault inclusion and full controller health remain open.
-Next validation work is remaining effective mesh-configuration sources before
-workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
+The mounted ConfigMap source batch is now implemented with selected-source
+provenance, version rechecks and bounded networks-dependency guards. Next audit
+nonempty networks acceptance and full protobuf parse/fusion/backend defaults,
+then remaining configuration-cluster topology and caller-specific TLS context,
+before workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
 gates in an authorized environment independently; do not enable dormant port
 helpers or infer route attachment from this milestone.
 
@@ -1384,7 +1411,9 @@ panel and query cardinality limits.
    presence reproduces the pinned input. VM WorkloadEntry accounts are separate.
    Do not add a shortcut absence checker while that workload boundary is missing.
 2. Resolve remaining effective mesh configuration sources before extending
-   configured mTLS to workloads, ports and subsets. Preserve the distinction
+   configured mTLS to workloads, ports and subsets. The mounted-file batch is
+   implemented; nonempty networks, full parse/fusion/default evidence and
+   external configuration mapping remain unsupported. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
 3. Complete health query coverage and supported workload variants.
    Application/Service consumers are now wired. Extend service-driven traffic

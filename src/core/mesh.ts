@@ -1,6 +1,7 @@
 import { JSON_SCHEMA, load, YAMLException } from 'js-yaml';
 import { WorkloadStatus } from './health';
 import { decodeLabelSelector, isLabelValue, matchesSelector } from './labels';
+import { MeshConfigSource, MeshNetworksSource, resolveMeshConfigSource } from './meshConfigSource';
 import { namespaceRevisionSelection } from './namespaceRevision';
 import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import { workloadHealthResource } from './workloadHealth';
@@ -20,6 +21,8 @@ export interface ControlPlaneObservation {
   image?: string;
   clusterId?: string;
   sharedMeshConfig?: string;
+  meshConfigSource?: MeshConfigSource;
+  meshNetworksSource?: MeshNetworksSource;
   managesExternal: boolean | null;
   scopeGatewayToNamespace?: boolean | null;
   effectiveConfigBlocked: boolean;
@@ -56,11 +59,25 @@ export interface MeshConfigFields {
     basis: 'explicit' | 'protobuf-default';
   };
 }
+export interface MeshConfigMapSource {
+  cluster: string;
+  namespace: string;
+  name: string;
+  key: string;
+  uid?: string;
+  resourceVersion?: string;
+}
+export interface MeshConfigurationSources {
+  local: MeshConfigMapSource & { kind: 'standard' | 'mounted'; path?: string };
+  shared?: MeshConfigMapSource & { status: 'ready' | 'not-found' };
+  networks?: MeshConfigMapSource & { path: string; content: 'absent-key' | 'empty' };
+}
 export type NamespaceMeshConfiguration =
   | {
       status: 'ready';
       controller: string;
       fields: MeshConfigFields;
+      sources?: MeshConfigurationSources;
       discovery?: NamespaceDiscoveryBasis;
       root?: { namespace: string; basis: 'configured' | 'controller-namespace' };
     }
@@ -228,6 +245,9 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
   const container = isRecord(first) ? first : undefined;
   const configurationWarnings: string[] = [];
   let effectiveConfigBlocked = !container;
+  const envFrom = container?.envFrom;
+  const unresolvedEnvFrom =
+    envFrom !== undefined && envFrom !== null && (!Array.isArray(envFrom) || envFrom.length > 0);
   const rawEnv = container?.env;
   if (rawEnv !== undefined && rawEnv !== null && !Array.isArray(rawEnv))
     throw new Error('Malformed istiod environment list');
@@ -251,6 +271,11 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
       if (name !== 'CLUSTER_ID') effectiveConfigBlocked = true;
       return undefined;
     }
+    if (typeof entry.value === 'string' && /\$\(|\$\{/.test(entry.value)) {
+      configurationWarnings.push(`${name} uses unresolved environment expansion`);
+      if (name !== 'CLUSTER_ID') effectiveConfigBlocked = true;
+      return undefined;
+    }
     return typeof entry.value === 'string' ? entry.value : '';
   };
   const clusterId = literal('CLUSTER_ID');
@@ -269,12 +294,13 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
       'Noncanonical EXTERNAL_ISTIOD values are not interpreted as resolved topology'
     );
   const managesExternal =
-    indirectExternal || noncanonicalExternal
+    unresolvedEnvFrom || indirectExternal || noncanonicalExternal
       ? null
       : external.some(entry => entry.value === 'true');
   const gatewayScope = env.filter(entry => entry.name === 'PILOT_SCOPE_GATEWAY_TO_NAMESPACE');
   const unresolvedGatewayScope =
     !container ||
+    unresolvedEnvFrom ||
     gatewayScope.some(
       entry =>
         (entry.valueFrom !== undefined && entry.valueFrom !== null) ||
@@ -287,46 +313,12 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     effectiveConfigBlocked = true;
   }
   if (!container) configurationWarnings.push('The first declared container was not found');
-  const args = container && Array.isArray(container.args) ? container.args : [];
-  if (
-    args.some(
-      arg =>
-        typeof arg === 'string' &&
-        (arg === '--meshConfigFile' || arg.startsWith('--meshConfigFile='))
-    )
-  ) {
-    configurationWarnings.push('Explicit mesh configuration file overrides are not evaluated');
-    effectiveConfigBlocked = true;
-  }
-  if (container && Array.isArray(container.volumeMounts)) {
-    const standard = revisionConfigMapName('istio', revision);
-    for (const mount of container.volumeMounts) {
-      if (!isRecord(mount) || typeof mount.mountPath !== 'string') continue;
-      const path = mount.mountPath.replace(/\/+$/, '') || '/';
-      if (
-        !(
-          path === '/' ||
-          path === '/etc/istio/config/mesh' ||
-          '/etc/istio/config/mesh'.startsWith(`${path}/`)
-        )
-      )
-        continue;
-      const volume = Array.isArray(pod.volumes)
-        ? pod.volumes.find(volume => isRecord(volume) && volume.name === mount.name)
-        : undefined;
-      if (
-        path !== '/etc/istio/config' ||
-        !isRecord(volume) ||
-        !isRecord(volume.configMap) ||
-        volume.configMap.name !== standard ||
-        volume.configMap.items !== undefined ||
-        mount.subPath !== undefined ||
-        mount.subPathExpr !== undefined
-      ) {
-        configurationWarnings.push('Mounted mesh configuration overrides are not evaluated');
-        effectiveConfigBlocked = true;
-      }
-    }
+  const source = container
+    ? resolveMeshConfigSource(container, pod.volumes, revisionConfigMapName('istio', revision))
+    : undefined;
+  if (source) {
+    configurationWarnings.push(...source.warnings);
+    effectiveConfigBlocked ||= source.blocked;
   }
   const health = workloadHealthResource(value, {
     kind: 'Deployment',
@@ -349,6 +341,8 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     image: typeof container?.image === 'string' ? container.image : undefined,
     clusterId,
     sharedMeshConfig: shared || undefined,
+    meshConfigSource: source?.source,
+    meshNetworksSource: source?.networksSource,
     managesExternal,
     scopeGatewayToNamespace: unresolvedGatewayScope
       ? null
@@ -387,6 +381,19 @@ function text(value: unknown, field: string): string | undefined {
   if (typeof value !== 'string' || value.length > 1024)
     throw new Error(`Invalid ${field} configuration field`);
   return value;
+}
+
+export function emptyMeshNetworks(yaml: unknown): 'absent-key' | 'empty' {
+  if (yaml === undefined) return 'absent-key';
+  const value = document(yaml, 'yaml');
+  if (
+    Object.keys(value).some(key => key !== 'networks') ||
+    (value.networks !== undefined &&
+      value.networks !== null &&
+      (!isRecord(value.networks) || Object.keys(value.networks).length > 0))
+  )
+    throw new Error('Nonempty or unsupported mesh networks configuration remains unresolved');
+  return 'empty';
 }
 
 export function meshConfigFields(yaml: unknown): MeshConfigFields {

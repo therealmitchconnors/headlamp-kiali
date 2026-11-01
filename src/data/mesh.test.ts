@@ -3,6 +3,407 @@ import { clusterScope } from '../core/scope';
 import { loadMeshSnapshot, localManagedNamespaceScope, namespaceMeshConfiguration } from './mesh';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({ ApiProxy: { request: vi.fn() } }));
+
+describe('captured mounted mesh configuration', () => {
+  const mountedController = () => ({
+    ...structuredClone(controller),
+    kind: 'Deployment',
+    apiVersion: 'apps/v1',
+    metadata: { ...controller.metadata, resourceVersion: 'cp-10' },
+    spec: {
+      ...controller.spec,
+      template: {
+        spec: {
+          containers: [
+            {
+              name: 'discovery',
+              image: 'example.test/pilot:v1',
+              args: ['discovery', '--meshConfig=/custom/mesh.yaml'],
+              env: [
+                { name: 'CLUSTER_ID', value: 'logical' },
+                { name: 'SHARED_MESH_CONFIG', value: 'shared' },
+              ],
+              volumeMounts: [{ name: 'config', mountPath: '/custom' }],
+            },
+          ],
+          volumes: [
+            {
+              name: 'config',
+              configMap: {
+                name: 'mounted',
+                items: [{ key: 'custom-mesh', path: 'mesh.yaml' }],
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  function serve(path: string, deployment = mountedController()): unknown {
+    const url = new URL(path, 'http://example.test');
+    if (url.pathname === '/api/v1/namespaces')
+      return list('Namespace', 'v1', [
+        { metadata: { name: 'istio-system', uid: 'ns-system' } },
+        { metadata: { name: 'bookinfo', uid: 'ns', labels: { 'istio.io/rev': 'blue' } } },
+      ]);
+    if (url.pathname === '/apis/apps/v1/namespaces/istio-system/deployments/istiod-blue')
+      return deployment;
+    const name = url.pathname.split('/').pop()!;
+    if (name === 'mounted' || name === 'shared')
+      return {
+        kind: 'ConfigMap',
+        apiVersion: 'v1',
+        metadata: {
+          name,
+          namespace: 'istio-system',
+          uid: `${name}-uid`,
+          resourceVersion: `${name}-10`,
+        },
+        data:
+          name === 'mounted'
+            ? {
+                'custom-mesh':
+                  'rootNamespace: mounted-root\nenableAutoMtls: false\ntrustDomainAliases: [local]',
+              }
+            : {
+                mesh: 'rootNamespace: shared-root\ntrustDomain: shared.test\ntrustDomainAliases: [shared]',
+              },
+      };
+    return response(path, [deployment]);
+  }
+  const load = () => loadMeshSnapshot(clusterScope('alpha'), new AbortController().signal);
+  beforeEach(() => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => serve(String(path)));
+  });
+  it('replaces the standard source, merges shared fields, and carries verified source provenance to consumers', async () => {
+    const snapshot = await load();
+    const plane = snapshot.controlPlanes[0];
+    expect(plane.mesh.name).toBe('mounted');
+    expect(plane.effective).toMatchObject({
+      status: 'ready',
+      value: {
+        rootNamespace: 'mounted-root',
+        trustDomain: 'shared.test',
+        enableAutoMtls: false,
+        trustDomainAliases: ['local', 'shared'],
+      },
+      sources: {
+        local: {
+          kind: 'mounted',
+          cluster: 'alpha',
+          name: 'mounted',
+          key: 'custom-mesh',
+          path: '/custom/mesh.yaml',
+          uid: 'mounted-uid',
+          resourceVersion: 'mounted-10',
+        },
+        shared: { name: 'shared', key: 'mesh', status: 'ready' },
+      },
+    });
+    const configuration = namespaceMeshConfiguration(snapshot, 'bookinfo');
+    expect(configuration).toMatchObject({
+      status: 'ready',
+      root: { namespace: 'mounted-root', basis: 'configured' },
+      sources: { local: { name: 'mounted' } },
+    });
+    expect(localManagedNamespaceScope(snapshot, 'logical').configurationSources[0]).toMatchObject({
+      sources: { local: { name: 'mounted' } },
+    });
+    expect(ApiProxy.request).toHaveBeenCalledTimes(9);
+    for (const [path, options] of vi.mocked(ApiProxy.request).mock.calls) {
+      expect(String(path)).not.toMatch(/\/configmaps\/istio-blue$|\/secrets\//);
+      expect(options?.cluster).toBe('alpha');
+      expect(options?.method).toBeUndefined();
+    }
+    if (configuration.status !== 'ready' || plane.effective?.status !== 'ready') throw new Error();
+    configuration.fields.trustDomainAliases?.push('changed');
+    expect(plane.effective.value.trustDomainAliases).toEqual(['local', 'shared']);
+  });
+  it('keeps separate keys when mounted and shared configuration use the same ConfigMap', async () => {
+    const deployment = mountedController();
+    deployment.spec.template.spec.volumes[0].configMap.name = 'shared';
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      const result = serve(String(path), deployment);
+      if (String(path).endsWith('/configmaps/shared'))
+        Object.assign(result as object, {
+          data: { mesh: 'trustDomain: shared.test', 'custom-mesh': 'rootNamespace: mounted-root' },
+        });
+      return result;
+    });
+    expect((await load()).controlPlanes[0].effective).toMatchObject({
+      status: 'ready',
+      value: { rootNamespace: 'mounted-root', trustDomain: 'shared.test' },
+      sources: { local: { key: 'custom-mesh' }, shared: { key: 'mesh' } },
+    });
+  });
+  it('retains standard-source equivalence while verifying a declared mount to the standard mesh key', async () => {
+    const deployment = mountedController();
+    deployment.spec.template.spec.volumes[0].configMap = {
+      name: 'istio-blue',
+      items: [{ key: 'mesh', path: 'mesh.yaml' }],
+    };
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (String(path).endsWith('/configmaps/istio-blue'))
+        return {
+          kind: 'ConfigMap',
+          apiVersion: 'v1',
+          metadata: {
+            name: 'istio-blue',
+            namespace: 'istio-system',
+            uid: 'standard-uid',
+            resourceVersion: 'standard-10',
+          },
+          data: { mesh: 'rootNamespace: standard-root' },
+        };
+      return serve(String(path), deployment);
+    });
+    expect((await load()).controlPlanes[0].effective).toMatchObject({
+      status: 'ready',
+      value: { rootNamespace: 'standard-root' },
+      sources: { local: { kind: 'standard', name: 'istio-blue', path: '/custom/mesh.yaml' } },
+    });
+    expect(
+      vi
+        .mocked(ApiProxy.request)
+        .mock.calls.filter(([path]) => String(path).endsWith('/configmaps/istio-blue'))
+    ).toHaveLength(2);
+  });
+  it('retains confirmed optional shared-map absence without losing the mounted local fields', async () => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (String(path).endsWith('/configmaps/shared')) throw { status: 404 };
+      return serve(String(path));
+    });
+    expect((await load()).controlPlanes[0].effective).toMatchObject({
+      status: 'ready',
+      sharedAbsent: true,
+      value: { rootNamespace: 'mounted-root', enableAutoMtls: false },
+      sources: { shared: { name: 'shared', status: 'not-found' } },
+    });
+  });
+  it.each([
+    'missing-key',
+    'malformed',
+    'missing-uid',
+    'missing-version',
+    'wrong-identity',
+    'denied',
+    'missing',
+  ])('blocks %s mounted sources without reading or reviving the standard source', async failure => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (String(path).endsWith('/configmaps/mounted')) {
+        if (failure === 'denied') throw { status: 403 };
+        if (failure === 'missing') throw { status: 404 };
+        const result = serve(String(path)) as {
+          metadata: Record<string, string>;
+          data: Record<string, string>;
+        };
+        if (failure === 'missing-key') result.data = { mesh: 'rootNamespace: wrong' };
+        if (failure === 'malformed') result.data['custom-mesh'] = 'rootNamespace: [';
+        if (failure === 'missing-uid') delete result.metadata.uid;
+        if (failure === 'missing-version') delete result.metadata.resourceVersion;
+        if (failure === 'wrong-identity') result.metadata.name = 'other';
+        return result;
+      }
+      return serve(String(path));
+    });
+    const snapshot = await load();
+    expect(snapshot.controlPlanes[0].effective?.status).toBe('unavailable');
+    expect(namespaceMeshConfiguration(snapshot, 'bookinfo').status).toBe('unavailable');
+    expect(() => localManagedNamespaceScope(snapshot, 'logical')).toThrow();
+    expect(
+      vi
+        .mocked(ApiProxy.request)
+        .mock.calls.some(([path]) => String(path).endsWith('/configmaps/istio-blue'))
+    ).toBe(false);
+  });
+  it.each(['mounted', 'shared'])('rejects stale %s source versions during capture', async name => {
+    let reads = 0;
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      const result = serve(String(path));
+      if (String(path).endsWith(`/configmaps/${name}`) && ++reads > 1)
+        (result as { metadata: { resourceVersion: string } }).metadata.resourceVersion = 'changed';
+      return result;
+    });
+    expect((await load()).controlPlanes[0].effective).toMatchObject({
+      status: 'unavailable',
+      message: expect.stringContaining('changed'),
+    });
+  });
+  it('does not treat a newly appearing optional shared map as the earlier confirmed absence', async () => {
+    let reads = 0;
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (String(path).endsWith('/configmaps/shared') && ++reads === 1) throw { status: 404 };
+      return serve(String(path));
+    });
+    expect((await load()).controlPlanes[0].effective?.status).toBe('unavailable');
+  });
+  it.each([
+    'controller-changed',
+    'controller-unversioned',
+    'shared-denied',
+    'incomplete-controllers',
+  ])(
+    'rejects %s evidence rather than authorizing namespace or absence conclusions',
+    async failure => {
+      const deployment = mountedController();
+      if (failure === 'controller-unversioned') deployment.metadata.resourceVersion = '';
+      vi.mocked(ApiProxy.request).mockImplementation(async path => {
+        if (failure === 'shared-denied' && String(path).endsWith('/configmaps/shared'))
+          throw { status: 403 };
+        const result = serve(String(path), deployment);
+        if (failure === 'controller-changed' && String(path).endsWith('/deployments/istiod-blue'))
+          deployment.metadata.resourceVersion = 'changed';
+        if (
+          failure === 'incomplete-controllers' &&
+          String(path).startsWith('/apis/apps/v1/deployments?')
+        )
+          (result as { metadata: object }).metadata = {
+            resourceVersion: '10',
+            continue: 'repeated',
+          };
+        return result;
+      });
+      const snapshot = await load();
+      expect(snapshot.controlPlanes[0].effective?.status).toBe('unavailable');
+      expect(namespaceMeshConfiguration(snapshot, 'bookinfo').status).toBe('unavailable');
+    }
+  );
+  it('does not reuse a previous successful snapshot after a source becomes denied', async () => {
+    expect((await load()).controlPlanes[0].effective?.status).toBe('ready');
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      if (String(path).endsWith('/configmaps/mounted')) throw { status: 403 };
+      return serve(String(path));
+    });
+    expect((await load()).controlPlanes[0].effective?.status).toBe('unavailable');
+  });
+  it.each([
+    ...[undefined, '', '{}', 'null', 'networks: {}'].map(value => ({
+      value,
+      data: value === undefined ? {} : { topology: value },
+    })),
+    { value: undefined, data: undefined },
+    { value: undefined, data: null },
+  ])(
+    'checks the mounted networks acceptance dependency without projecting topology: $value',
+    async ({ value, data }) => {
+      const deployment = mountedController();
+      deployment.spec.template.spec.containers[0].args.push(
+        '--networksConfigFile=/networks/map.yaml'
+      );
+      deployment.spec.template.spec.containers[0].volumeMounts.push({
+        name: 'networks',
+        mountPath: '/networks',
+      });
+      deployment.spec.template.spec.volumes.push({
+        name: 'networks',
+        configMap: { name: 'networks', items: [{ key: 'topology', path: 'map.yaml' }] },
+      });
+      vi.mocked(ApiProxy.request).mockImplementation(async path => {
+        if (String(path).endsWith('/configmaps/networks'))
+          return {
+            kind: 'ConfigMap',
+            apiVersion: 'v1',
+            metadata: {
+              name: 'networks',
+              namespace: 'istio-system',
+              uid: 'net-uid',
+              resourceVersion: 'net-10',
+            },
+            data,
+          };
+        return serve(String(path), deployment);
+      });
+      expect((await load()).controlPlanes[0].effective).toMatchObject({
+        status: 'ready',
+        sources: {
+          networks: {
+            name: 'networks',
+            key: 'topology',
+            path: '/networks/map.yaml',
+            content: value === undefined ? 'absent-key' : 'empty',
+          },
+        },
+      });
+      expect(
+        vi
+          .mocked(ApiProxy.request)
+          .mock.calls.filter(([path]) => String(path).endsWith('/configmaps/networks'))
+      ).toHaveLength(2);
+    }
+  );
+  it.each(['denied', 'missing', 'malformed', 'nonempty', 'stale'])(
+    'does not accept a mounted file with %s networks dependency',
+    async failure => {
+      const deployment = mountedController();
+      deployment.spec.template.spec.containers[0].args.push(
+        '--networksConfigFile=/custom/network.yaml'
+      );
+      deployment.spec.template.spec.volumes[0].configMap.items.push({
+        key: 'topology',
+        path: 'network.yaml',
+      });
+      let reads = 0;
+      vi.mocked(ApiProxy.request).mockImplementation(async path => {
+        if (String(path).endsWith('/configmaps/mounted')) {
+          reads++;
+          if (failure === 'denied' && reads > 1) throw { status: 403 };
+          if (failure === 'missing' && reads > 1) throw { status: 404 };
+          const result = serve(String(path), deployment) as {
+            metadata: { resourceVersion: string };
+            data: Record<string, string>;
+          };
+          result.data.topology =
+            failure === 'malformed'
+              ? 'networks: ['
+              : failure === 'nonempty'
+              ? 'networks: {east: {}}'
+              : '{}';
+          if (failure === 'stale' && reads > 2) result.metadata.resourceVersion = 'changed';
+          return result;
+        }
+        return serve(String(path), deployment);
+      });
+      const snapshot = await load();
+      expect(snapshot.controlPlanes[0].effective?.status).toBe('unavailable');
+      expect(namespaceMeshConfiguration(snapshot, 'bookinfo').status).toBe('unavailable');
+    }
+  );
+  it.each(['meshNetworks: [', 'networks: {east: {}}'])(
+    'does not ignore shared-source networks parsing/coverage dependencies: %s',
+    async meshNetworks => {
+      vi.mocked(ApiProxy.request).mockImplementation(async path => {
+        const result = serve(String(path));
+        if (String(path).endsWith('/configmaps/shared'))
+          (result as { data: Record<string, string> }).data.meshNetworks = meshNetworks;
+        return result;
+      });
+      expect((await load()).controlPlanes[0].effective?.status).toBe('unavailable');
+    }
+  );
+  it('cancels mounted-source verification within the existing whole-capture deadline', async () => {
+    vi.useFakeTimers();
+    try {
+      let reads = 0;
+      vi.mocked(ApiProxy.request).mockImplementation(async path => {
+        if (String(path).endsWith('/configmaps/mounted') && ++reads > 1)
+          return new Promise(() => {});
+        return serve(String(path));
+      });
+      const caller = new AbortController();
+      const pending = loadMeshSnapshot(clusterScope('alpha'), caller.signal);
+      const failure = expect(pending).rejects.toThrow('Mesh discovery exceeded 15 seconds');
+      await vi.advanceTimersByTimeAsync(15000);
+      await failure;
+      expect(caller.signal.aborted).toBe(false);
+      expect(
+        vi.mocked(ApiProxy.request).mock.calls.every(([, options]) => options?.signal?.aborted)
+      ).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 const controller = {
   metadata: {
     name: 'istiod-blue',

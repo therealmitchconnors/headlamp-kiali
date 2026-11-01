@@ -1517,14 +1517,38 @@ prove injection, traffic or health. Malformed selectors, ambiguous associations
 and missing sources remain unresolved. The plugin does not invent an association
 for an unrelated unlabelled namespace or apply Kiali-server visibility overrides.
 
-Standard revision ConfigMaps and a literal same-cluster `SHARED_MESH_CONFIG`
-reference provide selected configuration fields. Local values take precedence,
+Standard revision ConfigMaps, supported direct ConfigMap-backed mounted mesh
+files and a literal same-cluster `SHARED_MESH_CONFIG` reference provide selected
+configuration fields. The first container's `--meshConfig` flag selects the file
+path (default `/etc/istio/config/mesh`); `--meshConfigFile` is not that flag.
+Supported mappings include the most-specific mount, item path-to-key mappings
+and exact-file `subPath`. A selected alternate map/key replaces the standard
+source, rather than merging both local sources. Local values take precedence,
 trust-domain aliases are combined, and explicit false automatic-mTLS values are
 preserved. Missing shared configuration is reported; denied/invalid sources
-block the merged projection. This does not apply Istio runtime defaults or merge
-all ProxyConfig/extension fields, mounted files or external configuration clusters.
+block the merged projection. A missing or failed mounted file never silently
+falls back to the standard map. Mounted captures require complete discovery and
+versioned controller/ConfigMap evidence, rechecked within the shared deadline.
+Mesh inventory shows the selected map, key, path and captured UID/resource
+version; consumer inspectors retain the source provenance.
+
+Mounted-file acceptance also checks directly mapped networks-file dependencies:
+absent keys and empty YAML/network maps are supported, but denied/missing maps,
+malformed or nonempty networks remain unavailable. This guard does not implement
+network topology; it prevents a failed dependency from certifying the file source.
+
+Unresolved environment references/expansion, `envFrom`, projected/Secret/host/CSI
+volumes, ambiguous or masking mounts, directory `subPath`, `subPathExpr` and
+external configuration topology remain blocked. No Secret or container-file
+endpoint is read. This does not apply Istio runtime defaults or merge all
+ProxyConfig/extension fields, networks or external configuration clusters.
 The injector's configured DNS suffix remains distinct from trust domain,
 Headlamp cluster name and metric cluster labels.
+
+This source batch has no new live-load evidence: browser contribution, console,
+i18n/accessibility, hosted fixtures, Desktop and live-cluster gates remain open.
+Local tests/builds do not establish injection, encryption, proxy synchronization
+or complete effective configuration.
 
 No Secrets are read. Collections, configuration reads and parser input are
 bounded; at most 20 controllers receive configuration lookups, with three

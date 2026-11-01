@@ -89,6 +89,9 @@ const trafficSignals = JSON.parse(
 const controllerEnvironment = JSON.parse(
   await readFile('test-files/parity/controller-environment-oracle.json', 'utf8')
 );
+const meshConfigSources = JSON.parse(
+  await readFile('test-files/parity/mesh-config-source-oracle.json', 'utf8')
+);
 const commit = '0e8be887b8217bbcac5e3ae0bfcd258073949cca';
 for (const artifact of [
   upstream,
@@ -98,6 +101,7 @@ for (const artifact of [
   namespaceRevisions,
   revisionTags,
   controllerEnvironment,
+  meshConfigSources,
   calculator,
   hosts,
   mtls,
@@ -207,6 +211,12 @@ assert.equal(Object.keys(labels.sources).length, 4);
 assert.equal(namespaceRevisions.cases.length, 1538);
 assert.equal(revisionTags.cases.length, 364);
 assert.equal(controllerEnvironment.cases.length, 211);
+assert.equal(meshConfigSources.cases.length, 141);
+assert.equal(meshConfigSources.cases.filter(item => item.nativeGuard).length, 25);
+console.log('Mesh source oracle: 116 source comparisons and 25 explicit native guard cases.');
+assert.deepEqual(meshConfigSources.sources, {
+  'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
+});
 assert.deepEqual(controllerEnvironment.sources, {
   'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
   'istio/constants.go': '90de803c8c48862ba48b34fcfcb5c633a12c3956',

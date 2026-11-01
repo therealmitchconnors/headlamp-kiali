@@ -225,6 +225,20 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - Pinned controller discovery reads the first declared container, not the first
   container named discovery. Keep image/env/argument/mount provenance together;
   never filter away a malformed first entry and inspect a later container.
+- Mounted mesh sources follow pinned `parseArgsInto` (`--meshConfig`, not
+  `--meshConfigFile`) and `findMeshConfigFile`: the most-specific direct
+  ConfigMap mount supplies the selected key; item mappings and exact-file
+  subPath are supported. A selected alternate map/key replaces the standard
+  local source before shared/local field merging. Do not read both as overlays.
+  Native guards reject unresolved/masking/ambiguous mounts and indirection.
+  Unlike upstream's display fallback, failed selected files must stay
+  unavailable. Keep source UID/version/path/key provenance and revalidation;
+  neither optional shared-map absence nor an earlier successful capture may
+  hide a denied, changed or malformed selected source.
+- File-source success also depends on pinned `setFileMeshNetworks`. The bounded
+  mounted batch accepts only absent keys or empty network configuration;
+  nonempty/unsupported, denied or malformed dependencies must remain unavailable.
+  Do not drop this guard merely because network topology is not projected.
 - Pinned controller environment handling uses final CLUSTER_ID/SHARED_MESH_CONFIG
   assignments and accumulates exact EXTERNAL_ISTIOD=true declarations. A later
   false does not undo true. Final indirection cannot fall back to earlier literals;
