@@ -229,6 +229,35 @@ describe('captured mounted mesh configuration', () => {
       message: expect.stringContaining('changed'),
     });
   });
+  it.each(
+    ['mounted', 'shared'].flatMap(name =>
+      [
+        { shape: 'absent', data: undefined },
+        { shape: 'null', data: null },
+        { shape: 'array', data: [] },
+        { shape: 'scalar', data: 'not-a-map' },
+      ].map(test => ({ name, ...test }))
+    )
+  )('keeps required $name mesh fields unavailable with $shape data', async ({ name, data }) => {
+    vi.mocked(ApiProxy.request).mockImplementation(async path => {
+      const result = serve(String(path)) as { data?: unknown };
+      if (String(path).endsWith(`/configmaps/${name}`)) {
+        if (data === undefined) delete result.data;
+        else result.data = data;
+      }
+      return result;
+    });
+    const snapshot = await load();
+    const plane = snapshot.controlPlanes[0];
+    expect(name === 'mounted' ? plane.mesh.status : plane.shared?.status).toBe('error');
+    expect(plane.effective?.status).toBe('unavailable');
+    expect(namespaceMeshConfiguration(snapshot, 'bookinfo').status).toBe('unavailable');
+    expect(
+      vi
+        .mocked(ApiProxy.request)
+        .mock.calls.some(([path]) => String(path).endsWith('/configmaps/istio-blue'))
+    ).toBe(false);
+  });
   it('does not treat a newly appearing optional shared map as the earlier confirmed absence', async () => {
     let reads = 0;
     vi.mocked(ApiProxy.request).mockImplementation(async path => {
@@ -309,7 +338,7 @@ describe('captured mounted mesh configuration', () => {
               uid: 'net-uid',
               resourceVersion: 'net-10',
             },
-            data,
+            ...(data === undefined ? {} : { data }),
           };
         return serve(String(path), deployment);
       });

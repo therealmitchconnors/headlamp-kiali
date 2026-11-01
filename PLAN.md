@@ -134,6 +134,23 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Mounted mesh configuration sources (2026-11-01, issue #3):** integrated
+  prerequisite #2 and added first-container `--meshConfig`/direct-volume
+  resolution, selected map/key/path provenance and bounded shared/local merging.
+  The new file-source branch checks mapped networks dependencies, accepting only
+  absent keys/empty configuration. Unsupported, missing, denied, malformed or
+  changed sources remain unavailable; no fallback or new validator is enabled.
+  All relevant consumers retain captured provenance. The original-Go helper
+  artifact has 116 source comparisons and 25 explicit native guard cases;
+  argument parsing, transport and full protobuf fusion/defaults remain oracle gaps.
+  Final local verification passed **22,785 tests in 188 files**, including
+  **106 targeted consumer tests**. Type-check, lint, production build, changed-code
+  formatting, parity/resource/dashboard checks and oracle regeneration passed.
+  An unrelated wizard test timed out once during concurrent gates; a targeted
+  retry and subsequent full suites passed without changing that test.
+  No Headlamp endpoint or configured Kubernetes context was available.
+  Browser contribution/console/i18n/a11y, hosted fixture, Desktop and live-cluster
+  gates remain open, including all earlier Gateway runtime gates.
 - **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
   inspector, active Istio Gateway KIA0302 and captured exact-true controller
   scope semantics. Complete versioned Gateway/default-workload/VM sources are

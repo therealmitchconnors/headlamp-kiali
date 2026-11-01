@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
 const { values } = parseArgs({
@@ -220,11 +221,10 @@ add(
   'Native guard: reject traversal before cleaning an item path.'
 );
 
-const directory = resolve('scripts/parity', `.mesh-config-oracle-${randomUUID()}`);
-await mkdir(directory);
-await mkdir(join(directory, 'build'));
+const directory = await mkdtemp(join(tmpdir(), 'kiali-mesh-config-oracle-'));
 let output;
 try {
+  await mkdir(join(directory, 'build'));
   await writeFile(
     join(directory, 'main.go'),
     `package main
