@@ -59,6 +59,97 @@ writes occurred. Namespace/managed mesh evidence was real except explicit
 denial; all policy objects were intercepted. The actual policy list was empty.
 This is not encryption, access enforcement, or full selector checker parity.
 
+## Declared-scope Gateway listener/port/controller increment
+
+`core/gatewayWorkloads.ts`, `data/gatewayValidation.ts` and the explicit
+detail-page **Run scoped Gateway checks** action add KIA0302 and reuse the
+existing Gateway checks over the declared local/default-visibility namespace
+scope. This is an active-caller-only milestone, not full Gateway API attachment,
+Service backend-port validity, controller readiness or reachability parity.
+The older initial-check action retains its independent bounded behavior.
+
+The pinned Istio `gateway_checker.go` (`f12fc368f401076f10a084662f66ef778e427da1`)
+enables `SelectorChecker` (`692a678199da1173a3cc4e4272975d3b451aa841`), not its
+port-name helper. KIA0302 compares Gateway equality selectors against workload
+DTO labels. Empty/null selectors match any workload in the effective pool,
+but an empty pool still warns. The pinned warning text retains "in this
+namespace" even when the controller allows all captured managed namespaces.
+`PILOT_SCOPE_GATEWAY_TO_NAMESPACE` reads the first declared container and
+accumulates exact `true` declarations; later `false` does not undo true.
+Indirect/noncanonical values remain unavailable natively, without blocking
+unrelated mesh configuration. The discovery source is
+`istio/discovery.go` (`60f6f7ab41a65acc5f40ca1095ce279433e62dce`).
+
+Workload inclusion follows the pinned defaults, excluding Job, CronJob,
+ReplicationController and DeploymentConfig, not the application correlation
+projection. Complete Deployment, ReplicaSet, StatefulSet, DaemonSet and Pod
+lists are required. Controller template labels apply even without Pods;
+standalone Pods use metadata labels. Owned Pods and child ReplicaSets are not
+independent selector targets. UID ownership guards reject missing/stale owners;
+custom controllers, ambiguous controller-priority names and unsupported owner
+chains/legacy owner API versions abort rather than approximate inclusion.
+Configured nondefault workload
+inclusion is not implemented. Sources are `business/workloads.go`
+(`e0b704c0b299d19b50fbe9ae1d19cab1272a15cc`) and `models/workload.go`
+(`8070c2c4423dee1ef6629e94ffd299e57c03c843`).
+
+Complete WorkloadGroup and WorkloadEntry reads participate. VM labels use the
+first matching WorkloadEntry in captured pool order, without a namespace
+re-filter; otherwise they use group spec metadata labels only after a complete
+entry read. Empty group selectors never import entries. Group identity/version
+and entry-label provenance remain separate. This label-only inclusion evidence
+does not establish VM health, accounts, Service routing or generic KIA0004
+workload-absence coverage.
+
+Both Gateway types require complete versioned namespace/controller/tag and
+resolved local configuration evidence plus an explicit logical mesh mapping.
+The selected namespace must be in the declared projection. Istio Gateway
+selector checks additionally require one unambiguous controller with a captured
+scope flag. Complete cluster-wide resource collections are reduced to declared
+membership before analysis; pooled VM entry order is preserved. Pagination
+uses at most four 250-item pages, and source jobs share three workers and one
+15-second deadline including discovery. All source failures abort the scoped
+result. The selected Gateway is compared against its list capture and a final
+GET by UID/resourceVersion/spec/status/generation/labels/annotations.
+Every declared Istio controller's identity/version/environment/configuration
+provenance must match the later Deployment capture, not just the selected
+Gateway controller. These are bounded captures, not atomic Kubernetes
+transactions or continuous watch-based validity.
+
+Gateway API `k8sgateway_checker.go`
+(`325feda97b07a084ddc33b8c0372bec3de078d7e`) enables the existing class registry
+and controller-condition checks, alongside listener/address conflicts.
+KIA1501/KIA1502 retain exact fields and equal-name exclusion across namespaces;
+KIA1503 retains literal listener uniqueness. GWAPI keeps current generation,
+benign-transition and actual nested-listener-path guards. Registry membership
+is not controller acceptance; absent/denied discovery never becomes successful
+empty discovery. Conditional mesh-wide fallback classes remain unevaluated.
+Dormant Istio port-name checks and unsupported listener/section/hostname/backend
+attachment rules are not introduced.
+
+Limits add 7,000 native/group/entry inputs, 256 labels/object, 20,000 aggregate
+labels, 1,000,000 label characters, 20,000 VM comparisons and 20 owner references/
+object. Equality selectors retain the shared 100-entry decoder limit.
+Gateway spec/status/annotations each have 256 KiB guards and Gateway collection
+captures a 1 MiB aggregate guard, in addition to existing host/listener/address
+analysis limits. These are analysis bounds, not an assertion that Headlamp never
+buffers a larger initial response.
+
+Source-informed core, loading and UI tests cover controller flags, workload
+inclusion, pooled VM order, both Gateway groups, complete pagination, scope/
+ownership/freshness failures, suppression, deadlines, retries and no capture
+replay/resurrection after settings changes. No new original-Go differential
+oracle or positive live Gateway fixture was added. No Headlamp CDP target or
+Kubernetes CLI was available: browser contribution/console/i18n/a11y, hosted
+fixture, Desktop and live-cluster gates remain explicitly open. No cluster
+install, fixture application or write occurred.
+The final focused set passed **103 tests in three files**; the final full suite
+passed **22,480 tests in 186 files**, including the owner-API-version guard and
+related-link provenance regression. Type-check, lint and production build pass.
+Resource/dashboard generation,
+catalog parity, i18n extraction and code formatting also pass. These are local
+gates only, not live-load evidence.
+
 ## Istio Gateway host-conflict checks
 
 KIA0301 follows the active `GatewayChecker` and `gateways.MultiMatchChecker`,
@@ -3533,7 +3624,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Configuration lists/details | `components/configuration/Configuration.tsx` | Stock-host discovery and empty-list rendering; populated synthetic detail rendering, nested fields, unknown status, Conditions before Events | Populated real CR integration and Desktop verification for this increment |
 | Discovery gate | `data/configuration.ts`, `ConfigurationGate.tsx` | 401/403/404 distinction, resource scope validation, supported version selection, separate endpoint-cache ownership | Additional cluster/server-version matrix |
 | Mutations | `data/mutations.ts`, `ConfigurationActions.tsx` | Spec CRUD and annotation-only validation exclusions, scoped confirmation, UID/version/acknowledgement guards and no retry; browser writes intercepted | Real write integration, YAML forms and broader workload/namespace mutations |
-| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group check modules, `data/validation.ts` | Thirty-five bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts and TLS patterns; source-bound oracles and hosted fixtures | Attachment/per-workload/principal context and remaining checkers remain; dormant CRD port checks are not activated |
+| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group check modules, `core/gatewayWorkloads.ts`, `data/validation.ts`, `data/gatewayValidation.ts` | Thirty-nine bounded codes on this branch, including declared-scope KIA0302/controller flags and existing Gateway listener/status/class checks; source-bound oracles and earlier hosted fixtures | Attachment/per-workload/principal context and remaining checkers remain; Gateway scoped runtime verification is open and dormant CRD port checks are not activated |
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |

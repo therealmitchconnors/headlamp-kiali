@@ -3,7 +3,7 @@ import type { ReferenceValidationContext, ValidationOwner } from './referenceVal
 import type { Finding, FindingReference } from './validation';
 import { namespacedValidationRecords } from './validationScope';
 
-function collisionFields(spec: Record<string, unknown>) {
+export function gatewayCollisionFields(spec: Record<string, unknown>) {
   const rawListeners = spec.listeners ?? [];
   const rawAddresses = spec.addresses ?? [];
   if (
@@ -77,7 +77,7 @@ export function gatewayCollisionChecks(
   if (kind !== 'Gateway' || group !== 'gateway.networking.k8s.io')
     return { findings: [], skipped: [] };
   try {
-    const selected = collisionFields(spec);
+    const selected = gatewayCollisionFields(spec);
     if (!gatewayNeedsCollisionContext(kind, group, spec)) return { findings: [], skipped: [] };
     if (!owner || !context?.gateways?.complete)
       throw new Error(
@@ -90,7 +90,7 @@ export function gatewayCollisionChecks(
     if (
       !current ||
       current.uid !== owner.uid ||
-      JSON.stringify(collisionFields(current.spec)) !== JSON.stringify(selected)
+      JSON.stringify(gatewayCollisionFields(current.spec)) !== JSON.stringify(selected)
     )
       throw new Error(
         'Selected Gateway identity, listeners or addresses changed; reload before checking conflicts'
@@ -99,7 +99,7 @@ export function gatewayCollisionChecks(
     const addressIndex = new Map<string, Map<string, FindingReference>>();
     let entries = 0;
     for (const record of records) {
-      const fields = collisionFields(record.spec);
+      const fields = gatewayCollisionFields(record.spec);
       entries += fields.listeners.length + fields.addresses.length;
       if (entries > 20000)
         throw new Error('Gateway collision context exceeds 20000 listener/address entries');
