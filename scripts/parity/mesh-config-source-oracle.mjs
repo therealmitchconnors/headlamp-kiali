@@ -10,7 +10,12 @@ const { values } = parseArgs({
   options: { source: { type: 'string' }, check: { type: 'boolean', default: false } },
 });
 const commit = '0e8be887b8217bbcac5e3ae0bfcd258073949cca';
-const sources = { 'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce' };
+const sources = {
+  'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
+  'istio/constants.go': '90de803c8c48862ba48b34fcfcb5c633a12c3956',
+  'go.mod': '4502633e3522dacba5e50bee4fb55ee232832d7f',
+  'go.sum': 'b853c35ef129a5e8d20db91bd37c67b349f51706',
+};
 const texts = {};
 for (const [path, blob] of Object.entries(sources)) {
   let bytes;
@@ -31,6 +36,7 @@ const names = [
   'cleanContainerPath',
   'findMeshConfigFile',
   'shouldLoadMeshConfigFile',
+  'parseArgsInto',
 ];
 const helpers = names.map(name => {
   const helper = texts['istio/discovery.go'].match(
@@ -41,6 +47,19 @@ const helpers = names.map(name => {
 });
 
 const defaultPath = '/etc/istio/config/mesh';
+const parser = { module: 'github.com/spf13/pflag', version: 'v1.0.10' };
+assert.ok(texts['go.mod'].includes(`${parser.module} ${parser.version}\n`));
+const parserSums = texts['go.sum']
+  .split('\n')
+  .filter(line => line.startsWith(`${parser.module} ${parser.version}`));
+assert.equal(parserSums.length, 2);
+const constants = ['defaultMeshConfigPath', 'defaultMeshNetworksConfigPath', 'defaultMonitoringPort']
+  .map(name => {
+    const declaration = texts['istio/constants.go'].match(new RegExp(`^\\s*${name}\\s*=.*$`, 'm'));
+    assert.ok(declaration, `Missing pinned constant ${name}`);
+    return `const ${declaration[0].trim()}`;
+  })
+  .join('\n');
 const standardName = 'istio-blue';
 const cases = [];
 const add = (label, path, mounts, volumes, nativeGuard) =>
@@ -221,14 +240,81 @@ add(
   'Native guard: reject traversal before cleaning an item path.'
 );
 
+const argumentCases = [];
+const addArguments = (label, args, nativeGuard) =>
+  argumentCases.push({ label, args, ...(nativeGuard ? { nativeGuard } : {}) });
+for (const mesh of [defaultPath, '/custom/mesh.yaml', './custom//mesh.yaml']) {
+  for (const networks of ['/etc/istio/config/meshNetworks', '/networks/map.yaml']) {
+    for (const split of [false, true]) {
+      const flags = split
+        ? ['--meshConfig', mesh, '--networksConfigFile', networks]
+        : [`--meshConfig=${mesh}`, `--networksConfigFile=${networks}`];
+      for (const prefix of [
+        [],
+        ['discovery'],
+        ['--unknown', ''],
+        ['--unknown=value'],
+        ['-xy', 'discarded', 'positional'],
+        ['--monitoringAddr=:15014'],
+        ['--monitoringAddr', 'not-an-address'],
+        ['--meshConfig=/discarded', '--networksConfigFile=/discarded'],
+      ])
+        addArguments('recognized flags and precedence', [...prefix, ...flags]);
+    }
+  }
+}
+for (const args of [
+  [],
+  ['--meshConfigFile=/ignored'],
+  ['--meshConfigFile', '/ignored'],
+  ['--unknown', '--meshConfig', '/custom/mesh.yaml'],
+  ['-x=value', '--meshConfig=/custom/mesh.yaml'],
+  ['-x=', 'positional', '--meshConfig=/custom/mesh.yaml'],
+  ['--', '--meshConfig=/ignored'],
+  ['discovery', '-', '--networksConfigFile=/networks/map.yaml'],
+  ['--monitoringAddr', '--meshConfig=/consumed'],
+  ['--meshConfig=/custom/mesh.yaml', '--', '--meshConfig=/ignored'],
+])
+  addArguments('ignored flags and argument termination', args);
+for (const args of [
+  ['--meshConfig'],
+  ['--networksConfigFile'],
+  ['--monitoringAddr'],
+  ['---meshConfig=/custom/mesh.yaml'],
+  ['--=value'],
+  ['--help'],
+  ['-h'],
+  ['-xh'],
+  ['--meshConfig='],
+  ['--meshConfig=relative/mesh'],
+  ['--meshConfig=/a/../mesh'],
+  ['--networksConfigFile=relative/networks'],
+  ['--meshConfig', '--another-flag'],
+  ['--meshConfig=$(PATH)'],
+  ['--unknown=${PATH}'],
+  ['--', '$(PATH)'],
+])
+  addArguments(
+    'explicit native argument guard',
+    args,
+    'Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.'
+  );
+
 const directory = await mkdtemp(join(tmpdir(), 'kiali-mesh-config-oracle-'));
 let output;
 try {
   await mkdir(join(directory, 'build'));
   await writeFile(
+    join(directory, 'go.mod'),
+    `module mesh-source-oracle\n\ngo 1.23\n\nrequire ${parser.module} ${parser.version}\n`
+  );
+  await writeFile(join(directory, 'go.sum'), parserSums.join('\n') + '\n');
+  await writeFile(
     join(directory, 'main.go'),
     `package main
-import ("encoding/json"; "os"; "path"; "strings")
+import ("encoding/json"; "os"; "path"; "strings"; "net"; "strconv"; "${parser.module}")
+${constants}
+var log = struct{ Debugf func(string, ...interface{}) }{func(string, ...interface{}) {}}
 type KeyToPath struct { Key string; Path string }
 type ConfigMapVolumeSource struct { Name string; Items []KeyToPath }
 type Volume struct { Name string; ConfigMap *ConfigMapVolumeSource }
@@ -238,32 +324,48 @@ type MeshConfigFileReference struct {
  ConfigMapName string \`json:"name"\`; ConfigMapKey string \`json:"key"\`; Path string \`json:"path"\`
 }
 type Cluster struct { Name string }
-type ControlPlane struct { ID string; Cluster Cluster; MeshConfigFile *MeshConfigFileReference }
+type ControlPlane struct {
+ ID string; Cluster Cluster; MeshConfigFile *MeshConfigFileReference
+ MonitoringPort int; MeshConfigFilePath string; MeshNetworksConfigFilePath string
+}
 ${helpers.join('\n')}
 type Input struct { Path string; Container Container; Volumes []Volume; StandardName string }
 type Output struct { Reference *MeshConfigFileReference \`json:"reference"\`; LoadFile bool \`json:"loadFile"\` }
+type Paths struct { Mesh string \`json:"mesh"\`; Networks string \`json:"networks"\` }
 func main() {
- var inputs []Input
+ var inputs struct { Sources []Input; Arguments [][]string }
  if err:=json.NewDecoder(os.Stdin).Decode(&inputs); err!=nil { panic(err) }
- results:=make([]Output,0,len(inputs))
- for _,input:=range inputs {
+ results:=struct { Sources []Output \`json:"sources"\`; Arguments []Paths \`json:"arguments"\` }{
+  Sources:make([]Output,0,len(inputs.Sources)), Arguments:make([]Paths,0,len(inputs.Arguments)),
+ }
+ for _,input:=range inputs.Sources {
   reference:=findMeshConfigFile(input.Container,input.Volumes,input.Path)
   cp:=ControlPlane{ID:"local",Cluster:Cluster{Name:"local"},MeshConfigFile:reference}
-  results=append(results,Output{reference,shouldLoadMeshConfigFile(&cp,input.StandardName)})
+  results.Sources=append(results.Sources,Output{reference,shouldLoadMeshConfigFile(&cp,input.StandardName)})
+ }
+ for _,args:=range inputs.Arguments {
+  cp:=ControlPlane{MonitoringPort:defaultMonitoringPort,MeshConfigFilePath:defaultMeshConfigPath,MeshNetworksConfigFilePath:defaultMeshNetworksConfigPath}
+  parseArgsInto(args,&cp)
+  results.Arguments=append(results.Arguments,Paths{cp.MeshConfigFilePath,cp.MeshNetworksConfigFilePath})
  }
  if err:=json.NewEncoder(os.Stdout).Encode(results); err!=nil { panic(err) }
 }
 `
   );
   output = JSON.parse(
-    execFileSync('go', ['run', 'main.go'], {
+    execFileSync('go', ['run', '-mod=readonly', 'main.go'], {
       cwd: directory,
-      input: JSON.stringify(cases.map(test => test.input)),
+      input: JSON.stringify({
+        sources: cases.map(test => test.input),
+        arguments: argumentCases.map(test => test.args),
+      }),
       encoding: 'utf8',
       env: {
         ...process.env,
-        GO111MODULE: 'off',
+        GO111MODULE: 'on',
+        GOWORK: 'off',
         GOPROXY: 'off',
+        GOSUMDB: 'off',
         GOTOOLCHAIN: 'local',
         GOTMPDIR: join(directory, 'build'),
         TMPDIR: join(directory, 'build'),
@@ -274,15 +376,21 @@ func main() {
 } finally {
   await rm(directory, { recursive: true, force: true });
 }
-assert.equal(output.length, cases.length);
+assert.equal(output.sources.length, cases.length);
+assert.equal(output.arguments.length, argumentCases.length);
 const artifact = {
   version: 'v2.33.0',
   commit,
   sources,
   helpers: names,
+  parser: { ...parser, sums: parserSums },
   scope:
-    'Original-Go path/reference and same-context shouldLoad helpers only; argument parsing, transport and merge are not covered.',
-  cases: cases.map((test, index) => ({ ...test, expected: output[index] })),
+    'Original-Go parseArgsInto with pinned pflag, path/reference and same-context shouldLoad helpers; transport, networks parsing and protobuf fusion/defaults are not covered.',
+  cases: cases.map((test, index) => ({ ...test, expected: output.sources[index] })),
+  argumentCases: argumentCases.map((test, index) => ({
+    ...test,
+    expected: output.arguments[index],
+  })),
 };
 const artifactPath = 'test-files/parity/mesh-config-source-oracle.json';
 const serialized = JSON.stringify(artifact, null, 2) + '\n';
@@ -292,5 +400,7 @@ else await writeFile(artifactPath, serialized);
 console.log(
   `Verified ${cases.length} original-Go mesh source cases (${
     cases.filter(test => test.nativeGuard).length
+  } explicitly stricter native guards), plus ${argumentCases.length} argument cases (${
+    argumentCases.filter(test => test.nativeGuard).length
   } explicitly stricter native guards)`
 );

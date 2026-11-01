@@ -214,8 +214,17 @@ assert.equal(controllerEnvironment.cases.length, 211);
 assert.equal(meshConfigSources.cases.length, 141);
 assert.equal(meshConfigSources.cases.filter(item => item.nativeGuard).length, 25);
 console.log('Mesh source oracle: 116 source comparisons and 25 explicit native guard cases.');
+assert.equal(meshConfigSources.argumentCases.length, 122);
+assert.equal(meshConfigSources.argumentCases.filter(item => item.nativeGuard).length, 16);
+assert.equal(meshConfigSources.parser.module, 'github.com/spf13/pflag');
+assert.equal(meshConfigSources.parser.version, 'v1.0.10');
+assert.ok(meshConfigSources.helpers.includes('parseArgsInto'));
+console.log('Mesh arguments oracle: 106 source comparisons and 16 explicit native guard cases.');
 assert.deepEqual(meshConfigSources.sources, {
   'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',
+  'istio/constants.go': '90de803c8c48862ba48b34fcfcb5c633a12c3956',
+  'go.mod': '4502633e3522dacba5e50bee4fb55ee232832d7f',
+  'go.sum': 'b853c35ef129a5e8d20db91bd37c67b349f51706',
 });
 assert.deepEqual(controllerEnvironment.sources, {
   'istio/discovery.go': '60f6f7ab41a65acc5f40ca1095ce279433e62dce',

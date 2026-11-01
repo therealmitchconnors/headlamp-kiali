@@ -2,15 +2,27 @@
   "version": "v2.33.0",
   "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
   "sources": {
-    "istio/discovery.go": "60f6f7ab41a65acc5f40ca1095ce279433e62dce"
+    "istio/discovery.go": "60f6f7ab41a65acc5f40ca1095ce279433e62dce",
+    "istio/constants.go": "90de803c8c48862ba48b34fcfcb5c633a12c3956",
+    "go.mod": "4502633e3522dacba5e50bee4fb55ee232832d7f",
+    "go.sum": "b853c35ef129a5e8d20db91bd37c67b349f51706"
   },
   "helpers": [
     "isValidContainerPath",
     "cleanContainerPath",
     "findMeshConfigFile",
-    "shouldLoadMeshConfigFile"
+    "shouldLoadMeshConfigFile",
+    "parseArgsInto"
   ],
-  "scope": "Original-Go path/reference and same-context shouldLoad helpers only; argument parsing, transport and merge are not covered.",
+  "parser": {
+    "module": "github.com/spf13/pflag",
+    "version": "v1.0.10",
+    "sums": [
+      "github.com/spf13/pflag v1.0.10 h1:4EBh2KAYBwaONj6b2Ye1GiHfwjqyROoF4RwYO+vPwFk=",
+      "github.com/spf13/pflag v1.0.10/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg="
+    ]
+  },
+  "scope": "Original-Go parseArgsInto with pinned pflag, path/reference and same-context shouldLoad helpers; transport, networks parsing and protobuf fusion/defaults are not covered.",
   "cases": [
     {
       "label": "direct/default/exact/normalized",
@@ -5051,6 +5063,1592 @@
           "path": "/etc/istio/config/mesh"
         },
         "loadFile": true
+      }
+    }
+  ],
+  "argumentCases": [
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=/etc/istio/config/mesh",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "/etc/istio/config/mesh",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=/custom/mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "/custom/mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/etc/istio/config/meshNetworks"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig=./custom//mesh.yaml",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "discovery",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown",
+        "",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--unknown=value",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "-xy",
+        "discarded",
+        "positional",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr=:15014",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--monitoringAddr",
+        "not-an-address",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "recognized flags and precedence",
+      "args": [
+        "--meshConfig=/discarded",
+        "--networksConfigFile=/discarded",
+        "--meshConfig",
+        "./custom//mesh.yaml",
+        "--networksConfigFile",
+        "/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--meshConfigFile=/ignored"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--meshConfigFile",
+        "/ignored"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--unknown",
+        "--meshConfig",
+        "/custom/mesh.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "-x=value",
+        "--meshConfig=/custom/mesh.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "-x=",
+        "positional",
+        "--meshConfig=/custom/mesh.yaml"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--",
+        "--meshConfig=/ignored"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "discovery",
+        "-",
+        "--networksConfigFile=/networks/map.yaml"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/networks/map.yaml"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--monitoringAddr",
+        "--meshConfig=/consumed"
+      ],
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "ignored flags and argument termination",
+      "args": [
+        "--meshConfig=/custom/mesh.yaml",
+        "--",
+        "--meshConfig=/ignored"
+      ],
+      "expected": {
+        "mesh": "/custom/mesh.yaml",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--networksConfigFile"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--monitoringAddr"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "---meshConfig=/custom/mesh.yaml"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--=value"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--help"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "-h"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "-xh"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig="
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig=relative/mesh"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig=/a/../mesh"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--networksConfigFile=relative/networks"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig",
+        "--another-flag"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--meshConfig=$(PATH)"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--unknown=${PATH}"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
+      }
+    },
+    {
+      "label": "explicit native argument guard",
+      "args": [
+        "--",
+        "$(PATH)"
+      ],
+      "nativeGuard": "Native guard: reject malformed, unresolved or invalid arguments instead of retaining/defaulting paths.",
+      "expected": {
+        "mesh": "/etc/istio/config/mesh",
+        "networks": "/etc/istio/config/meshNetworks"
       }
     }
   ]
