@@ -151,7 +151,16 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   no plugin runtime dependency changed. Transport, networks parsing and full
   protobuf fusion/default evidence remain gaps, not completed parity.
   Focused verification passed **521 tests in five files**, type-check, lint,
-  production build and parity checks. Full-suite verification is pending below.
+  production build, formatting, parity/resource/dashboard checks and oracle
+  regeneration (both fetched and local pinned sources).
+  The full suite passed **22,939 tests in 188 files** with the existing Vitest
+  runner and `--maxWorkers=2`. A default-worker run had two unrelated five-second
+  UI timeouts (ServiceTrafficWizard and Traces); both files passed a **32-test**
+  focused rerun before the complete two-worker run. No tests or timeouts changed.
+  Read-only code review found no significant issues. Secret scans passed.
+  CodeQL reported only a pre-existing mocked-request assertion in
+  `gatewayScopedValidation.test.ts:224`; its substring filter checks that a
+  request did not occur, not URL trust or transport, so it is a false positive.
   No Headlamp endpoint or configured Kubernetes context is available; contribution,
   console, i18n/a11y, hosted fixture, Desktop and live-cluster gates remain open.
 - **Mounted mesh configuration sources (2026-11-01, issue #3):** integrated
