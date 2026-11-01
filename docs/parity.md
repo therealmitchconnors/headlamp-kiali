@@ -59,6 +59,97 @@ writes occurred. Namespace/managed mesh evidence was real except explicit
 denial; all policy objects were intercepted. The actual policy list was empty.
 This is not encryption, access enforcement, or full selector checker parity.
 
+## Declared-scope Gateway listener/port/controller increment
+
+`core/gatewayWorkloads.ts`, `data/gatewayValidation.ts` and the explicit
+detail-page **Run scoped Gateway checks** action add KIA0302 and reuse the
+existing Gateway checks over the declared local/default-visibility namespace
+scope. This is an active-caller-only milestone, not full Gateway API attachment,
+Service backend-port validity, controller readiness or reachability parity.
+The older initial-check action retains its independent bounded behavior.
+
+The pinned Istio `gateway_checker.go` (`f12fc368f401076f10a084662f66ef778e427da1`)
+enables `SelectorChecker` (`692a678199da1173a3cc4e4272975d3b451aa841`), not its
+port-name helper. KIA0302 compares Gateway equality selectors against workload
+DTO labels. Empty/null selectors match any workload in the effective pool,
+but an empty pool still warns. The pinned warning text retains "in this
+namespace" even when the controller allows all captured managed namespaces.
+`PILOT_SCOPE_GATEWAY_TO_NAMESPACE` reads the first declared container and
+accumulates exact `true` declarations; later `false` does not undo true.
+Indirect/noncanonical values remain unavailable natively, without blocking
+unrelated mesh configuration. The discovery source is
+`istio/discovery.go` (`60f6f7ab41a65acc5f40ca1095ce279433e62dce`).
+
+Workload inclusion follows the pinned defaults, excluding Job, CronJob,
+ReplicationController and DeploymentConfig, not the application correlation
+projection. Complete Deployment, ReplicaSet, StatefulSet, DaemonSet and Pod
+lists are required. Controller template labels apply even without Pods;
+standalone Pods use metadata labels. Owned Pods and child ReplicaSets are not
+independent selector targets. UID ownership guards reject missing/stale owners;
+custom controllers, ambiguous controller-priority names and unsupported owner
+chains/legacy owner API versions abort rather than approximate inclusion.
+Configured nondefault workload
+inclusion is not implemented. Sources are `business/workloads.go`
+(`e0b704c0b299d19b50fbe9ae1d19cab1272a15cc`) and `models/workload.go`
+(`8070c2c4423dee1ef6629e94ffd299e57c03c843`).
+
+Complete WorkloadGroup and WorkloadEntry reads participate. VM labels use the
+first matching WorkloadEntry in captured pool order, without a namespace
+re-filter; otherwise they use group spec metadata labels only after a complete
+entry read. Empty group selectors never import entries. Group identity/version
+and entry-label provenance remain separate. This label-only inclusion evidence
+does not establish VM health, accounts, Service routing or generic KIA0004
+workload-absence coverage.
+
+Both Gateway types require complete versioned namespace/controller/tag and
+resolved local configuration evidence plus an explicit logical mesh mapping.
+The selected namespace must be in the declared projection. Istio Gateway
+selector checks additionally require one unambiguous controller with a captured
+scope flag. Complete cluster-wide resource collections are reduced to declared
+membership before analysis; pooled VM entry order is preserved. Pagination
+uses at most four 250-item pages, and source jobs share three workers and one
+15-second deadline including discovery. All source failures abort the scoped
+result. The selected Gateway is compared against its list capture and a final
+GET by UID/resourceVersion/spec/status/generation/labels/annotations.
+Every declared Istio controller's identity/version/environment/configuration
+provenance must match the later Deployment capture, not just the selected
+Gateway controller. These are bounded captures, not atomic Kubernetes
+transactions or continuous watch-based validity.
+
+Gateway API `k8sgateway_checker.go`
+(`325feda97b07a084ddc33b8c0372bec3de078d7e`) enables the existing class registry
+and controller-condition checks, alongside listener/address conflicts.
+KIA1501/KIA1502 retain exact fields and equal-name exclusion across namespaces;
+KIA1503 retains literal listener uniqueness. GWAPI keeps current generation,
+benign-transition and actual nested-listener-path guards. Registry membership
+is not controller acceptance; absent/denied discovery never becomes successful
+empty discovery. Conditional mesh-wide fallback classes remain unevaluated.
+Dormant Istio port-name checks and unsupported listener/section/hostname/backend
+attachment rules are not introduced.
+
+Limits add 7,000 native/group/entry inputs, 256 labels/object, 20,000 aggregate
+labels, 1,000,000 label characters, 20,000 VM comparisons and 20 owner references/
+object. Equality selectors retain the shared 100-entry decoder limit.
+Gateway spec/status/annotations each have 256 KiB guards and Gateway collection
+captures a 1 MiB aggregate guard, in addition to existing host/listener/address
+analysis limits. These are analysis bounds, not an assertion that Headlamp never
+buffers a larger initial response.
+
+Source-informed core, loading and UI tests cover controller flags, workload
+inclusion, pooled VM order, both Gateway groups, complete pagination, scope/
+ownership/freshness failures, suppression, deadlines, retries and no capture
+replay/resurrection after settings changes. No new original-Go differential
+oracle or positive live Gateway fixture was added. No Headlamp CDP target or
+Kubernetes CLI was available: browser contribution/console/i18n/a11y, hosted
+fixture, Desktop and live-cluster gates remain explicitly open. No cluster
+install, fixture application or write occurred.
+The final focused set passed **103 tests in three files**; the final full suite
+passed **22,480 tests in 186 files**, including the owner-API-version guard and
+related-link provenance regression. Type-check, lint and production build pass.
+Resource/dashboard generation,
+catalog parity, i18n extraction and code formatting also pass. These are local
+gates only, not live-load evidence.
+
 ## Istio Gateway host-conflict checks
 
 KIA0301 follows the active `GatewayChecker` and `gateways.MultiMatchChecker`,
@@ -2729,9 +2820,10 @@ Selected root/trust-domain/automatic-mTLS/discovery-selector fields use local
 precedence and alias union, without runtime defaults. Empty/null YAML fields
 remain unset; explicit false is retained. A confirmed missing shared map is
 reported and leaves only local fields. Denied/invalid sources, indirect shared
-references, mounted overrides and unmapped external topology block the merged
-projection. Full ProxyConfig/extensions, certificate parsing, defaults, networks
-and effective/observed security are not implemented by this projection.
+references, unsupported mounted overrides and unmapped external topology block
+the merged projection. The mounted-file batch below extends source selection,
+not full ProxyConfig/extensions, certificate parsing, runtime defaults,
+networks topology or effective/observed security.
 
 Namespaces use four 250-item pages; controller/tag collections use four
 50-item pages. Configuration lookups and detail sections cover at most 20
@@ -2750,6 +2842,140 @@ payload and denial separately verified projection and incomplete-source behavior
 No cluster mutation occurred. Expected HTTP diagnostics include this missing
 optional map and the host's CRD-v1beta1 probe, not plugin execution failures.
 Desktop verification and complete mesh/security parity remain open.
+
+### Mounted mesh sources — issue #3 audit and bounded implementation
+
+The prerequisite Gateway increment (#2) is integrated into this branch; its
+runtime gates remain open. The source baseline is unchanged: **Kiali v2.33.0,
+`0e8be887b8217bbcac5e3ae0bfcd258073949cca`**. Exact audited blobs:
+
+| Source | Git blob | Active evidence |
+| --- | --- | --- |
+| `istio/discovery.go` | `60f6f7ab41a65acc5f40ca1095ce279433e62dce` | `Mesh` first-container call chain, `parseArgsInto`, `findMeshConfigFile`, `shouldLoadMeshConfigFile`, `setControlPlaneConfig`, `setFileConfig`, `setFileMeshNetworks`, `setSharedConfig`, `fusionMeshConfigs` |
+| `istio/constants.go` | `90de803c8c48862ba48b34fcfcb5c633a12c3956` | Default mesh and networks file paths |
+| `models/mesh.go` | `518a4242407e27452bb199b91344456d89908ad4` | Backend defaults, source/reference models, Maistra classification |
+| `istio/discovery_internal_test.go` | `3ec63ac4524f945bf7e231e8b311ec63fcbfe452` | Caller tests for arguments, mounts, file/shared precedence and failures |
+| `business/tls.go` | `fd8ff28c63de87e87cd655c35e10d7ba5faaaabc` | Existing namespace/mesh-wide TLS consumer differences retained as follow-up work |
+| `business/mesh.go` | `c8771bc4c0f63436b7cb47c199aa52f940f3ccb8` | Existing configured/mesh identity-domain consumer differences |
+| `go.mod` / `go.sum` | `4502633e3522dacba5e50bee4fb55ee232832d7f` / `b853c35ef129a5e8d20db91bd37c67b349f51706` | Exact pflag, Istio API and legacy jsonpb dependency pins |
+
+Pinned caller references:
+[first-container pipeline](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L809-L856),
+[arguments](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L1450-L1490),
+[file reference selection](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L310-L400),
+[source loading/precedence](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L101-L308),
+[fusion](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/istio/discovery.go#L402-L492).
+
+**Chosen batch:** same-context direct ConfigMap-backed mounted mesh files.
+The registered flag is `--meshConfig`, not `--meshConfigFile`; the latter is
+unknown to the pinned pflag caller. Missing arguments use
+`/etc/istio/config/mesh`. Repeated known flags use the final value; split and
+equals forms, interspersed positionals and `--` termination are retained.
+Invalid/unresolved inputs block natively rather than reproducing error fallback.
+
+The first declared container supplies arguments, mounts and environment together.
+The most-specific covering direct ConfigMap mount maps the requested file to a
+key, including `items`, normalized paths and exact-file literal `subPath`.
+Pinned equal-path/duplicate-volume first-match behavior is deliberately not
+trusted: ambiguous mounts defer, and unsupported longer mounts cannot fall
+through to a shorter valid source. Unresolved `subPathExpr`, directory subPath,
+projected/Secret/host/CSI volumes, environment expansion and nonempty/malformed
+`envFrom` remain guarded. No Secret, exec or container-filesystem read occurs.
+The caller does not resolve `valueFrom`/`envFrom`; adding kubelet-style
+indirection would not be Kiali source parity.
+
+Shared configuration contributes first; the selected local file **or** standard
+revision ConfigMap supplies local precedence. A successful alternate map/key
+replaces standard configuration and does not require reading that unused map.
+Standard-name/`mesh`-key mounts retain standard-source identity even at another
+path. Upstream also selects its file branch for a differing logical controller
+ID; external/configuration-cluster association remains unsupported here.
+Shared reads switch clusters upstream only for
+`ManagesExternal && ID != hostingCluster`, not either condition alone.
+
+Local scalar/list presence and sorted alias-union behavior remain unchanged.
+Display fields receive no runtime defaults. Kiali's separate backend defaults
+include automatic-mTLS true and outbound ALLOW_ANY, not full Istiod defaults;
+the existing resolved-root fallback remains the observed controller namespace.
+Denied, malformed or missing selected local files never become standard
+fallback or successful defaults. Only a confirmed missing optional shared map
+keeps the documented local-only result; a later appearance invalidates capture.
+
+**Projected field-name decoding:** Kiali's `models.MeshConfig` embeds the Istio
+type and overrides only marshaling. Its inherited decoder uses legacy
+`github.com/golang/protobuf/jsonpb` **v1.5.4**, not protojson. The pinned Istio API
+revision is `23c54ad84d6e`:
+
+| Dependency source | Git blob | Evidence |
+| --- | --- | --- |
+| `istio/api/mesh/v1alpha1/config_json.gen.go` | `20a0af3f2d044d1ee8af6782f04afb35e0081b1e` | `MeshConfig.UnmarshalJSON`, `ConfigUnmarshaler` with unknown fields allowed |
+| `istio/api/mesh/v1alpha1/config.proto` | `efe2a169300f71bcad0bb17afda6a03d5b385772` | Supported top-level protobuf names; selector names already camelCase |
+| `golang/protobuf/jsonpb/decode.go` at v1.5.4 | `c6f66f10393d28df299086da373edf3ba8b1041e` | Field lookup at lines 320–340: protobuf name first, present JSON name wins |
+
+The nine projected top-level fields now accept both spellings. In particular,
+`enable_auto_mtls: false` is not silently discarded and replaced by an enabled
+default, and `root_namespace` / `discovery_selectors` affect the captured
+namespace context. A present camelCase key wins even when null or malformed;
+the snake_case value is not a fallback. Normalization occurs before the existing
+bounded validation and shared/local merge. Selector `matchLabels` and
+`matchExpressions` are the actual protobuf names; snake_case variants remain
+unsupported, and label-map keys stay literal. This is source-inspected regression
+evidence, not a full protobuf-unmarshaling oracle or an expansion of supported
+ProxyConfig/extensions.
+
+**Networks acceptance dependency:** pinned `setFileConfig` calls
+`setFileMeshNetworks` before declaring file success. For the new mounted-file
+branch, the native adapter resolves the direct networks-file reference
+(`--networksConfigFile`, default `/etc/istio/config/meshNetworks`) and reads its
+declared key. Missing keys and empty YAML/network maps are supported; missing
+maps, denied/malformed inputs and nonempty/unsupported network configuration
+remain unavailable. Shared-map network input receives the same bounded guard
+for this branch. This is an acceptance check, not networks projection or a
+claim of full parsing of the earlier standard-ConfigMap pipeline.
+
+Mounted captures require complete versioned discovery plus controller and
+ConfigMap UID/resourceVersion evidence. Selected local/shared/networks sources
+and the controller are rechecked before publishing; changed/denied/invalid
+evidence cannot reuse a successful capture. Read workers remain limited to three,
+with twenty controllers, existing collection limits and the shared fifteen-second
+deadline. Namespace contexts clone field/source metadata. Mesh, mTLS, initial
+validation and scoped Gateway inspectors disclose captured source provenance.
+This remains a bounded snapshot, not a transactional or continuously watched
+proof of applied configuration.
+
+`scripts/parity/mesh-config-source-oracle.mjs` extracts original pinned Go path,
+reference, same-context file-selection and `parseArgsInto` helpers. Its original
+**141 path/reference cases** comprise **116 comparisons plus 25 explicitly
+stricter native guard cases**. The continuation adds **122 argument cases**:
+**106 comparisons plus 16 native guards**, executing the original caller with
+its pinned **pflag v1.0.10** dependency. They cover split/equals flags, repeated
+assignments, positionals, ignored values, argument termination and explicit
+rejection instead of the upstream parse/path fallback. Native guards are not
+counted as matching upstream behavior.
+
+Cache the audited generator-only dependency with
+`go mod download github.com/spf13/pflag@v1.0.10`, then run
+`node scripts/parity/mesh-config-source-oracle.mjs --check` (or supply
+`--source <pinned-kiali>` for local source files, including `go.mod`/`go.sum`).
+The generator checks all source blobs and the upstream module sums; its Go
+execution disables module/network lookup and uses a temporary module outside
+the repository. No plugin runtime dependency is added. `parity:check` verifies
+artifact identity/counts. Transport, networks parsing and complete protobuf
+parse→fusion→backend-default behavior remain **oracle gaps**.
+
+The next bounded milestone is nonempty networks acceptance and complete
+protobuf parse/fusion/default evidence, followed by separately audited
+configuration-cluster mapping. Existing TLS consumer differences also remain
+open: `business/tls.go:82–110` uses the Istiod namespace for its mesh-wide path,
+and `business/mesh.go:94–109` resolves identity domains differently from the
+native explicit/injector-domain calculation. No workload/port/subset mTLS,
+principal-absence checker or new Gateway rule is enabled by this batch.
+
+Browser contribution/console/i18n/accessibility, hosted fixtures, Desktop and
+live-cluster gates remain **open**. No Headlamp endpoint or configured Kubernetes
+context was available in this cloud session; no cluster install, fixture
+application or cleanup occurred. Local validation is recorded in `PLAN.md`,
+not substituted for live-load evidence.
 
 ### Controller container provenance
 
@@ -3533,7 +3759,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Configuration lists/details | `components/configuration/Configuration.tsx` | Stock-host discovery and empty-list rendering; populated synthetic detail rendering, nested fields, unknown status, Conditions before Events | Populated real CR integration and Desktop verification for this increment |
 | Discovery gate | `data/configuration.ts`, `ConfigurationGate.tsx` | 401/403/404 distinction, resource scope validation, supported version selection, separate endpoint-cache ownership | Additional cluster/server-version matrix |
 | Mutations | `data/mutations.ts`, `ConfigurationActions.tsx` | Spec CRUD and annotation-only validation exclusions, scoped confirmation, UID/version/acknowledgement guards and no retry; browser writes intercepted | Real write integration, YAML forms and broader workload/namespace mutations |
-| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group check modules, `data/validation.ts` | Thirty-five bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts and TLS patterns; source-bound oracles and hosted fixtures | Attachment/per-workload/principal context and remaining checkers remain; dormant CRD port checks are not activated |
+| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group check modules, `core/gatewayWorkloads.ts`, `data/validation.ts`, `data/gatewayValidation.ts` | Thirty-nine bounded codes on this branch, including declared-scope KIA0302/controller flags and existing Gateway listener/status/class checks; source-bound oracles and earlier hosted fixtures | Attachment/per-workload/principal context and remaining checkers remain; Gateway scoped runtime verification is open and dormant CRD port checks are not activated |
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |

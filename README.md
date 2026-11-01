@@ -67,11 +67,25 @@ Run `npm run parity:check` and `CI=1 npm test` for the offline inventory and
 core-logic checks. A successful build alone does not verify loading in Headlamp:
 check the actual Kiali route and browser console in a running instance.
 
+For focused tests, use the toolchain's runner configuration directly:
+`npx vitest run -c node_modules/@kinvolk/headlamp-plugin/config/vite.config.mjs <test-paths>`.
+The `npm test` wrapper does not forward Vitest runner arguments.
+
 ## Using the native slice
 
 Select one cluster, then open **Kiali > Overview**. Istio API presence is reported
 separately from control-plane health: having the CRDs does not prove a healthy
 mesh. Resource browsing works without configuring Prometheus.
+
+Istio and Gateway API detail pages now offer **Run scoped Gateway checks**.
+Configure an explicit logical mesh cluster name first. Complete versioned
+evidence is projected onto the declared local namespace scope; unavailable,
+stale or incomplete sources do not produce partial findings. Istio selector
+checks use pinned-default workload inclusion and the captured controller scope
+flag, not raw Pod matches. Existing listener/port-conflict/status/class checks
+remain bounded; dormant Istio port-name helpers and route attachment rules are
+not enabled. This increment has not passed browser, hosted fixture, Desktop or
+live-cluster verification in the current environment.
 
 Under **Kiali > Connection settings** (also available in Headlamp's plugin
 settings), select a cluster and enable an existing Prometheus Service connection.
@@ -1503,14 +1517,42 @@ prove injection, traffic or health. Malformed selectors, ambiguous associations
 and missing sources remain unresolved. The plugin does not invent an association
 for an unrelated unlabelled namespace or apply Kiali-server visibility overrides.
 
-Standard revision ConfigMaps and a literal same-cluster `SHARED_MESH_CONFIG`
-reference provide selected configuration fields. Local values take precedence,
+Standard revision ConfigMaps, supported direct ConfigMap-backed mounted mesh
+files and a literal same-cluster `SHARED_MESH_CONFIG` reference provide selected
+configuration fields. The first container's `--meshConfig` flag selects the file
+path (default `/etc/istio/config/mesh`); `--meshConfigFile` is not that flag.
+Supported mappings include the most-specific mount, item path-to-key mappings
+and exact-file `subPath`. A selected alternate map/key replaces the standard
+source, rather than merging both local sources. Local values take precedence,
 trust-domain aliases are combined, and explicit false automatic-mTLS values are
-preserved. Missing shared configuration is reported; denied/invalid sources
-block the merged projection. This does not apply Istio runtime defaults or merge
-all ProxyConfig/extension fields, mounted files or external configuration clusters.
+preserved. Supported fields accept protobuf names such as `root_namespace` and
+`enable_auto_mtls` as well as `rootNamespace` and `enableAutoMtls`. When both
+spellings occur, the camelCase name wins even when null, regardless of key order.
+Selector and label-map keys are not renamed.
+Missing shared configuration is reported; denied/invalid sources
+block the merged projection. A missing or failed mounted file never silently
+falls back to the standard map. Mounted captures require complete discovery and
+versioned controller/ConfigMap evidence, rechecked within the shared deadline.
+Mesh inventory shows the selected map, key, path and captured UID/resource
+version; consumer inspectors retain the source provenance.
+
+Mounted-file acceptance also checks directly mapped networks-file dependencies:
+absent keys and empty YAML/network maps are supported, but denied/missing maps,
+malformed or nonempty networks remain unavailable. This guard does not implement
+network topology; it prevents a failed dependency from certifying the file source.
+
+Unresolved environment references/expansion, `envFrom`, projected/Secret/host/CSI
+volumes, ambiguous or masking mounts, directory `subPath`, `subPathExpr` and
+external configuration topology remain blocked. No Secret or container-file
+endpoint is read. This does not apply Istio runtime defaults or merge all
+ProxyConfig/extension fields, networks or external configuration clusters.
 The injector's configured DNS suffix remains distinct from trust domain,
 Headlamp cluster name and metric cluster labels.
+
+This source batch has no new live-load evidence: browser contribution, console,
+i18n/accessibility, hosted fixtures, Desktop and live-cluster gates remain open.
+Local tests/builds do not establish injection, encryption, proxy synchronization
+or complete effective configuration.
 
 No Secrets are read. Collections, configuration reads and parser input are
 bounded; at most 20 controllers receive configuration lookups, with three

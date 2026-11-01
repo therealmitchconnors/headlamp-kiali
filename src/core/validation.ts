@@ -1,5 +1,6 @@
 import { configurationReferences } from './configuration';
 import { CorrelatedWorkload } from './correlation';
+import { gatewaySelectorChecks, GatewayWorkloadContext } from './gatewayWorkloads';
 import { getHost, hostString } from './hosts';
 import { decodeLabelSelector, matchesSelector } from './labels';
 import { localConfigurationChecks } from './localValidation';
@@ -28,6 +29,7 @@ export interface Finding {
     | 'KIA1105'
     | 'KIA1106'
     | 'KIA0301'
+    | 'KIA0302'
     | 'KIA0004'
     | 'KIA0002'
     | 'KIA0005'
@@ -89,6 +91,7 @@ export function initialValidation({
   status,
   generation,
   owner,
+  gatewayWorkloads,
 }: {
   cluster: string;
   namespace: string;
@@ -102,6 +105,7 @@ export function initialValidation({
   status?: unknown;
   generation?: number;
   owner?: ValidationOwner;
+  gatewayWorkloads?: GatewayWorkloadContext;
 }): InitialValidation {
   const findings: Finding[] = [];
   const skipped: string[] = [];
@@ -114,6 +118,15 @@ export function initialValidation({
       suppressed: 0,
       coverage: 'partial',
     };
+  if (kind === 'Gateway' && group === 'networking.istio.io' && gatewayWorkloads) {
+    try {
+      findings.push(...gatewaySelectorChecks(namespace, spec, gatewayWorkloads));
+    } catch (error) {
+      skipped.push(
+        error instanceof Error ? error.message : 'Gateway workload evidence is unavailable'
+      );
+    }
+  }
   if (kind === 'VirtualService' && group === 'networking.istio.io') {
     for (const protocol of ['http', 'tcp', 'tls']) {
       const routes = spec[protocol];

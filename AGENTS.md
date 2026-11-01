@@ -199,6 +199,15 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   address-type/value pairs. The pinned checker excludes equal Gateway names
   even across namespaces; do not silently replace that with UID-based exclusion
   or add wildcard/default-type matching.
+- Scoped Istio Gateway KIA0302 uses default workload inclusion, not application
+  correlation or raw Pod matches. Owned Pods/child ReplicaSets are not independent
+  targets; Jobs/CronJobs/RCs/DeploymentConfigs are excluded. Custom/ambiguous
+  owners and incomplete sources block the scoped inspector. VM labels use the
+  first matching entry in captured managed-scope order without a namespace filter.
+- PILOT_SCOPE_GATEWAY_TO_NAMESPACE accumulates exact `true` declarations from
+  the first container; later `false` does not undo them. Indirect/noncanonical
+  evidence stays unavailable for Gateway checks without blocking unrelated mesh
+  configuration. Dormant Istio Gateway port-name rules remain disabled.
 - A resolved configuration with no root namespace uses the observed controller
   namespace, following pinned Kiali discovery. Keep that provenance separate
   from raw configuration; never apply this fallback to denied, missing,
@@ -216,6 +225,26 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
 - Pinned controller discovery reads the first declared container, not the first
   container named discovery. Keep image/env/argument/mount provenance together;
   never filter away a malformed first entry and inspect a later container.
+- Mounted mesh sources follow pinned `parseArgsInto` (`--meshConfig`, not
+  `--meshConfigFile`) and `findMeshConfigFile`: the most-specific direct
+  ConfigMap mount supplies the selected key; item mappings and exact-file
+  subPath are supported. A selected alternate map/key replaces the standard
+  local source before shared/local field merging. Do not read both as overlays.
+  Native guards reject unresolved/masking/ambiguous mounts and indirection.
+  Unlike upstream's display fallback, failed selected files must stay
+  unavailable. Keep source UID/version/path/key provenance and revalidation;
+  neither optional shared-map absence nor an earlier successful capture may
+  hide a denied, changed or malformed selected source.
+- File-source success also depends on pinned `setFileMeshNetworks`. The bounded
+  mounted batch accepts only absent keys or empty network configuration;
+  nonempty/unsupported, denied or malformed dependencies must remain unavailable.
+  Do not drop this guard merely because network topology is not projected.
+- Selected mesh fields accept their protobuf snake_case and JSON camelCase names.
+  Pinned legacy jsonpb gives a present JSON name precedence, including null,
+  independent of key order; do not use nullish fallback to the protobuf name.
+  This applies only to the audited top-level fields. Selector `matchLabels` and
+  `matchExpressions` are already protobuf names, not snake_case aliases; never
+  recursively rename selector or label-map keys.
 - Pinned controller environment handling uses final CLUSTER_ID/SHARED_MESH_CONFIG
   assignments and accumulates exact EXTERNAL_ISTIOD=true declarations. A later
   false does not undo true. Final indirection cannot fall back to earlier literals;

@@ -1,4 +1,5 @@
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
+import { meshConfigFields } from '../core/mesh';
 import { clusterScope } from '../core/scope';
 import { loadMeshSnapshot, MeshSnapshot } from './mesh';
 import { loadMtlsSnapshot } from './mtls';
@@ -96,6 +97,39 @@ it('assesses scoped policies with explicit controller/root/domain provenance and
       .mocked(ApiProxy.request)
       .mock.calls.every(([, options]) => options?.cluster === 'alpha' && options?.signal === signal)
   ).toBe(true);
+});
+it('retains explicit protobuf-named root and disabled auto-mTLS without defaulting', async () => {
+  const snapshot = mesh();
+  const plane = snapshot.controlPlanes[0];
+  if (plane.effective?.status !== 'ready') throw new Error('Expected ready fixture');
+  plane.effective.value = meshConfigFields('root_namespace: policies\nenable_auto_mtls: false');
+  vi.mocked(loadMeshSnapshot).mockResolvedValue(snapshot);
+  const result = await loadMtlsSnapshot(
+    clusterScope('alpha'),
+    query,
+    null,
+    new AbortController().signal
+  );
+  expect(result).toMatchObject({
+    rootNamespace: 'policies',
+    rootNamespaceDefaulted: false,
+    autoMtlsEnabled: false,
+    autoMtlsDefaulted: false,
+  });
+  expect(
+    vi
+      .mocked(ApiProxy.request)
+      .mock.calls.some(([path]) =>
+        String(path).includes('/namespaces/policies/peerauthentications')
+      )
+  ).toBe(true);
+  expect(
+    vi
+      .mocked(ApiProxy.request)
+      .mock.calls.some(([path]) =>
+        String(path).includes('/namespaces/istio-system/peerauthentications')
+      )
+  ).toBe(false);
 });
 it('does not assess policies for excluded or malformed declared namespace discovery', async () => {
   for (const selectors of [

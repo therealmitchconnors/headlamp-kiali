@@ -93,6 +93,82 @@ it('preserves a zero-valued local mode over shared policy while null policy inhe
     expect(() => meshConfigFields(yaml)).toThrow(/outbound traffic policy/);
 });
 
+const projectedMeshFields = [
+  { field: 'rootNamespace', value: 'policies', other: 'other-policies' },
+  { field: 'trustDomain', value: 'mesh.test', other: 'other.test' },
+  { field: 'trustDomainAliases', value: ['alias.test'], other: [] },
+  { field: 'enableAutoMtls', value: false, other: true },
+  {
+    field: 'discoverySelectors',
+    value: [{ matchLabels: { team: 'mesh' } }],
+    other: [],
+  },
+  { field: 'defaultDestinationRuleExportTo', value: ['.'], other: ['*'] },
+  { field: 'defaultVirtualServiceExportTo', value: ['.'], other: [] },
+  { field: 'defaultServiceExportTo', value: ['.'], other: ['other'] },
+  { field: 'outboundTrafficPolicy', value: { mode: 'REGISTRY_ONLY' }, other: {} },
+].map(test => ({
+  ...test,
+  protoName: test.field.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`),
+}));
+
+it.each(projectedMeshFields)(
+  'accepts the pinned protobuf name $protoName for projected $field',
+  ({ field, protoName, value }) => {
+    expect(meshConfigFields(JSON.stringify({ [protoName]: value }))).toEqual(
+      meshConfigFields(JSON.stringify({ [field]: value }))
+    );
+  }
+);
+
+it.each(projectedMeshFields)(
+  'uses present JSON $field over $protoName independent of order, including null',
+  ({ field, protoName, value, other }) => {
+    for (const jsonValue of [other, null]) {
+      for (const entries of [
+        [
+          [protoName, value],
+          [field, jsonValue],
+        ],
+        [
+          [field, jsonValue],
+          [protoName, value],
+        ],
+      ]) {
+        expect(meshConfigFields(JSON.stringify(Object.fromEntries(entries)))).toEqual(
+          meshConfigFields(JSON.stringify({ [field]: jsonValue }))
+        );
+      }
+    }
+  }
+);
+
+it.each(projectedMeshFields)(
+  'validates $protoName instead of silently publishing missing fields',
+  ({ field, protoName, value }) => {
+    expect(() => meshConfigFields(JSON.stringify({ [protoName]: 42 }))).toThrow();
+    expect(meshConfigFields(JSON.stringify({ [protoName]: 42, [field]: value }))).toEqual(
+      meshConfigFields(JSON.stringify({ [field]: value }))
+    );
+    expect(() => meshConfigFields(JSON.stringify({ [protoName]: value, [field]: 42 }))).toThrow();
+  }
+);
+
+it('preserves shared/local precedence and explicit false across both field spellings', () => {
+  const local = meshConfigFields(
+    'root_namespace: policies\nenable_auto_mtls: false\ntrust_domain_aliases: [local.test]'
+  );
+  const shared = meshConfigFields(
+    'rootNamespace: shared-root\nenableAutoMtls: true\ntrust_domain: shared.test\ntrustDomainAliases: [shared.test]'
+  );
+  expect(mergeMeshFields(local, shared)).toMatchObject({
+    rootNamespace: 'policies',
+    enableAutoMtls: false,
+    trustDomain: 'shared.test',
+    trustDomainAliases: ['local.test', 'shared.test'],
+  });
+});
+
 const controller = {
   apiVersion: 'apps/v1',
   kind: 'Deployment',
@@ -143,7 +219,7 @@ it('derives only reported controller identity and replica state, not a chart-lab
     })
   ).toThrow('selector');
 });
-it('keeps shared, mounted, indirect and external configuration uncertainty visible', () => {
+it('keeps shared, unmounted, indirect and external configuration uncertainty visible', () => {
   const found = controlPlaneObservation({
     ...controller,
     spec: {
@@ -161,7 +237,7 @@ it('keeps shared, mounted, indirect and external configuration uncertainty visib
                 },
                 { name: 'EXTERNAL_ISTIOD', value: 'true' },
               ],
-              args: ['--meshConfigFile=/custom/mesh'],
+              args: ['--meshConfig=/custom/mesh'],
               volumeMounts: [{ name: 'custom', mountPath: '/etc/istio/config' }],
             },
           ],
@@ -173,7 +249,7 @@ it('keeps shared, mounted, indirect and external configuration uncertainty visib
   expect(found.clusterId).toBeUndefined();
   expect(found.sharedMeshConfig).toBe('shared');
   expect(found.effectiveConfigBlocked).toBe(true);
-  for (const fragment of ['indirection', 'External', 'Explicit', 'Mounted'])
+  for (const fragment of ['indirection', 'External', 'Explicit'])
     expect(found.configurationWarnings.some(warning => warning.includes(fragment))).toBe(true);
 });
 it('observes the first declared container rather than preferring a discovery-named sibling', () => {
@@ -193,7 +269,7 @@ it('observes the first declared container rather than preferring a discovery-nam
         spec: {
           containers: [
             first,
-            { ...controller.spec.template.spec.containers[0], args: ['--meshConfigFile=/ignored'] },
+            { ...controller.spec.template.spec.containers[0], args: ['--meshConfig=/ignored'] },
           ],
         },
       },
@@ -214,6 +290,112 @@ it('observes the first declared container rather than preferring a discovery-nam
     effectiveConfigBlocked: true,
   });
 });
+it('selects a direct mounted source from the first container without losing controller provenance', () => {
+  const observed = controlPlaneObservation({
+    ...controller,
+    metadata: { ...controller.metadata, resourceVersion: 'captured-rv' },
+    spec: {
+      ...controller.spec,
+      template: {
+        spec: {
+          containers: [
+            {
+              ...controller.spec.template.spec.containers[0],
+              args: ['discovery', '--meshConfig', '/mesh/settings.yaml'],
+              volumeMounts: [{ name: 'mesh', mountPath: '/mesh' }],
+            },
+            { name: 'ignored', args: ['--meshConfig=/unresolved'] },
+          ],
+          volumes: [
+            {
+              name: 'mesh',
+              configMap: { name: 'custom', items: [{ key: 'config', path: 'settings.yaml' }] },
+            },
+          ],
+        },
+      },
+    },
+  });
+  expect(observed).toMatchObject({
+    uid: 'controller-uid',
+    resourceVersion: 'captured-rv',
+    configurationContainer: 'discovery',
+    image: 'example.test/pilot:v1.30.5',
+    clusterId: 'mesh-east',
+    revision: 'blue',
+    meshConfigSource: {
+      kind: 'mounted',
+      name: 'custom',
+      key: 'config',
+      path: '/mesh/settings.yaml',
+    },
+    effectiveConfigBlocked: false,
+    configurationWarnings: [],
+  });
+});
+it('does not clear external/shared guards when a direct mounted source is auditable', () => {
+  const observed = controlPlaneObservation({
+    ...controller,
+    spec: {
+      ...controller.spec,
+      template: {
+        spec: {
+          containers: [
+            {
+              name: 'discovery',
+              env: [
+                { name: 'EXTERNAL_ISTIOD', value: 'true' },
+                { name: 'SHARED_MESH_CONFIG', value: '$(UNRESOLVED)' },
+              ],
+              volumeMounts: [{ name: 'mesh', mountPath: '/etc/istio/config' }],
+            },
+          ],
+          volumes: [{ name: 'mesh', configMap: { name: 'custom' } }],
+        },
+      },
+    },
+  });
+  expect(observed).toMatchObject({
+    meshConfigSource: { kind: 'mounted', name: 'custom', key: 'mesh' },
+    meshNetworksSource: {
+      name: 'custom',
+      key: 'meshNetworks',
+      path: '/etc/istio/config/meshNetworks',
+    },
+    managesExternal: true,
+    sharedMeshConfig: undefined,
+    effectiveConfigBlocked: true,
+  });
+  expect(observed.configurationWarnings).toEqual([
+    'SHARED_MESH_CONFIG uses unresolved environment expansion',
+    'External control-plane topology is not resolved',
+  ]);
+});
+it.each([undefined, null, []].map(envFrom => ({ envFrom })))(
+  'permits absent/empty envFrom while guarding nonempty or malformed evidence %#',
+  ({ envFrom }) => {
+    const input = (value: unknown) => ({
+      ...controller,
+      spec: {
+        ...controller.spec,
+        template: { spec: { containers: [{ name: 'discovery', envFrom: value }] } },
+      },
+    });
+    expect(controlPlaneObservation(input(envFrom))).toMatchObject({
+      effectiveConfigBlocked: false,
+      managesExternal: false,
+      scopeGatewayToNamespace: false,
+    });
+    for (const value of [[{ configMapRef: { name: 'indirect' } }], 'malformed']) {
+      expect(controlPlaneObservation(input(value))).toMatchObject({
+        effectiveConfigBlocked: true,
+        meshConfigSource: undefined,
+        managesExternal: null,
+        scopeGatewayToNamespace: null,
+      });
+    }
+  }
+);
 it('does not skip malformed first containers and keeps missing-container configuration blocked', () => {
   const input = (containers: unknown) => ({
     ...controller,

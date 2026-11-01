@@ -16,7 +16,18 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-30
+### Resume status — 2026-11-01
+
+Issue #3 continues from the declared-scope Gateway prerequisite (#2), integrated
+into this implementation branch without merging either PR into the working base.
+The selected source batch is same-context, direct ConfigMap-backed mounted mesh
+files, audited against the existing pinned Kiali discovery caller. Indirect
+environment resolution and cross-context configuration remain unsupported.
+See the source audit in `docs/parity.md` before extending this batch.
+The issue #3 continuation now accepts the audited protobuf field-name aliases
+without silently defaulting configured root/discovery/automatic-mTLS values,
+and closes the argument-parser oracle gap using pinned `parseArgsInto`/pflag.
+The batch remains a selected-field projection, not full effective configuration.
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -67,12 +78,35 @@ with cloud agents rather than keeping the laptop running. The working branch is
 task must explicitly use the working branch as its base or it will miss this
 port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
 
-The next ready milestone is **Service port validation**: consume the new typed
-declared local namespace scope, collect the complete pooled managed-namespace
-Pod input and cluster-wide Deployments, and port the pinned active caller's
-port-name/appProtocol/mapping checks. Do not activate them from a namespace-only
-snapshot, truncated lists or correlation `proxyMode`. No Service checker has
-been enabled by the stopping checkpoint.
+The **Gateway listener/port/controller milestone is implemented as an
+active-caller-only, declared-scope increment** on this branch. Gateway details
+offer explicit scoped checks: Istio KIA0302 uses complete default workload
+inclusion and captured controller namespace-scope flags; existing Istio/Gateway
+API conflicts, listener/status and class checks reuse the same complete local
+scope. Dormant Gateway port-name helpers and new route-attachment/port rules
+remain disabled. Browser, hosted fixture, Desktop and live-cluster verification
+are unavailable here and remain open. Full Gateway/controller parity is not claimed.
+
+The configuration-source continuation selects supported mounted mesh files from
+the first container's `--meshConfig` arguments and direct ConfigMap volume
+mapping. It preserves shared/local precedence and reports selected map/key/path
+and captured identity through Mesh, namespace validation, scoped Gateway checks
+and the configured mTLS indicator. Selected-file failures do not fall back to the
+standard ConfigMap. New mounted captures verify controller and source versions;
+existing unsupported topology and completeness guards remain in force.
+
+The next bounded prerequisite is nonempty networks acceptance and complete
+protobuf parse/fusion/default evidence, followed by separately audited
+cross-context configuration-cluster association, not arbitrary environment
+expansion. Full ProxyConfig/extensions and runtime configuration remain separate
+work. Do not enable workload/port/subset mTLS or principal-absence checks from
+this selected-field projection.
+
+Service port validation was published separately and is not part of this
+branch's base. Integrate that milestone before dependent Service work; this
+Gateway increment depends only on the declared-local-scope baseline already
+in the working branch. Never substitute namespace-only inputs or correlation
+`proxyMode` for the Service checker's complete evidence.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -104,7 +138,65 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
-- 23 schema-derived configuration kinds and **38 bounded finding codes**.
+- **Issue #3 completion audit (2026-11-01):** the existing mounted-source batch
+  retains its no-fallback, bounded-read and source-revalidation guards. Fixed
+  silent omission of protobuf snake_case names for the nine projected mesh
+  fields, including disabled automatic mTLS and namespace discovery. Pinned
+  legacy jsonpb gives present camelCase names precedence even when null; nested
+  selectors and label-map keys are not recursively renamed. Unit/adapter/mTLS
+  regressions cover aliases, conflicting spellings, malformed values and
+  downstream scope/default behavior. Added 122 original-Go argument cases
+  (106 comparisons and 16 explicitly stricter guards) to the existing 141-case
+  path/reference artifact. The generator pins pflag through Kiali's go.mod/go.sum;
+  no plugin runtime dependency changed. Transport, networks parsing and full
+  protobuf fusion/default evidence remain gaps, not completed parity.
+  Focused verification passed **521 tests in five files**, type-check, lint,
+  production build, formatting, parity/resource/dashboard checks and oracle
+  regeneration (both fetched and local pinned sources).
+  The full suite passed **22,939 tests in 188 files** with the existing Vitest
+  runner and `--maxWorkers=2`. A default-worker run had two unrelated five-second
+  UI timeouts (ServiceTrafficWizard and Traces); both files passed a **32-test**
+  focused rerun before the complete two-worker run. No tests or timeouts changed.
+  Read-only code review found no significant issues. Secret scans passed.
+  CodeQL reported only a pre-existing mocked-request assertion in
+  `gatewayScopedValidation.test.ts:224`; its substring filter checks that a
+  request did not occur, not URL trust or transport, so it is a false positive.
+  No Headlamp endpoint or configured Kubernetes context is available; contribution,
+  console, i18n/a11y, hosted fixture, Desktop and live-cluster gates remain open.
+- **Mounted mesh configuration sources (2026-11-01, issue #3):** integrated
+  prerequisite #2 and added first-container `--meshConfig`/direct-volume
+  resolution, selected map/key/path provenance and bounded shared/local merging.
+  The new file-source branch checks mapped networks dependencies, accepting only
+  absent keys/empty configuration. Unsupported, missing, denied, malformed or
+  changed sources remain unavailable; no fallback or new validator is enabled.
+  All relevant consumers retain captured provenance. The original-Go helper
+  artifact has 116 source comparisons and 25 explicit native guard cases;
+  argument parsing was still an oracle gap at this earlier checkpoint; it is
+  covered by the continuation above. Transport and full protobuf fusion/defaults remain gaps.
+  Final local verification passed **22,785 tests in 188 files**, including
+  **106 targeted consumer tests**. Type-check, lint, production build, changed-code
+  formatting, parity/resource/dashboard checks and oracle regeneration passed.
+  An unrelated wizard test timed out once during concurrent gates; a targeted
+  retry and subsequent full suites passed without changing that test.
+  No Headlamp endpoint or configured Kubernetes context was available.
+  Browser contribution/console/i18n/a11y, hosted fixture, Desktop and live-cluster
+  gates remain open, including all earlier Gateway runtime gates.
+- **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
+  inspector, active Istio Gateway KIA0302 and captured exact-true controller
+  scope semantics. Complete versioned Gateway/default-workload/VM sources are
+  projected onto the declared local namespace scope. UID/version/field freshness,
+  ownership, pagination, malformed-source, denial and timeout guards fail closed.
+  Default workload inclusion is a separate source-informed projection, not
+  application correlation or full configurable workload coverage.
+  No new original-Go oracle or positive live Gateway fixture was added.
+  The final focused set passed **103 tests in three files**; the final full
+  run passed **22,480 tests in 186 files**, including the owner-version guard
+  and related-link provenance regression. Type/lint/production-build gates pass.
+  Resource/dashboard generation, catalog parity, i18n and code-format gates pass.
+  Browser contribution/i18n/a11y/console, hosted fixture, Desktop and live-cluster
+  gates remain open; local tests do not close them. See `docs/parity.md`.
+- 23 schema-derived configuration kinds and **39 bounded finding codes** on
+  this branch; the independent Service milestone adds its own codes when integrated.
   An activation audit removed unintended ServiceEntry KIA0601 enforcement:
   the pinned ServiceEntry/Istio Gateway pipelines leave port-name helpers disabled.
   A subsequent KIA0004 audit restricts generic workload-selector activation to
@@ -762,8 +854,10 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
 - Mesh inventory discovers local `app=istiod` controllers, namespace labels,
   revision tags and standard/shared configuration fields. It preserves unknown
   values and uses label hints rather than claiming actual injection or security.
-  Selected shared/local fields merge without runtime defaults; mounted files,
-  external config clusters and full ProxyConfig/extension merging remain open.
+  Selected shared/local fields merge without runtime defaults. Direct ConfigMap
+  mounted mesh files now have guarded source selection and empty-networks
+  acceptance; unsupported mounts, nonempty networks, external configuration
+  clusters and full ProxyConfig/extension merging remain open.
 - Configured mTLS has a reusable pinned composition engine with 2,600 independent
   Go cases and a namespace-wide consumer using an explicit controller. It
   suppresses output on partial policy reads, conflicts and unsupported contexts.
@@ -1138,7 +1232,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
 | Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
-| Initial checks | Thirty-eight bounded codes, including selectorless PeerAuthentication, Istio/VirtualService host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, WorkloadGroup labels, Gateway API registry/collisions/targets, exports and conditions | No full semantic validity verdict; dormant CRD port checks excluded; attachment/port/per-workload/registry/security context remains incomplete |
+| Initial checks | Thirty-nine bounded codes on this branch, including declared-scope Istio Gateway selector/controller validation, selectorless PeerAuthentication, host conflicts, registry/TLS patterns and Gateway API listeners/status/classes | No full semantic validity verdict; dormant CRD port checks excluded; attachment/per-workload/security context and Gateway runtime verification remain incomplete |
 | Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
@@ -1220,7 +1314,7 @@ the authority for individual behavior and platform claims.
 | `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Thirty-eight bounded codes, group/import/local/policy/registry oracles and scoped snapshots; attachment/port/principal and broader checks remain | `config-views` |
+| `basic-validation` | Partial / open | Thirty-nine bounded codes on this branch, including declared-scope Gateway selectors/controller flags and existing listener/status/class checks; attachment/port/principal and broader checks remain | `config-views`, `mesh-security` |
 | `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
@@ -1259,7 +1353,9 @@ of ManagesExternal. Explicit per-context `meshClusterName` and captured UI
 comparison are now implemented without implicit context/telemetry fallback.
 The typed local/default-visibility scope now requires complete controller/tag/
 namespace reads and configuration, with supported local topology and explicit
-mapping. Next consume it for pooled Service-validation inputs. Remote contexts
+mapping. The scoped Gateway inspector now consumes it for complete default
+workload inclusion and Gateway evidence. Service inputs are a separate published
+milestone, pending integration into this base. Remote contexts
 and custom Kiali visibility remain unsupported; do not promote the comparison
 hint or prior label-based configuration inspection to complete membership.
 Service checks in the pinned caller pool Pods across all managed namespaces,
@@ -1268,6 +1364,20 @@ as matching that pool. Their sidecar test is all-Pod/vacuous-empty, with a
 separate any-ambient path and annotation-derived proxy evidence. Deployment port
 mapping uses the first cluster-wide metadata-label match. Namespace-local
 approximations must not activate KIA0601/KIA0602/KIA0701.
+
+The bounded Gateway increment is complete locally, not live-verified. Its active
+caller adds KIA0302, while the existing listener/host/port/status/class predicates
+are reused without inventing new diagnostics. PILOT_SCOPE_GATEWAY_TO_NAMESPACE
+retains exact-true accumulation from the first declared container; unresolved
+flags or multiple eligible controllers block the scoped check. Custom workload
+owners, configured nondefault inclusion and full controller health remain open.
+The mounted ConfigMap source batch is now implemented with selected-source
+provenance, version rechecks and bounded networks-dependency guards. Next audit
+nonempty networks acceptance and full protobuf parse/fusion/backend defaults,
+then remaining configuration-cluster topology and caller-specific TLS context,
+before workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
+gates in an authorized environment independently; do not enable dormant port
+helpers or infer route attachment from this milestone.
 
 The dashboard continuation is external link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
@@ -1334,8 +1444,9 @@ requests/series remain independently bounded. Use `dashboards:generate`/
 Preserve strict scalar decoding for ungrouped callers and explicit response,
 panel and query cardinality limits.
 
-1. Extend remaining configuration checkers and Gateway listener/port/controller
-   semantics. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar
+1. Extend remaining configuration checkers after their source/evidence
+   prerequisites. The bounded Gateway increment is complete locally; its runtime
+   gates remain open. HTTP/gRPC parent/Service/grant checks and namespace-wide Sidecar
    import/export visibility now exist. Preserve strict group/name grants and
    conservative source boundaries; partial context must defer absence claims.
    The reusable Service host registry now preserves namespace export annotations
@@ -1347,7 +1458,9 @@ panel and query cardinality limits.
    presence reproduces the pinned input. VM WorkloadEntry accounts are separate.
    Do not add a shortcut absence checker while that workload boundary is missing.
 2. Resolve remaining effective mesh configuration sources before extending
-   configured mTLS to workloads, ports and subsets. Preserve the distinction
+   configured mTLS to workloads, ports and subsets. The mounted-file batch is
+   implemented; nonempty networks, full parse/fusion/default evidence and
+   external configuration mapping remain unsupported. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
 3. Complete health query coverage and supported workload variants.
    Application/Service consumers are now wired. Extend service-driven traffic
