@@ -1,4 +1,12 @@
+import {
+  CorrelatedWorkload,
+  correlateResources,
+  CorrelationKind,
+  CorrelationResource,
+} from './correlation';
+import { AppLabels } from './labels';
 import { isDnsLabel, isDnsSubdomain } from './object';
+import { NamespaceScope } from './scope';
 import { TraceSpan } from './tracing';
 
 export interface ReportedPodIdentity {
@@ -13,6 +21,33 @@ export type TracePodReference =
       origin: 'resource' | 'span' | 'mixed';
     }
   | { status: 'unavailable'; reason: 'absent' | 'incomplete' | 'conflicting' | 'invalid' };
+
+export interface TraceCurrentWorkload {
+  pod: Readonly<CorrelationResource['identity'] & { kind: 'Pod' }>;
+  workload: Readonly<
+    CorrelationResource['identity'] & {
+      kind: Extract<
+        CorrelationResource['identity']['kind'],
+        'Deployment' | 'StatefulSet' | 'DaemonSet' | 'ReplicaSet' | 'Job' | 'CronJob'
+      >;
+    }
+  >;
+  application?: { cluster: string; namespace: string; name: string };
+}
+
+type TraceWorkloadKind = TraceCurrentWorkload['workload']['kind'];
+const TRACE_WORKLOAD_KINDS = new Set<TraceWorkloadKind>([
+  'Deployment',
+  'StatefulSet',
+  'DaemonSet',
+  'ReplicaSet',
+  'Job',
+  'CronJob',
+]);
+
+function isTraceWorkloadKind(kind: CorrelationKind): kind is TraceWorkloadKind {
+  return TRACE_WORKLOAD_KINDS.has(kind as TraceWorkloadKind);
+}
 
 export function tracePodIdentity(
   namespace: unknown,
@@ -31,6 +66,86 @@ export function tracePodIdentity(
   )
     throw new Error('A valid reported Pod namespace, name and UID are required');
   return Object.freeze({ namespace, name, uid });
+}
+
+export function traceCurrentWorkload(
+  scope: NamespaceScope,
+  reported: ReportedPodIdentity,
+  resources: readonly CorrelationResource[],
+  labels?: AppLabels | null
+): TraceCurrentWorkload {
+  const target = tracePodIdentity(reported.namespace, reported.name, reported.uid);
+  if (
+    resources.some(
+      resource =>
+        resource.identity.cluster !== scope.cluster ||
+        resource.identity.namespace !== scope.namespace
+    )
+  )
+    throw new Error('Current workload snapshot contains resources outside the captured scope');
+
+  const sameNamePods = resources.filter(
+    (
+      resource
+    ): resource is CorrelationResource & {
+      identity: CorrelationResource['identity'] & { kind: 'Pod' };
+    } =>
+      resource.identity.kind === 'Pod' &&
+      resource.identity.namespace === target.namespace &&
+      resource.identity.name === target.name
+  );
+  const currentPods = sameNamePods.filter(resource => resource.identity.uid === target.uid);
+  if (currentPods.length !== 1) {
+    throw new Error(
+      sameNamePods.length
+        ? 'The reported Pod was replaced; its current UID does not match'
+        : 'The reported Pod is not present in the current namespace snapshot'
+    );
+  }
+
+  const correlated = correlateResources(resources, labels);
+  if (correlated.issues.length)
+    throw new Error('Complete UID-based workload ownership could not be established');
+  const pod = currentPods[0];
+  const matches = correlated.workloads.filter(
+    (
+      item
+    ): item is CorrelatedWorkload & {
+      identity: CorrelationResource['identity'] & { kind: TraceWorkloadKind };
+    } =>
+      isTraceWorkloadKind(item.identity.kind) &&
+      item.pods.some(
+        current =>
+          current.identity.cluster === pod.identity.cluster &&
+          current.identity.namespace === pod.identity.namespace &&
+          current.identity.uid === pod.identity.uid
+      )
+  );
+  if (matches.length !== 1)
+    throw new Error('The current Pod has no unique supported workload owner');
+
+  const workload = matches[0];
+  const application = correlated.applications.find(item =>
+    item.workloads.some(
+      current =>
+        current.identity.cluster === workload.identity.cluster &&
+        current.identity.namespace === workload.identity.namespace &&
+        current.identity.uid === workload.identity.uid
+    )
+  );
+  return Object.freeze({
+    pod: Object.freeze({ ...pod.identity }),
+    workload: Object.freeze({ ...workload.identity }),
+    ...(application
+      ? {
+          application: Object.freeze({
+            cluster: application.cluster,
+            namespace: application.namespace,
+            name: application.name,
+          }),
+        }
+      : {}),
+  });
 }
 
 export function reportedTracePod(

@@ -59,10 +59,12 @@ const traceIdStyle = {
 function TraceContent({
   cluster,
   trace,
+  captureKey,
   onSelectTrace,
 }: {
   cluster: string;
   trace: TraceDetail;
+  captureKey: string;
   onSelectTrace: (id: string) => void;
 }) {
   const { t } = useTranslation();
@@ -198,7 +200,12 @@ function TraceContent({
               {t('Resource / process attributes')}
             </Typography>
             <Attributes entries={selected.resourceAttributes} />
-            <TracePodCorrelation key={selected.id} cluster={cluster} span={selected} />
+            <TracePodCorrelation
+              key={selected.id}
+              cluster={cluster}
+              span={selected}
+              traceCaptureKey={captureKey}
+            />
             <Typography variant="h6" component="h3">
               {t('Span events / logs')}
             </Typography>
@@ -291,6 +298,7 @@ function Detail({
           key={trace.id}
           cluster={cluster}
           trace={trace}
+          captureKey={JSON.stringify([cluster, config, id, trace.startNs, trace.durationNs])}
           onSelectTrace={onSelectTrace}
         />
       )}

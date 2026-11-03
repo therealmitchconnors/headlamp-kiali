@@ -1,4 +1,6 @@
-import { reportedTracePod, tracePodIdentity } from './traceCorrelation';
+import { CorrelationResource, OwnerReference } from './correlation';
+import { namespaceScope } from './scope';
+import { reportedTracePod, traceCurrentWorkload, tracePodIdentity } from './traceCorrelation';
 import { TraceAttribute, TraceValue } from './tracing';
 
 const attrs = (values: Record<string, TraceValue>): TraceAttribute[] =>
@@ -8,6 +10,44 @@ const identity = {
   'k8s.pod.name': 'reviews-1',
   'k8s.pod.uid': 'reported-uid',
 };
+const reportedIdentity = { namespace: 'bookinfo', name: 'reviews-1', uid: 'reported-uid' };
+const scope = namespaceScope('alpha', 'bookinfo');
+const owner = (kind: string, name: string, uid: string): OwnerReference => ({
+  group: kind === 'Job' || kind === 'CronJob' ? 'batch' : 'apps',
+  kind,
+  name,
+  uid,
+  controller: true,
+});
+const resource = (
+  kind: CorrelationResource['identity']['kind'],
+  name: string,
+  uid: string,
+  owners: OwnerReference[] = [],
+  workloadLabels: Record<string, string> = {}
+): CorrelationResource => ({
+  identity: {
+    cluster: 'alpha',
+    namespace: 'bookinfo',
+    group: kind === 'Pod' ? '' : 'apps',
+    kind,
+    name,
+    uid,
+  },
+  labels: {},
+  workloadLabels,
+  owners,
+  serviceSelector: null,
+  proxyMode: 'none',
+});
+const ownedResources = () => [
+  resource('Pod', 'reviews-1', 'reported-uid', [owner('ReplicaSet', 'reviews-abc', 'rs-uid')]),
+  resource('ReplicaSet', 'reviews-abc', 'rs-uid', [
+    owner('Deployment', 'reviews-v1', 'deploy-uid'),
+  ]),
+  resource('Deployment', 'reviews-v1', 'deploy-uid', [], { app: 'reviews', version: 'v1' }),
+];
+
 it('requires all three explicit identity fields and never derives them from service or cluster labels', () => {
   expect(
     reportedTracePod({
@@ -29,6 +69,86 @@ it('requires all three explicit identity fields and never derives them from serv
     origin: 'resource',
     identity: { namespace: 'bookinfo', name: 'reviews-1', uid: 'reported-uid' },
   });
+});
+
+it('resolves a current workload through the complete UID owner chain and keeps identities separate', () => {
+  const result = traceCurrentWorkload(scope, reportedIdentity, ownedResources());
+  expect(result).toEqual({
+    pod: {
+      cluster: 'alpha',
+      namespace: 'bookinfo',
+      group: '',
+      kind: 'Pod',
+      name: 'reviews-1',
+      uid: 'reported-uid',
+    },
+    workload: {
+      cluster: 'alpha',
+      namespace: 'bookinfo',
+      group: 'apps',
+      kind: 'Deployment',
+      name: 'reviews-v1',
+      uid: 'deploy-uid',
+    },
+    application: { cluster: 'alpha', namespace: 'bookinfo', name: 'reviews' },
+  });
+  expect(Object.isFrozen(result)).toBe(true);
+  expect(Object.isFrozen(result.workload)).toBe(true);
+});
+
+it.each([
+  ['deleted Pod', []],
+  ['replaced Pod', [resource('Pod', 'reviews-1', 'new-uid')]],
+])('does not resolve a %s from a name-only snapshot', (_reason, resources) => {
+  expect(() => traceCurrentWorkload(scope, reportedIdentity, resources)).toThrow(
+    /current|replaced/i
+  );
+});
+
+it('rejects mismatched, ambiguous, cyclic, and unsupported owner chains', () => {
+  const resources = ownedResources();
+  expect(() =>
+    traceCurrentWorkload(scope, reportedIdentity, [
+      resources[0],
+      { ...resources[1], identity: { ...resources[1].identity, uid: 'different-uid' } },
+      resources[2],
+    ])
+  ).toThrow(/ownership/);
+  expect(() =>
+    traceCurrentWorkload(scope, reportedIdentity, [
+      {
+        ...resources[0],
+        owners: [...resources[0].owners, owner('Job', 'other', 'other-uid')],
+      },
+      ...resources.slice(1),
+    ])
+  ).toThrow(/ownership/);
+  const cyclic = [
+    resource('Pod', 'reviews-1', 'reported-uid', [owner('ReplicaSet', 'reviews-abc', 'rs-uid')]),
+    resource('ReplicaSet', 'reviews-abc', 'rs-uid', [owner('Pod', 'reviews-1', 'reported-uid')]),
+  ];
+  expect(() => traceCurrentWorkload(scope, reportedIdentity, cyclic)).toThrow(/ownership/);
+  expect(() =>
+    traceCurrentWorkload(scope, reportedIdentity, [resource('Pod', 'reviews-1', 'reported-uid')])
+  ).toThrow(/supported workload owner/);
+});
+
+it('rejects resource snapshots that collide across contexts or namespaces', () => {
+  expect(() =>
+    traceCurrentWorkload(scope, reportedIdentity, [
+      ...ownedResources(),
+      { ...ownedResources()[2], identity: { ...ownedResources()[2].identity, cluster: 'beta' } },
+    ])
+  ).toThrow(/outside the captured scope/);
+  expect(() =>
+    traceCurrentWorkload(scope, reportedIdentity, [
+      ...ownedResources(),
+      {
+        ...ownedResources()[2],
+        identity: { ...ownedResources()[2].identity, namespace: 'other' },
+      },
+    ])
+  ).toThrow(/outside the captured scope/);
 });
 it('retains explicit provenance and accepts identical repeated values without inventing precedence', () => {
   expect(reportedTracePod({ attributes: attrs(identity), resourceAttributes: [] })).toMatchObject({
