@@ -2801,8 +2801,8 @@ intercepted GETs across assignment/clear, indirection, exact-true accumulation,
 noncanonical flags and malformed-input cases. No superseded or indirect source
 was read. Unintercepted managed Istiod first-container image/name and final
 literal cluster ID matched the UI. No settings or cluster objects changed.
-Logical-cluster mapping, complete managed scope and Service checker activation
-remain separate prerequisites.
+At this prior checkpoint, logical-cluster mapping, complete managed scope and
+Service checker activation remained separate prerequisites.
 
 ### Explicit logical mesh identity
 
@@ -2823,10 +2823,9 @@ Unknown literal IDs/mappings stay unavailable, and matching does not clear
 existing external/configuration guards.
 
 This is declared comparison evidence, not a complete managed-context/namespace
-model. It deliberately does not change Kubernetes routing, prior label-based
-configuration inspection or Service checker activation. The following
-managed-scope implementation must consume explicit mappings and complete
-source/visibility/topology evidence rather than promoting this hint to proof.
+model. It deliberately does not change Kubernetes routing or prior label-based
+configuration inspection. Service validation separately requires this explicit
+mapping and the complete local-scope evidence below.
 
 Verification passed **354 focused tests in six files**, the full **22,359-test/
 182-file** suite and normal gates. Four stock-hosted groups made 33 intercepted
@@ -2865,16 +2864,74 @@ absence evidence.
 
 The Mesh view exposes eligible namespaces, ordered declaring controllers and
 separate unmanaged/default-hidden lists. The existing configuration-inspection
-path remains unchanged. Remote contexts, custom Kiali visibility overrides,
-full physical membership and Service port checker activation remain open.
+path remains unchanged. Remote contexts, custom Kiali visibility overrides and
+full physical membership remain open.
 
 Verification passed **2,229 focused tests in eight files**, the full
 **22,377-test/183-file** suite and normal gates. Four stock-hosted groups made
 25 intercepted GETs, covering tag/selector/default visibility, own/root
 exceptions, declared revision precedence alongside conflicting-label diagnostics,
 Maistra presence, unsupported mappings and denied sources. No cluster objects
-were changed; settings were restored. The next implementation step is to consume
-this evidence for complete pooled-Pod and cluster-wide Deployment Service checks.
+were changed.
+
+### Service port checks
+
+The explicit Service inspector consumes the declared local/default-visibility
+projection. It accepts a Service only when its namespace is in the captured
+projection, then reads every eligible namespace's complete, versioned Pod list
+and the complete cluster-wide Deployment list. A denied, malformed, timed-out,
+truncated or unversioned source aborts the whole check rather than returning
+partial findings. Reads share a 15-second deadline and Pod namespace requests
+are bounded to three concurrent workers. The selected Service is captured by
+UID/resourceVersion and re-read after the other evidence; changed identity,
+spec, labels or annotations discard the result. The all-exclusions annotation
+skips discovery. The scope remains local-only; remote contexts and custom Kiali
+visibility are not inferred.
+
+The active caller is pinned to `business/checkers/service_checker.go`
+(`e35d1f2dce753daae5397d602625995eced89dc7`) and
+`business/checkers/services/port_mapping_checker.go`
+(`904caff5e74ffa6c6559ade3070c4cecd544a78e`), with inputs assembled in
+`business/istio_validations.go`. KIA0601/KIA0602 naming checks run only when
+all matching pooled Pods have sidecars or any has ambient redirection.
+Sidecars derive from `sidecar.istio.io/status` (including named
+`istio-proxy` init containers); ambient requires the exact
+`ambient.istio.io/redirection=enabled` annotation. No Pod namespace re-filter
+or correlation `proxyMode` is used. Empty Pod matches preserve upstream's
+vacuous all-true sidecar behavior. A present invalid `appProtocol` emits KIA0602
+without falling back to the port name; valid Kubernetes/Istio app protocols
+supersede name checking. UDP skips naming only, and `kiali_wizard` label
+presence skips naming even when the value is empty.
+
+KIA0701 is independent of mesh naming. The checker skips mapping only for
+control-plane namespaces and the exact waypoint/gateway labels. It selects the
+first cluster-wide Deployment whose **metadata labels** match a nonempty
+Service selector; Deployment namespace, Pod ownership and template selector do
+not participate. An empty Service selector matches every Pod in the pool
+but selects no Deployment. Named target ports compare against declared
+container-port names; positive integer targets compare numerically, while
+omitted/zero targets fall back to the Service port. Container protocols are
+not compared. The pinned caller emits no missing-Deployment finding. These
+findings do not establish reachability, listener acceptance, runtime injection,
+health or full mesh validity.
+
+Bounds are 1,000 Pods and Deployments per read, 100 Service ports,
+100 containers and 100 ports per container in the selected Deployment,
+20,000 aggregate metadata labels, 1,000,000 annotation characters and bounded
+per-object strings/maps. Malformed relevant records fail closed. These analysis
+limits do not assert that the host buffers no larger initial API page.
+
+Source-informed tests cover caller selection/port semantics, pooled inputs,
+empty selectors, annotations, gateway/control-plane exclusions, first-match
+ordering, exclusions, stale Service captures, pagination and completeness
+guards. No new original-Go differential oracle or live positive Service fixture
+was added. The Services-list link and explicit inspector have unit/UI coverage,
+but this session had no running Headlamp target or configured Kubernetes
+CLI/context. Browser contribution/i18n/a11y and console checks, hosted fixtures,
+Desktop and live-cluster verification remain open; the inspector is not
+described as live-verified. The **118 focused tests in four files** and full
+**22,491-test/186-file** suite pass, as do type-check, lint, production build,
+resource/dashboard generation, catalog parity and formatting gates.
 
 ### Declared managed-revision selection
 `core/namespaceRevision.ts` ports the label-only `GetRevision` selector from
@@ -2897,7 +2954,7 @@ The mesh-labelled filter now retains Maistra-only/ignored labels. Coincident
 Istiod revision hints cannot resolve a Maistra membership automatically; explicit
 controller/root namespace exceptions are preserved. Assessment links require a
 ready configuration context. Relevant malformed labels defer explicitly.
-This does not activate Service port checks or infer runtime injection.
+This does not infer runtime injection.
 
 The shared mesh loader now captures the cluster before awaiting and applies a
 fifteen-second whole-discovery deadline, including configuration enrichment.
@@ -3533,7 +3590,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Configuration lists/details | `components/configuration/Configuration.tsx` | Stock-host discovery and empty-list rendering; populated synthetic detail rendering, nested fields, unknown status, Conditions before Events | Populated real CR integration and Desktop verification for this increment |
 | Discovery gate | `data/configuration.ts`, `ConfigurationGate.tsx` | 401/403/404 distinction, resource scope validation, supported version selection, separate endpoint-cache ownership | Additional cluster/server-version matrix |
 | Mutations | `data/mutations.ts`, `ConfigurationActions.tsx` | Spec CRUD and annotation-only validation exclusions, scoped confirmation, UID/version/acknowledgement guards and no retry; browser writes intercepted | Real write integration, YAML forms and broader workload/namespace mutations |
-| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group check modules, `data/validation.ts` | Thirty-five bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts and TLS patterns; source-bound oracles and hosted fixtures | Attachment/per-workload/principal context and remaining checkers remain; dormant CRD port checks are not activated |
+| Initial checks | `core/validation.ts`, reference/Gateway/local/policy/group and Service port modules, `data/validation.ts`, `data/servicePortValidation.ts` | Forty-one bounded codes, including AuthorizationPolicy host registry, Gateway class/collision checks, scoped registry, peer-policy, ServiceEntry/DestinationRule conflicts/TLS patterns and KIA0601/KIA0602/KIA0701 over complete declared local scope; source-informed tests and hosted fixtures for earlier checks | Attachment/per-workload/principal context and remaining checkers remain; Service port browser/live/hosted verification is open |
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |

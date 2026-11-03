@@ -35,6 +35,7 @@ import Mesh from './components/Mesh';
 import Mtls from './components/Mtls';
 import Overview from './components/Overview';
 import { Namespaces, Services, Workloads } from './components/Resources';
+import ServicePortValidation from './components/ServicePortValidation';
 import ServiceTrafficWizard from './components/ServiceTrafficWizard';
 import Settings from './components/Settings';
 import Topology from './components/Topology';
@@ -87,6 +88,13 @@ for (const page of pages) {
 }
 
 registerPluginSettings('kiali', Settings, false);
+registerRoute({
+  name: 'kiali-service-validation',
+  path: '/kiali/service-validation',
+  sidebar: 'kiali-services',
+  exact: true,
+  component: ServicePortValidation,
+});
 registerRoute({
   name: 'kiali-workload-dashboards',
   path: '/kiali/workload-dashboards',
