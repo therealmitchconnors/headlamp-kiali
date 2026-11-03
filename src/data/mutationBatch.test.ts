@@ -29,6 +29,7 @@ const originals = {
       namespace: 'bookinfo',
       uid: 'dr-uid',
       resourceVersion: '4',
+      creationTimestamp: '2026-01-01T00:00:00Z',
       labels: { preserved: 'yes' },
     },
     spec: { host: 'reviews.bookinfo.svc.cluster.local', future: true },
@@ -41,6 +42,7 @@ const originals = {
       namespace: 'bookinfo',
       uid: 'vs-uid',
       resourceVersion: '7',
+      creationTimestamp: '2026-01-01T00:00:00Z',
       annotations: { preserved: 'yes' },
     },
     spec: { hosts: ['reviews.bookinfo.svc.cluster.local'], http: [{ route: [] }] },
@@ -153,7 +155,7 @@ it('dry-runs each captured existing target before confirmation and preserves its
   const reviewed = await reviewMutationBatch(mutations, signal, guard);
   const reviewedWrites = vi
     .mocked(ApiProxy.request)
-    .mock.calls.filter(([path, options]) => options?.method === 'PUT');
+    .mock.calls.filter(([, options]) => options?.method === 'PUT');
   expect(reviewedWrites.map(([path]) => path)).toEqual([
     '/apis/networking.istio.io/v1/namespaces/bookinfo/destinationrules/reviews?dryRun=All',
     '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices/reviews?dryRun=All',

@@ -190,12 +190,7 @@ it('captures a unique existing pair immutably and prepares only spec-preserving 
       return list('VirtualService', 'networking.istio.io/v1', [existingService]);
     return response(String(path));
   });
-  const source = await loadServiceTrafficSource(
-    'alpha',
-    query,
-    null,
-    new AbortController().signal
-  );
+  const source = await loadServiceTrafficSource('alpha', query, null, new AbortController().signal);
   expect(source.conflicts).toEqual([
     { kind: 'DestinationRule', namespace: 'bookinfo', name: 'reviews-policy' },
     { kind: 'VirtualService', namespace: 'bookinfo', name: 'reviews-routes' },
@@ -232,7 +227,9 @@ it('captures a unique existing pair immutably and prepares only spec-preserving 
     ],
   });
   expect(JSON.stringify(source.routingResources.map(resource => resource.object))).toBe(before);
-  await expect(assertTrafficProposalFresh(source, new AbortController().signal)).resolves.toBeUndefined();
+  await expect(
+    assertTrafficProposalFresh(source, new AbortController().signal)
+  ).resolves.toBeUndefined();
 });
 
 it('rejects a replaced existing capture before review and never treats a missing pair as permission to create', async () => {
@@ -255,12 +252,7 @@ it('rejects a replaced existing capture before review and never treats a missing
       return list('VirtualService', 'networking.istio.io/v1', []);
     return response(String(path));
   });
-  const source = await loadServiceTrafficSource(
-    'alpha',
-    query,
-    null,
-    new AbortController().signal
-  );
+  const source = await loadServiceTrafficSource('alpha', query, null, new AbortController().signal);
   const draft = {
     destinationRuleName: 'reviews',
     virtualServiceName: 'reviews',

@@ -16,11 +16,11 @@ import {
   ServiceRoutingCapture,
   serviceTrafficEditContext,
 } from '../core/serviceTrafficEdit';
+import { ConfigurationObject } from '../resources/common';
 import { ConfigurationDefinition, configurationDefinitions } from '../resources/registry';
 import { readCollection } from './collections';
 import { discoverConfiguration } from './configuration';
 import { loadCorrelationSnapshot } from './correlation';
-import { ConfigurationObject } from '../resources/common';
 import { MutationConflict, PreparedMutation, prepareMutation } from './mutations';
 import { readCluster, readFailure } from './requests';
 

@@ -4,8 +4,8 @@ import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { commitMutationBatch, reviewMutationBatch } from '../data/mutationBatch';
 import {
-  assertTrafficTargetsAbsent,
   assertTrafficProposalFresh,
+  assertTrafficTargetsAbsent,
   loadServiceTrafficSource,
   ServiceTrafficSource,
 } from '../data/serviceTraffic';
@@ -478,9 +478,7 @@ it('does not turn observed routing overlap into an overwrite proposal', async ()
   open();
   await userEvent.setup().click(screen.getByRole('button', { name: 'Load Service versions' }));
   await screen.findByText(/exactly one existing DestinationRule and one existing VirtualService/);
-  expect(
-    screen.getByRole('button', { name: 'Review and dry-run selected changes' }).hasAttribute('disabled')
-  ).toBe(true);
+  expect(screen.queryByRole('button', { name: 'Review and dry-run selected changes' })).toBeNull();
   expect(commitMutationBatch).not.toHaveBeenCalled();
 });
 it('reviews and confirms an existing pair as updates while preserving each selected target', async () => {
@@ -497,9 +495,7 @@ it('reviews and confirms an existing pair as updates while preserving each selec
   await user.click(screen.getByRole('option', { name: 'Set values' }));
   await user.clear(screen.getByLabelText('Maximum connections'));
   await user.type(screen.getByLabelText('Maximum connections'), '20');
-  await user.click(
-    screen.getByRole('button', { name: 'Review and dry-run selected changes' })
-  );
+  await user.click(screen.getByRole('button', { name: 'Review and dry-run selected changes' }));
   const confirm = await screen.findByRole('button', {
     name: 'Confirm updates to selected resources',
   });

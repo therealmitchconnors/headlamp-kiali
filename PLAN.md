@@ -789,10 +789,13 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
   HTTP/TCP/TLS route, requiring integer percentages totaling 100 and preserving
   every other field. It reuses the guarded review path and captures the original
   API object when opening, not after editing. Limits are 100 routes/20
-  destinations. A separate Service workflow now creates namespace-local
-  DestinationRule/VirtualService proposals from observed versions, with
-  guarded two-step execution and per-object partial outcomes. Existing-resource
-  wizard editing and advanced routing controls remain.
+  destinations. The Service workflow creates namespace-local
+  DestinationRule/VirtualService proposals from observed versions and now also
+  edits one uniquely captured, same-namespace existing pair. The edit path
+  updates only changed objects, retains selected originals/UID/resourceVersion,
+  reuses existing route and policy planners, and uses guarded two-step execution
+  with per-object partial outcomes. Mixed create/update, ambiguous targets,
+  Gateway-attached/multi-host resources and unsupported routes remain excluded.
 - Existing HTTP forwarding routes now have keep/set/remove timeout, retry,
   fixed-delay and HTTP-abort controls. They preserve unrelated fields and
   use immutable current/proposed JSON review through the existing guarded
@@ -1264,8 +1267,8 @@ the authority for individual behavior and platform claims.
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
 | `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
-| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
-| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
+| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation plus bounded existing-pair updates with guarded partial outcomes implemented; broader routing and advanced controls remain | `safe-mutations`, `basic-validation` |
+| `full-wizards` | Partial / open | HTTP/TCP Service creation and bounded existing-pair updates reuse guarded HTTP/matching/mirroring/DR policy editors; inbound-mTLS/Gateway-weight/exclusion editors exist; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
 | `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
@@ -1402,9 +1405,10 @@ panel and query cardinality limits.
    configured mTLS to workloads, ports and subsets. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
 3. Complete health query coverage and supported workload variants.
-   Application/Service consumers are now wired. Extend service-driven traffic
-   workflows using existing correlation and guarded mutation adapters.
-   Multi-object proposals require per-object outcomes; no blind retry or rollback.
+   Application/Service consumers are now wired. Service-driven creation and
+   the bounded existing-pair edit use existing correlation and guarded mutation
+   adapters. Extend only after auditing target selection and field preservation;
+   multi-object proposals require per-object outcomes, with no blind retry or rollback.
 4. Continue tracing workload/graph correlations and remaining
    structural/count intrinsic filters and broader cross-span pipelines. One
    explicit related group with six fixed relationships is implemented.

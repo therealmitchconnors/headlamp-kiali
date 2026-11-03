@@ -1,8 +1,12 @@
 import { initialHttpMatchEdit } from './httpMatchEditing';
 import { editableHttpRoutes, initialHttpBehavior } from './httpRouteBehavior';
-import { serviceTrafficEditContext, initialServiceTrafficEditDraft, planServiceTrafficEdit } from './serviceTrafficEdit';
-import type { ServiceRoutingCapture } from './serviceTrafficEdit';
 import { routingService } from './serviceTraffic';
+import type { ServiceRoutingCapture } from './serviceTrafficEdit';
+import {
+  initialServiceTrafficEditDraft,
+  planServiceTrafficEdit,
+  serviceTrafficEditContext,
+} from './serviceTrafficEdit';
 
 const service = routingService(
   {
@@ -108,13 +112,7 @@ const versions = [
 ];
 
 function context(resources: ServiceRoutingCapture[] = [destinationRule, virtualService]) {
-  return serviceTrafficEditContext(
-    service,
-    'svc.cluster.local',
-    'version',
-    versions,
-    resources
-  );
+  return serviceTrafficEditContext(service, 'svc.cluster.local', 'version', versions, resources);
 }
 
 it('composes existing route and DestinationRule changes without mutating unrelated fields or captures', () => {
@@ -151,8 +149,11 @@ it('composes existing route and DestinationRule changes without mutating unrelat
   const planned = planServiceTrafficEdit(selected, draft);
   const nextRule = planned.destinationRule!;
   const nextService = planned.virtualService!;
-  const currentRule = destinationRule.object.spec as Record<string, any>;
-  const currentService = virtualService.object.spec as Record<string, any>;
+  const currentRule = destinationRule.object.spec as Record<string, unknown>;
+  const currentService = virtualService.object.spec as Record<string, unknown>;
+  const originalHttp = (currentService.http as Record<string, unknown>[])[0];
+  const originalRoutes = originalHttp.route as Record<string, unknown>[];
+  const nextHttp = nextService.http as Record<string, unknown>[];
 
   expect(nextRule).toMatchObject({
     host,
@@ -173,22 +174,22 @@ it('composes existing route and DestinationRule changes without mutating unrelat
     futureSpecField: 'preserve',
     http: [
       {
-        ...currentService.http[0],
+        ...originalHttp,
         match: [
           { headers: { 'x-user': { exact: 'tester' } }, uri: { prefix: '/new-reviews' } },
           { method: { exact: 'GET' } },
         ],
         route: [
-          { ...currentService.http[0].route[0], weight: 40 },
-          { ...currentService.http[0].route[1], weight: 60 },
+          { ...originalRoutes[0], weight: 40 },
+          { ...originalRoutes[1], weight: 60 },
         ],
         retries: { attempts: 4, retryOn: 'gateway-error,connect-failure,refused-stream' },
       },
-      currentService.http[1],
+      (currentService.http as Record<string, unknown>[])[1],
     ],
   });
-  expect(nextService.http[0]).toHaveProperty('mirror', currentService.http[0].mirror);
-  expect(nextService.http[0]).toHaveProperty('mirrorPercentage', { value: 5 });
+  expect(nextHttp[0]).toHaveProperty('mirror', originalHttp.mirror);
+  expect(nextHttp[0]).toHaveProperty('mirrorPercentage', { value: 5 });
   expect(JSON.stringify([destinationRule.object, virtualService.object])).toBe(before);
 });
 
@@ -198,6 +199,14 @@ it('rejects ambiguous targets, unsupported gateway/VM shapes and removal of the 
   const gateway = structuredClone(virtualService);
   (gateway.object.spec as Record<string, unknown>).gateways = ['bookinfo/public'];
   expect(() => context([destinationRule, gateway])).toThrow('attached to gateways');
+  const multiHost = structuredClone(virtualService);
+  (multiHost.object.spec as Record<string, unknown>).hosts = [
+    host,
+    'ratings.bookinfo.svc.cluster.local',
+  ];
+  expect(() => context([destinationRule, multiHost])).toThrow(
+    'exact, namespace-local Service host'
+  );
 
   const selected = context();
   const draft = initialServiceTrafficEditDraft(selected, service);
@@ -210,15 +219,58 @@ it('rejects ambiguous targets, unsupported gateway/VM shapes and removal of the 
   expect(() => planServiceTrafficEdit(selected, draft)).toThrow('unconditional alternative');
 });
 
+it('edits an existing TCP Service route without touching HTTP routes or unrelated VirtualService fields', () => {
+  const tcp = structuredClone(virtualService);
+  const spec = tcp.object.spec as Record<string, unknown>;
+  spec.http = [{ route: [{ destination: { host: 'ratings.bookinfo.svc.cluster.local' } }] }];
+  spec.tcp = [
+    {
+      match: [{ port: 9080 }],
+      route: [
+        { destination: { host, subset: 'blue' }, weight: 80 },
+        { destination: { host, subset: 'green' }, weight: 20 },
+      ],
+      futureRouteField: 'preserve',
+    },
+  ];
+  const selected = context([destinationRule, tcp]);
+  const draft = initialServiceTrafficEditDraft(selected, service);
+  draft.subsets[0].weight = 10;
+  draft.subsets[1].weight = 90;
+  const planned = planServiceTrafficEdit(selected, draft);
+
+  expect(planned.destinationRule).toBeUndefined();
+  expect(planned.virtualService).toMatchObject({
+    hosts: [host],
+    gateways: ['mesh'],
+    http: spec.http,
+    tcp: [
+      {
+        match: [{ port: 9080 }],
+        route: [
+          { destination: { host, subset: 'blue' }, weight: 10 },
+          { destination: { host, subset: 'green' }, weight: 90 },
+        ],
+        futureRouteField: 'preserve',
+      },
+    ],
+  });
+});
+
 it('rejects ambiguous routes, unobserved subset mappings and missing resource versions before mutation', () => {
   const multiple = structuredClone(virtualService);
-  (multiple.object.spec as Record<string, any>).http.push({
+  const multipleSpec = multiple.object.spec as Record<string, unknown>;
+  (multipleSpec.http as Record<string, unknown>[]).push({
     route: [{ destination: { host, subset: 'blue' }, weight: 100 }],
   });
   expect(() => context([destinationRule, multiple])).toThrow('More than one route');
 
   const unknown = structuredClone(virtualService);
-  (unknown.object.spec as Record<string, any>).http[0].route[0].destination.subset = 'unknown';
+  const unknownSpec = unknown.object.spec as Record<string, unknown>;
+  const unknownRoute = (
+    (unknownSpec.http as Record<string, unknown>[])[0].route as Record<string, unknown>[]
+  )[0];
+  (unknownRoute.destination as Record<string, unknown>).subset = 'unknown';
   expect(() => context([destinationRule, unknown])).toThrow('no observed Service version');
 
   const stale = structuredClone(destinationRule);

@@ -1,10 +1,10 @@
 import type { DestinationRuleSpec, VirtualServiceSpec } from '../resources/schema-types';
 import { circuitBreakerChanges, CircuitBreakerDraft } from './circuitBreaker';
 import { ServiceRelations } from './correlation';
-import { buildHttpMatches, HttpMatchCondition } from './httpMatches';
 import type { HttpMatchEditDraft } from './httpMatchEditing';
-import { mirrorTarget } from './httpMirroring';
+import { buildHttpMatches, HttpMatchCondition } from './httpMatches';
 import type { HttpMirroringDraft } from './httpMirroring';
+import { mirrorTarget } from './httpMirroring';
 import { HttpBehaviorDraft, planHttpBehavior } from './httpRouteBehavior';
 import { isLabelKey } from './labels';
 import { loadBalancerChange, LoadBalancerDraft } from './loadBalancer';

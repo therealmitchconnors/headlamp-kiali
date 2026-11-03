@@ -18,7 +18,10 @@ import { initialLoadBalancer } from '../core/loadBalancer';
 import { isDnsLabel, isDnsSubdomain } from '../core/object';
 import { initialOutboundTls } from '../core/outboundTls';
 import { ServiceTrafficDraft } from '../core/serviceTraffic';
-import { initialServiceTrafficEditDraft, serviceTrafficEditContext } from '../core/serviceTrafficEdit';
+import {
+  initialServiceTrafficEditDraft,
+  serviceTrafficEditContext,
+} from '../core/serviceTrafficEdit';
 import {
   commitMutationBatch,
   MutationOutcome,
@@ -261,92 +264,92 @@ function TrafficProposal({
             { label: t('Matching workloads'), getter: item => item.workloads.join(', ') },
           ]}
         />
-        {!reviewed && !sent && (
+        {!reviewed && !sent && (!isEditing || !!existing.context) && (
           <>
             {!isEditing && (
               <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-              <TextField
-                select
-                label={t('Routing protocol')}
-                value={draft.protocol ?? 'http'}
-                disabled={busy}
-                helperText={t(
-                  'Choose explicitly; protocol is not inferred from the Service port. Existing draft settings are retained when switching.'
-                )}
-                onChange={event => {
-                  const protocol = event.target.value;
-                  if (protocol === 'http' || protocol === 'tcp')
-                    setDraft(value => ({ ...value, protocol }));
-                }}
-              >
-                <MenuItem value="http">HTTP/gRPC</MenuItem>
-                <MenuItem value="tcp">TCP</MenuItem>
-              </TextField>
-              <TextField
-                label={t('DestinationRule name')}
-                value={draft.destinationRuleName}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, destinationRuleName: event.target.value }))
-                }
-              />
-              <TextField
-                label={t('VirtualService name')}
-                value={draft.virtualServiceName}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, virtualServiceName: event.target.value }))
-                }
-              />
-              <TextField
-                select
-                label={t('Service port')}
-                value={draft.port}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, port: Number(event.target.value) }))
-                }
-              >
-                {source.service.ports
-                  .filter(port => port.protocol === 'TCP')
-                  .map(port => (
-                    <MenuItem key={port.port} value={port.port}>
-                      {port.name ? `${port.name}: ` : ''}
-                      {port.port}
-                    </MenuItem>
-                  ))}
-              </TextField>
+                <TextField
+                  select
+                  label={t('Routing protocol')}
+                  value={draft.protocol ?? 'http'}
+                  disabled={busy}
+                  helperText={t(
+                    'Choose explicitly; protocol is not inferred from the Service port. Existing draft settings are retained when switching.'
+                  )}
+                  onChange={event => {
+                    const protocol = event.target.value;
+                    if (protocol === 'http' || protocol === 'tcp')
+                      setDraft(value => ({ ...value, protocol }));
+                  }}
+                >
+                  <MenuItem value="http">HTTP/gRPC</MenuItem>
+                  <MenuItem value="tcp">TCP</MenuItem>
+                </TextField>
+                <TextField
+                  label={t('DestinationRule name')}
+                  value={draft.destinationRuleName}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, destinationRuleName: event.target.value }))
+                  }
+                />
+                <TextField
+                  label={t('VirtualService name')}
+                  value={draft.virtualServiceName}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, virtualServiceName: event.target.value }))
+                  }
+                />
+                <TextField
+                  select
+                  label={t('Service port')}
+                  value={draft.port}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, port: Number(event.target.value) }))
+                  }
+                >
+                  {source.service.ports
+                    .filter(port => port.protocol === 'TCP')
+                    .map(port => (
+                      <MenuItem key={port.port} value={port.port}>
+                        {port.name ? `${port.name}: ` : ''}
+                        {port.port}
+                      </MenuItem>
+                    ))}
+                </TextField>
               </Stack>
             )}
             {!isEditing && (
               <TextField
-              select
-              label={t('Mirrored version')}
-              value={
-                draft.mirror
-                  ? draft.subsets.findIndex(item => item.version === draft.mirror?.version)
-                  : -1
-              }
-              disabled={busy || (draft.protocol === 'tcp' && !draft.mirror)}
-              helperText={t(
-                'The mirrored version is excluded from forwarding in this generated rule, not from other or default routing. Set the remaining forwarding weights to total 100; no automatic redistribution is performed.'
-              )}
-              onChange={event => {
-                const subset = draft.subsets[Number(event.target.value)];
-                setDraft(value => ({
-                  ...value,
-                  mirror: subset
-                    ? { version: subset.version, percentage: value.mirror?.percentage ?? '100' }
-                    : undefined,
-                }));
-              }}
-            >
-              <MenuItem value={-1}>{t('No mirrored version')}</MenuItem>
-              {draft.subsets.map((subset, index) => (
-                <MenuItem key={subset.version} value={index}>
-                  {subset.version || t('Empty label')}
-                </MenuItem>
-              ))}
+                select
+                label={t('Mirrored version')}
+                value={
+                  draft.mirror
+                    ? draft.subsets.findIndex(item => item.version === draft.mirror?.version)
+                    : -1
+                }
+                disabled={busy || (draft.protocol === 'tcp' && !draft.mirror)}
+                helperText={t(
+                  'The mirrored version is excluded from forwarding in this generated rule, not from other or default routing. Set the remaining forwarding weights to total 100; no automatic redistribution is performed.'
+                )}
+                onChange={event => {
+                  const subset = draft.subsets[Number(event.target.value)];
+                  setDraft(value => ({
+                    ...value,
+                    mirror: subset
+                      ? { version: subset.version, percentage: value.mirror?.percentage ?? '100' }
+                      : undefined,
+                  }));
+                }}
+              >
+                <MenuItem value={-1}>{t('No mirrored version')}</MenuItem>
+                {draft.subsets.map((subset, index) => (
+                  <MenuItem key={subset.version} value={index}>
+                    {subset.version || t('Empty label')}
+                  </MenuItem>
+                ))}
               </TextField>
             )}
             {draft.mirror && (
@@ -476,7 +479,11 @@ function TrafficProposal({
               disabled={busy || !proposal.mutations}
               onClick={() => run(false)}
             >
-              {t(isEditing ? 'Review and dry-run selected changes' : 'Review and dry-run both changes')}
+              {t(
+                isEditing
+                  ? 'Review and dry-run selected changes'
+                  : 'Review and dry-run both changes'
+              )}
             </Button>
           </>
         )}
@@ -513,48 +520,48 @@ function TrafficProposal({
                 },
               ]}
             />
-            {reviewed.mutations.map(mutation => (
-              <SectionBox
-                key={mutation.target.definition.kind}
-                title={`${mutation.action === 'update' ? t('Update') : t('Create')} ${mutation.target.definition.kind}: ${mutation.target.namespace}/${mutation.target.name}`}
-              >
-                <Typography>{mutation.target.apiVersion}</Typography>
-                {mutation.action === 'update' && (
+            {reviewed.mutations.map(mutation => {
+              const original = source.routingResources.find(
+                resource =>
+                  resource.kind === mutation.target.definition.kind &&
+                  resource.namespace === mutation.target.namespace &&
+                  resource.name === mutation.target.name
+              )?.object;
+              return (
+                <SectionBox
+                  key={mutation.target.definition.kind}
+                  title={`${mutation.action === 'update' ? t('Update') : t('Create')} ${
+                    mutation.target.definition.kind
+                  }: ${mutation.target.namespace}/${mutation.target.name}`}
+                >
+                  <Typography>{mutation.target.apiVersion}</Typography>
+                  {mutation.action === 'update' && (
+                    <CodeBlock
+                      label={t('Captured original {{kind}}', {
+                        kind: mutation.target.definition.kind,
+                      })}
+                      value={JSON.stringify(original, null, 2)}
+                    />
+                  )}
                   <CodeBlock
-                    label={t('Captured original {{kind}}', {
-                      kind: mutation.target.definition.kind,
-                    })}
+                    label={t('Proposed {{kind}}', { kind: mutation.target.definition.kind })}
                     value={JSON.stringify(
-                      source.routingResources.find(
-                        resource =>
-                          resource.kind === mutation.target.definition.kind &&
-                          resource.namespace === mutation.target.namespace &&
-                          resource.name === mutation.target.name
-                      )?.object,
+                      {
+                        apiVersion: mutation.target.apiVersion,
+                        kind: mutation.target.definition.kind,
+                        metadata: original?.metadata ?? {
+                          namespace: mutation.target.namespace,
+                          name: mutation.target.name,
+                        },
+                        spec: mutation.spec,
+                      },
                       null,
                       2
                     )}
                   />
-                )}
-                <CodeBlock
-                  label={t('Proposed {{kind}}', { kind: mutation.target.definition.kind })}
-                  value={JSON.stringify(
-                    {
-                      apiVersion: mutation.target.apiVersion,
-                      kind: mutation.target.definition.kind,
-                      metadata: {
-                        namespace: mutation.target.namespace,
-                        name: mutation.target.name,
-                        ...(mutation.original ? mutation.original : {}),
-                      },
-                      spec: mutation.spec,
-                    },
-                    null,
-                    2
-                  )}
-                />
-              </SectionBox>
-            ))}
+                </SectionBox>
+              );
+            })}
             <Alert severity="warning">
               {t(
                 'These are separate writes, not a transaction. Execution stops at the first failure; earlier changes remain. There is no automatic retry or rollback. Inspect every selected resource after an interrupted or uncertain attempt.'
@@ -571,7 +578,11 @@ function TrafficProposal({
                   disabled={busy}
                   onClick={() => run(true)}
                 >
-                  {t(isEditing ? 'Confirm updates to selected resources' : 'Confirm creation of both resources')}
+                  {t(
+                    isEditing
+                      ? 'Confirm updates to selected resources'
+                      : 'Confirm creation of both resources'
+                  )}
                 </Button>
               </Stack>
             )}

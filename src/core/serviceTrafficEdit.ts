@@ -6,8 +6,8 @@ import { initialLoadBalancer, loadBalancerChange, planLoadBalancer } from './loa
 import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import { initialOutboundTls, outboundTlsChange, planOutboundTls } from './outboundTls';
 import type { RoutingService, ServiceTrafficDraft, ServiceVersion } from './serviceTraffic';
-import { planTrafficWeights, weightedRoutes } from './trafficWeights';
 import type { WeightedRoute } from './trafficWeights';
+import { planTrafficWeights, weightedRoutes } from './trafficWeights';
 
 export interface ServiceRoutingCapture {
   kind: 'DestinationRule' | 'VirtualService';
@@ -80,7 +80,8 @@ export function serviceTrafficEditContext(
     !versionLabel ||
     destinationRuleSpec.host !== host ||
     !Array.isArray(virtualServiceSpec.hosts) ||
-    !virtualServiceSpec.hosts.includes(host)
+    virtualServiceSpec.hosts.length !== 1 ||
+    virtualServiceSpec.hosts[0] !== host
   )
     throw new Error('Only an exact, namespace-local Service host can be edited by this workflow');
   const gateways = virtualServiceSpec.gateways;
@@ -91,7 +92,9 @@ export function serviceTrafficEditContext(
   )
     throw new Error('VirtualServices attached to gateways are outside this Service workflow');
   if (!Array.isArray(destinationRuleSpec.subsets) || destinationRuleSpec.subsets.length > 100)
-    throw new Error('The existing DestinationRule subsets are unavailable or exceed the edit limit');
+    throw new Error(
+      'The existing DestinationRule subsets are unavailable or exceed the edit limit'
+    );
 
   const versionsByValue = new Map(versions.map(version => [version.value, version]));
   const versionsBySubset = new Map<string, ServiceVersion>();
@@ -178,14 +181,8 @@ export function initialServiceTrafficEditDraft(
     circuitBreaker: initialCircuitBreaker(destinationRuleSpec),
     loadBalancer: initialLoadBalancer(destinationRuleSpec),
     outboundTls: initialOutboundTls(destinationRuleSpec),
-    httpBehavior:
-      context.route.protocol === 'http'
-        ? initialHttpBehavior(httpRoute)
-        : undefined,
-    httpMatchEdit:
-      context.route.protocol === 'http'
-        ? initialHttpMatchEdit(httpRoute)
-        : undefined,
+    httpBehavior: context.route.protocol === 'http' ? initialHttpBehavior(httpRoute) : undefined,
+    httpMatchEdit: context.route.protocol === 'http' ? initialHttpMatchEdit(httpRoute) : undefined,
     httpMirroring:
       context.route.protocol === 'http'
         ? {
