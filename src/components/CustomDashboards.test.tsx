@@ -1101,6 +1101,7 @@ it('applies only current captured annotation sources and requires an explicit re
     sources: [
       {
         kind: 'Namespace',
+        apiVersion: 'v1',
         name: target.namespace,
         namespace: target.namespace,
         uid: 'ns-captured',

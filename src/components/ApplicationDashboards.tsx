@@ -398,6 +398,7 @@ export function InspectionResults({
               data={data.annotationSources}
               columns={[
                 { label: t('Resource'), getter: source => `${source.kind}/${source.name}` },
+                { label: t('API version'), getter: source => source.apiVersion },
                 { label: t('UID'), getter: source => source.uid },
                 { label: t('Resource version'), getter: source => source.resourceVersion },
                 {

@@ -9,6 +9,7 @@ export type CorrelationKind =
   | 'DaemonSet'
   | 'ReplicaSet'
   | 'ReplicationController'
+  | 'DeploymentConfig'
   | 'Job'
   | 'CronJob'
   | 'Pod'
@@ -31,6 +32,7 @@ export interface CorrelationResource {
   serviceSelector: Labels | null;
   proxyMode: 'sidecar' | 'native-sidecar' | 'none';
   resourceVersion?: string;
+  apiVersion?: string;
   podAccount?: { ok: true; name: string } | { ok: false; message: string };
   dashboardRefs?: PodDashboardReferences;
   virtualMachine?: {

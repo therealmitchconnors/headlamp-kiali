@@ -128,6 +128,7 @@ it.each([
   if (mode === 'ready' || mode === 'v1beta1') {
     expect(result.source.apiVersion).toBe(apiVersion);
     expect(result.resources[0]).toMatchObject({
+      apiVersion,
       identity: { kind: 'WorkloadGroup', uid: 'vm-group', name: 'vm-group', namespace: 'bookinfo' },
       resourceVersion: 'vm-group-version',
       workloadLabels: { app: 'vm', version: 'v1' },

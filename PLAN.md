@@ -382,6 +382,16 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   Shared correlation captures scope and has a 15-second deadline. Sixteen
   hosted groups observed real Bookinfo plus 34 intercepted VM-list GETs, one
   synthetic graph query and a 15,658 ms timeout/retry. No VM was deployed.
+- Workload dashboard annotation/recommendation attribution now consumes that
+  captured WorkloadGroup evidence and supports the pinned WorkloadGroup metadata
+  annotation source plus OpenShift DeploymentConfig pod-template source.
+  WorkloadGroup API version, group UID/resourceVersion, first-entry label
+  provenance and later annotation-source identity remain distinct. Arbitrary
+  custom workload parents and WorkloadEntry annotations stay unsupported.
+  **186 focused tests** and the full suite (**22,606 tests in 190 files**),
+  type-check, lint, i18n, production build, and parity/resource/dashboard checks
+  passed locally. No real VM, OpenShift controller, hosted Headlamp, console, or
+  accessibility verification was available for this increment.
 - Matching WorkloadEntries now expose source-backed probe evidence, separating
   reported conditions from disabled/unrecognized-annotation assumptions. Three
   hosted groups/five intercepted lists covered all branches, first-condition
@@ -1259,7 +1269,7 @@ the authority for individual behavior and platform claims.
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
 | `basic-validation` | Partial / open | Forty-one bounded codes, including declared-scope Gateway selectors/controller flags, Gateway listener/status/class checks, and source-informed Service port checks over complete declared local namespace scope; attachment/per-workload/principal and broader checks remain | `config-views`, `mesh-security` |
-| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
+| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, WorkloadGroup VM and DeploymentConfig annotation attribution, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; arbitrary custom-controller parents, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
 | `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
@@ -1320,11 +1330,22 @@ workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
 gates in an authorized environment independently; do not enable dormant port
 helpers or infer route attachment from this milestone.
 
-The dashboard continuation is external link support and broader
-VM/custom-controller attribution. Workload recommendations are now integrated
-through an explicit inspector, reusing application recommendation/chart code
-while retaining paired app/version filters and a fresh workload overlay.
-Selected child controllers are rooted by UID without including sibling Pods.
+The dashboard continuation is external link support and attribution for
+arbitrary configured custom-workload parents. Workload recommendations use an
+explicit inspector, reusing application recommendation/chart code while
+retaining paired app/version filters and a fresh workload overlay. Selected
+child controllers are rooted by UID without including sibling Pods.
+WorkloadGroup recommendations use the existing complete VM reader: first
+matching WorkloadEntry `spec.labels` in captured order, or group selector labels
+only when no entries match. They use WorkloadGroup metadata annotations, not
+WorkloadEntry annotations or synthetic Pods. OpenShift DeploymentConfig is
+read only as the selected target and uses its pod-template labels/annotations;
+it is not added to general correlation, health, or workload-inclusion sources.
+Kiali's configured custom workload types inherit a selected ReplicaSet's
+metadata/template during parsing; arbitrary parent controllers are not
+attributed natively. No background fan-out, replica health, routing, or mesh
+membership is inferred. No real VM/OpenShift or live Headlamp evidence is
+available for this increment.
 Native resource details remain the spec/status/conditions/events surface;
 the new inspector intentionally does not duplicate them. Captured panels can
 now expand without refetching, using a native keyboard-accessible dialog rather
@@ -1353,8 +1374,9 @@ replace whole runtime groups. Embedded charts preserve the winning app selector,
 or require an explicit choice for ambiguous reference-only conventions.
 Settings/evidence changes clear captures without replay. Do not generalize this
 into background fan-out or VM/telemetry-ownership/health inference.
-Explicit Namespace/workload annotation overrides are now implemented
-for supported Kubernetes kinds, without writes or silent fallback. Built-in definitions and explicit saved-template
+Explicit Namespace/workload annotation overrides are implemented for the
+audited Kubernetes kinds, WorkloadGroup and DeploymentConfig, without writes or
+silent fallback. Built-in definitions and explicit saved-template
 discovery, composition and label grouping are implemented for their documented
 bounded subsets. Literal includes are now preserved in settings for discovery;
 composition still trims them. Broader automatic/background discovery still

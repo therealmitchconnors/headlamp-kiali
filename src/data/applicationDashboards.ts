@@ -63,6 +63,7 @@ export async function inspectApplicationDashboards(
                 workload: {
                   kind: evidence.workload.kind,
                   name: evidence.workload.name,
+                  apiVersion: evidence.workload.apiVersion,
                 },
               }
             : {}),
@@ -74,6 +75,7 @@ export async function inspectApplicationDashboards(
         const source = annotation.sources[annotation.sources.length - 1];
         if (
           source.kind !== evidence.workload.kind ||
+          source.apiVersion !== evidence.workload.apiVersion ||
           source.name !== evidence.workload.name ||
           source.uid !== evidence.workload.uid ||
           source.resourceVersion !== evidence.workload.resourceVersion

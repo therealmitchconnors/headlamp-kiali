@@ -262,6 +262,7 @@ it('loads workload charts with the captured app/version pair and workload annota
           refs: ['go'],
           workload: {
             kind: 'Pod',
+            apiVersion: 'v1',
             name: 'reviews',
             uid: 'pod-uid',
             resourceVersion: '17',

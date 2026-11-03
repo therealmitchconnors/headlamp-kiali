@@ -26,10 +26,16 @@ export interface ApplicationDashboardEvidence {
   selectors: ApplicationDashboardSelector[];
   workload?: {
     kind: DashboardWorkloadKind;
+    apiVersion: string;
     name: string;
     uid: string;
     resourceVersion: string;
     version: string;
+    virtualMachine?: {
+      labelSource: 'group' | 'entry';
+      matchingEntries: number;
+      entry?: { name: string; uid: string; resourceVersion: string };
+    };
   };
 }
 export interface ApplicationDashboardRef {

@@ -68,6 +68,62 @@ it('captures target/base scope before reading namespace then workload with immut
     vi.mocked(ApiProxy.request).mock.calls.every(([, options]) => options?.cluster === 'alpha')
   ).toBe(true);
 });
+it.each([
+  [
+    'WorkloadGroup',
+    'networking.istio.io/v1beta1',
+    '/apis/networking.istio.io/v1beta1/namespaces/bookinfo/workloadgroups/vm',
+    { metadata: { annotations: { [DASHBOARD_ANNOTATION]: declaration('vm_group') } }, spec: {} },
+  ],
+  [
+    'DeploymentConfig',
+    'apps.openshift.io/v1',
+    '/apis/apps.openshift.io/v1/namespaces/bookinfo/deploymentconfigs/reviews',
+    {
+      metadata: {},
+      spec: {
+        template: { metadata: { annotations: { [DASHBOARD_ANNOTATION]: declaration('dc') } } },
+      },
+    },
+  ],
+] as const)(
+  'reads pinned %s annotation source and records its API identity',
+  async (kind, apiVersion, path, fields) => {
+    const name = kind === 'WorkloadGroup' ? 'vm' : 'reviews';
+    const value = {
+      kind,
+      apiVersion,
+      metadata: {
+        name,
+        namespace: 'bookinfo',
+        uid: `${kind}-uid`,
+        resourceVersion: '23',
+        ...fields.metadata,
+      },
+      spec: fields.spec,
+    };
+    vi.mocked(ApiProxy.request).mockResolvedValueOnce(ns).mockResolvedValueOnce(value);
+    const result = await loadDashboardAnnotations(
+      { cluster: 'alpha' },
+      settings(),
+      { namespace: 'bookinfo', workload: { kind, name, apiVersion } },
+      new AbortController().signal
+    );
+    expect(result.sources[1]).toMatchObject({
+      kind,
+      apiVersion,
+      uid: `${kind}-uid`,
+      resourceVersion: '23',
+    });
+    expect(
+      result.catalog.templates.find(template => template.name === 'go')?.items[0].chart?.metricName
+    ).toBe(kind === 'WorkloadGroup' ? 'vm_group' : 'dc');
+    expect(vi.mocked(ApiProxy.request).mock.calls.map(([requestedPath]) => requestedPath)).toEqual([
+      '/api/v1/namespaces/bookinfo',
+      path,
+    ]);
+  }
+);
 it('fails closed on namespace denial, malformed YAML or a later workload failure', async () => {
   const target: DashboardAnnotationTarget = {
     namespace: 'bookinfo',

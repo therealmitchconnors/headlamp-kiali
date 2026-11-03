@@ -78,6 +78,7 @@ it('bounds declaration count and structural complexity before normalization', ()
 it('captures namespace identity, distinguishes missing and empty annotations and rejects wrong scope', () => {
   const missing = dashboardAnnotationEvidence(namespace(), { namespace: 'bookinfo' });
   expect(missing.source).toMatchObject({
+    apiVersion: 'v1',
     uid: 'ns-uid',
     resourceVersion: '1',
     annotationPresent: false,
@@ -98,7 +99,14 @@ it('captures namespace identity, distinguishes missing and empty annotations and
     dashboardAnnotationEvidence(namespace({ [DASHBOARD_ANNOTATION]: 1 }), { namespace: 'bookinfo' })
   ).toThrow('YAML string');
 });
-it.each(['Deployment', 'DaemonSet', 'StatefulSet', 'ReplicaSet', 'ReplicationController'] as const)(
+it.each([
+  'Deployment',
+  'DaemonSet',
+  'StatefulSet',
+  'ReplicaSet',
+  'ReplicationController',
+  'DeploymentConfig',
+] as const)(
   'preserves pinned %s pod-template map precedence, including an explicit empty map',
   kind => {
     const target = { namespace: 'bookinfo', workload: { kind, name: 'target' } };
@@ -120,6 +128,30 @@ it.each(['Deployment', 'DaemonSet', 'StatefulSet', 'ReplicaSet', 'ReplicationCon
     ).toBe('template');
   }
 );
+it('uses WorkloadGroup metadata annotations, not its Istio template or WorkloadEntry annotations', () => {
+  const value = {
+    ...workload(
+      'WorkloadGroup',
+      { [DASHBOARD_ANNOTATION]: yaml('group') },
+      { [DASHBOARD_ANNOTATION]: yaml('template') }
+    ),
+    spec: {
+      template: {
+        metadata: { annotations: { [DASHBOARD_ANNOTATION]: yaml('ignored-template') } },
+      },
+    },
+  };
+  const result = dashboardAnnotationEvidence(value, {
+    namespace: 'bookinfo',
+    workload: { kind: 'WorkloadGroup', name: 'target' },
+  });
+  expect(result.templates[0].name).toBe('group');
+  expect(result.source).toMatchObject({
+    kind: 'WorkloadGroup',
+    apiVersion: 'networking.istio.io/v1',
+    location: 'resource',
+  });
+});
 it.each(['Pod', 'Job', 'CronJob'] as const)(
   'uses %s own metadata rather than a guessed template',
   kind => {
@@ -193,5 +225,39 @@ it('does not expand the effective catalog budget or accept path injection', () =
   expect(
     dashboardAnnotationPath({ namespace: 'bookinfo', workload: { kind: 'Job', name: 'run' } })
   ).toBe('/apis/batch/v1/namespaces/bookinfo/jobs/run');
+  expect(
+    dashboardAnnotationPath({
+      namespace: 'bookinfo',
+      workload: { kind: 'WorkloadGroup', name: 'vm' },
+    })
+  ).toBe('/apis/networking.istio.io/v1/namespaces/bookinfo/workloadgroups/vm');
+  expect(
+    dashboardAnnotationPath({
+      namespace: 'bookinfo',
+      workload: {
+        kind: 'WorkloadGroup',
+        name: 'vm',
+        apiVersion: 'networking.istio.io/v1beta1',
+      },
+    })
+  ).toBe('/apis/networking.istio.io/v1beta1/namespaces/bookinfo/workloadgroups/vm');
+  expect(
+    dashboardAnnotationPath({
+      namespace: 'bookinfo',
+      workload: { kind: 'Pod', name: 'pod', apiVersion: 'v1' },
+    })
+  ).toBe('/api/v1/namespaces/bookinfo/pods/pod');
+  expect(
+    dashboardAnnotationPath({
+      namespace: 'bookinfo',
+      workload: { kind: 'DeploymentConfig', name: 'reviews' },
+    })
+  ).toBe('/apis/apps.openshift.io/v1/namespaces/bookinfo/deploymentconfigs/reviews');
   expect(() => dashboardAnnotationPath({ namespace: '../other' })).toThrow('namespace');
+  expect(() =>
+    dashboardAnnotationPath({
+      namespace: 'bookinfo',
+      workload: { kind: 'ArgoRollout' as never, name: 'reviews' },
+    })
+  ).toThrow('supported workload kind');
 });

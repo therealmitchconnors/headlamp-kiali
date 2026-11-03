@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { useKialiConfig } from '../config';
 import { readConfig } from '../core/config';
 import { CorrelationResource } from '../core/correlation';
-import { loadCorrelationSnapshot } from '../data/correlation';
+import { loadWorkloadDashboardSnapshot } from '../data/workloadDashboards';
 import { InspectionResults } from './ApplicationDashboards';
 import WorkloadDashboards from './WorkloadDashboards';
 
@@ -17,7 +17,7 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   }),
 }));
 vi.mock('../config', () => ({ useKialiConfig: vi.fn() }));
-vi.mock('../data/correlation', () => ({ loadCorrelationSnapshot: vi.fn() }));
+vi.mock('../data/workloadDashboards', () => ({ loadWorkloadDashboardSnapshot: vi.fn() }));
 vi.mock('./ApplicationDashboards', () => ({
   InspectionResults: vi.fn(() => <div>Runtime inspection requested</div>),
 }));
@@ -62,8 +62,45 @@ function snapshot() {
 }
 beforeEach(() => {
   vi.mocked(useKialiConfig).mockReturnValue(readConfig(settings));
-  vi.mocked(loadCorrelationSnapshot).mockReset().mockResolvedValue(snapshot());
+  vi.mocked(loadWorkloadDashboardSnapshot).mockReset().mockResolvedValue(snapshot());
   vi.mocked(InspectionResults).mockClear();
+});
+it('offers a WorkloadGroup as the VM workload identity without creating Pod evidence', async () => {
+  const vm = snapshot();
+  vm.resources[0].identity = {
+    ...vm.resources[0].identity,
+    group: 'networking.istio.io',
+    kind: 'WorkloadGroup',
+    name: 'reviews-vm',
+    uid: 'group-uid',
+  };
+  vm.resources[0].resourceVersion = 'group-rv';
+  vm.resources[0].workloadLabels = { app: 'reviews', version: 'v2' };
+  vm.resources[0].virtualMachine = {
+    labelSource: 'entry',
+    matchingEntries: 1,
+    entry: { name: 'reviews-vm-entry', uid: 'entry-uid', resourceVersion: 'entry-rv' },
+  };
+  vm.resources = [vm.resources[0]];
+  vi.mocked(loadWorkloadDashboardSnapshot).mockResolvedValue(vm);
+  open('?kind=WorkloadGroup&namespace=bookinfo&name=reviews-vm&uid=group-uid');
+  await read();
+  await screen.findByText(/Application and version labels came from WorkloadEntry/);
+  expect(screen.getByText(/WorkloadGroup UID group-uid, resource version group-rv/)).toBeDefined();
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Inspect workload dashboard recommendations' })
+  );
+  const query = vi.mocked(InspectionResults).mock.calls[0][0].query;
+  expect(query.evidence.pods).toEqual([]);
+  expect(query.evidence.workload).toMatchObject({
+    apiVersion: 'networking.istio.io/v1',
+    uid: 'group-uid',
+    resourceVersion: 'group-rv',
+    virtualMachine: {
+      labelSource: 'entry',
+      entry: { uid: 'entry-uid', resourceVersion: 'entry-rv' },
+    },
+  });
 });
 afterEach(cleanup);
 const open = (search = '?kind=Pod&namespace=bookinfo&name=reviews&uid=pod-uid') =>
@@ -76,7 +113,7 @@ const read = () =>
   userEvent.click(screen.getByRole('button', { name: 'Read workload dashboard evidence' }));
 it('requires separate explicit ownership and runtime inspection, retaining workload/version identity', async () => {
   open();
-  expect(loadCorrelationSnapshot).not.toHaveBeenCalled();
+  expect(loadWorkloadDashboardSnapshot).not.toHaveBeenCalled();
   expect(InspectionResults).not.toHaveBeenCalled();
   await read();
   await screen.findByRole('button', { name: 'Inspect workload dashboard recommendations' });
@@ -88,6 +125,7 @@ it('requires separate explicit ownership and runtime inspection, retaining workl
   expect(query.metricCluster).toBe('east');
   expect(query.evidence.workload).toMatchObject({
     kind: 'Pod',
+    apiVersion: 'v1',
     uid: 'pod-uid',
     resourceVersion: '17',
     version: 'v2',
@@ -98,7 +136,7 @@ it('clears captures on draft changes and never resurrects them when the target r
   open();
   await read();
   await screen.findByRole('button', { name: 'Inspect workload dashboard recommendations' });
-  const signal = vi.mocked(loadCorrelationSnapshot).mock.calls[0][1];
+  const signal = vi.mocked(loadWorkloadDashboardSnapshot).mock.calls[0][2];
   fireEvent.change(screen.getByLabelText('Dashboard workload name'), {
     target: { value: 'other' },
   });
@@ -109,13 +147,13 @@ it('clears captures on draft changes and never resurrects them when the target r
   expect(
     screen.queryByRole('button', { name: 'Inspect workload dashboard recommendations' })
   ).toBeNull();
-  expect(loadCorrelationSnapshot).toHaveBeenCalledTimes(1);
+  expect(loadWorkloadDashboardSnapshot).toHaveBeenCalledTimes(1);
 });
 it('rejects invalid targets before transport and refuses changed linked UIDs', async () => {
   open('?kind=Pod&namespace=bookinfo&name=invalid%2Fname');
   await read();
   expect(screen.getByText(/valid name for dashboard annotations/)).toBeDefined();
-  expect(loadCorrelationSnapshot).not.toHaveBeenCalled();
+  expect(loadWorkloadDashboardSnapshot).not.toHaveBeenCalled();
   cleanup();
   open('?kind=Pod&namespace=bookinfo&name=reviews&uid=old');
   await read();
@@ -128,7 +166,7 @@ it('invalidates pending ownership reads on a settings change without replaying o
   let resolve: (value: ReturnType<typeof snapshot>) => void = () => {
     throw new Error('Reader not started');
   };
-  vi.mocked(loadCorrelationSnapshot).mockImplementation(
+  vi.mocked(loadWorkloadDashboardSnapshot).mockImplementation(
     () =>
       new Promise(done => {
         resolve = done;
@@ -146,10 +184,10 @@ it('invalidates pending ownership reads on a settings change without replaying o
   );
   resolve(snapshot());
   await waitFor(() =>
-    expect(vi.mocked(loadCorrelationSnapshot).mock.calls[0][1].aborted).toBe(true)
+    expect(vi.mocked(loadWorkloadDashboardSnapshot).mock.calls[0][2].aborted).toBe(true)
   );
   expect(
     screen.queryByRole('button', { name: 'Inspect workload dashboard recommendations' })
   ).toBeNull();
-  expect(loadCorrelationSnapshot).toHaveBeenCalledTimes(1);
+  expect(loadWorkloadDashboardSnapshot).toHaveBeenCalledTimes(1);
 });
