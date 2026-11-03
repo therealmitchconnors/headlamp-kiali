@@ -203,7 +203,11 @@ it('keeps an absent direction unavailable while retaining explicit zero-rate obs
     new AbortController().signal
   );
   expect(zero.missingDirections).toEqual([]);
-  expect(zero.calculation).toMatchObject({ status: 'Healthy', errorRatio: -1, totalRequestRate: 0 });
+  expect(zero.calculation).toMatchObject({
+    status: 'Healthy',
+    errorRatio: -1,
+    totalRequestRate: 0,
+  });
 });
 it('keeps unsupported TCP observations from becoming healthy workload results', async () => {
   vi.mocked(ApiProxy.request).mockImplementation(async path => {

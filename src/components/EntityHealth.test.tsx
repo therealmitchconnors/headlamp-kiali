@@ -170,13 +170,17 @@ it('announces per-direction telemetry gaps and failures accessibly without a hea
   await user.type(screen.getByLabelText('Istio metric cluster label'), 'east');
   await user.type(screen.getByLabelText('Istio canonical service label'), 'reviews');
   await user.click(screen.getByRole('button', { name: 'Load health' }));
-  const missing = await screen.findByText('Outbound request telemetry is missing; health cannot be assessed.');
+  const missing = await screen.findByText(
+    'Outbound request telemetry is missing; health cannot be assessed.'
+  );
   expect(missing.closest('[role="alert"]')).not.toBeNull();
-  expect(screen.getByText('Inbound: Inbound metrics denied').closest('[role="alert"]')).not.toBeNull();
   expect(
-    screen.getByText(/Health is unavailable from incomplete, missing or invalid evidence/).closest(
-      '[role="alert"]'
-    )
+    screen.getByText('Inbound: Inbound metrics denied').closest('[role="alert"]')
+  ).not.toBeNull();
+  expect(
+    screen
+      .getByText(/Health is unavailable from incomplete, missing or invalid evidence/)
+      .closest('[role="alert"]')
   ).not.toBeNull();
   expect(screen.queryByText('Replica and request health: Degraded')).toBeNull();
 });

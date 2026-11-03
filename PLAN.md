@@ -8,15 +8,19 @@ database, conversation, or private artifact directory.
 correlation work. An additional increment implements 14 Istio configuration
 models/views, confirmed configuration CRUD, limited checks, traffic charts
 and a basic observed-request graph. Configuration now also includes nine
-Gateway API/inference kinds from pinned upstream schemas. The subsequent health increment adds a
-Go-oracle-backed calculator, per-cluster tolerances and workload health.
+Gateway API/inference kinds from pinned upstream schemas. The health increment
+adds a Go-oracle-backed calculator, per-cluster tolerances and health for
+supported workloads, Applications and inbound-only Services. The 2026-11-03
+increment closes the supported HTTP/gRPC reporter and entity-aggregation
+boundary; TCP health, capability inference, and proxy/ambient/security evidence
+remain explicitly unavailable.
 Hosted live Bookinfo request/latency charts, traffic graph and workload health
 are verified. Native Jaeger/Tempo HTTP trace browsing is implemented with
 hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-31
+### Resume status — 2026-11-03
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -32,6 +36,12 @@ No VM was deployed.
 Positive Pod-account provenance now appears in Applications through captured
 UID owner chains. Missing account fields remain unavailable and no
 account-absence checker or authorization principal is inferred.
+The supported health boundary now requires observed data for every queried
+direction, rejects unsupported request protocols rather than treating them as
+healthy, and distinguishes explicit zero-rate observations from absent vectors.
+A pinned query/aggregation fixture complements the existing Go reporter and
+calculator oracles. No new hosted/real telemetry or Desktop evidence was
+collected for this increment.
 
 **Prometheus recurrence, 2026-10-29:** the existing Pod again reached its 1 GiB
 cap during TSDB compaction (156 OOM restarts before mitigation). Under the
@@ -1171,7 +1181,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Scoped reads | Explicit cluster, namespace validation, abort propagation, structured failures, stale-response suppression | No persistent derived-data cache |
 | Applications | List/detail grouping, versions, related Services, owned pods and native-sidecar detection | One cluster and one explicitly selected namespace |
 | Correlation core | Scoped label postings, selectors, UID owner chains, de-duplication, Service-host resolution | Configuration relationships, not measured traffic |
-| Health | Pinned calculator/reporter combination, cluster rules, five-kind workloads, correlated Applications and inbound-only Services | No proxy/ambient/security assessment; unknown-cluster/external and complete query coverage remain |
+| Health | Pinned calculator/reporter combination, cluster rules, five replica-workload kinds, correlated Applications and inbound-only Services; exact telemetry-cluster selectors and complete HTTP/gRPC direction observations | TCP error health, capability inference, unknown-cluster fallback, external Service discovery, proxy/ambient/security assessment and VM health remain unavailable |
 | Mesh inventory and configured mTLS | Local discovery, selected config merge and namespace-wide policy indicator | Label hints/configuration only; not full effective/observed mesh security |
 | Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
@@ -1551,8 +1561,11 @@ substitute for meaningful detail presentation.
 - Port safe query construction and typed Prometheus-compatible result decoding.
 - Cover HTTP/gRPC/TCP signals, inbound/outbound metrics, reporter selection,
   histograms/quantiles, throughput, missing samples and duplicate-series handling.
-- Complete health thresholds, annotations, protocol semantics and aggregation.
-  Missing telemetry is not zero traffic or healthy status.
+- Health thresholds, annotations, HTTP/gRPC semantics, reporter aggregation and
+  absent-versus-zero handling are source/oracle-backed for supported workloads,
+  Applications and inbound-only Services. TCP byte metrics do not provide
+  request-code health; unsupported protocols, missing directions and unavailable
+  capability evidence stay unavailable rather than healthy.
 - Build a simple deterministic observed graph before advanced decorations.
   Never synthesize traffic edges from ownership/selector relationships.
 - Compare query, health and graph outputs to pinned upstream fixtures.

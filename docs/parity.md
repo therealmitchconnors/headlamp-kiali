@@ -581,8 +581,8 @@ Desktop debugging remained unavailable. Host-only deprecated CRD-v1beta1
 discovery and watch-close errors remain separate from plugin behavior.
 Prometheus stayed ready with zero restarts under the existing 1 GiB limit.
 The user now permits raising that limit if trouble recurs; it was not needed.
-Proxy/ambient assessment, full query semantics and complete health aggregation
-remain open.
+TCP error semantics, capability detection, external Service discovery and
+proxy/ambient assessment remain open.
 
 ### Application and Service consumers
 
@@ -608,19 +608,21 @@ captured query time; the domain aggregator still sums independent observations
 with the same protocol/code. Missing, stale, warning-bearing and invalid
 observations suppress derived health. Service health does not incorporate
 endpoint or replica readiness.
-Zero-rate Service health is Not assessed. Applications/workloads retain the
-calculator's replica status but label it replica-only with request health
-unassessed, rather than describing zero-rate traffic as healthy.
+Zero-rate Service health is Not assessed. When both request directions return
+explicit zero-rate vectors, Applications/workloads retain the calculator's
+replica status but label it replica-only with request health unassessed. An
+absent direction is unavailable instead; it is not treated as a zero rate.
 
 Real hosted Bookinfo evidence covered reviews Service inbound health and
 Application replica/request health across three 1/1/1 Deployments, following
 36 bounded productpage GETs. A nonexistent telemetry-cluster label produced
 unavailable health. Native links retained target identity, and no response
 fixtures or resource mutations were used. Existing workload regression checks
-remain green. Reporter combination is described below. Exact cluster labels and
-five-minute rates remain bounded defaults: unknown-destination fallback,
-external Services, capability detection, more workload kinds and
-proxy/ambient semantics remain open. Desktop evidence remains outstanding.
+remain green. Reporter combination is described below. Query labels use the
+exact explicit telemetry-cluster value, including literal `unknown` or `external`;
+there is no unknown-cluster fallback. Unknown-destination fallback, external
+Service discovery, capability detection, additional workload kinds and
+proxy/ambient semantics remain unsupported. Desktop evidence remains outstanding.
 
 ### Reporter combination and no-response normalization
 
@@ -644,6 +646,25 @@ explicit known reporter labels and refuses a healthy result when they are
 missing/malformed. The adapter retains the 2,000-series bounds; the pure combiner
 accepts at most 4,000 samples across both directions and rejects nonfinite or
 negative input. Traffic charts retain their existing reporter semantics.
+
+`parity/entity-health-oracle.json` adds query-and-output fixtures bound to the
+same commit and the pinned health service/model sources. The fixtures cover a
+workload inbound query, Application canonical-service inbound/outbound queries,
+an inbound-only Service query, and literal `unknown`/`external` telemetry labels.
+Combined expected output covers source/destination max-per-code behavior, HTTP,
+gRPC status and no-response normalization; the 372 independently executed Go
+reporter cases remain the differential oracle for the aggregation functions.
+
+Health request observations are supported only for HTTP and gRPC. A `tcp` or
+unknown protocol on `istio_requests_total` is rejected as unsupported; TCP byte
+counters have no response-code health semantics and are not converted into
+healthy request results. A zero-valued vector sample is observed evidence, while
+an absent vector is not: Applications and the five supported replica workload
+kinds require both directions to have observations; Services require inbound
+observations only. Missing directions are announced accessibly and suppress the
+calculation. No sidecar, waypoint, proxy-sync, ambient or security capability is
+assumed. Other workload kinds and VM WorkloadGroup application health remain
+unavailable rather than receiving fabricated replica or traffic health.
 
 Real hosted Bookinfo checks loaded Service, Application and workload health
 using combined queries after 18 bounded productpage GETs. Separate intercepted

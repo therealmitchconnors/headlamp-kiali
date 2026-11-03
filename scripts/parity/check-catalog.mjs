@@ -21,6 +21,9 @@ const localChecks = JSON.parse(
 const reporters = JSON.parse(
   await readFile('test-files/parity/health-reporters-oracle.json', 'utf8')
 );
+const entityHealth = JSON.parse(
+  await readFile('test-files/parity/entity-health-oracle.json', 'utf8')
+);
 const proxySummaries = JSON.parse(
   await readFile('test-files/parity/proxy-summary-oracle.json', 'utf8')
 );
@@ -103,6 +106,7 @@ for (const artifact of [
   mtls,
   imports,
   reporters,
+  entityHealth,
   localChecks,
   proxySummaries,
   authorization,
@@ -226,6 +230,9 @@ assert.deepEqual(namespaceRevisions.sources, {
 assert.equal(health.workloads[0].input, null);
 assert.equal(health.workloads[0].expected, 'NA');
 assert.equal(calculator.cases.length, 271);
+assert.equal(entityHealth.queries.length, 4);
+assert.ok(entityHealth.sources.includes('models/health.go:CombineReporters'));
+assert.ok(entityHealth.combinedRequests.expected.inbound.grpc['-'] > 0);
 assert.equal(hosts.cases.length, 627);
 assert.equal(mtls.cases.length, 2600);
 assert.equal(imports.cases.length, 760);

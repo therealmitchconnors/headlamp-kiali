@@ -1,5 +1,6 @@
 {
   "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "version": "v2.33.0",
   "sources": [
     "business/health.go:getAppRequestsHealth",
     "business/health.go:getServiceRequestsHealth",
