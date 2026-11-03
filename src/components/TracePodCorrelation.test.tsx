@@ -227,3 +227,30 @@ it('clears captured workload navigation when the selected span range changes', a
   expect(screen.queryByRole('link', { name: 'Open current application' })).toBeNull();
   expect(vi.mocked(verifyTraceWorkload)).toHaveBeenCalledTimes(1);
 });
+it('aborts a pending workload capture and suppresses its late links after a range change', async () => {
+  let resolve: (value: typeof currentWorkload) => void = () => {};
+  vi.mocked(verifyTraceWorkload).mockReturnValueOnce(
+    new Promise(done => {
+      resolve = done;
+    })
+  );
+  const { rerender } = render(<TracePodCorrelation cluster="alpha" span={span} />);
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Verify reported pod in this cluster' })
+  );
+  await userEvent.click(
+    await screen.findByRole('button', { name: 'Verify current workload owner' })
+  );
+  await waitFor(() => expect(verifyTraceWorkload).toHaveBeenCalledTimes(1));
+  const signal = vi.mocked(verifyTraceWorkload).mock.calls[0][3];
+  rerender(
+    <TracePodCorrelation
+      cluster="alpha"
+      span={{ ...span, durationNs: (BigInt(span.durationNs) + BigInt(1)).toString() }}
+    />
+  );
+  expect(signal.aborted).toBe(true);
+  await act(async () => resolve(currentWorkload));
+  expect(screen.queryByRole('link', { name: 'Open current application' })).toBeNull();
+  expect(screen.queryByRole('link', { name: 'Open traffic graph for this namespace' })).toBeNull();
+});

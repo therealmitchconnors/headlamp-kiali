@@ -198,7 +198,11 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   DestinationRule KIA0205–KIA0208 add the counterpart peer-policy checks, with
   selected-rule freshness and security-group links to observed peer policies.
 - Native Envoy/pod diagnostics, fixture-backed ztunnel inspection, expanded
-  trace metadata and explicit UID-verified trace-to-Pod links.
+  trace metadata and explicit UID-verified trace-to-Pod links. A second
+  opt-in trace action resolves the current supported workload through complete
+  UID owner chains; applications are linked only from the captured correlation
+  model. The separate Prometheus graph remains unassociated because it has no
+  shared Kubernetes UID or trace/span identity.
 - Separate traffic topology page with workload/application/versioned-application/
   Service projections, captured historical windows, request/byte/message units,
   local filtering and edge metadata. Source/destination reporters are explicit,
@@ -1100,7 +1104,16 @@ settings; no test provider or cluster resource was installed.
 The latest package SHA-256 is
 `a77fd1febf985a1cda15a61a45e45e75cff80ef3bba772fc12d8c043aa62ccf6`.
 Prometheus remained ready with zero restarts. Broader workload/service/graph
-correlation and historical identity resolution remain open.
+correlation and historical identity resolution remain open. Trace-to-current-
+workload navigation is narrowly supported by complete namespace snapshots;
+trace/graph edge association remains explicitly unproven.
+
+The 2026-11-03 trace workload increment passed 37 focused trace-correlation
+tests, all **22,604 tests in 189 files**, type-check, lint, production build and
+the parity inventory check. English strings were extracted and copied into the
+build. No Headlamp CDP target was available on `127.0.0.1:9222`, so this
+increment has no new hosted/console/a11y evidence; live-provider and Desktop
+gates remain open.
 
 The WorkloadGroup label-conflict increment passed **7,716 tests in 77 files**
 plus normal gates. KIA1702 reads only the selected namespace's WorkloadGroups,
@@ -1180,7 +1193,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
-| Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
+| Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, explicit UID-verified Pod links, and opt-in current-workload/application links from complete UID owner chains | Synthetic trace fixtures and current-object tests; live provider, trace/graph association, broader filters/transports and lossless raw viewing remain |
 | Pod/proxy diagnostics | Container inventory, bounded logs, Envoy inspection, current-Service/configuration candidates and explicitly selected ztunnel registry tables | Envoy/Service hosted-live; configuration/ztunnel positives fixture-backed; broader metadata formats, authorized sync, ambient metrics, logging controls and Desktop remain |
 | Parity evidence | Source inventories, reproducible generators, synthetic fixtures and live Bookinfo checks | Inventoried does not mean implemented |
 
