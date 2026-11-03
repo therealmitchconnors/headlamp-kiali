@@ -130,6 +130,10 @@ async function readSource(
         return {
           name: item.metadata.name,
           uid: item.metadata.uid,
+          resourceVersion:
+            typeof item.metadata.resourceVersion === 'string'
+              ? item.metadata.resourceVersion
+              : undefined,
           namespace: typeof item.metadata.namespace === 'string' ? item.metadata.namespace : '',
           labels: Object.fromEntries(
             Object.entries(labels).map(([key, value]) => [key, String(value)])
