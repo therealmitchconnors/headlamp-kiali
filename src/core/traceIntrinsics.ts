@@ -3,6 +3,7 @@ import {
   TempoAttributeFilter,
   TRACE_ATTRIBUTE_OPERATORS,
   traceAttributeOperatorAllowed,
+  traceIntegerLiteral,
   traceStringLiteral,
 } from './traceFilters';
 
@@ -12,6 +13,7 @@ export const TEMPO_SPAN_INTRINSICS = [
   'duration',
   'status',
   'kind',
+  'childCount',
 ] as const;
 export const TEMPO_TRACE_INTRINSICS = ['traceDuration', 'rootName', 'rootServiceName'] as const;
 export const TEMPO_METADATA_INTRINSICS = [
@@ -58,6 +60,10 @@ export function traceIntrinsicIsDuration(field: TempoIntrinsicFilter['field']): 
   return field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart';
 }
 
+export function traceIntrinsicIsCount(field: TempoIntrinsicFilter['field']): boolean {
+  return field === 'childCount';
+}
+
 export function traceIntrinsicOperatorAllowed(
   field: TempoIntrinsicFilter['field'],
   operator: TempoIntrinsicFilter['operator']
@@ -65,7 +71,7 @@ export function traceIntrinsicOperatorAllowed(
   return traceAttributeOperatorAllowed(
     field === 'status' || field === 'kind' || traceIntrinsicIdWidth(field) !== undefined
       ? 'boolean'
-      : traceIntrinsicIsDuration(field)
+      : traceIntrinsicIsDuration(field) || traceIntrinsicIsCount(field)
       ? 'integer'
       : 'string',
     operator
@@ -74,6 +80,7 @@ export function traceIntrinsicOperatorAllowed(
 
 export function traceIntrinsicName(field: TempoIntrinsicFilter['field']): string {
   if (field === 'traceDuration') return 'trace:duration';
+  if (field === 'childCount') return 'span:childCount';
   if (field === 'rootName') return 'trace:rootName';
   if (field === 'rootServiceName') return 'trace:rootService';
   if (field === 'eventName') return 'event:name';
@@ -147,7 +154,8 @@ export function tempoIntrinsicClauses(filters: readonly TempoIntrinsicFilter[] =
       if (!values.includes(filter.value))
         throw new Error(`Span ${field} requires one of: ${values.join(', ')}`);
       literal = filter.value;
-    } else if (traceIntrinsicIsDuration(field))
+    } else if (traceIntrinsicIsCount(field)) literal = traceIntegerLiteral(filter.value, 'nonnegative');
+    else if (traceIntrinsicIsDuration(field))
       literal = durationLiteral(
         filter.value,
         field === 'duration' ? 'Span' : field === 'traceDuration' ? 'Trace' : 'Event'

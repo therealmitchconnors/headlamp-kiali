@@ -10,6 +10,7 @@ import {
   TEMPO_INTRINSICS,
   TempoIntrinsicFilter,
   traceIntrinsicIdWidth,
+  traceIntrinsicIsCount,
   traceIntrinsicIsDuration,
   traceIntrinsicOperatorAllowed,
 } from '../core/traceIntrinsics';
@@ -35,6 +36,7 @@ export default function TraceIntrinsicFilters({
     duration: t('Span duration'),
     status: t('Reported span status'),
     kind: t('Span kind'),
+    childCount: t('Direct child span count'),
     traceDuration: t('Whole trace duration'),
     rootName: t('Trace root span name'),
     rootServiceName: t('Trace root service name'),
@@ -123,7 +125,11 @@ export default function TraceIntrinsicFilters({
             inputProps={{
               maxLength:
                 traceIntrinsicIdWidth(filter.field) ??
-                (traceIntrinsicIsDuration(filter.field) ? 64 : 1024),
+                (traceIntrinsicIsCount(filter.field)
+                  ? 19
+                  : traceIntrinsicIsDuration(filter.field)
+                  ? 64
+                  : 1024),
             }}
             helperText={
               traceIntrinsicIdWidth(filter.field) !== undefined
@@ -134,6 +140,10 @@ export default function TraceIntrinsicFilters({
                 : filter.field === 'eventTimeSinceStart'
                 ? t(
                     'One signed quantity with ns, us, ms, s, m or h, for example -1.5ms. Whole-nanosecond precision and magnitude at most 9223372036854775807ns; never rounded.'
+                  )
+                : traceIntrinsicIsCount(filter.field)
+                ? t(
+                    'Enter a canonical nonnegative signed 64-bit integer. Tempo supports span:childCount with vParquet5 storage; vParquet4 can return an unsupported-intrinsic error.'
                   )
                 : traceIntrinsicIsDuration(filter.field)
                 ? t(
