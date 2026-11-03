@@ -2,19 +2,24 @@ import {
   captureClusterComparison,
   ClusterComparisonQuery,
   ComparisonTarget,
+  normalizeComparisonStores,
+  NormalizedTelemetryStore,
 } from '../core/clusterComparison';
 import { isRecord } from '../core/object';
 import { clusterScope } from '../core/scope';
-import { RequestPoint, requestPoints, requestRateQuery } from '../core/telemetry';
-import { readHealthMetric } from './health';
+import { decodePrometheus, requestPoints, requestRateQuery } from '../core/telemetry';
 import {
   discoverIstio,
   InvalidResponseError,
   readCluster,
   ReadFailure,
   readFailure,
+  serviceProxyPath,
   withDiagnosticDeadline,
 } from './requests';
+
+const MAX_COMPARISON_SERIES = 2000;
+const MAX_COMPARISON_SAMPLES_PER_SERIES = 241;
 
 type Observation<T> =
   | { status: 'ready'; value: T }
@@ -24,11 +29,12 @@ export interface ComparedCluster {
   target: ComparisonTarget;
   namespace: Observation<{ uid: string }>;
   istio: Observation<{ versions: string[] }>;
-  metrics: Observation<{ point: RequestPoint | null; warnings: string[] }>;
+  metrics: Observation<{ points: ReturnType<typeof requestPoints>; warnings: string[] }>;
 }
 export interface ClusterComparisonSnapshot {
   query: ClusterComparisonQuery;
   clusters: ComparedCluster[];
+  stores: NormalizedTelemetryStore[];
 }
 export async function loadClusterComparison(
   input: ClusterComparisonQuery,
@@ -91,39 +97,47 @@ export async function loadClusterComparison(
               destination_cluster: target.telemetryCluster,
               destination_workload_namespace: query.namespace,
             });
-            const metric = await readHealthMetric(
-              scope,
-              endpoint,
-              expression,
-              query.end,
-              requestSignal
-            );
-            requestSignal.throwIfAborted();
-            if (metric.ok === false) result.metrics = { status: 'error', error: metric.error };
-            else
-              result.metrics = await observe(async () => {
-                try {
-                  if (
-                    metric.result.series.some(series =>
+            result.metrics = await observe(async () => {
+              const params = new URLSearchParams({
+                query: expression,
+                start: String(query.start),
+                end: String(query.end),
+                step: String(query.step),
+              });
+              const response = await readCluster(
+                scope,
+                `${serviceProxyPath(endpoint, '/api/v1/query_range')}?${params}`,
+                requestSignal
+              );
+              try {
+                const metric = decodePrometheus(response, 'matrix');
+                if (
+                  metric.series.length > MAX_COMPARISON_SERIES ||
+                  metric.series.some(
+                    series =>
                       Object.keys(series.labels).some(
                         label =>
                           !['request_protocol', 'response_code', 'grpc_response_status'].includes(
                             label
                           )
+                      ) ||
+                      series.samples.length > MAX_COMPARISON_SAMPLES_PER_SERIES ||
+                      series.samples.some(
+                        sample =>
+                          sample.timestamp < query.start ||
+                          sample.timestamp > query.end ||
+                          Math.abs((sample.timestamp - query.start) % query.step) > 0.001
                       )
-                    )
                   )
-                    throw new Error('Comparison rates contain unexpected aggregation labels');
-                  const points = requestPoints(metric.result);
-                  if (points.length > 1)
-                    throw new Error('Comparison rates do not share one sample time');
-                  return { point: points[0] ?? null, warnings: metric.result.warnings };
-                } catch (error) {
-                  throw new InvalidResponseError(
-                    error instanceof Error ? error.message : 'Invalid comparison rates'
-                  );
-                }
-              });
+                )
+                  throw new Error('Comparison rates exceeded their series or range bounds');
+                return { points: requestPoints(metric), warnings: metric.warnings };
+              } catch (error) {
+                throw new InvalidResponseError(
+                  error instanceof Error ? error.message : 'Invalid comparison rates'
+                );
+              }
+            });
           }
         }
       );
@@ -145,5 +159,9 @@ export async function loadClusterComparison(
   }
   await Promise.all(Array.from({ length: Math.min(3, query.targets.length) }, worker));
   signal.throwIfAborted();
-  return { query, clusters };
+  const stores = normalizeComparisonStores(
+    clusters.map(({ target, metrics }) => ({ target, metrics })),
+    (query.end - query.start) / query.step + 1
+  );
+  return { query, clusters, stores };
 }

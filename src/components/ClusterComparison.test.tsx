@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { useKialiConfig } from '../config';
@@ -57,8 +57,18 @@ const config = {
   config: {
     schemaVersion: 1 as const,
     clusters: {
-      alpha: { prometheus: endpoint, telemetryCluster: 'shared' },
-      beta: { prometheus: endpoint, telemetryCluster: 'shared' },
+      alpha: {
+        prometheus: endpoint,
+        meshClusterName: 'logical-alpha',
+        telemetryCluster: 'shared',
+        telemetryStore: 'shared-store',
+      },
+      beta: {
+        prometheus: endpoint,
+        meshClusterName: 'logical-beta',
+        telemetryCluster: 'shared',
+        telemetryStore: 'shared-store',
+      },
     },
   },
 };
@@ -73,28 +83,53 @@ beforeEach(() => {
         target,
         istio: { status: 'ready', value: { versions: ['v1'] } },
         namespace: { status: 'error', error: { kind: 'forbidden', message: 'Namespace denied' } },
-        metrics: { status: 'ready', value: { point: null, warnings: [] } },
+        metrics: { status: 'ready', value: { points: [], warnings: [] } },
       })),
+      stores: [
+        {
+          identity: 'shared-store',
+          kind: 'shared',
+          sourceClusters: query.targets.map(target => target.cluster),
+          sourceMappings: query.targets,
+          status: 'incomplete',
+          points: [],
+          duplicates: [],
+          reason: 'No usable samples',
+        },
+      ],
     }));
 });
 afterEach(cleanup);
-it('compares only explicit selections, preserves errors and avoids combined health/rate claims', async () => {
+it('compares explicit contexts over a captured historical range and preserves source errors', async () => {
   render(<ClusterComparison />);
   const user = userEvent.setup();
   expect(loadClusterComparison).not.toHaveBeenCalled();
   await user.click(screen.getByLabelText('beta'));
   await user.type(screen.getByLabelText('Namespace'), 'bookinfo');
+  fireEvent.change(screen.getByLabelText('Range duration (minutes)'), { target: { value: '30' } });
+  fireEvent.change(screen.getByLabelText('Range end (UTC)'), {
+    target: { value: '2023-11-14T22:13' },
+  });
   await user.click(screen.getByRole('button', { name: 'Compare clusters' }));
   await screen.findByText('Captured cluster comparison');
-  expect(screen.getByText(/Repeated telemetry identities: shared/)).toBeDefined();
+  expect(screen.getByText('Normalized telemetry stores')).toBeDefined();
   expect(screen.getAllByText('Forbidden: Namespace denied')).toHaveLength(2);
   expect(screen.getAllByText('No usable samples')).toHaveLength(2);
   expect(screen.getByRole('link', { name: 'beta' }).getAttribute('href')).toBe(
     '/c/beta/kiali-overview'
   );
-  expect(
-    vi.mocked(loadClusterComparison).mock.calls[0][0].targets.map(target => target.cluster)
-  ).toEqual(['alpha', 'beta']);
+  const submitted = vi.mocked(loadClusterComparison).mock.calls[0][0];
+  expect(submitted.targets.map(target => target.cluster)).toEqual(['alpha', 'beta']);
+  expect(submitted.targets.map(target => target.meshClusterName)).toEqual([
+    'logical-alpha',
+    'logical-beta',
+  ]);
+  expect(submitted.targets.map(target => target.telemetryStore)).toEqual([
+    'shared-store',
+    'shared-store',
+  ]);
+  expect(submitted.end).toBe(Date.parse('2023-11-14T22:13:00Z') / 1000);
+  expect(submitted.start).toBe(submitted.end - 30 * 60);
 });
 it('invalidates and aborts submissions when a selected connection changes, without replay', async () => {
   vi.mocked(loadClusterComparison).mockImplementation(() => new Promise(() => {}));
@@ -105,7 +140,7 @@ it('invalidates and aborts submissions when a selected connection changes, witho
   await waitFor(() => expect(loadClusterComparison).toHaveBeenCalledTimes(1));
   const signal = vi.mocked(loadClusterComparison).mock.calls[0][1];
   const changed = structuredClone(config);
-  changed.config.clusters.alpha.telemetryCluster = 'changed';
+  changed.config.clusters.alpha.telemetryStore = 'changed';
   vi.mocked(useKialiConfig).mockReturnValue(changed);
   view.rerender(<ClusterComparison />);
   expect(signal.aborted).toBe(true);

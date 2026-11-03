@@ -11,7 +11,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useKialiConfig } from '../config';
 import {
   ClusterComparisonQuery,
-  duplicateTelemetryIdentities,
   planClusterComparison,
 } from '../core/clusterComparison';
 import { getClusterConfig } from '../core/config';
@@ -24,7 +23,8 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
   const { t } = useTranslation();
   const load = useCallback((signal: AbortSignal) => loadClusterComparison(query, signal), [query]);
   const state = useRequest(JSON.stringify(query), load);
-  const duplicates = duplicateTelemetryIdentities(query.targets);
+  const end = new Date(query.end * 1000).toISOString();
+  const start = new Date(query.start * 1000).toISOString();
   const failure = (error: ReadFailure) => {
     const labels = {
       'not-found': t('Not found'),
@@ -42,21 +42,14 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
           <Stack spacing={2}>
             <Typography>
               {t(
-                'Namespace {{namespace}}; five-minute destination-reporter rates ending {{time}}',
+                'Namespace {{namespace}}; five-minute destination-reporter rates from {{start}} to {{end}} at one-minute intervals.',
                 {
                   namespace: query.namespace,
-                  time: new Date(query.end * 1000).toISOString(),
+                  start,
+                  end,
                 }
               )}
             </Typography>
-            {!!duplicates.length && (
-              <Alert severity="warning">
-                {t(
-                  'Repeated telemetry identities: {{identities}}. They may refer to overlapping data. Results are not summed or deduplicated across providers.',
-                  { identities: duplicates.join(', ') }
-                )}
-              </Alert>
-            )}
             <div id="kiali-cluster-comparison">
               <SimpleTable
                 data={snapshot.clusters}
@@ -68,6 +61,10 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
                         {item.target.cluster}
                       </Link>
                     ),
+                  },
+                  {
+                    label: t('Logical mesh cluster'),
+                    getter: item => item.target.meshClusterName ?? t('Not mapped'),
                   },
                   {
                     label: t('Istio API observation'),
@@ -88,7 +85,14 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
                         : t('Unavailable'),
                   },
                   {
-                    label: t('Metric identity'),
+                    label: t('Telemetry store'),
+                    getter: item =>
+                      item.target.telemetryStore
+                        ? t('Shared: {{identity}}', { identity: item.target.telemetryStore })
+                        : t('Context isolated'),
+                  },
+                  {
+                    label: t('Metric cluster identity'),
                     getter: item => item.target.telemetryCluster ?? t('Not configured'),
                   },
                   {
@@ -105,14 +109,16 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
                         ? t('Endpoint and metric identity required')
                         : item.metrics.status === 'error'
                         ? failure(item.metrics.error)
-                        : item.metrics.value.point?.requests?.toPrecision(5) ??
+                        : item.metrics.value.points.at(-1)?.requests?.toPrecision(5) ??
                           t('No usable samples'),
                   },
                   {
                     label: t('Observed error percentage'),
                     getter: item =>
                       item.metrics.status === 'ready'
-                        ? item.metrics.value.point?.errorPercent?.toFixed(2) ?? t('Not available')
+                        ? item.metrics.value.points
+                            .at(-1)
+                            ?.errorPercent?.toFixed(2) ?? t('Not available')
                         : t('Not available'),
                   },
                   {
@@ -125,6 +131,56 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
                 ]}
               />
             </div>
+            <Typography variant="h6">{t('Normalized telemetry stores')}</Typography>
+            <SimpleTable
+              data={snapshot.stores}
+              columns={[
+                {
+                  label: t('Telemetry store'),
+                  getter: store =>
+                    store.kind === 'shared'
+                      ? t('Shared: {{identity}}', { identity: store.identity })
+                      : t('Context isolated: {{identity}}', { identity: store.identity }),
+                },
+                {
+                  label: t('Source contexts'),
+                  getter: store =>
+                    store.sourceMappings
+                      .map(
+                        source =>
+                          `${source.cluster} (${source.telemetryCluster ?? t('Not configured')})`
+                      )
+                      .join(', '),
+                },
+                {
+                  label: t('Normalization'),
+                  getter: store =>
+                    store.status === 'ready'
+                      ? t('Complete')
+                      : store.status === 'ambiguous'
+                      ? t('Ambiguous: {{reason}}', { reason: store.reason ?? '' })
+                      : t('Incomplete: {{reason}}', { reason: store.reason ?? '' }),
+                },
+                {
+                  label: t('Normalized requests / second'),
+                  getter: store =>
+                    store.status === 'ready'
+                      ? store.points.at(-1)?.requests?.toPrecision(5) ?? t('No usable samples')
+                      : t('Not available'),
+                },
+                {
+                  label: t('Normalized error percentage'),
+                  getter: store =>
+                    store.status === 'ready'
+                      ? store.points.at(-1)?.errorPercent?.toFixed(2) ?? t('Not available')
+                      : t('Not available'),
+                },
+                {
+                  label: t('Duplicate contexts excluded'),
+                  getter: store => store.duplicates.map(item => item.cluster).join(', ') || '-',
+                },
+              ]}
+            />
           </Stack>
         </SectionBox>
       )}
@@ -142,6 +198,10 @@ export default function ClusterComparison() {
     selected.filter(name => names.includes(name))
   );
   const [namespace, setNamespace] = useState('');
+  const [rangeMinutes, setRangeMinutes] = useState(60);
+  const [rangeEnd, setRangeEnd] = useState(() =>
+    new Date(Math.floor(Date.now() / 60000) * 60000).toISOString().slice(0, 16)
+  );
   const [submitted, setSubmitted] = useState<{ binding: string; query: ClusterComparisonQuery }>();
   const [error, setError] = useState('');
   const binding = JSON.stringify([
@@ -149,7 +209,14 @@ export default function ClusterComparison() {
     config.valid,
     clusters.map(cluster => {
       const settings = config.valid ? getClusterConfig(config.config, cluster) : undefined;
-      return [cluster, names.includes(cluster), settings?.prometheus, settings?.telemetryCluster];
+      return [
+        cluster,
+        names.includes(cluster),
+        settings?.prometheus,
+        settings?.meshClusterName,
+        settings?.telemetryCluster,
+        settings?.telemetryStore,
+      ];
     }),
   ]);
   useEffect(() => setSubmitted(undefined), [binding]);
@@ -159,7 +226,7 @@ export default function ClusterComparison() {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'Select up to eight Headlamp contexts explicitly. Reads use each context and its saved Prometheus/metric identity with at most three active targets and a 15-second deadline per target. This does not discover mesh membership, infer health, combine providers or enable multi-cluster writes. Changing selections or connection settings discards the submitted comparison.'
+              'Select up to eight Headlamp contexts explicitly. Reads use each context, its saved endpoint and metric identity, and an optional explicit shared-store identity, with at most three active targets and a 15-second deadline per target. Unmapped stores remain isolated; requests do not borrow credentials across contexts. This does not discover mesh membership or enable multi-cluster writes.'
             )}
           </Alert>
           {!names.length && (
@@ -210,9 +277,28 @@ export default function ClusterComparison() {
               setSubmitted(undefined);
             }}
           />
+          <TextField
+            label={t('Range duration (minutes)')}
+            type="number"
+            inputProps={{ min: 15, max: 240, step: 15 }}
+            value={rangeMinutes}
+            onChange={event => {
+              setRangeMinutes(Number(event.target.value));
+              setSubmitted(undefined);
+            }}
+          />
+          <TextField
+            label={t('Range end (UTC)')}
+            type="datetime-local"
+            value={rangeEnd}
+            onChange={event => {
+              setRangeEnd(event.target.value);
+              setSubmitted(undefined);
+            }}
+          />
           <Typography>
             {t(
-              'Unknown mappings do not produce broad metric queries. Missing namespaces, denied APIs and metric failures remain separate observations; empty metrics are not a healthy result.'
+              'Rates are sampled once per minute over the selected historical range, using five-minute Prometheus rate windows. Shared-store values collapse only when the explicit store and metric identities match and their samples are identical. Endpoint aliases or conflicting readings remain ambiguous; partial sources never produce a complete normalized total.'
             )}
           </Typography>
           <Button
@@ -221,12 +307,16 @@ export default function ClusterComparison() {
             onClick={() => {
               if (config.valid === false) return;
               try {
+                const parsedEnd = Date.parse(`${rangeEnd}:00Z`);
+                if (!Number.isFinite(parsedEnd)) throw new Error(t('Choose a valid UTC range end'));
+                const end = Math.floor(parsedEnd / 1000);
                 const query = planClusterComparison(
                   clusters,
                   names,
                   config.config,
                   namespace,
-                  Math.floor(Date.now() / 1000)
+                  end - rangeMinutes * 60,
+                  end
                 );
                 setSubmitted({ binding, query });
                 setError('');

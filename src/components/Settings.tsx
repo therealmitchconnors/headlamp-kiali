@@ -20,6 +20,7 @@ import {
   validateMeshClusterName,
   validateServiceEndpoint,
   validateTelemetryCluster,
+  validateTelemetryStore,
   validateTracingConfig,
 } from '../core/config';
 import { CustomDashboardSettings, validateCustomDashboardSettings } from '../core/customDashboards';
@@ -84,6 +85,7 @@ function ClusterSettingsForm({
   initialIdentityDomain,
   initialTracing,
   initialGatewayClasses,
+  initialTelemetryStore,
   initialTelemetryCluster,
   initialMeshClusterName,
   initialSkipWildcardGatewayHosts,
@@ -96,6 +98,7 @@ function ClusterSettingsForm({
   initialIdentityDomain?: string | null;
   initialTracing?: TracingConfig | null;
   initialGatewayClasses?: GatewayClassSettings;
+  initialTelemetryStore?: string | null;
   initialTelemetryCluster?: string | null;
   initialMeshClusterName?: string | null;
   initialSkipWildcardGatewayHosts?: boolean;
@@ -111,6 +114,7 @@ function ClusterSettingsForm({
     JSON.stringify(initialGatewayClasses ?? { classes: [], selector: {} }, null, 2)
   );
   const [domainDraft, setDomainDraft] = useState(initialIdentityDomain ?? '');
+  const [telemetryStore, setTelemetryStore] = useState(initialTelemetryStore ?? '');
   const [metricIdentity, setMetricIdentity] = useState(initialTelemetryCluster ?? '');
   const [meshIdentity, setMeshIdentity] = useState(initialMeshClusterName ?? '');
   const [dashboardText, setDashboardText] = useState(
@@ -204,6 +208,16 @@ function ClusterSettingsForm({
         error instanceof Error ? error.message : t('Invalid metric cluster label');
     }
   }
+  let telemetryStoreIdentity: string | null = null;
+  let telemetryStoreValidation: string | undefined;
+  if (telemetryStore) {
+    try {
+      telemetryStoreIdentity = validateTelemetryStore(telemetryStore);
+    } catch (error) {
+      telemetryStoreValidation =
+        error instanceof Error ? error.message : t('Invalid telemetry store identity');
+    }
+  }
   let customDashboards: CustomDashboardSettings | undefined;
   let meshClusterName: string | null = null;
   let meshIdentityValidation: string | undefined;
@@ -229,6 +243,7 @@ function ClusterSettingsForm({
     domainValidation ??
     tracingValidation ??
     gatewayValidation ??
+    telemetryStoreValidation ??
     telemetryValidation ??
     meshIdentityValidation ??
     dashboardValidation;
@@ -274,6 +289,10 @@ function ClusterSettingsForm({
           initialTelemetryCluster === undefined && telemetryCluster === null
             ? undefined
             : telemetryCluster,
+        telemetryStore:
+          initialTelemetryStore === undefined && telemetryStoreIdentity === null
+            ? undefined
+            : telemetryStoreIdentity,
         meshClusterName:
           initialMeshClusterName === undefined && meshClusterName === null
             ? undefined
@@ -474,6 +493,18 @@ function ClusterSettingsForm({
         }}
         helperText={t(
           'Rules match namespace, kind and name in order. Supply tolerance entries with code, degraded, failure, protocol and direction. Kiali defaults are appended after these custom rules. Patterns use linear-time RE2 syntax.'
+        )}
+      />
+      <TextField
+        label={t('Telemetry store identity (optional)')}
+        value={telemetryStore}
+        inputProps={{ maxLength: 256 }}
+        onChange={event => {
+          setTelemetryStore(event.target.value);
+          setFeedback(undefined);
+        }}
+        helperText={t(
+          'Use the same explicit identity only when contexts read one shared telemetry store. Leave blank to keep this context isolated. Requests still use each Headlamp context and its own credentials.'
         )}
       />
       <TextField
@@ -730,6 +761,7 @@ export default function Settings() {
                 }
                 initialTracing={getClusterConfig(state.config, activeCluster).tracing}
                 initialGatewayClasses={getClusterConfig(state.config, activeCluster).gatewayClasses}
+                initialTelemetryStore={getClusterConfig(state.config, activeCluster).telemetryStore}
                 initialTelemetryCluster={
                   getClusterConfig(state.config, activeCluster).telemetryCluster
                 }

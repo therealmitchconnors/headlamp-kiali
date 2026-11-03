@@ -929,37 +929,56 @@ Historical identity and broader cross-provider correlation remain open.
 
 `core/clusterComparison.ts`, `data/clusterComparison.ts` and the native
 **Cluster comparison** page support explicit selection of 1..8 Headlamp
-contexts, initialized from the host selection. Captured targets use their own
-validated Service endpoint and explicit telemetry identity. A three-worker
-queue performs sequential discovery, Namespace and optional request-metric
-reads per target, with a 15-second deadline per target. Ignored SDK aborts do
-not block timeout, queued work does not start after cancellation, and complete
-earlier observations survive an individual target timeout.
+contexts, initialized from the public `K8s.useClustersConf()` and
+`K8s.useSelectedClusters()` APIs. Each captured target separately retains its
+Headlamp context, optional logical `meshClusterName`, exact telemetry-cluster
+label, endpoint and optional telemetry-store identity. An unset store identity
+means context-isolated data; it is never inferred to be shared. A declared
+store identity is the only key that permits cross-context normalization.
 
-Every target/source retains independent error classification and provenance.
-No mapping means no metric request; zero, absent samples, malformed samples,
-denial and namespace absence remain distinct. Request observations use one
-destination reporter and a captured five-minute rate window, not a workload
-health verdict. Repeated identities are flagged as possibly overlapping;
-there is no cross-provider sum or claimed deduplication. Mesh membership is
-not inferred from the user's available contexts or selections.
+The three-worker queue performs discovery, Namespace and optional range-metric
+reads within that target's own `ApiProxy` cluster scope, under a 15-second
+deadline per target. It does not deduplicate requests, share responses or use
+another context's credentials. The selected UTC range is 15 minutes to four
+hours at one-minute steps (at most 241 samples); each sample is the
+destination-reporter five-minute request rate. Each decoded provider response
+is bounded to 2,000 series and 100,000 samples, with no more than 241 samples
+per series. Range, settings and selections are captured for the explicit
+submission. Cancellation stops queued work and suppresses stale results; errors
+remain classified per context.
 
-Connection/selection changes discard the captured comparison before refetch;
-equal settings do not replay reads. Links to the single-context overview use
-explicit `params.cluster`: hosted testing caught that `Link.activeCluster`
-preserves the prior selected group and could otherwise open the single-cluster
-guard. Existing write/resource pages retain their one-cluster boundary.
+Normalization is limited to one explicit store identity at a time. Every
+source must have a telemetry-cluster mapping, the complete requested
+one-minute sample grid and no provider warnings. Distinct telemetry-cluster
+labels in one declared store may be summed only when their timestamp grids
+align. A repeated store+metric identity is excluded only when the endpoint
+mappings agree and the full request/error sample sequences are identical.
+Conflicting readings or different endpoint aliases make the store ambiguous;
+a missing mapping, empty result, warning, unusable sample, partial denial, or
+unaligned range leaves it incomplete with no total. Different stores are never
+merged. Context-level observations and source mappings remain visible alongside
+the normalized group; neither logical mesh names nor equal entity/namespace
+names are membership or deduplication evidence.
 
-Three hosted scenario groups used eight synthetic contexts supplied only in an
-intercepted public `/config` response. Thirty-five API/provider GETs were
-intercepted; peak concurrent target reads measured **3**. They verified mixed
-denied/absent/empty observations, missing mappings, malformed Namespace identity,
-settings invalidation, correct links and the eight-context selection cap.
-All fake context/configuration state was removed; no live writes occurred.
-Tests also cover hanging/cancelled targets and retained prior observations.
-Gates pass **15,722 tests in 113 files**. Comparison rates additionally reject
-unexpected aggregation labels and mixed sample times. Actual multi-cluster topology,
-shared-store normalization and full mesh-wide semantics remain open.
+This follows the bounded telemetry surface, not a claim of full Kiali graph
+parity. At pinned Kiali
+[`v2.33.0` / `0e8be887b8217bbcac5e3ae0bfcd258073949cca`](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/prometheus/metrics.go),
+`fetchRateRange` builds `sum(rate(...))` queries and uses Prometheus
+`QueryRange`; the request-rate callers scope by explicit cluster labels.
+Kiali's `getAllRequestRates`/namespace/service helpers also document that
+omitting reporter scoping can inflate rates. This comparison keeps an explicit
+destination reporter and normalizes only exact duplicate readings within an
+explicitly shared store.
+
+Focused coverage verifies duplicate and distinct telemetry identities,
+context-isolated stores, different same-store endpoint aliases, external label
+values, missing/empty mappings, warning/partial-source states, historical ranges,
+series/sample and context/concurrency bounds, per-context API scoping, cancellation,
+stale-setting invalidation and independent failure presentation. The focused
+suite, type-check and lint pass locally. A running Headlamp/hosted instance was
+not available for this change, so live rendering, browser console, i18n/a11y,
+Desktop and real multi-cluster behavior are not claimed. Full graph fan-out,
+cross-context membership discovery and topology remain open.
 
 ## Native traffic histogram explorer
 
