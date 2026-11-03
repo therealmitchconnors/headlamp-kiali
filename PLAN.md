@@ -388,9 +388,10 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   WorkloadGroup API version, group UID/resourceVersion, first-entry label
   provenance and later annotation-source identity remain distinct. Arbitrary
   custom workload parents and WorkloadEntry annotations stay unsupported.
-  **186 focused tests**, type-check and lint passed locally; no real VM,
-  OpenShift controller, hosted Headlamp, console, or accessibility verification
-  was available for this increment.
+  **186 focused tests** and the full suite (**22,606 tests in 190 files**),
+  type-check, lint, i18n, production build, and parity/resource/dashboard checks
+  passed locally. No real VM, OpenShift controller, hosted Headlamp, console, or
+  accessibility verification was available for this increment.
 - Matching WorkloadEntries now expose source-backed probe evidence, separating
   reported conditions from disabled/unrecognized-annotation assumptions. Three
   hosted groups/five intercepted lists covered all branches, first-condition

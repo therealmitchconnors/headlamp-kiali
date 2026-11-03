@@ -1656,9 +1656,10 @@ annotations are unsupported. Application recommendations still use no version
 or workload overlay.
 
 The source-attribution increment passed **186 focused tests in eight files**,
-type-check and lint. No live VM, OpenShift DeploymentConfig, hosted Headlamp,
-console, or accessibility verification was available for this increment; those
-evidence gaps remain open.
+the full suite (**22,606 tests in 190 files**), type-check, lint, i18n,
+production build, and parity/resource/dashboard checks. No live VM, OpenShift
+DeploymentConfig, hosted Headlamp, console, or accessibility verification was
+available for this increment; those evidence gaps remain open.
 
 Earlier verification passed **175 focused tests in twelve files**, type/lint/i18n/build,
 resource/catalog/parity checks and five stock hosted scenario groups:
