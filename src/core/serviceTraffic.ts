@@ -2,7 +2,9 @@ import type { DestinationRuleSpec, VirtualServiceSpec } from '../resources/schem
 import { circuitBreakerChanges, CircuitBreakerDraft } from './circuitBreaker';
 import { ServiceRelations } from './correlation';
 import { buildHttpMatches, HttpMatchCondition } from './httpMatches';
+import type { HttpMatchEditDraft } from './httpMatchEditing';
 import { mirrorTarget } from './httpMirroring';
+import type { HttpMirroringDraft } from './httpMirroring';
 import { HttpBehaviorDraft, planHttpBehavior } from './httpRouteBehavior';
 import { isLabelKey } from './labels';
 import { loadBalancerChange, LoadBalancerDraft } from './loadBalancer';
@@ -37,6 +39,8 @@ export interface ServiceTrafficDraft {
   outboundTls?: OutboundTlsDraft;
   httpBehavior?: HttpBehaviorDraft;
   httpMatches?: HttpMatchCondition[];
+  httpMatchEdit?: HttpMatchEditDraft;
+  httpMirroring?: HttpMirroringDraft;
 }
 
 export function routingService(

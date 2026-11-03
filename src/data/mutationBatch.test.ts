@@ -20,6 +20,48 @@ const mutation = (kind: string, name = 'reviews') =>
     JSON.stringify({ host: 'reviews', nested: { values: [{ value: 1 }] } })
   );
 const operations = () => [mutation('DestinationRule'), mutation('VirtualService')];
+const originals = {
+  DestinationRule: {
+    apiVersion: 'networking.istio.io/v1',
+    kind: 'DestinationRule',
+    metadata: {
+      name: 'reviews',
+      namespace: 'bookinfo',
+      uid: 'dr-uid',
+      resourceVersion: '4',
+      labels: { preserved: 'yes' },
+    },
+    spec: { host: 'reviews.bookinfo.svc.cluster.local', future: true },
+  },
+  VirtualService: {
+    apiVersion: 'networking.istio.io/v1',
+    kind: 'VirtualService',
+    metadata: {
+      name: 'reviews',
+      namespace: 'bookinfo',
+      uid: 'vs-uid',
+      resourceVersion: '7',
+      annotations: { preserved: 'yes' },
+    },
+    spec: { hosts: ['reviews.bookinfo.svc.cluster.local'], http: [{ route: [] }] },
+  },
+};
+const updateOperations = () =>
+  (['DestinationRule', 'VirtualService'] as const).map(kind => {
+    const definition = configurationDefinitions.find(item => item.kind === kind)!;
+    return prepareMutation(
+      {
+        cluster: 'alpha',
+        namespace: 'bookinfo',
+        name: 'reviews',
+        apiVersion: 'networking.istio.io/v1',
+        definition,
+      },
+      'update',
+      JSON.stringify({ ...originals[kind].spec, proposed: true }),
+      originals[kind]
+    );
+  });
 beforeEach(() => {
   vi.mocked(ApiProxy.request).mockReset();
   vi.mocked(ApiProxy.request).mockImplementation(async path =>
@@ -96,6 +138,51 @@ it('distinguishes a pre-write guard or permission failure from a dispatched unce
   expect(
     (await commitMutationBatch(next, signal, async () => {})).map(item => item.status)
   ).toEqual(['blocked', 'not-attempted']);
+});
+it('dry-runs each captured existing target before confirmation and preserves its metadata on update', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = String(path);
+    if (url.includes('selfsubjectaccessreviews')) return { status: { allowed: true } };
+    if (url.includes('/destinationrules/')) return originals.DestinationRule;
+    if (url.includes('/virtualservices/')) return originals.VirtualService;
+    return {};
+  });
+  const signal = new AbortController().signal;
+  const guard = vi.fn(async () => {});
+  const mutations = updateOperations();
+  const reviewed = await reviewMutationBatch(mutations, signal, guard);
+  const reviewedWrites = vi
+    .mocked(ApiProxy.request)
+    .mock.calls.filter(([path, options]) => options?.method === 'PUT');
+  expect(reviewedWrites.map(([path]) => path)).toEqual([
+    '/apis/networking.istio.io/v1/namespaces/bookinfo/destinationrules/reviews?dryRun=All',
+    '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices/reviews?dryRun=All',
+  ]);
+  expect(reviewedWrites.map(([, options]) => JSON.parse(String(options?.body)).metadata)).toEqual([
+    originals.DestinationRule.metadata,
+    originals.VirtualService.metadata,
+  ]);
+  expect(guard).toHaveBeenCalledTimes(2);
+  const beforeConfirmation = vi.mocked(ApiProxy.request).mock.calls.length;
+  expect(beforeConfirmation).toBe(6);
+  const outcomes = await commitMutationBatch(reviewed, signal, guard);
+  expect(outcomes.map(result => result.status)).toEqual(['succeeded', 'succeeded']);
+  const writes = vi
+    .mocked(ApiProxy.request)
+    .mock.calls.filter(([, options]) => options?.method === 'PUT');
+  expect(writes).toHaveLength(4);
+  expect(writes.slice(2).map(([path]) => path)).toEqual([
+    '/apis/networking.istio.io/v1/namespaces/bookinfo/destinationrules/reviews',
+    '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices/reviews',
+  ]);
+  expect(JSON.parse(String(writes[2][1]?.body))).toEqual({
+    ...originals.DestinationRule,
+    spec: { ...originals.DestinationRule.spec, proposed: true },
+  });
+  expect(JSON.parse(String(writes[3][1]?.body))).toEqual({
+    ...originals.VirtualService,
+    spec: { ...originals.VirtualService.spec, proposed: true },
+  });
 });
 it('rejects duplicate/mixed-cluster batches and preserves cancellation before sending writes', async () => {
   const signal = new AbortController().signal;

@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { commitMutationBatch, reviewMutationBatch } from '../data/mutationBatch';
 import {
+  assertTrafficTargetsAbsent,
   assertTrafficProposalFresh,
   loadServiceTrafficSource,
   ServiceTrafficSource,
@@ -104,14 +105,81 @@ const source: ServiceTrafficSource = {
     workloads: [`Deployment/reviews-${value}`],
   })),
   conflicts: [],
+  routingResources: [],
   definitions: ['DestinationRule', 'VirtualService'].map(kind => ({
     definition: configurationDefinitions.find(definition => definition.kind === kind)!,
     apiVersion: 'networking.istio.io/v1',
   })),
 };
+function existingSource(): ServiceTrafficSource {
+  const host = 'reviews.bookinfo.svc.cluster.local';
+  return {
+    ...source,
+    conflicts: [
+      { kind: 'DestinationRule', namespace: 'bookinfo', name: 'reviews-policy' },
+      { kind: 'VirtualService', namespace: 'bookinfo', name: 'reviews-routes' },
+    ],
+    routingResources: [
+      {
+        kind: 'DestinationRule',
+        apiVersion: 'networking.istio.io/v1',
+        namespace: 'bookinfo',
+        name: 'reviews-policy',
+        object: {
+          apiVersion: 'networking.istio.io/v1',
+          kind: 'DestinationRule',
+          metadata: {
+            name: 'reviews-policy',
+            namespace: 'bookinfo',
+            uid: 'dr-uid',
+            resourceVersion: '4',
+            labels: { preserved: 'yes' },
+          },
+          spec: {
+            host,
+            subsets: ['v1', 'v2'].map(name => ({ name, labels: { version: name } })),
+            trafficPolicy: { loadBalancer: { simple: 'RANDOM', futureField: true } },
+          },
+        },
+      },
+      {
+        kind: 'VirtualService',
+        apiVersion: 'networking.istio.io/v1',
+        namespace: 'bookinfo',
+        name: 'reviews-routes',
+        object: {
+          apiVersion: 'networking.istio.io/v1',
+          kind: 'VirtualService',
+          metadata: {
+            name: 'reviews-routes',
+            namespace: 'bookinfo',
+            uid: 'vs-uid',
+            resourceVersion: '7',
+            annotations: { preserved: 'yes' },
+          },
+          spec: {
+            hosts: [host],
+            gateways: ['mesh'],
+            http: [
+              {
+                match: [{ uri: { prefix: '/reviews' } }],
+                route: ['v1', 'v2'].map((version, index) => ({
+                  destination: { host, subset: version, port: { number: 9080 } },
+                  weight: index === 0 ? 50 : 50,
+                })),
+              },
+              { route: [{ destination: { host: 'ratings.bookinfo.svc.cluster.local' } }] },
+            ],
+          },
+        },
+      },
+    ],
+  };
+}
 beforeEach(() => {
   vi.mocked(loadServiceTrafficSource).mockReset().mockResolvedValue(source);
   vi.mocked(assertTrafficProposalFresh).mockReset().mockResolvedValue();
+  vi.mocked(assertTrafficTargetsAbsent).mockReset().mockResolvedValue();
   vi.mocked(reviewMutationBatch)
     .mockReset()
     .mockImplementation(async mutations => ({ mutations }));
@@ -409,11 +477,88 @@ it('does not turn observed routing overlap into an overwrite proposal', async ()
   });
   open();
   await userEvent.setup().click(screen.getByRole('button', { name: 'Load Service versions' }));
-  await screen.findByText(/Potentially overlapping routing configuration exists/);
+  await screen.findByText(/exactly one existing DestinationRule and one existing VirtualService/);
   expect(
-    screen.getByRole('button', { name: 'Review and dry-run both changes' }).hasAttribute('disabled')
+    screen.getByRole('button', { name: 'Review and dry-run selected changes' }).hasAttribute('disabled')
   ).toBe(true);
   expect(commitMutationBatch).not.toHaveBeenCalled();
+});
+it('reviews and confirms an existing pair as updates while preserving each selected target', async () => {
+  vi.mocked(loadServiceTrafficSource).mockResolvedValue(existingSource());
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load Service versions' }));
+  await screen.findByText(/Editing DestinationRule bookinfo\/reviews-policy/);
+  await user.clear(screen.getByLabelText('Weight for version v1'));
+  await user.type(screen.getByLabelText('Weight for version v1'), '40');
+  await user.clear(screen.getByLabelText('Weight for version v2'));
+  await user.type(screen.getByLabelText('Weight for version v2'), '60');
+  await user.click(screen.getByLabelText('Connection pool change'));
+  await user.click(screen.getByRole('option', { name: 'Set values' }));
+  await user.clear(screen.getByLabelText('Maximum connections'));
+  await user.type(screen.getByLabelText('Maximum connections'), '20');
+  await user.click(
+    screen.getByRole('button', { name: 'Review and dry-run selected changes' })
+  );
+  const confirm = await screen.findByRole('button', {
+    name: 'Confirm updates to selected resources',
+  });
+  const mutations = vi.mocked(reviewMutationBatch).mock.calls[0][0];
+  expect(mutations.map(mutation => [mutation.action, mutation.target.name])).toEqual([
+    ['update', 'reviews-policy'],
+    ['update', 'reviews-routes'],
+  ]);
+  expect(mutations[0].original).toEqual({ uid: 'dr-uid', resourceVersion: '4' });
+  expect(mutations[1].original).toEqual({ uid: 'vs-uid', resourceVersion: '7' });
+  expect(mutations[0].spec).toMatchObject({
+    host: 'reviews.bookinfo.svc.cluster.local',
+    subsets: ['v1', 'v2'].map(name => ({ name, labels: { version: name } })),
+    trafficPolicy: {
+      connectionPool: { tcp: { maxConnections: 20 }, http: { http1MaxPendingRequests: 1 } },
+      loadBalancer: { simple: 'RANDOM', futureField: true },
+    },
+  });
+  expect(mutations[1].spec).toMatchObject({
+    http: [
+      {
+        match: [{ uri: { prefix: '/reviews' } }],
+        route: [
+          { destination: { subset: 'v1' }, weight: 40 },
+          { destination: { subset: 'v2' }, weight: 60 },
+        ],
+      },
+      { route: [{ destination: { host: 'ratings.bookinfo.svc.cluster.local' } }] },
+    ],
+  });
+  expect(screen.getByLabelText('Captured original DestinationRule').textContent).toContain(
+    '"resourceVersion": "4"'
+  );
+  expect(commitMutationBatch).not.toHaveBeenCalled();
+  expect(assertTrafficTargetsAbsent).not.toHaveBeenCalled();
+  await user.click(confirm);
+  await screen.findByText('API operation succeeded');
+  expect(commitMutationBatch).toHaveBeenCalledTimes(1);
+  expect(
+    vi.mocked(commitMutationBatch).mock.calls[0][0].mutations.map(mutation => mutation.target.name)
+  ).toEqual(['reviews-policy', 'reviews-routes']);
+});
+it('blocks an existing-resource replacement before dry-run or confirmation', async () => {
+  vi.mocked(loadServiceTrafficSource).mockResolvedValue(existingSource());
+  vi.mocked(assertTrafficProposalFresh).mockRejectedValue(new Error('Existing resource replaced'));
+  open();
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Load Service versions' }));
+  await user.clear(screen.getByLabelText('Weight for version v1'));
+  await user.type(screen.getByLabelText('Weight for version v1'), '40');
+  await user.clear(screen.getByLabelText('Weight for version v2'));
+  await user.type(screen.getByLabelText('Weight for version v2'), '60');
+  await user.click(
+    await screen.findByRole('button', { name: 'Review and dry-run selected changes' })
+  );
+  await screen.findByText('Existing resource replaced');
+  expect(reviewMutationBatch).not.toHaveBeenCalled();
+  expect(commitMutationBatch).not.toHaveBeenCalled();
+  expect(assertTrafficTargetsAbsent).not.toHaveBeenCalled();
 });
 it('locks scope controls while reviewing and preserves the draft when returning from review', async () => {
   let resolve!: (value: {
