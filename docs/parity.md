@@ -2403,6 +2403,71 @@ provenance groundwork, not a new Go oracle or a complete upstream workload
 inclusion/account-principal universe. KIA1701/KIA0106 and authorization verdicts
 remain deferred. Gates pass **19,322 tests in 150 files**.
 
+### Complete captured workload inclusion and account projection
+
+The bounded application model is not the account caller's workload universe.
+At pinned Kiali v2.33.0 (`0e8be887b8217bbcac5e3ae0bfcd258073949cca`),
+`business/apps.go` groups `AppService.fetchNamespaceApps` results by configured
+application labels; WorkloadGroups use the first matching WorkloadEntry labels
+or the group template labels. Gateway status/selector paths have their own
+`GetGateways`/`SelectorChecker` inclusion semantics and remain unchanged.
+
+The KIA1701 input is different: `business/istio_validations.go:getServiceAccounts`
+uses each workload's `ServiceAccountNames`, populated in
+`models/workload.go:WorkloadListItem.ParseWorkload` from
+`workload.Pods.ServiceAccounts()`. It does not list Kubernetes ServiceAccount
+objects. `business/workloads.go:fetchWorkloadsFromCluster` supports Pods,
+Deployments, ReplicaSets, StatefulSets, DaemonSets, Jobs, CronJobs,
+ReplicationControllers, OpenShift DeploymentConfigs and WorkloadGroups; its
+`KubernetesConfig.ExcludeWorkloads` setting controls inclusion. The pinned
+default excludes Job, CronJob, ReplicationController and DeploymentConfig, so
+the account projection's default set is Deployment, ReplicaSet, StatefulSet,
+DaemonSet and standalone/attributed Pod. The runtime exclusion configuration is
+not available to the plugin, therefore this is a complete capture for that
+pinned default profile, not proof of the active Kiali runtime workload policy.
+Configured exclusions/custom workload types remain downstream gates.
+
+`src/core/workloadInclusion.ts` consumes the namespace correlation capture plus
+a separate OpenShift DeploymentConfig source. This source is discovered and
+versioned without entering the application resources or Gateway projection.
+Completeness requires all supported list captures, source and item
+resourceVersions, and owner chains that match scoped UID, kind, group, name and
+API version. ReplicaSet-to-Deployment promotion is supported. Excluded
+Job/CronJob/ReplicationController/DeploymentConfig ownership is not counted as
+Pod-account input. Missing/stale owners, unsupported/custom chains, ambiguous
+controllers, partial/truncated/denied/malformed/replaced sources, and missing or
+malformed account fields leave the projection unavailable for absence claims.
+The optional DeploymentConfig source has a separate five-second deadline;
+timeout marks only account evidence incomplete and does not reject the
+application snapshot. Caller cancellation and application namespace/label-setting
+changes discard captures.
+Positive captured account observations may still be shown while the projection
+is incomplete.
+
+Pod `spec.serviceAccountName` observations are aggregated only under their
+captured account-workload root. WorkloadEntry `spec.serviceAccount` values are
+shown separately with entry UID/resourceVersion, in captured order, only for
+nonempty `WorkloadGroup.spec.metadata.labels` matches. Empty selectors do not
+import entries. These VM values are not Pod accounts, do not populate the
+KIA1701 input and do not establish Kubernetes ServiceAccount existence,
+permissions, principals or health. No ServiceAccount-object reads, KIA1701,
+KIA0106 or authorization verdicts were added. Applications now exposes the
+projection's completeness and these distinct provenance classes; application
+label grouping and Gateway's separate inclusion projection are not changed.
+
+The focused local tests cover default supported/excluded kinds, standalone
+Pods, ReplicaSet/Deployment and direct controller ownership, namespaces,
+resource/API-version freshness, ambiguous/custom/stale/non-controller owners,
+missing Pod/VM account fields, ordered VM entry matches, empty selectors,
+denied/malformed/truncated/replaced/timed-out DeploymentConfig reads,
+cancellation and namespace/settings invalidation. The final focused run passed
+180 tests in 7 files; type-check, lint and production build also passed. The full
+suite passed 22,615 of 22,616 tests; one unrelated existing `Traces.test.tsx`
+test hit its 5-second timeout under full-suite load, while it passed in a
+separate run alongside `ServiceTrafficWizard.test.tsx` (32 tests total). No new
+original-Go oracle or live/hosted/Desktop fixture was available for this
+increment; those runtime gates remain open.
+
 ## Guarded validation-exclusion editing
 
 The configuration action bar now edits only `kiali.io/ignore-validations`.

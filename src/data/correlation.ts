@@ -33,11 +33,19 @@ export const CORRELATION_SOURCES: readonly CorrelationSource[] = [
   { kind: 'Service', group: '', apiVersion: 'v1', plural: 'services' },
 ];
 
+export const DEPLOYMENT_CONFIG_ACCOUNT_SOURCE: CorrelationSource = {
+  kind: 'DeploymentConfig',
+  group: 'apps.openshift.io',
+  apiVersion: 'apps.openshift.io/v1',
+  plural: 'deploymentconfigs',
+};
+
 export interface SourceSnapshot {
   source: CorrelationSource;
   resources: CorrelationResource[];
   complete: boolean;
   resourceVersion?: string;
+  relatedVersions?: { kind: string; apiVersion: string; resourceVersion: string }[];
   error?: ReadFailure;
   limited?: boolean;
   notServed?: boolean;
@@ -46,6 +54,7 @@ export interface SourceSnapshot {
 export interface CorrelationSnapshot {
   scope: NamespaceScope;
   sources: SourceSnapshot[];
+  accountSources?: SourceSnapshot[];
   resources: CorrelationResource[];
   complete: boolean;
 }
@@ -53,6 +62,7 @@ export interface CorrelationSnapshot {
 const PAGE_SIZE = 250;
 const PAGE_LIMIT = 4;
 const CONCURRENCY = 3;
+const ACCOUNT_SOURCE_TIMEOUT_MS = 5000;
 
 function requiredString(value: unknown, field: string): string {
   if (typeof value !== 'string' || !value) {
@@ -88,6 +98,7 @@ function owners(value: unknown): OwnerReference[] {
       throw new InvalidResponseError('Invalid controller reference');
     }
     return {
+      apiVersion,
       group: segments.length === 2 ? segments[0] : '',
       kind: requiredString(owner.kind, 'owner kind'),
       name: requiredString(owner.name, 'owner name'),
@@ -142,9 +153,14 @@ export function decodeCorrelationResource(
   const name = requiredString(value.metadata.name, 'resource name');
   let workloadLabels = objectLabels;
   if (
-    ['Deployment', 'ReplicaSet', 'StatefulSet', 'DaemonSet', 'ReplicationController'].includes(
-      source.kind
-    )
+    [
+      'Deployment',
+      'ReplicaSet',
+      'StatefulSet',
+      'DaemonSet',
+      'ReplicationController',
+      'DeploymentConfig',
+    ].includes(source.kind)
   ) {
     if (source.kind === 'ReplicationController' && value.spec.template === undefined) {
       workloadLabels = {};
@@ -256,23 +272,107 @@ export async function readCorrelationSource(
   }
 }
 
-export async function loadCorrelationSnapshot(
+async function readDeploymentConfigAccountSource(
   scope: NamespaceScope,
   signal: AbortSignal
+): Promise<SourceSnapshot> {
+  const source = DEPLOYMENT_CONFIG_ACCOUNT_SOURCE;
+  try {
+    let group: unknown;
+    try {
+      group = await readCluster(scope, `/apis/${source.group}`, signal);
+    } catch (error) {
+      if (signal.aborted) throw error;
+      if (readFailure(error).kind === 'not-found')
+        return { source, resources: [], complete: true, notServed: true };
+      throw error;
+    }
+    if (!isRecord(group) || group.name !== source.group || !Array.isArray(group.versions))
+      throw new InvalidResponseError('Invalid DeploymentConfig API group discovery response');
+    const servedVersions = new Set(
+      group.versions.map(version => {
+        if (!isRecord(version) || typeof version.groupVersion !== 'string')
+          throw new InvalidResponseError('Invalid DeploymentConfig API group version');
+        return version.groupVersion;
+      })
+    );
+    const served = servedVersions.has(source.apiVersion);
+    if (!served)
+      return {
+        source,
+        resources: [],
+        complete: false,
+        error: {
+          kind: 'invalid-response',
+          message: 'DeploymentConfig API does not serve the supported apps.openshift.io/v1 version',
+        },
+      };
+    const discovery = await readCluster(scope, `/apis/${source.apiVersion}`, signal);
+    if (
+      !isRecord(discovery) ||
+      discovery.groupVersion !== source.apiVersion ||
+      !Array.isArray(discovery.resources)
+    )
+      throw new InvalidResponseError('Invalid DeploymentConfig resource discovery response');
+    const matchingResources = discovery.resources.filter(
+      item => isRecord(item) && item.name === source.plural && item.kind === source.kind
+    );
+    if (matchingResources.length > 1)
+      throw new InvalidResponseError('DeploymentConfig resource discovery is ambiguous');
+    const resource = matchingResources[0];
+    if (resource === undefined) return { source, resources: [], complete: true, notServed: true };
+    if (!isRecord(resource) || resource.namespaced !== true)
+      throw new InvalidResponseError('DeploymentConfig discovery reported an unexpected scope');
+    return await readCorrelationSource(scope, source, signal);
+  } catch (error) {
+    if (signal.aborted) throw error;
+    return { source, resources: [], complete: false, error: readFailure(error) };
+  }
+}
+
+async function readOptionalDeploymentConfigAccountSource(
+  scope: NamespaceScope,
+  signal: AbortSignal
+): Promise<SourceSnapshot> {
+  try {
+    return await withDiagnosticDeadline(
+      signal,
+      'DeploymentConfig account source exceeded 5 seconds',
+      accountSignal => readDeploymentConfigAccountSource(scope, accountSignal),
+      ACCOUNT_SOURCE_TIMEOUT_MS
+    );
+  } catch (error) {
+    if (signal.aborted) throw error;
+    return {
+      source: DEPLOYMENT_CONFIG_ACCOUNT_SOURCE,
+      resources: [],
+      complete: false,
+      error: readFailure(error),
+    };
+  }
+}
+
+export async function loadCorrelationSnapshot(
+  scope: NamespaceScope,
+  signal: AbortSignal,
+  includeAccountSources = false
 ): Promise<CorrelationSnapshot> {
   const captured = namespaceScope(scope.cluster, scope.namespace);
   return withDiagnosticDeadline(
     signal,
     'Namespace correlation exceeded 15 seconds',
-    requestSignal => collectCorrelationSnapshot(captured, requestSignal)
+    requestSignal => collectCorrelationSnapshot(captured, requestSignal, includeAccountSources)
   );
 }
 
 async function collectCorrelationSnapshot(
   scope: NamespaceScope,
-  signal: AbortSignal
+  signal: AbortSignal,
+  includeAccountSources: boolean
 ): Promise<CorrelationSnapshot> {
-  const requested = [...CORRELATION_SOURCES, VIRTUAL_WORKLOAD_SOURCE];
+  const baseRequested = [...CORRELATION_SOURCES, VIRTUAL_WORKLOAD_SOURCE];
+  const accountRequested = includeAccountSources ? [DEPLOYMENT_CONFIG_ACCOUNT_SOURCE] : [];
+  const requested = [...baseRequested, ...accountRequested];
   const results = new Map<CorrelationKind, SourceSnapshot>();
   let next = 0;
   async function worker() {
@@ -283,19 +383,24 @@ async function collectCorrelationSnapshot(
         source.kind,
         source.kind === 'WorkloadGroup'
           ? await readVirtualWorkloadSource(scope, signal)
+          : source.kind === 'DeploymentConfig'
+          ? await readOptionalDeploymentConfigAccountSource(scope, signal)
           : await readCorrelationSource(scope, source, signal)
       );
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-  const sources = requested.map(source => {
+  function snapshotFor(source: CorrelationSource) {
     const result = results.get(source.kind);
     if (!result) throw new Error('Correlation source was not collected');
     return result;
-  });
+  }
+  const sources = baseRequested.map(snapshotFor);
+  const accountSources = accountRequested.map(snapshotFor);
   return {
     scope,
     sources,
+    ...(includeAccountSources ? { accountSources } : {}),
     resources: sources.flatMap(source => source.resources),
     complete: sources.every(source => source.complete),
   };

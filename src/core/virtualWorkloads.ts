@@ -2,6 +2,7 @@ import type { CorrelationResource } from './correlation';
 import type { Labels } from './labels';
 import { isDnsSubdomain } from './object';
 import { NamespaceScope, namespaceScope } from './scope';
+import { observedVmAccount } from './workloadAccounts';
 import {
   workloadEntryLabels,
   workloadEntryMatches,
@@ -14,6 +15,7 @@ export interface VirtualWorkloadRecord {
   uid: string;
   resourceVersion: string;
   labels: Labels;
+  serviceAccount?: ReturnType<typeof observedVmAccount>;
 }
 export interface VirtualWorkloadGroup extends VirtualWorkloadRecord {
   selector: Labels;
@@ -84,9 +86,19 @@ export function virtualWorkloadResources(
       virtualMachine: {
         labelSource: first ? 'entry' : 'group',
         matchingEntries: matches.length,
+        selectorEmpty: Object.keys(selector).length === 0,
         ...(first
           ? { entry: { name: first.name, uid: first.uid, resourceVersion: first.resourceVersion } }
           : {}),
+        accountEntries: matches.map(entry => ({
+          name: entry.name,
+          uid: entry.uid,
+          resourceVersion: entry.resourceVersion,
+          serviceAccount: entry.serviceAccount ?? {
+            ok: false as const,
+            message: 'WorkloadEntry service account was not collected',
+          },
+        })),
       },
     };
   });

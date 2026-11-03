@@ -33,6 +33,22 @@ Positive Pod-account provenance now appears in Applications through captured
 UID owner chains. Missing account fields remain unavailable and no
 account-absence checker or authorization principal is inferred.
 
+**Captured workload/account projection (2026-11-03):** Applications retain their
+existing label grouping and Gateway retains its separate default-workload
+projection. The account path now has a separate bounded projection over complete
+namespace captures, including OpenShift DeploymentConfig discovery, versioned
+source lists and UID/API-version-checked owner chains. It uses only the pinned
+v2.33 default account workload kinds; runtime Kiali `ExcludeWorkloads`, managed
+namespace/cross-context membership and custom controllers are not captured and
+must remain explicit downstream gates. Pod accounts come only from attributed
+Pod specs. Matched WorkloadEntry `spec.serviceAccount` values and UIDs/versions
+are exposed as separate VM provenance, never as Pods or ServiceAccount-object
+existence. No KIA1701/principal/absence checker is enabled. Type-check, lint,
+build and focused tests pass (180 tests in 7 files). The full suite passed
+22,615 of 22,616 tests; one unrelated Traces component test hit its existing
+5-second timeout under full-suite load and passed when run with its neighboring
+component tests. Hosted, Desktop and live checks remain open.
+
 **Prometheus recurrence, 2026-10-29:** the existing Pod again reached its 1 GiB
 cap during TSDB compaction (156 OOM restarts before mitigation). Under the
 user's earlier conditional authorization, a UID-guarded `pods/resize` patch
@@ -55,8 +71,8 @@ discard data to make the template match.
 The current full-parity estimate is **approximately 55%, with roughly +/-10
 percentage points of uncertainty**. This is an engineering estimate across the
 remaining feature families, not a measured catalog coverage score or a claim
-that test counts imply parity. Advanced graphs, full workload/capability
-provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
+that test counts imply parity. Advanced graphs, configured and cross-context
+workload/capability provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
 dashboards and integration/live/Desktop closure remain substantial work.
 
 ### Cloud continuation handoff — paused at the user's request
@@ -149,6 +165,12 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   their exact groups/fields. Inactive kinds no longer get spurious deferrals;
   malformed active selectors defer explicitly. Runtime absence checking remains
   gated on a complete mesh-workload model, not bounded correlation.
+  The separate namespace account projection now requires complete versioned
+  source lists and supported UID owner chains for the pinned default account
+  workload set. It exposes observed Pod accounts and source-aligned VM entry
+  accounts without constructing principals. Custom Kiali exclusions, custom
+  controllers and managed/cross-context membership remain unavailable; KIA1701,
+  KIA0106 and authorization verdicts stay disabled.
   Declared namespace revision selection now has a 1,538-case original-Go oracle
   and visible provenance separate from controller/injection hints. Maistra
   membership cannot be resolved through coincident Istiod labels; assessment
@@ -1394,10 +1416,13 @@ panel and query cardinality limits.
    and defaults. VirtualService destination checks, AuthorizationPolicy host
    registry/exemptions and outbound-policy severity are wired; preserve each
    caller's export filtering for remaining destination/policy checker families.
-   KIA1701 WorkloadGroup service accounts require complete workload-attributed
-   Pod-account evidence: neither ServiceAccount object existence nor raw Pod
-   presence reproduces the pinned input. VM WorkloadEntry accounts are separate.
-   Do not add a shortcut absence checker while that workload boundary is missing.
+   KIA1701 WorkloadGroup service accounts require workload-attributed Pod-account
+   evidence: neither ServiceAccount object existence nor raw Pod presence
+   reproduces the pinned input. The pinned-default namespace projection now
+   exists, but it does not capture runtime Kiali workload exclusions, custom
+   controllers or managed/cross-context membership. VM WorkloadEntry accounts
+   remain separate; do not activate KIA1701 or infer absence until those policy
+   and scope gates are resolved.
 2. Resolve remaining effective mesh configuration sources before extending
    configured mTLS to workloads, ports and subsets. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
