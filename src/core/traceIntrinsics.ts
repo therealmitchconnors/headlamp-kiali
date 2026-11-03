@@ -154,7 +154,8 @@ export function tempoIntrinsicClauses(filters: readonly TempoIntrinsicFilter[] =
       if (!values.includes(filter.value))
         throw new Error(`Span ${field} requires one of: ${values.join(', ')}`);
       literal = filter.value;
-    } else if (traceIntrinsicIsCount(field)) literal = traceIntegerLiteral(filter.value, 'nonnegative');
+    } else if (traceIntrinsicIsCount(field))
+      literal = traceIntegerLiteral(filter.value, 'nonnegative');
     else if (traceIntrinsicIsDuration(field))
       literal = durationLiteral(
         filter.value,

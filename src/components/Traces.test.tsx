@@ -373,6 +373,54 @@ it('captures exact span intrinsics, validates drafts and requires explicit resub
   expect(searchTraces).toHaveBeenCalledTimes(2);
 });
 
+it('captures direct-child count comparisons and rejects unsupported provider/values before search', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  const view = open('/traces?service=reviews');
+  const user = userEvent.setup();
+  vi.mocked(searchTraces).mockRejectedValueOnce({
+    status: 501,
+    message: "intrinsic 'span:childCount' not supported in vParquet4",
+  });
+  await user.click(screen.getByRole('button', { name: 'Add intrinsic filter' }));
+  await user.click(screen.getByLabelText('Intrinsic field 1'));
+  await user.click(screen.getByRole('option', { name: 'Direct child span count' }));
+  expect(screen.getByText(/vParquet5 storage/)).toBeDefined();
+  await user.click(screen.getByLabelText('Intrinsic comparison 1'));
+  await user.click(screen.getByRole('option', { name: '>=' }));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '9007199254740993');
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(await screen.findAllByText(/vParquet4/)).toHaveLength(2);
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await screen.findByText('Show captured intrinsic filters');
+  const captured = vi.mocked(searchTraces).mock.calls[1][2];
+  expect(captured.tempoIntrinsics).toEqual([
+    { field: 'childCount', operator: '>=', value: '9007199254740993' },
+  ]);
+  await user.clear(screen.getByLabelText('Intrinsic value 1'));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '-1');
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(screen.getByText(/Tempo span child counts require/)).toBeDefined();
+  expect(searchTraces).toHaveBeenCalledTimes(2);
+  await user.clear(screen.getByLabelText('Intrinsic value 1'));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '2');
+  state.config = configured;
+  view.rerender(
+    <Router history={view.history}>
+      <Traces />
+    </Router>
+  );
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  expect(
+    screen.getByText('Intrinsic filters require Tempo; remove them before searching Jaeger')
+  ).toBeDefined();
+  expect(searchTraces).toHaveBeenCalledTimes(2);
+});
+
 it('captures trace-wide fields separately from span fields without relabeling submitted values', async () => {
   const tempo = structuredClone(configured);
   if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
@@ -503,22 +551,28 @@ it('captures a directional related-span group without replaying drafts into anot
     'GET /ratings'
   );
   await user.click(screen.getByRole('checkbox', { name: 'Related span reported errors only' }));
+  await user.click(screen.getByRole('button', { name: 'Add related span group' }));
+  await user.type(screen.getByLabelText('Related span service 2'), 'db');
+  await user.type(screen.getByLabelText('Related span operation 2 (exact, optional)'), 'SELECT');
   await user.click(screen.getByLabelText('Span relationship'));
   await user.click(
-    screen.getByRole('option', { name: 'Related span is a descendant of a primary match (>>)' })
+    screen.getByRole('option', { name: 'Right group is a descendant of the left group (>>)' })
   );
   await user.click(screen.getByRole('button', { name: 'Search traces' }));
   await screen.findByText(/Captured related-span clause:/);
   const captured = vi.mocked(searchTraces).mock.calls[0][2];
-  expect(captured.tempoRelatedSpan).toEqual({
-    relation: 'descendant',
-    service: 'ratings',
-    operation: 'GET /ratings',
-    errorsOnly: true,
-  });
+  expect(captured.tempoRelatedSpans).toEqual([
+    {
+      relation: 'descendant',
+      service: 'ratings',
+      operation: 'GET /ratings',
+      errorsOnly: true,
+    },
+    { relation: 'and', service: 'db', operation: 'SELECT', errorsOnly: false },
+  ]);
   await user.clear(screen.getByLabelText('Related span service'));
   await user.type(screen.getByLabelText('Related span service'), 'changed');
-  expect(captured.tempoRelatedSpan?.service).toBe('ratings');
+  expect(captured.tempoRelatedSpans?.[0].service).toBe('ratings');
   expect(searchTraces).toHaveBeenCalledTimes(1);
   state.config = configured;
   view.rerender(
@@ -536,6 +590,61 @@ it('captures a directional related-span group without replaying drafts into anot
   await user.click(screen.getByRole('button', { name: 'Search traces' }));
   await waitFor(() => expect(searchTraces).toHaveBeenCalledTimes(2));
   expect(vi.mocked(searchTraces).mock.calls[1][2].tempoRelatedSpan).toBeUndefined();
+  expect(vi.mocked(searchTraces).mock.calls[1][2].tempoRelatedSpans).toBeUndefined();
+});
+it('aborts a captured count/structural search when the configured backend changes while loading', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  let resolve!: (result: Awaited<ReturnType<typeof searchTraces>>) => void;
+  vi.mocked(searchTraces).mockImplementation(
+    () =>
+      new Promise(done => {
+        resolve = done;
+      })
+  );
+  const view = open('/traces?service=reviews');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Add intrinsic filter' }));
+  await user.click(screen.getByLabelText('Intrinsic field 1'));
+  await user.click(screen.getByRole('option', { name: 'Direct child span count' }));
+  await user.type(screen.getByLabelText('Intrinsic value 1'), '2');
+  await user.click(screen.getByRole('checkbox', { name: 'Require a related span group' }));
+  await user.type(screen.getByLabelText('Related span service'), 'ratings');
+  await user.click(screen.getByRole('button', { name: 'Search traces' }));
+  await waitFor(() => expect(searchTraces).toHaveBeenCalledTimes(1));
+  const signal = vi.mocked(searchTraces).mock.calls[0][3];
+  state.config = configured;
+  view.rerender(
+    <Router history={view.history}>
+      <Traces />
+    </Router>
+  );
+  await waitFor(() => expect(signal?.aborted).toBe(true));
+  await act(async () => resolve(decodeTraceSearch('jaeger', fixtures.jaeger, 20)));
+  expect(screen.queryByText('Trace search results')).toBeNull();
+  expect(searchTraces).toHaveBeenCalledTimes(1);
+});
+it('bounds nested related groups and allows removing an intermediate draft group', async () => {
+  const tempo = structuredClone(configured);
+  if (!tempo.valid || !tempo.config.clusters.alpha.tracing)
+    throw new Error('Missing fixture config');
+  tempo.config.clusters.alpha.tracing.provider = 'tempo';
+  state.config = tempo;
+  open('/traces?service=reviews');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('checkbox', { name: 'Require a related span group' }));
+  for (let index = 0; index < 3; index++)
+    await user.click(screen.getByRole('button', { name: 'Add related span group' }));
+  expect(
+    (screen.getByRole('button', { name: 'Add related span group' }) as HTMLButtonElement).disabled
+  ).toBe(true);
+  await user.click(screen.getByRole('button', { name: 'Remove related span group 2' }));
+  expect(
+    (screen.getByRole('button', { name: 'Add related span group' }) as HTMLButtonElement).disabled
+  ).toBe(false);
 });
 it('captures event, link and instrumentation scopes and preserves them after draft edits', async () => {
   const tempo = structuredClone(configured);

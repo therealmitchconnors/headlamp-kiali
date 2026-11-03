@@ -3505,6 +3505,43 @@ Primary ID/offset regressions also passed. Settings were restored durably;
 these are source/transport/UI checks, not independent parser execution or
 live-provider relationship matching.
 
+### Tempo child-count and nested spanset expressions
+
+The typed intrinsic catalog adds only the count field exposed by the pinned
+TraceQL grammar: `span:childCount`. It accepts `=`, `!=`, `<`, `<=`, `>` and
+`>=` with canonical nonnegative signed-64-bit decimal operands (`0` through
+`9223372036854775807`); regex, negative, fractional, exponent and noncanonical
+values fail before transport. The count predicate is part of the primary span
+group, not a count of the whole trace or of the related groups.
+
+Kiali `v2.33.0` (`0e8be887b8217bbcac5e3ae0bfcd258073949cca`) uses service,
+operation, reported-error and minimum-duration search controls; it does not
+provide an arbitrary TraceQL editor. The pinned Tempo parser at
+`afbbb308bbad6caa74fe33f4f122aff6275974f8` defines `span:childCount` as
+`TypeInt`. Its vParquet5 predicate implementation supports integer comparisons
+and reads the stored span child count. The vParquet4 caller returns an explicit
+unsupported-intrinsic error. The plugin cannot infer the configured Tempo
+storage format, so it leaves that backend capability failure visible rather
+than rewriting or emulating the predicate.
+
+The related-group control now builds a typed left-nested expression with up to
+five total span groups: the primary group and at most four related groups
+(maximum relation depth four). Each related group has an explicit service,
+optional exact operation, error predicate and one whitelisted relation:
+same-trace AND (`&&`), child (`>`), parent (`<`), descendant (`>>`), ancestor
+(`<<`) or sibling (`~`). Parenthesized nesting preserves the order shown in
+the controls. There is no user-supplied expression text, OR, negated relation,
+pipeline or linked-trace traversal. All nested groups share the original
+captured range, result limit, cancellation/deadline and 16 KiB encoded URL cap.
+
+The semantics remain those of the pinned spanset evaluator: AND requires both
+groups, can match the same span and returns both groups; structural relations
+return matching spans from the right group. They do not establish temporal
+ordering, causality or cross-trace relationships. Jaeger rejects both the
+count intrinsic and related groups before transport. The focused AST, query
+serialization, bounds and UI capture/provider regressions pass locally; no
+hosted provider, independent Tempo parser execution or Desktop check is claimed.
+
 ### Exact tag filters and captured search time
 
 The search form now supports ten additional string tag equalities, explicit

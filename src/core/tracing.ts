@@ -6,7 +6,7 @@ import {
   tempoAttributeIdentifier,
 } from './traceFilters';
 import { tempoIntrinsicClauses, TempoIntrinsicFilter } from './traceIntrinsics';
-import { TempoRelatedSpan, tempoRelatedSpanClause } from './traceRelations';
+import { TempoRelatedSpan, tempoRelatedSpansetClause } from './traceRelations';
 
 export interface TraceWindow {
   start: number;
@@ -22,6 +22,7 @@ export interface TraceQuery extends TraceWindow {
   tempoFilters?: readonly TempoAttributeFilter[];
   tempoIntrinsics?: readonly TempoIntrinsicFilter[];
   tempoRelatedSpan?: TempoRelatedSpan;
+  tempoRelatedSpans?: readonly TempoRelatedSpan[];
 }
 export interface TraceTagFilter {
   key: string;
@@ -283,8 +284,27 @@ export function traceSearchPath(provider: TracingConfig['provider'], query: Trac
   const intrinsicClauses = tempoIntrinsicClauses(query.tempoIntrinsics);
   if (provider !== 'tempo' && intrinsicClauses.length)
     throw new Error('Intrinsic filters require Tempo; remove them before searching Jaeger');
-  const relatedSpan = tempoRelatedSpanClause(query.tempoRelatedSpan);
-  if (provider !== 'tempo' && relatedSpan)
+  if (query.tempoRelatedSpan !== undefined && query.tempoRelatedSpans !== undefined)
+    throw new Error(
+      'Use either the legacy Tempo related-span filter or the related-span group list'
+    );
+  const relatedSpans =
+    query.tempoRelatedSpans ?? (query.tempoRelatedSpan ? [query.tempoRelatedSpan] : undefined);
+  const clauses = [`.service.name = ${JSON.stringify(query.service)}`];
+  if (query.operation) clauses.push(`name = ${JSON.stringify(query.operation)}`);
+  if (query.errorsOnly) clauses.push('status = error');
+  for (const filter of filters) {
+    if (filter.key === 'error') {
+      if (!query.errorsOnly)
+        clauses.push(filter.value === 'true' ? 'status = error' : 'status != error');
+    } else
+      clauses.push(`.${tempoAttributeIdentifier(filter.key)} = ${JSON.stringify(filter.value)}`);
+  }
+  clauses.push(...attributeClauses);
+  clauses.push(...intrinsicClauses);
+  const primary = `{ ${clauses.join(' && ')} }`;
+  const tempoQuery = tempoRelatedSpansetClause(primary, relatedSpans);
+  if (provider !== 'tempo' && tempoQuery !== primary)
     throw new Error('Related span filters require Tempo; disable them before searching Jaeger');
   const params = new URLSearchParams({ limit: String(query.limit) });
   if (provider === 'jaeger') {
@@ -303,19 +323,7 @@ export function traceSearchPath(provider: TracingConfig['provider'], query: Trac
       params.set('minDuration', `${Math.round(query.minDurationMs * 1000)}us`);
     return boundedPath(`/api/traces?${params}`);
   }
-  const clauses = [`.service.name = ${JSON.stringify(query.service)}`];
-  if (query.operation) clauses.push(`name = ${JSON.stringify(query.operation)}`);
-  if (query.errorsOnly) clauses.push('status = error');
-  for (const filter of filters) {
-    if (filter.key === 'error') {
-      if (!query.errorsOnly)
-        clauses.push(filter.value === 'true' ? 'status = error' : 'status != error');
-    } else
-      clauses.push(`.${tempoAttributeIdentifier(filter.key)} = ${JSON.stringify(filter.value)}`);
-  }
-  clauses.push(...attributeClauses);
-  clauses.push(...intrinsicClauses);
-  params.set('q', `{ ${clauses.join(' && ')} }${relatedSpan ? ` ${relatedSpan}` : ''}`);
+  params.set('q', tempoQuery);
   params.set('start', String(query.start));
   params.set('end', String(query.end));
   params.set('spss', '1');

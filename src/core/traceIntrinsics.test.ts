@@ -105,23 +105,15 @@ it('serializes direct-child counts as bounded nonnegative integer predicates', (
     'span:childCount >= 9007199254740993',
     'span:childCount < 9223372036854775807',
   ]);
-  for (const operator of ['!=', '>', '>=', '<', '<='])
+  for (const operator of ['!=', '>', '>=', '<', '<='] as const)
     expect(tempoIntrinsicClauses([{ field: 'childCount', operator, value: '1' }])).toHaveLength(1);
 });
-it.each([
-  '',
-  '-0',
-  '-1',
-  '+1',
-  '01',
-  '1.0',
-  '1e3',
-  ' 1',
-  '1\n',
-  '9223372036854775808',
-])('rejects invalid direct-child count %j', value => {
-  expect(() => tempoIntrinsicClauses([{ field: 'childCount', operator: '=', value }])).toThrow();
-});
+it.each(['', '-0', '-1', '+1', '01', '1.0', '1e3', ' 1', '1\n', '9223372036854775808'])(
+  'rejects invalid direct-child count %j',
+  value => {
+    expect(() => tempoIntrinsicClauses([{ field: 'childCount', operator: '=', value }])).toThrow();
+  }
+);
 it.each([
   '',
   ' 1ms',
@@ -154,9 +146,7 @@ it.each(
   const value =
     field === 'childCount'
       ? '1'
-      : field === 'duration' ||
-        field === 'traceDuration' ||
-        field === 'eventTimeSinceStart'
+      : field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
       ? '1ns'
       : TEMPO_ID_INTRINSICS.some(id => id === field)
       ? 'AbC'
