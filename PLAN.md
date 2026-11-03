@@ -806,10 +806,18 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
   Go cases and a namespace-wide consumer using an explicit controller. It
   suppresses output on partial policy reads, conflicts and unsupported contexts.
   Configured status is kept separate from observed encryption/security.
-- Traffic metrics now also show destination-reported HTTP/gRPC connection
-  security labels and shares. Missing labels stay unknown; zero/non-finite
-  observations do not produce a security verdict. Real Bookinfo traffic
-  reported `mutual_tls`; TCP/ambient and per-edge security enrichment remain.
+- Observed connection security now uses a captured 5/15/60-minute range for
+  destination-reported `istio_requests_total` HTTP/gRPC labels, with a five-minute
+  rate window and 15-second samples. It exposes mTLS-labeled, `none`-labeled,
+  mixed, unknown, unsupported and unavailable categories plus query/range/reporter
+  provenance. The projection bounds results to eight groups, retains unknown
+  labels, summarizes positive categories across that range, and displays rates
+  from the latest aligned sample. Sparse, missing, stale or non-finite samples
+  and warnings withhold shares and mark the evidence partial or unavailable.
+  It does not claim complete traffic coverage, configured policy, proxy sync,
+  certificate validity or authorization. The active Kiali graph appender also
+  consumes message/TCP metrics and has graph-dependent waypoint/ambient paths;
+  those dimensions remain unsupported here pending their required inputs.
 - Tracing adds optional per-cluster Jaeger/Tempo HTTP query endpoints, connection
   probes, service/operation/duration/error searches, trace deep links and native
   span timing/attributes/events/reference inspection. Nanoseconds and OTLP int64
@@ -1177,7 +1185,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
 | Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
 | Initial checks | Forty-one bounded codes, including declared-scope Istio Gateway selector/controller checks, Gateway API listeners/status/classes, selectorless PeerAuthentication, host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, Service port checks, WorkloadGroup labels, Gateway API collisions/targets, exports and conditions | No full semantic validity verdict; dormant Gateway port-name checks excluded; attachment/per-workload/principal context and remaining checkers are incomplete; Gateway scoped and Service port browser/live verification remain open |
-| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
+| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; observed connection-security range projection for destination-reported HTTP/gRPC request labels | Full graph security enrichment, gRPC-message/TCP security semantics, waypoint/ambient evidence and new Desktop/live telemetry checks remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
 | Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
