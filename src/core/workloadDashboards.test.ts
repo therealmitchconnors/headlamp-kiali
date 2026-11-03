@@ -1,5 +1,6 @@
 import { CorrelationKind, CorrelationResource } from './correlation';
 import { namespaceScope } from './scope';
+import { virtualWorkloadResources } from './virtualWorkloads';
 import { captureWorkloadDashboardEvidence, workloadDashboardSelectors } from './workloadDashboards';
 
 const scope = namespaceScope('alpha', 'bookinfo');
@@ -17,6 +18,10 @@ function resource(
       uid: `${kind}-${name}`,
       group: ['Deployment', 'ReplicaSet'].includes(kind)
         ? 'apps'
+        : kind === 'DeploymentConfig'
+        ? 'apps.openshift.io'
+        : kind === 'WorkloadGroup'
+        ? 'networking.istio.io'
         : ['Job', 'CronJob'].includes(kind)
         ? 'batch'
         : '',
@@ -51,6 +56,7 @@ it('captures a Deployment and all of its UID-owned descendant Pods without mutat
   expect(evidence.pods.map(pod => pod.name)).toEqual(['first-pod', 'second-pod']);
   expect(evidence.workload).toEqual({
     kind: 'Deployment',
+    apiVersion: 'apps/v1',
     name: 'reviews',
     uid: 'Deployment-reviews',
     resourceVersion: '17',
@@ -59,6 +65,86 @@ it('captures a Deployment and all of its UID-owned descendant Pods without mutat
   expect(evidence.selectors[2].filters).toEqual({ app: 'reviews', version: 'v2' });
   expect(input).toEqual(original);
 });
+it('uses first-entry WorkloadGroup labels while retaining separate group and entry identities', () => {
+  const [group] = virtualWorkloadResources(
+    scope,
+    [
+      {
+        name: 'vm-group',
+        namespace: 'bookinfo',
+        uid: 'group-uid',
+        resourceVersion: 'group-rv',
+        labels: { app: 'group-metadata-app' },
+        selector: { scope: 'vm' },
+      },
+    ],
+    [
+      {
+        name: 'first-entry',
+        namespace: 'bookinfo',
+        uid: 'entry-uid',
+        resourceVersion: 'entry-rv',
+        labels: { scope: 'vm', app: 'entry-app', version: 'entry-version' },
+      },
+      {
+        name: 'later-entry',
+        namespace: 'bookinfo',
+        uid: 'later-uid',
+        resourceVersion: 'later-rv',
+        labels: { scope: 'vm', app: 'later-app', version: 'later-version' },
+      },
+    ],
+    'networking.istio.io/v1beta1'
+  );
+  const evidence = captureWorkloadDashboardEvidence(scope, [group], true, {
+    kind: 'WorkloadGroup',
+    name: 'vm-group',
+  });
+  expect(evidence.pods).toEqual([]);
+  expect(evidence.refs).toEqual([]);
+  expect(evidence.selectors[2].filters).toEqual({
+    app: 'entry-app',
+    version: 'entry-version',
+  });
+  expect(evidence.workload).toEqual({
+    kind: 'WorkloadGroup',
+    apiVersion: 'networking.istio.io/v1beta1',
+    name: 'vm-group',
+    uid: 'group-uid',
+    resourceVersion: 'group-rv',
+    version: 'entry-version',
+    virtualMachine: {
+      labelSource: 'entry',
+      matchingEntries: 2,
+      entry: { name: 'first-entry', uid: 'entry-uid', resourceVersion: 'entry-rv' },
+    },
+  });
+});
+it('uses group selector labels only when the complete VM evidence has no matching entry', () => {
+  const group = resource('WorkloadGroup', 'vm-group');
+  group.workloadLabels = { app: 'group-selector-app', version: 'group-selector-version' };
+  group.virtualMachine = { labelSource: 'group', matchingEntries: 0 };
+  const evidence = captureWorkloadDashboardEvidence(scope, [group], true, {
+    kind: 'WorkloadGroup',
+    name: 'vm-group',
+  });
+  expect(evidence.selectors[2].filters).toEqual({
+    app: 'group-selector-app',
+    version: 'group-selector-version',
+  });
+  expect(evidence.workload?.virtualMachine).toEqual({
+    labelSource: 'group',
+    matchingEntries: 0,
+  });
+  group.workloadLabels = { version: 'group-selector-version' };
+  expect(() =>
+    captureWorkloadDashboardEvidence(scope, [group], true, {
+      kind: 'WorkloadGroup',
+      name: 'vm-group',
+    })
+  ).toThrow('nonempty application label');
+});
+
 it('roots child ReplicaSet and Pod inspection at the selected identity, excluding sibling and ancestor Pods', () => {
   const input = deploymentTree();
   expect(

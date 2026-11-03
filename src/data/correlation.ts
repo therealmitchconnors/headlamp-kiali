@@ -196,6 +196,7 @@ export function decodeCorrelationResource(
     ...(typeof value.metadata.resourceVersion === 'string'
       ? { resourceVersion: value.metadata.resourceVersion }
       : {}),
+    apiVersion: source.apiVersion,
     ...(health ? { health } : {}),
   };
 }

@@ -182,7 +182,7 @@ export default function DashboardAnnotations({
           </Stack>
           <Typography variant="body2">
             {t(
-              'Supported controllers use pod-template annotations when the map is present, even if empty; otherwise resource annotations apply. Pod, Job and CronJob use their own metadata, matching the pinned caller. Custom controllers and WorkloadGroups are not selected here.'
+              'Deployment, DaemonSet, StatefulSet, ReplicaSet, ReplicationController and DeploymentConfig use non-null pod-template annotation maps, even when empty. Pod, Job, CronJob and WorkloadGroup use their own metadata. WorkloadEntry annotations and arbitrary custom-controller sources are excluded.'
             )}
           </Typography>
           <Button

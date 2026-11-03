@@ -40,6 +40,18 @@ export const DASHBOARD_WORKLOAD_KINDS = {
     apiVersion: 'v1',
     template: true,
   },
+  DeploymentConfig: {
+    api: '/apis/apps.openshift.io/v1',
+    resource: 'deploymentconfigs',
+    apiVersion: 'apps.openshift.io/v1',
+    template: true,
+  },
+  WorkloadGroup: {
+    api: '/apis/networking.istio.io/v1',
+    resource: 'workloadgroups',
+    apiVersion: 'networking.istio.io/v1',
+    template: false,
+  },
   Pod: { api: '/api/v1', resource: 'pods', apiVersion: 'v1', template: false },
   Job: { api: '/apis/batch/v1', resource: 'jobs', apiVersion: 'batch/v1', template: false },
   CronJob: { api: '/apis/batch/v1', resource: 'cronjobs', apiVersion: 'batch/v1', template: false },
@@ -47,10 +59,28 @@ export const DASHBOARD_WORKLOAD_KINDS = {
 export type DashboardWorkloadKind = keyof typeof DASHBOARD_WORKLOAD_KINDS;
 export interface DashboardAnnotationTarget {
   namespace: string;
-  workload?: { kind: DashboardWorkloadKind; name: string };
+  workload?: { kind: DashboardWorkloadKind; name: string; apiVersion?: string };
 }
+
+const WORKLOAD_API_VERSIONS: Record<DashboardWorkloadKind, readonly string[]> = {
+  Deployment: ['apps/v1'],
+  DaemonSet: ['apps/v1'],
+  StatefulSet: ['apps/v1'],
+  ReplicaSet: ['apps/v1'],
+  ReplicationController: ['v1'],
+  DeploymentConfig: ['apps.openshift.io/v1'],
+  WorkloadGroup: [
+    'networking.istio.io/v1',
+    'networking.istio.io/v1beta1',
+    'networking.istio.io/v1alpha3',
+  ],
+  Pod: ['v1'],
+  Job: ['batch/v1'],
+  CronJob: ['batch/v1'],
+};
 export interface DashboardAnnotationSource {
   kind: string;
+  apiVersion: string;
   name: string;
   namespace: string;
   uid: string;
@@ -68,7 +98,9 @@ export function validateDashboardAnnotationTarget(
   if (
     value.workload &&
     (!Object.prototype.hasOwnProperty.call(DASHBOARD_WORKLOAD_KINDS, value.workload.kind) ||
-      !isDnsSubdomain(value.workload.name))
+      !isDnsSubdomain(value.workload.name) ||
+      (value.workload.apiVersion !== undefined &&
+        !WORKLOAD_API_VERSIONS[value.workload.kind].includes(value.workload.apiVersion)))
   )
     throw new Error('Choose a supported workload kind and valid name for dashboard annotations');
   return structuredClone(value);
@@ -77,7 +109,12 @@ export function dashboardAnnotationPath(target: DashboardAnnotationTarget): stri
   validateDashboardAnnotationTarget(target);
   if (!target.workload) return `/api/v1/namespaces/${target.namespace}`;
   const type = DASHBOARD_WORKLOAD_KINDS[target.workload.kind];
-  return `${type.api}/namespaces/${target.namespace}/${type.resource}/${target.workload.name}`;
+  const api = target.workload.apiVersion
+    ? target.workload.apiVersion.includes('/')
+      ? `/apis/${target.workload.apiVersion}`
+      : `/api/${target.workload.apiVersion}`
+    : type.api;
+  return `${api}/namespaces/${target.namespace}/${type.resource}/${target.workload.name}`;
 }
 
 export function parseDashboardAnnotation(value: unknown): CustomDashboardTemplate[] {
@@ -133,7 +170,7 @@ export function dashboardAnnotationEvidence(
   const kind = target.workload?.kind ?? 'Namespace';
   const name = target.workload?.name ?? target.namespace;
   const apiVersion = target.workload
-    ? DASHBOARD_WORKLOAD_KINDS[target.workload.kind].apiVersion
+    ? target.workload.apiVersion ?? DASHBOARD_WORKLOAD_KINDS[target.workload.kind].apiVersion
     : 'v1';
   if (
     !isRecord(value) ||
@@ -183,6 +220,7 @@ export function dashboardAnnotationEvidence(
   return {
     source: {
       kind,
+      apiVersion,
       name,
       namespace: target.namespace,
       uid,

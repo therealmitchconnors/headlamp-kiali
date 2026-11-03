@@ -146,7 +146,7 @@ export async function readVirtualWorkloadSource(
     }
     return {
       source,
-      resources: virtualWorkloadResources(scope, groups.items, entries),
+      resources: virtualWorkloadResources(scope, groups.items, entries, available.apiVersion),
       complete: true,
       resourceVersion: groups.resourceVersion,
     };

@@ -20,7 +20,7 @@ import {
 } from '../core/dashboardAnnotations';
 import { namespaceScope } from '../core/scope';
 import { captureWorkloadDashboardEvidence } from '../core/workloadDashboards';
-import { loadCorrelationSnapshot } from '../data/correlation';
+import { loadWorkloadDashboardSnapshot } from '../data/workloadDashboards';
 import { useRequest } from '../hooks/useRequest';
 import { useTelemetryQuery } from '../hooks/useTelemetryQuery';
 import { InspectionQuery, InspectionResults } from './ApplicationDashboards';
@@ -107,7 +107,11 @@ function WorkloadSnapshot({
   const { t } = useTranslation();
   const load = useCallback(
     (signal: AbortSignal) =>
-      loadCorrelationSnapshot(namespaceScope(cluster, request.namespace), signal),
+      loadWorkloadDashboardSnapshot(
+        namespaceScope(cluster, request.namespace),
+        { kind: request.kind, name: request.name },
+        signal
+      ),
     [cluster, request]
   );
   const state = useRequest(JSON.stringify([cluster, request]), load);
@@ -139,6 +143,29 @@ function WorkloadSnapshot({
           <SectionBox title={t('Captured workload evidence')}>
             <Stack spacing={2}>
               {resource && <ResourceName resource={resource} />}
+              {evidence.workload?.virtualMachine && (
+                <Alert severity="info">
+                  {evidence.workload.virtualMachine.labelSource === 'entry'
+                    ? t(
+                        'Application and version labels came from WorkloadEntry {{name}} (UID {{uid}}, resource version {{resourceVersion}}); the workload identity remains WorkloadGroup UID {{groupUid}}, resource version {{groupResourceVersion}}.',
+                        {
+                          name: evidence.workload.virtualMachine.entry?.name ?? '',
+                          uid: evidence.workload.virtualMachine.entry?.uid ?? '',
+                          resourceVersion:
+                            evidence.workload.virtualMachine.entry?.resourceVersion ?? '',
+                          groupUid: evidence.workload.uid,
+                          groupResourceVersion: evidence.workload.resourceVersion,
+                        }
+                      )
+                    : t(
+                        'Application and version labels came from WorkloadGroup selector labels; the workload identity remains WorkloadGroup UID {{groupUid}}, resource version {{groupResourceVersion}}.',
+                        {
+                          groupUid: evidence.workload.uid,
+                          groupResourceVersion: evidence.workload.resourceVersion,
+                        }
+                      )}
+                </Alert>
+              )}
               <Typography>
                 {t(
                   'Resource links, where available, open Headlamp native details. This inspector does not replace specification, status, conditions or events views.'
@@ -198,7 +225,7 @@ function WorkloadScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Typography>
             {t(
-              'Read one supported workload and its namespace ownership snapshot before inspecting dashboard references. Reads are explicit and bounded; nothing is installed or written to the cluster. VM and custom-controller annotation sources are not supported here.'
+              'Read one supported workload and its namespace ownership snapshot before inspecting dashboard references. WorkloadGroup uses its first matching WorkloadEntry labels (or group selector labels when none match) and group metadata annotations; DeploymentConfig uses pod-template labels and annotations. Arbitrary custom controllers and WorkloadEntry annotations are not used.'
             )}
           </Typography>
           <TextField

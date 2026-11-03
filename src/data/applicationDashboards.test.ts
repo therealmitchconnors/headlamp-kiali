@@ -193,6 +193,7 @@ it('applies workload annotations after Namespace sources while verifying the cap
   input.refs = ['first'];
   input.workload = {
     kind: 'Deployment',
+    apiVersion: 'apps/v1',
     name: 'reviews',
     uid: 'dep-uid',
     resourceVersion: '17',
@@ -242,6 +243,7 @@ it('preserves captured workload version constraints throughout metric discovery'
   const input = evidence();
   input.workload = {
     kind: 'Pod',
+    apiVersion: 'v1',
     name: 'reviews',
     uid: 'pod-uid',
     resourceVersion: '17',

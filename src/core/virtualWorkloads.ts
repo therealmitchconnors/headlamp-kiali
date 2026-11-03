@@ -22,7 +22,8 @@ export interface VirtualWorkloadGroup extends VirtualWorkloadRecord {
 export function virtualWorkloadResources(
   scope: NamespaceScope,
   groups: readonly VirtualWorkloadGroup[],
-  entries: readonly VirtualWorkloadRecord[]
+  entries: readonly VirtualWorkloadRecord[],
+  apiVersion = 'networking.istio.io/v1'
 ): CorrelationResource[] {
   const captured = namespaceScope(scope.cluster, scope.namespace);
   if (groups.length > 1000 || entries.length > 1000)
@@ -75,6 +76,7 @@ export function virtualWorkloadResources(
         name: group.name,
         uid: group.uid,
       },
+      apiVersion,
       labels: { ...group.labels },
       workloadLabels: { ...(first ? first.labels : selector) },
       owners: [],

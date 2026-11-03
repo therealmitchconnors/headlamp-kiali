@@ -57,7 +57,8 @@ export function captureWorkloadDashboardEvidence(
   if (selected.length !== 1)
     throw new Error('Selected workload is missing or ambiguous in the captured snapshot');
   const resource = selected[0];
-  const group = DASHBOARD_WORKLOAD_KINDS[target.kind].apiVersion.split('/').slice(0, -1).join('/');
+  const apiVersion = resource.apiVersion ?? DASHBOARD_WORKLOAD_KINDS[target.kind].apiVersion;
+  const group = apiVersion.split('/').slice(0, -1).join('/');
   if (
     resource.identity.group !== group ||
     (target.uid !== undefined && target.uid !== resource.identity.uid)
@@ -71,6 +72,10 @@ export function captureWorkloadDashboardEvidence(
   const uid = identity(resource.identity.uid);
   const resourceVersion = identity(resource.resourceVersion);
   // Root this read-only projection at the selected controller, even when it has a parent.
+  validateDashboardAnnotationTarget({
+    namespace: scope.namespace,
+    workload: { ...target, apiVersion },
+  });
   const correlation = correlateResources(
     resources.map(item => (item === resource ? { ...item, owners: [] } : item)),
     labels
@@ -102,6 +107,16 @@ export function captureWorkloadDashboardEvidence(
   return {
     ...evidence,
     selectors: workloadDashboardSelectors(workload.app.value, version, labels),
-    workload: { kind: target.kind, name: target.name, uid, resourceVersion, version },
+    workload: {
+      kind: target.kind,
+      apiVersion,
+      name: target.name,
+      uid,
+      resourceVersion,
+      version,
+      ...(resource.virtualMachine
+        ? { virtualMachine: structuredClone(resource.virtualMachine) }
+        : {}),
+    },
   };
 }
