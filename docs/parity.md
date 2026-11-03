@@ -20,6 +20,54 @@ against Bookinfo in both stock Headlamp
 independently checked against Go. A subsequent calculator/workload-health
 increment is described below; it is not complete mesh-health integration.
 
+## Large-input analysis and rendering budgets
+
+The measured code baseline is PR-base commit
+`655e75109cf27f964f55045bdadfe39c72d22022`. Run the deterministic local
+scenarios with:
+
+```sh
+node_modules/.bin/vite-node --script -c node_modules/@kinvolk/headlamp-plugin/config/vite.config.mjs scripts/bench-analysis.ts
+```
+
+The command reports Node/platform/architecture/CPU count, scenario dimensions,
+accepted or rejected output, elapsed time and retained heap delta. Its single-run
+timings are observational, not pass/fail thresholds; retained heap delta is not
+peak allocation and can be affected by garbage collection. Exact counts and
+output-shape boundary tests, rather than elapsed-time assertions, enforce the
+budgets.
+
+| Scenario | Baseline | Guarded result |
+| --- | --- | --- |
+| Dense Service correlation: 1,000 Deployments, 1,000 UID-owned Pods and 1,000 Services sharing a selector | 2,000,000 distinct relation matches (1,000,000 workload + 1,000,000 Pod), plus 1,000,000 reverse `workload.services` references; 187.95 ms and +39,606,000 retained heap bytes in this run | Capped at 20,000 Service-to-workload/Pod matches. The 10-Service exact-boundary case returns 10,000 of each relation type plus 10,000 reverse references (30,000 retained links); the 1,000-Service case rejects at the next match. The guarded boundary run measured 33.10 ms and +12,583,704 retained heap bytes; over-budget rejection measured 25.81 ms and +3,249,808 bytes. |
+| General metric-chart flattening: one 100,000-sample series | Flattened all 100,000 points; 2.56 ms and +2,815,888 retained heap bytes | `MetricChart` accepts at most 1,928 total points and displays an error without flattening/rendering larger results; the 100,000-point rejection measured 0.11 ms and +3,008 retained heap bytes. |
+| Topology: 4,000 observations, 1,000 nodes, 2,000 edges | Accepted the exact existing limits | Same exact output shape; no topology threshold or projection semantics changed. |
+| VirtualService Cartesian host/gateway input: two records × 100 hosts × 100 gateways | Accepted exactly 20,000 contributions with one peer reference | Same accepted findings/reference shape at the existing 20,000-contribution cap; an additional contribution is rejected by the existing guard. |
+
+These are pure-core measurements on Node `v22.23.4`, Linux x64, four reported
+CPUs. They do not measure Headlamp, Recharts, DOM/SVG construction, layout,
+browser memory or interactive responsiveness. No running stock Headlamp host was
+available for this increment, so host-level graph/chart limits remain
+unverified. `decodePrometheus` can receive up to 100,000 samples before chart
+projection; the chart guard bounds subsequent flattening and rendering, not the
+HTTP/JSON response or decoded input allocations.
+
+Namespace correlation reads retain the existing four pages of 250 items per
+kind, three concurrent readers and 15-second deadline. Decoding now rejects
+label maps over 256 entries, key/value text over 1,024 characters, owner lists
+over 20 entries, and any source over 20,000 normalized label entries or
+1,000,000 label-text characters. A source that exceeds these limits is
+incomplete; earlier pages may remain available, but a partially decoded page is
+not retained as complete. Dense Service selectors are rejected rather than
+returning a partial or truncated relation set. Existing `RequestStatus` surfaces
+that failure.
+
+These guards run after `ApiProxy.request` has delivered the parsed response to
+the plugin. Headlamp/transport buffering and JSON parsing of the initial body
+are outside plugin-side decoding control; pagination bounds item counts, not
+response bytes. No request fan-out, captured-scope, deadline, cancellation or
+dashboard query semantics were changed.
+
 ## Selectorless PeerAuthentication conflicts
 
 KIA0002 now executes the PeerAuthentication branch of the pinned generic

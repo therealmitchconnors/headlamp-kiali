@@ -140,6 +140,29 @@ it('keeps unavailable samples explicit rather than drawing a zero series', () =>
     screen.getByText('Samples are unavailable or non-finite. No zero values have been substituted.')
   ).toBeDefined();
 });
+it('shows an explicit over-budget state instead of rendering a large metric chart', () => {
+  render(
+    <MetricChart
+      title="Large"
+      unit="bytes"
+      result={{
+        warnings: [],
+        series: [
+          {
+            labels: {},
+            samples: Array.from({ length: 1929 }, (_, index) => ({
+              timestamp: index,
+              value: index,
+            })),
+          },
+        ],
+      }}
+    />
+  );
+  expect(screen.getByRole('alert').textContent).toContain('1928-sample display limit');
+  expect(screen.queryByTestId('composed')).toBeNull();
+  expect(screen.queryByText('Show metric values')).toBeNull();
+});
 it('uses an optional declared series label without changing the default unit label', () => {
   const props = {
     title: 'Capacity',

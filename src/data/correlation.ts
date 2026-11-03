@@ -53,6 +53,11 @@ export interface CorrelationSnapshot {
 const PAGE_SIZE = 250;
 const PAGE_LIMIT = 4;
 const CONCURRENCY = 3;
+const MAX_LABELS_PER_MAP = 256;
+const MAX_LABEL_TEXT_LENGTH = 1024;
+const MAX_SOURCE_LABELS = 20_000;
+const MAX_SOURCE_LABEL_TEXT = 1_000_000;
+const MAX_OWNER_REFERENCES = 20;
 
 function requiredString(value: unknown, field: string): string {
   if (typeof value !== 'string' || !value) {
@@ -63,23 +68,38 @@ function requiredString(value: unknown, field: string): string {
 
 function labels(value: unknown): Labels {
   if (value === undefined || value === null) return {};
-  if (!isRecord(value) || Object.values(value).some(item => typeof item !== 'string')) {
+  if (!isRecord(value)) {
     throw new InvalidResponseError('Invalid resource labels');
   }
-  return Object.fromEntries(
-    Object.entries(value).map(([key, item]) => {
-      if (typeof item !== 'string') throw new InvalidResponseError('Invalid label value');
-      return [key, item];
-    })
-  );
+  const boundedEntries: [string, string][] = [];
+  for (const key in value) {
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    if (boundedEntries.length >= MAX_LABELS_PER_MAP)
+      throw new InvalidResponseError(`Resource label maps exceed ${MAX_LABELS_PER_MAP} entries`);
+    const item = value[key];
+    if (
+      typeof item !== 'string' ||
+      key.length > MAX_LABEL_TEXT_LENGTH ||
+      item.length > MAX_LABEL_TEXT_LENGTH
+    )
+      throw new InvalidResponseError('Resource label keys and values must be bounded strings');
+    boundedEntries.push([key, item]);
+  }
+  return Object.fromEntries(boundedEntries);
 }
 
 function owners(value: unknown): OwnerReference[] {
   if (value === undefined || value === null) return [];
-  if (!Array.isArray(value)) throw new InvalidResponseError('Invalid owner references');
+  if (!Array.isArray(value) || value.length > MAX_OWNER_REFERENCES)
+    throw new InvalidResponseError(`Owner references exceed ${MAX_OWNER_REFERENCES} entries`);
   return value.map((owner: unknown) => {
     if (!isRecord(owner)) throw new InvalidResponseError('Invalid owner reference');
     const apiVersion = requiredString(owner.apiVersion, 'owner API version');
+    const kind = requiredString(owner.kind, 'owner kind');
+    const name = requiredString(owner.name, 'owner name');
+    const uid = requiredString(owner.uid, 'owner UID');
+    if ([apiVersion, kind, name, uid].some(item => item.length > MAX_LABEL_TEXT_LENGTH))
+      throw new InvalidResponseError('Owner reference fields must be bounded strings');
     const segments = apiVersion.split('/');
     if (segments.length > 2 || segments.some(segment => !segment)) {
       throw new InvalidResponseError('Invalid owner API version');
@@ -89,12 +109,26 @@ function owners(value: unknown): OwnerReference[] {
     }
     return {
       group: segments.length === 2 ? segments[0] : '',
-      kind: requiredString(owner.kind, 'owner kind'),
-      name: requiredString(owner.name, 'owner name'),
-      uid: requiredString(owner.uid, 'owner UID'),
+      kind,
+      name,
+      uid,
       controller: owner.controller === true,
     };
   });
+}
+
+function resourceLabelBudget(resource: CorrelationResource) {
+  const maps = new Set([resource.labels, resource.workloadLabels, resource.serviceSelector]);
+  let count = 0;
+  let textSize = 0;
+  for (const map of maps) {
+    if (!map) continue;
+    for (const [key, value] of Object.entries(map)) {
+      count++;
+      textSize += key.length + value.length;
+    }
+  }
+  return { count, textSize };
 }
 
 function proxyMode(spec: Record<string, unknown>): CorrelationResource['proxyMode'] {
@@ -208,6 +242,8 @@ export async function readCorrelationSource(
   const resources: CorrelationResource[] = [];
   const ids = new Set<string>();
   const tokens = new Set<string>();
+  let labelCount = 0;
+  let labelTextSize = 0;
   let continuation = '';
   let resourceVersion: string | undefined;
   const prefix = source.group ? `/apis/${source.apiVersion}` : '/api/v1';
@@ -234,7 +270,18 @@ export async function readCorrelationSource(
         throw new InvalidResponseError('Resource version changed during pagination');
       }
       resourceVersion = version;
-      const decoded = response.items.map(item => decodeCorrelationResource(item, source, scope));
+      const decoded: CorrelationResource[] = [];
+      for (const item of response.items) {
+        const resource = decodeCorrelationResource(item, source, scope);
+        const budget = resourceLabelBudget(resource);
+        labelCount += budget.count;
+        labelTextSize += budget.textSize;
+        if (labelCount > MAX_SOURCE_LABELS || labelTextSize > MAX_SOURCE_LABEL_TEXT)
+          throw new InvalidResponseError(
+            `Correlation source exceeds ${MAX_SOURCE_LABELS} labels or ${MAX_SOURCE_LABEL_TEXT} label-text characters`
+          );
+        decoded.push(resource);
+      }
       const next = response.metadata.continue ?? '';
       if (typeof next !== 'string' || (next && tokens.has(next))) {
         throw new InvalidResponseError('Invalid or repeated resource continuation token');
