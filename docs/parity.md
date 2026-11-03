@@ -1468,10 +1468,29 @@ explicitly means no overrides. Unsupported schema fields remain errors.
 
 Resource kind/API version/name/namespace, UID and resourceVersion are validated
 before applying evidence. Deployment/DaemonSet/StatefulSet/ReplicaSet/
-ReplicationController choose non-null pod-template annotations, including an
-empty map, otherwise resource annotations. Pod, Job and CronJob use their own
-metadata: the pinned Job/CronJob parsers deliberately do not use pod templates.
-Custom-controller and VM annotation sources remain unsupported.
+ReplicationController and OpenShift DeploymentConfig choose non-null
+pod-template annotations, including an empty map, otherwise resource
+annotations. Pod, Job and CronJob use their own metadata. WorkloadGroup uses
+WorkloadGroup object metadata: pinned `ParseWorkloadGroup` calls `parseObjectMeta`
+with that metadata for both inputs, and does not source dashboard annotations
+from `spec.template` or WorkloadEntry annotations.
+
+The source audit is pinned to Kiali v2.33.0
+(`0e8be887b8217bbcac5e3ae0bfcd258073949cca`). `ParseDeploymentConfig` uses
+`spec.template` through `parseObjectMeta`; `ParseWorkloadGroup` uses group
+metadata, while `GetWorkload` derives its app/version labels from the first
+matching WorkloadEntry or the group selector fallback. `GetCustomDashboardRefs`
+searches Pod annotations for explicit runtime/dashboard references. Since a
+WorkloadGroup has no Pod list, VM recommendations do not invent explicit
+references from WorkloadEntry annotations; source-backed app/version discovery
+remains available. Application recommendations remain Pod-only and receive no
+version or workload overlay.
+
+Configured `custom_workload_types` are parsed through an owned ReplicaSet:
+`ParseReplicaSetParent` uses the selected ReplicaSet template and does not
+process custom-parent properties. Native inspection supports that ReplicaSet
+source, but does not guess the custom parent or its annotations. Arbitrary
+custom workload parents and WorkloadEntry annotation sources remain excluded.
 
 At most two public Headlamp reads share a captured fifteen-second deadline.
 Failure of either source returns no effective overlay, never a partial success
@@ -1596,14 +1615,26 @@ or one configured pair; selected values are not inferred from other Pods.
 An empty/missing version omits its constraint. Collisions after metric-label
 sanitization fail explicitly.
 
-The supported eight Kubernetes kinds use the existing bounded correlation
-reader. A read-only projection roots ownership at the selected resource UID,
+The eight supported Kubernetes kinds use the existing bounded correlation
+reader. WorkloadGroup consumes its existing complete VM source and honors the
+first matching entry's `spec.labels` in captured list order; group selector
+labels are used only when a complete entry read finds no matches. Group UID and
+resourceVersion remain the workload identity, while entry UID/resourceVersion
+are separate label provenance. VM recommendations have no Pod/reference
+evidence, no replica or health inference, and do not infer per-entry versions.
+An empty selector still selects no entries.
+
+OpenShift DeploymentConfig uses one explicit selected-object read, merged with
+the existing captured ReplicationController/Pod sources for UID ownership. It
+uses pod-template labels and annotations, matching pinned `ParseDeploymentConfig`.
+It is not added to the general correlation, health, or workload-inclusion source
+set. A read-only projection roots ownership at the selected resource UID,
 allowing child ReplicaSet/Job and managed Pod inspection without inheriting
 ancestor/sibling Pods. Original owner metadata is preserved. Linked UID changes,
 missing identity/version, malformed references and unsupported app-label scope
 remain errors. Incomplete supported-source evidence can retain positive refs,
-but cannot initiate absence-based discovery. This is not complete arbitrary
-custom-controller workload attribution.
+but cannot initiate absence-based discovery. Arbitrary custom-controller
+attribution remains unsupported.
 
 Shared inspection applies Namespace then workload annotation overlays, checking
 the workload source against the captured UID/resourceVersion before resolving
@@ -1617,10 +1648,19 @@ explicitly chosen app/version pair and source evidence.
 Workloads and associated application-workload tables add UID-bound links without
 replacing native resource-name links. This inspector intentionally does not
 duplicate spec/status/conditions/events; those remain native resource details.
-VM/custom-controller annotation sources are explicitly unsupported. Application
-recommendations still use no version or workload overlay.
+WorkloadGroup and DeploymentConfig annotation sources are supported with their
+audited source precedence and captured API version/UID/resourceVersion. Explicit
+WorkloadGroup refs remain absent because Kiali's workload caller searches Pods,
+not WorkloadEntries. Arbitrary custom-parent annotations and WorkloadEntry
+annotations are unsupported. Application recommendations still use no version
+or workload overlay.
 
-Verification passed **175 focused tests in twelve files**, type/lint/i18n/build,
+The source-attribution increment passed **186 focused tests in eight files**,
+type-check and lint. No live VM, OpenShift DeploymentConfig, hosted Headlamp,
+console, or accessibility verification was available for this increment; those
+evidence gaps remain open.
+
+Earlier verification passed **175 focused tests in twelve files**, type/lint/i18n/build,
 resource/catalog/parity checks and five stock hosted scenario groups:
 78 intercepted resource GETs, twelve metric GETs and a **15,251 ms** deadline.
 Cases covered child ownership, app/version scope, workload-over-Namespace

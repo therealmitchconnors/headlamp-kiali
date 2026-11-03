@@ -5,6 +5,7 @@ import {
 } from '../core/applicationDashboards';
 import { ClusterConfig } from '../core/config';
 import { DASHBOARD_ANNOTATION } from '../core/dashboardAnnotations';
+import { workloadDashboardSelectors } from '../core/workloadDashboards';
 import { inspectApplicationDashboards } from './applicationDashboards';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({ ApiProxy: { request: vi.fn() } }));
@@ -235,6 +236,99 @@ it('applies workload annotations after Namespace sources while verifying the cap
       .mockReset()
       .mockResolvedValueOnce(ns)
       .mockResolvedValueOnce({ ...workload, metadata });
+    await expect(inspect(input)).rejects.toThrow('changed since its ownership snapshot');
+    expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+  }
+});
+it('binds VM discovery to captured WorkloadGroup identity and first-entry app/version labels', async () => {
+  const input = evidence();
+  input.pods = [];
+  input.refs = [];
+  input.workload = {
+    kind: 'WorkloadGroup',
+    apiVersion: 'networking.istio.io/v1beta1',
+    name: 'reviews-vm',
+    uid: 'group-uid',
+    resourceVersion: 'group-rv',
+    version: 'v3',
+    virtualMachine: {
+      labelSource: 'entry',
+      matchingEntries: 2,
+      entry: { name: 'first-entry', uid: 'entry-uid', resourceVersion: 'entry-rv' },
+    },
+  };
+  input.selectors = workloadDashboardSelectors('vm-app', 'v3');
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (path === '/api/v1/namespaces/bookinfo') return ns;
+    if (
+      path === '/apis/networking.istio.io/v1beta1/namespaces/bookinfo/workloadgroups/reviews-vm'
+    ) {
+      return {
+        kind: 'WorkloadGroup',
+        apiVersion: 'networking.istio.io/v1beta1',
+        metadata: {
+          name: 'reviews-vm',
+          namespace: 'bookinfo',
+          uid: 'group-uid',
+          resourceVersion: 'group-rv',
+        },
+        spec: {},
+      };
+    }
+    return vector(['first_info']);
+  });
+  const result = await inspect(input);
+  expect(result.mode).toBe('discovered');
+  expect(result.reads).toHaveLength(3);
+  expect(ApiProxy.request).toHaveBeenCalledTimes(5);
+  expect(result.annotationSources[1]).toMatchObject({
+    apiVersion: 'networking.istio.io/v1beta1',
+    uid: 'group-uid',
+    resourceVersion: 'group-rv',
+  });
+  expect(result.evidence.workload?.virtualMachine?.entry).toMatchObject({
+    uid: 'entry-uid',
+    resourceVersion: 'entry-rv',
+  });
+  expect(result.reads.map(read => read.selector.filters)).toEqual([
+    {
+      service_istio_io_canonical_name: 'vm-app',
+      service_istio_io_canonical_revision: 'v3',
+    },
+    { app_kubernetes_io_name: 'vm-app', app_kubernetes_io_version: 'v3' },
+    { app: 'vm-app', version: 'v3' },
+  ]);
+});
+it('blocks WorkloadGroup metrics when the later annotation source UID or resource version changed', async () => {
+  const input = evidence();
+  input.pods = [];
+  input.workload = {
+    kind: 'WorkloadGroup',
+    apiVersion: 'networking.istio.io/v1',
+    name: 'reviews-vm',
+    uid: 'group-uid',
+    resourceVersion: 'group-rv',
+    version: '',
+  };
+  const value = {
+    kind: 'WorkloadGroup',
+    apiVersion: 'networking.istio.io/v1',
+    metadata: {
+      name: 'reviews-vm',
+      namespace: 'bookinfo',
+      uid: 'group-uid',
+      resourceVersion: 'group-rv',
+    },
+    spec: {},
+  };
+  for (const metadata of [
+    { ...value.metadata, uid: 'replacement-uid' },
+    { ...value.metadata, resourceVersion: 'replacement-rv' },
+  ]) {
+    vi.mocked(ApiProxy.request)
+      .mockReset()
+      .mockResolvedValueOnce(ns)
+      .mockResolvedValueOnce({ ...value, metadata });
     await expect(inspect(input)).rejects.toThrow('changed since its ownership snapshot');
     expect(ApiProxy.request).toHaveBeenCalledTimes(2);
   }
