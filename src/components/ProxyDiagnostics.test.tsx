@@ -6,6 +6,7 @@ import { useKialiConfig } from '../config';
 import { DiagnosticPod } from '../core/diagnostics';
 import { loadProxySnapshot } from '../data/proxyAdmin';
 import { loadProxyServiceCandidate } from '../data/proxyService';
+import { loadZtunnelResourceCandidate } from '../data/ztunnelResourceCandidate';
 import ProxyDiagnostics from './ProxyDiagnostics';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
@@ -16,6 +17,9 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
 }));
 vi.mock('../data/proxyAdmin', () => ({ loadProxySnapshot: vi.fn() }));
 vi.mock('../data/proxyService', () => ({ loadProxyServiceCandidate: vi.fn() }));
+vi.mock('../data/ztunnelResourceCandidate', () => ({
+  loadZtunnelResourceCandidate: vi.fn(),
+}));
 vi.mock('../data/proxyConfigurationReference', () => ({
   loadProxyConfigurationCandidate: vi.fn(),
 }));
@@ -77,6 +81,17 @@ beforeEach(() => {
     .mockReturnValue({ valid: true, config: { schemaVersion: 1, clusters: {} } });
   vi.mocked(loadProxySnapshot).mockReset().mockResolvedValue(snapshot);
   vi.mocked(loadProxyServiceCandidate).mockReset();
+  vi.mocked(loadZtunnelResourceCandidate)
+    .mockReset()
+    .mockResolvedValue({
+      scope: { cluster: 'alpha', namespace: 'bookinfo' },
+      kind: 'Pod',
+      namespace: 'bookinfo',
+      name: 'reviews-a',
+      uid: 'current-pod-uid',
+      resourceVersion: '42',
+      checkedAt: snapshot.capturedAt,
+    });
 });
 afterEach(cleanup);
 it('requires an explicit read and shows server state without claiming synchronization', async () => {
@@ -185,8 +200,8 @@ it('adds a scoped cluster summary without inventing DNS identity or refetching o
     },
   });
   rerender(<ProxyDiagnostics cluster="alpha" pod={pod} />);
-  await screen.findByText('bookinfo');
-  expect(screen.getByText('reviews')).toBeDefined();
+  await screen.findAllByText('bookinfo');
+  expect(screen.getAllByText('reviews').length).toBeGreaterThan(0);
   expect(screen.queryByText(/no Kubernetes Service identity is inferred/)).toBeNull();
   expect(loadProxySnapshot).toHaveBeenCalledTimes(1);
 });
@@ -374,4 +389,53 @@ it('rejects an Envoy dump under the ztunnel format instead of reporting empty ob
   await userEvent.click(screen.getByRole('button', { name: 'Read ztunnel configuration' }));
   await screen.findByText(/requires ztunnel services and workloads arrays/);
   expect(screen.queryByText('0 of 0 reported services')).toBeNull();
+});
+
+it('offers a ztunnel Pod candidate only for exact mapped identities and links after verification', async () => {
+  vi.mocked(useKialiConfig).mockReturnValue({
+    valid: true,
+    config: {
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null, meshClusterName: 'mesh-a' } },
+    },
+  });
+  vi.mocked(loadProxySnapshot).mockResolvedValueOnce({
+    ...snapshot,
+    data: JSON.parse(ztunnelFixture),
+  });
+  render(<ProxyDiagnostics cluster="alpha" pod={pod} />);
+  await userEvent.click(screen.getByRole('radio', { name: 'ztunnel' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Read ztunnel configuration' }));
+  await screen.findByText('3 of 3 reported workloads');
+  await userEvent.click(screen.getByRole('button', { name: 'Inspect ztunnel workload 1' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Find current Pod candidate' }));
+  await screen.findByRole('link', { name: 'bookinfo/reviews-a' });
+  expect(screen.getByText('current-pod-uid')).toBeDefined();
+  expect(screen.getByText('42')).toBeDefined();
+  expect(loadZtunnelResourceCandidate).toHaveBeenCalledWith(
+    { cluster: 'alpha' },
+    { kind: 'Pod', namespace: 'bookinfo', name: 'reviews-a' },
+    expect.any(AbortSignal)
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Hide ztunnel entry' }));
+  vi.mocked(loadZtunnelResourceCandidate).mockResolvedValueOnce({
+    scope: { cluster: 'alpha', namespace: 'bookinfo' },
+    kind: 'Service',
+    namespace: 'bookinfo',
+    name: 'reviews',
+    uid: 'current-service-uid',
+    resourceVersion: '84',
+    checkedAt: snapshot.capturedAt,
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Inspect ztunnel service 1' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Find current Service candidate' }));
+  await screen.findByRole('link', { name: 'bookinfo/reviews' });
+  expect(loadZtunnelResourceCandidate).toHaveBeenLastCalledWith(
+    { cluster: 'alpha' },
+    { kind: 'Service', namespace: 'bookinfo', name: 'reviews' },
+    expect.any(AbortSignal)
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Hide ztunnel entry' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Inspect ztunnel workload 2' }));
+  expect(screen.queryByRole('button', { name: 'Find current Pod candidate' })).toBeNull();
 });

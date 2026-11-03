@@ -2230,8 +2230,11 @@ no credentials, logging changes or synchronization-auth workaround are needed.
 The proxy configuration-reference core/data/UI tests cover canonical path/kind
 guards, dotted identities, captured inputs, supported current API versions,
 strict response identity, cancellation/deadlines and no query resurrection.
-Raw route paths are retained independently of the legacy short display string.
-The Service and configuration readers share observed UID/version validation.
+Raw route paths are retained independently of the legacy short display string and
+shown with the source-context expected kind and canonical namespace/name. The
+pinned Kiali v2.33.0 caller consumes `metadata.filter_metadata.istio.config` as a
+string; do not treat `typed_filter_metadata` or protobuf `Any` as a supported
+alternate encoding.
 
 The hosted fixture uses a real authorized Bookinfo Pod and Playwright's public
 WebSocket routing API. Connect to the real forwarding endpoint to negotiate
@@ -2265,12 +2268,17 @@ namespace/name without automatically fetching logs.
 | Oversized/split UTF-8 logs | Byte-bound truncation warning, no corrupt split codepoint |
 | Pod replacement or restart during read | Reject attribution; never display old logs/configuration as a new instance |
 | Real Envoy server/configuration | One fixed GET over a v4 Kubernetes WebSocket forwarding stream to port 15000; close afterward |
+| Envoy Istio metadata | Preserve the full `filter_metadata.istio.config` path; expose a current candidate only for canonical kind/path identity and after current-object UID/version verification |
 | Repeated/unnamed proxy entries | Distinct indexed rows/controls; preserve source fields rather than inventing names |
 | Active/warming/draining/pending listener data | Separate observed states, never a synchronization or health verdict |
 | Selected configuration entry | Read-only Monaco JSON with unknown fields preserved; clear on replacement read |
 | Denial, malformed framing, unsupported encoding, early close, oversize | Explicit failure, no partial-success snapshot or automatic retry |
 | Cancellation before SDK socket assignment | Close an available late handle; never send a GET from late callbacks |
 | Host setup stuck beyond 15 seconds | Explicit timeout/warning; a later silent socket is a recorded stock-host reclamation limitation |
+| ztunnel source registry fields | Project service ports/IP families/SANs, endpoint ports, and workload/canonical metadata; preserve other fields in selected read-only JSON, but keep certificate/policy bodies hidden |
+| ztunnel current-resource candidates | Require exact configured `meshClusterName`; Pod requires `cluster//Pod/namespace/name` matching registry fields, Service requires exact nonempty namespace/name; link only after current core/v1 response identity, UID and resourceVersion verification |
+| Foreign/malformed ztunnel identity | No candidate for missing mapping, wrong cluster/kind/scope, path-like lookalikes, or mismatched workload fields; registry UID is never treated as Kubernetes UID |
+| Denied, replaced or late candidate read | Show denial/identity failure, preserve captured namespace/name, cancel on selection change/unmount/deadline and ignore late results |
 
 Focused checks use the repository's existing Vitest configuration:
 
@@ -2280,7 +2288,8 @@ UNDER_TEST=true node_modules/.bin/vitest run \
   src/core/diagnostics.test.ts src/data/diagnostics.test.ts \
   src/components/Diagnostics.test.tsx src/core/proxyHttp.test.ts \
   src/core/proxyConfig.test.ts src/data/proxyAdmin.test.ts \
-  src/components/ProxyDiagnostics.test.tsx
+  src/core/proxyDetails.test.ts src/core/ztunnel.test.ts \
+  src/data/ztunnelResourceCandidate.test.ts src/components/ProxyDiagnostics.test.tsx
 ```
 
 Proxy framing tests cover exact byte thresholds, incremental/chunked UTF-8,
@@ -2296,7 +2305,10 @@ replacement reads. Restore the original WebSocket constructor in `finally`
 and reload before checking real data again. Do not retain real logs or full
 configuration dumps in artifacts/screenshots; use synthetic payloads instead.
 Desktop, control-plane synchronization, full upstream summaries, ztunnel and
-confirmed logging controls remain outside this checkpoint.
+confirmed logging controls remain outside this checkpoint. The expanded
+source-defined ztunnel fields and current Service/Pod candidate paths have
+focused synthetic tests only; no live ztunnel, ambient or Desktop evidence was
+obtained. The `/debug/syncz` authorization boundary remains unchanged.
 
 Proxy summaries add a separate independent oracle:
 

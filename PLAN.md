@@ -1181,7 +1181,7 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
 | Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
-| Pod/proxy diagnostics | Container inventory, bounded logs, Envoy inspection, current-Service/configuration candidates and explicitly selected ztunnel registry tables | Envoy/Service hosted-live; configuration/ztunnel positives fixture-backed; broader metadata formats, authorized sync, ambient metrics, logging controls and Desktop remain |
+| Pod/proxy diagnostics | Container inventory, bounded logs, Envoy inspection and metadata candidates, source-defined ztunnel registry detail/current candidates | Envoy/Service hosted-live; new ztunnel fields/candidates are synthetic-test verified only; typed-metadata speculation, authorized sync, ambient metrics, logging controls and Desktop remain |
 | Parity evidence | Source inventories, reproducible generators, synthetic fixtures and live Bookinfo checks | Inventoried does not mean implemented |
 
 ### Application semantics to preserve
@@ -1266,7 +1266,7 @@ the authority for individual behavior and platform claims.
 | `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
 | `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
 | `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
-| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
+| `diagnostics` | Partial / open | Bounded logs, source-aligned Envoy metadata rows, and ztunnel registry fields with explicit-mesh current Service/Pod candidate verification implemented; speculative typed metadata, certificate/policy/runtime detail, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
 | `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
@@ -1427,14 +1427,21 @@ panel and query cardinality limits.
 5. Preserve all 23 generated models and checksum-bound schema captures. Read
    the focused skills for any new resource/detail/settings work rather than
    invoking the whole operator-installing build workflow.
-6. Extend the now-proven read-only Envoy transport and cluster/route/listener
-   inspection beyond current Service and canonical DestinationRule/VirtualService
-   candidate links, while keeping authorized sync evidence separate.
-   The managed Istiod Pod-proxy `/debug/syncz` endpoint returned 401; do not
-   create credentials or work around that authentication boundary.
-   Do not infer synchronization from admin HTTP success, server LIVE state,
-   an active configuration or an injected container. Preserve unnamed/repeated
-   resources rather than imposing Kubernetes-like name uniqueness.
+6. The bounded Envoy/ztunnel projection batch is implemented locally. At pinned
+   Kiali v2.33.0, Envoy callers consume only the
+   `metadata.filter_metadata.istio.config` string path; native rows now retain the
+   full reference and context-derived expected kind without decoding speculative
+   typed metadata. The ztunnel projection includes source-defined service,
+   endpoint and workload fields. Current Service/Pod candidates require an exact
+   configured `meshClusterName` match and a current core/v1 response with matching
+   kind, namespace/name, UID and resourceVersion before navigation. Registry
+   identities remain distinct from Kubernetes UIDs and historical identity.
+   Preserve unnamed/repeated resources; never derive sync, readiness, security or
+   policy verdicts from admin success, LIVE state, active config or injection.
+   Certificates/policies remain counts, and full runtime config, authorized sync,
+   live ztunnel/ambient and Desktop evidence remain open. The managed Istiod
+   Pod-proxy `/debug/syncz` endpoint returned 401; do not create credentials or
+   work around that boundary.
 7. Recheck hosted and Desktop availability, run relevant regression gates and
    verify actual rendering. Keep remaining diagnostics/multi-cluster/dashboard
    transport gaps explicit; no bridge or cluster install to conceal them.

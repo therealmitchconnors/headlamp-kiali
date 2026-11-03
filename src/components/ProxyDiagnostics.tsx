@@ -26,11 +26,13 @@ function Snapshot({
   pod,
   read,
   domain,
+  meshClusterName,
 }: {
   cluster: string;
   pod: DiagnosticPod;
   read: ProxyRead;
   domain: string | null;
+  meshClusterName: string | null;
 }) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<ProxyConfigEntry>();
@@ -80,7 +82,13 @@ function Snapshot({
               )}
             </Alert>
           )}
-          {snapshot.ztunnel && <ZtunnelDiagnostics data={snapshot.ztunnel} />}
+          {snapshot.ztunnel && (
+            <ZtunnelDiagnostics
+              cluster={cluster}
+              meshClusterName={meshClusterName}
+              data={snapshot.ztunnel}
+            />
+          )}
           {snapshot.info && (
             <SimpleTable
               data={[
@@ -165,6 +173,8 @@ export default function ProxyDiagnostics({
   const config = useKialiConfig();
   const domain =
     config.valid === true ? getClusterConfig(config.config, cluster).identityDomain ?? null : null;
+  const meshClusterName =
+    config.valid === true ? getClusterConfig(config.config, cluster).meshClusterName ?? null : null;
   const [request, setRequest] = useState<{ read: ProxyRead; attempt: number }>();
   const [format, setFormat] = useState<'envoy' | 'ztunnel'>(() =>
     pod.containers.some(container => container.name === 'ztunnel') &&
@@ -241,6 +251,7 @@ export default function ProxyDiagnostics({
             pod={pod}
             read={request.read}
             domain={domain}
+            meshClusterName={meshClusterName}
           />
         )}
       </Stack>

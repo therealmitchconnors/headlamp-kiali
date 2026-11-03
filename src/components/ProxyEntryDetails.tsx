@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
 import { ProxyConfigEntry } from '../core/proxyConfig';
+import { proxyConfigurationTarget } from '../core/proxyConfigurationReference';
 import { proxyListenerDetails, ProxyRouteDetail, proxyRouteDetails } from '../core/proxyDetails';
 import { readProxyClusterSummary, readProxyMetadataPath } from '../core/proxySummary';
 import CodeBlock from './configuration/CodeBlock';
@@ -52,6 +53,9 @@ export default function ProxyEntryDetails({
     'App: TCP TLS': t('TCP TLS'),
     'App: HTTP': t('HTTP plaintext'),
   };
+  const clusterReferenceTarget = result.clusterReference
+    ? proxyConfigurationTarget({ kind: 'DestinationRule', path: result.clusterReference })
+    : null;
   return (
     <Stack spacing={2}>
       {result.error && <Alert severity="warning">{result.error}</Alert>}
@@ -78,6 +82,26 @@ export default function ProxyEntryDetails({
               {
                 label: t('Configuration metadata reference'),
                 value: result.cluster.destinationRule,
+              },
+              {
+                label: t('Expected metadata resource kind'),
+                value: t('DestinationRule'),
+              },
+              {
+                label: t('Metadata namespace'),
+                value:
+                  clusterReferenceTarget?.available === true
+                    ? clusterReferenceTarget.namespace
+                    : null,
+              },
+              {
+                label: t('Metadata resource name'),
+                value:
+                  clusterReferenceTarget?.available === true ? clusterReferenceTarget.name : null,
+              },
+              {
+                label: t('Metadata reference path'),
+                value: result.clusterReference,
               },
             ]}
             columns={[
@@ -118,6 +142,22 @@ export default function ProxyEntryDetails({
                 getter: item => item.reference || t('Not reported'),
               },
               {
+                label: t('Expected metadata resource kind'),
+                getter: () => t('VirtualService'),
+              },
+              {
+                label: t('Metadata namespace'),
+                getter: item => item.referenceNamespace ?? t('Not a canonical current reference'),
+              },
+              {
+                label: t('Metadata resource name'),
+                getter: item => item.referenceName ?? t('Not a canonical current reference'),
+              },
+              {
+                label: t('Metadata reference path'),
+                getter: item => item.referencePath || t('Not reported'),
+              },
+              {
                 label: t('Details'),
                 getter: item => (
                   <Button
@@ -132,6 +172,13 @@ export default function ProxyEntryDetails({
                           match: item.match,
                           action: item.action,
                           configuration: item.actionData,
+                          metadata: {
+                            encoding: 'filter_metadata.istio.config',
+                            expectedKind: 'VirtualService',
+                            namespace: item.referenceNamespace,
+                            name: item.referenceName,
+                            path: item.referencePath || null,
+                          },
                         },
                       })
                     }
