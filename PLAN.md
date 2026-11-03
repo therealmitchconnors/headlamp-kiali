@@ -16,6 +16,24 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
+### Baseline reconciliation — 2026-11-03
+
+The implementation base and PR target are
+[`therealmitchconnors-kiali-plugin`](https://github.com/therealmitchconnors/headlamp-kiali/tree/therealmitchconnors-kiali-plugin)
+at `655e75109cf27f964f55045bdadfe39c72d22022` (merged #2). This task branch
+contains the same tracked implementation baseline; its planning commit is not
+evidence of feature integration. The verified GitHub PR base for this task is
+the port branch, not `main`.
+
+The GitHub issue/PR states below are a point-in-time planning snapshot. #1 and
+#2 are merged into the baseline. Every other implementation PR listed is open
+and unmerged; its branch, tests, or issue assignment do not change this
+baseline's implementation or evidence state. Use [the issue-linked execution
+map](#issue-linked-execution-and-catalog-map) and
+[partial-release readiness](docs/parity.md#partial-release-readiness) as the
+portable current handoff. The dated checkpoints and test counts below remain
+historical evidence for their named revisions, not current test results.
+
 ### Resume status — 2026-10-31
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
@@ -1255,30 +1273,98 @@ the authority for individual behavior and platform claims.
 | `shared-context` | Done | Scope, identity, settings, failure states and cancellation | `stock-host-spikes`, `parity-harness` |
 | `resource-access` | Done, initial | Typed built-in SDK models and explicit ApiProxy adapters; new CRD models belong to `config-views` | `shared-context` |
 | `resource-views` | Done, initial | Native read-only lists, readiness and native detail links | `resource-access` |
-| `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer | `resource-access` |
+| `correlation` | Done, initial | Supported Kubernetes correlation core and first Applications consumer; complete workload/account inclusion remains open ([#7](https://github.com/therealmitchconnors/headlamp-kiali/issues/7), PR [#11](https://github.com/therealmitchconnors/headlamp-kiali/pull/11)) | `resource-access` |
 | `config-views` | **Partial / open** | Applications and all 23 baseline configuration kinds implemented; more relationship edges and real-CR/Desktop evidence remain | `resource-views`, `correlation` |
 | `safe-mutations` | Partial / open | Guarded spec CRUD and validation-exclusion annotation editing implemented; real-write verification and broader resource actions remain | `config-views` |
-| `basic-validation` | Partial / open | Forty-one bounded codes, including declared-scope Gateway selectors/controller flags, Gateway listener/status/class checks, and source-informed Service port checks over complete declared local namespace scope; attachment/per-workload/principal and broader checks remain | `config-views`, `mesh-security` |
-| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and custom/bundled dashboards with scoped discovery, application/workload recommendations, annotation overlays, per-template disabling, grouping/value controls, label sorting, display bounds/spans and explicit chart batches implemented; VM/custom-controller integration, background discovery, alternate layouts and complete upstream query/default coverage remain | `resource-views`, `correlation` |
-| `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; unknown-cluster/external/capability/query and proxy/ambient semantics remain | `telemetry` |
+| `basic-validation` | Partial / open | Forty-one bounded codes, including integrated Service port checks (#1) and declared-scope Gateway checks (#2); Gateway route attachment, effective workload/principal context and broader checks remain ([#8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8), PR [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12)) | `config-views`, `mesh-security` |
+| `telemetry` | Partial / open | Initial charts, eight rate families, histograms and bounded native dashboards implemented; VM/custom-workload annotation sources and complete upstream query/default coverage remain ([#24](https://github.com/therealmitchconnors/headlamp-kiali/issues/24), PR [#27](https://github.com/therealmitchconnors/headlamp-kiali/pull/27)) | `resource-views`, `correlation` |
+| `health` | Partial / open | Calculator/reporter core and all three entity consumers implemented; protocol/reporter coverage and unknown-cluster/external/capability/query and proxy/ambient semantics remain ([#9](https://github.com/therealmitchconnors/headlamp-kiali/issues/9), PR [#13](https://github.com/therealmitchconnors/headlamp-kiali/pull/13)) | `telemetry` |
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
-| `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; full sources, policy/security and observed state remain | `correlation`, `config-views`, `telemetry` |
-| `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
-| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
-| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
-| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
-| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
-| `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
-| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
-| `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
+| `mesh-security` | Partial / open | Local inventory, revision/tag hints, selected config merge and configured namespace-selector assessment implemented; remaining effective configuration sources and observed-security telemetry remain ([#3](https://github.com/therealmitchconnors/headlamp-kiali/issues/3), PR [#4](https://github.com/therealmitchconnors/headlamp-kiali/pull/4); [#33](https://github.com/therealmitchconnors/headlamp-kiali/issues/33), PR [#38](https://github.com/therealmitchconnors/headlamp-kiali/pull/38)) | `correlation`, `config-views`, `telemetry` |
+| `full-validation` | Partial / open | Incremental checker batches are implemented; effective policy context, Gateway API route attachment and broader checkers remain ([#8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8), PR [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12)) | `basic-validation`, `mesh-security` |
+| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14)) | `safe-mutations`, `basic-validation` |
+| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway API forms remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14); [#15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15), PR [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19)) | `basic-wizards`, `full-validation` |
+| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; metadata projections, authorized synchronization, confirmed logging controls and Desktop checks remain ([#18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18), PR [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22); [#30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30), PR [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36)) | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
+| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; Tempo count predicates, trace/workload correlation, external dashboard discovery, live providers and authenticated transports remain ([#16](https://github.com/therealmitchconnors/headlamp-kiali/issues/16), PR [#20](https://github.com/therealmitchconnors/headlamp-kiali/pull/20); [#17](https://github.com/therealmitchconnors/headlamp-kiali/issues/17), PR [#21](https://github.com/therealmitchconnors/headlamp-kiali/pull/21); [#23](https://github.com/therealmitchconnors/headlamp-kiali/issues/23), PR [#29](https://github.com/therealmitchconnors/headlamp-kiali/pull/29)) | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
+| `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; shared-store normalization, full graph fan-out and configurable mesh membership remain ([#25](https://github.com/therealmitchconnors/headlamp-kiali/issues/25), PR [#28](https://github.com/therealmitchconnors/headlamp-kiali/pull/28)) | `config-views`, `telemetry`, `mesh-security` |
+| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; reporter normalization and remaining appenders/interactions, ambient behavior and correlations remain ([#26](https://github.com/therealmitchconnors/headlamp-kiali/issues/26), PR [#31](https://github.com/therealmitchconnors/headlamp-kiali/pull/31); [#32](https://github.com/therealmitchconnors/headlamp-kiali/issues/32), PR [#37](https://github.com/therealmitchconnors/headlamp-kiali/pull/37)) | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
+| `runtime-hardening` | Partial / open | Captured/deadline-bound reads implemented; repeatable hosted smoke and measured large-input analysis/rendering budgets remain ([#5](https://github.com/therealmitchconnors/headlamp-kiali/issues/5), PR [#6](https://github.com/therealmitchconnors/headlamp-kiali/pull/6); [#34](https://github.com/therealmitchconnors/headlamp-kiali/issues/34), PR [#39](https://github.com/therealmitchconnors/headlamp-kiali/pull/39)) | `advanced-graph`, `diagnostics`, `full-wizards` |
 | `parity-release` | Pending | Close the ledger, verify live, document and package with explicit remaining gaps | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster` |
 
-The optional verification setup is also complete: managed Istio installation,
-Bookinfo/example Prometheus deployment, real metric verification and a supplied
-Desktop debug target. These are development-environment milestones, not product
-installation requirements.
+The optional managed-Istio/Bookinfo/Prometheus environment and Desktop debug
+target were provisioned for earlier verification. They are historical setup,
+not an always-available task environment or current authorization to install,
+seed, mutate or clean up resources. Recheck availability and obtain the exact
+approval required before any cluster fixture or write.
 
-## Immediate next task: complete reusable validation and mesh context
+### Issue-linked execution and catalog map
+
+This table ties current assignments to the pinned inventory records and the
+existing milestone IDs above. “Open” means the issue/PR is not integrated into
+the baseline; it does not mean work is complete or that downstream acceptance
+is unblocked.
+
+| Assignment | Milestone | Individual pinned catalog obligations | Current issue / implementation PR |
+| --- | --- | --- | --- |
+| Integrated Service-port and declared-scope Gateway increments | `basic-validation` | KIA0601/KIA0602/KIA0701; Gateway listener/status/class and KIA0302 scope; only their documented bounded callers | Merged PR [#1](https://github.com/therealmitchconnors/headlamp-kiali/pull/1) and [#2](https://github.com/therealmitchconnors/headlamp-kiali/pull/2); source is in the base, runtime gates remain open |
+| Effective mesh-configuration sources | `mesh-security` → `full-validation` | `resource:ConfigMaps`, `page-source:frontend/src/pages/Namespaces/NamespaceRevisionUtils.ts`, selected mesh fields and their consumers; explicit file/mount overrides and external sources remain guarded | [Issue #3](https://github.com/therealmitchconnors/headlamp-kiali/issues/3), open PR [#4](https://github.com/therealmitchconnors/headlamp-kiali/pull/4) |
+| Hosted Headlamp smoke environment | `runtime-hardening` | Runtime import/load, route contribution, translated labels, accessible names and console behavior; no feature-family inventory is promoted | [Issue #5](https://github.com/therealmitchconnors/headlamp-kiali/issues/5), open draft PR [#6](https://github.com/therealmitchconnors/headlamp-kiali/pull/6) |
+| Workload inclusion and account provenance | `correlation` → `full-validation` | `checker:business/checkers/workloadgroups/service_accounts_checker.go#ServiceAccountsChecker`, `validation-code:workloadgroup.template.serviceaccount.notfound` (KIA1701), UID-rooted workload inclusion | [Issue #7](https://github.com/therealmitchconnors/headlamp-kiali/issues/7), open draft PR [#11](https://github.com/therealmitchconnors/headlamp-kiali/pull/11) |
+| Gateway API attachment/reference checks | `full-validation` | HTTPRoute/GRPCRoute checker and NoHost/NoK8sGateway records; KIA1601; TCPRoute/TLSRoute/UDPRoute identities remain explicit obligations, not inferred from schemas | [Issue #8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8), open draft PR [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12) |
+| Health protocol/reporter queries | `health` | Seven `health-primitive:*` records and `frontend-contract:frontend/src/types/Health.ts`; per-source completeness, protocol/reporter and unknown-capability cases | [Issue #9](https://github.com/therealmitchconnors/headlamp-kiali/issues/9), open draft PR [#13](https://github.com/therealmitchconnors/headlamp-kiali/pull/13) |
+| Existing-resource multi-object traffic workflows | `basic-wizards` → `full-wizards` | Individual traffic-shifting, request-routing, timeout/retry and supported DestinationRule wizard sources; immutable target and per-object outcome behavior | [Issue #10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), open draft PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14) |
+| Gateway API route create/attach forms | `full-wizards` | `wizard-source` records for `K8sRequestRouting`, `K8sGatewaySelector` and `K8sGRPCRouteHosts`; only source-supported HTTPRoute/GRPCRoute form fields | [Issue #15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15), open draft PR [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19) |
+| Tempo spanset count/composition | `integrations` | Trace search/filter contract and related-span operators; exact AST, count, backend capability and query-budget obligations | [Issue #16](https://github.com/therealmitchconnors/headlamp-kiali/issues/16), open draft PR [#20](https://github.com/therealmitchconnors/headlamp-kiali/pull/20) |
+| Trace-to-current-workload/graph association | `integrations` → `advanced-graph` | `page-source:frontend/src/pages/Graph/SummaryPanelNodeTraces.tsx`, trace/graph identity and current UID owner-chain fields; no historic identity inference | [Issue #17](https://github.com/therealmitchconnors/headlamp-kiali/issues/17), open draft PR [#21](https://github.com/therealmitchconnors/headlamp-kiali/pull/21) |
+| Envoy/ztunnel metadata projections | `diagnostics` | Six diagnostic source units and `api:GET /api/namespaces/{namespace}/pods/{pod}/config_dump_ztunnel`; current-resource identity/link obligations | [Issue #18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18), open draft PR [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22) |
+| Grafana/Perses discovery and links | `integrations` | `api:GET /api/grafana`, `api:GET /api/perses`, and the individual `GrafanaInfo`/`PersesInfo` contracts; external auth remains a separate capability gate | [Issue #23](https://github.com/therealmitchconnors/headlamp-kiali/issues/23), open draft PR [#29](https://github.com/therealmitchconnors/headlamp-kiali/pull/29) |
+| VM/custom-workload dashboard attribution | `telemetry` | `api:GET /api/namespaces/{namespace}/workloads/{workload}/dashboard`, `WorkloadAnnotationsWizard.tsx`, supported annotation sources and precedence | [Issue #24](https://github.com/therealmitchconnors/headlamp-kiali/issues/24), open draft PR [#27](https://github.com/therealmitchconnors/headlamp-kiali/pull/27) |
+| Shared/per-context telemetry store normalization | `multi-cluster` → `advanced-graph` | `GraphElementsQuery` namespaces/time/metric contracts and explicit context-to-telemetry mapping; no inferred mesh membership | [Issue #25](https://github.com/therealmitchconnors/headlamp-kiali/issues/25), open draft PR [#28](https://github.com/therealmitchconnors/headlamp-kiali/pull/28) |
+| Mixed-reporter graph queries | `advanced-graph` | Individual `GraphElementsQuery` HTTP/gRPC/TCP rate, throughput and projection contracts; duplicate/conflicting labels and reporter provenance | [Issue #26](https://github.com/therealmitchconnors/headlamp-kiali/issues/26), open draft PR [#31](https://github.com/therealmitchconnors/headlamp-kiali/pull/31) |
+| Authorized proxy sync/logging | `diagnostics` → `safe-mutations` | `api:POST /api/namespaces/{namespace}/pods/{pod}/logging`, Pod/container identity, authorized read-only sync evidence; observed `/debug/syncz` 401 remains a blocker | [Issue #30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30), open draft PR [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36) |
+| Graph appenders and focused interactions | `advanced-graph` | All 17 individual `graph-appender:*` records: AggregateNode, Ambient, DeadNode, Extensions, Health, IdleNode, Istio, Labeler, MeshCheck, Outsider, ResponseTime, SecurityPolicy, ServiceEntry, SidecarsCheck, Throughput, TrafficGenerator and WorkloadEntry | [Issue #32](https://github.com/therealmitchconnors/headlamp-kiali/issues/32), open draft PR [#37](https://github.com/therealmitchconnors/headlamp-kiali/pull/37) |
+| Observed connection-security telemetry | `mesh-security` → `advanced-graph` | Per-protocol/reporter security observations and graph `SecurityPolicyAppenderName` distinction; no configuration, sync, ambient or health verdict from absent samples | [Issue #33](https://github.com/therealmitchconnors/headlamp-kiali/issues/33), open draft PR [#38](https://github.com/therealmitchconnors/headlamp-kiali/pull/38) |
+| Large-input budgets | `runtime-hardening` | Cross-cutting graph option/appender, query, selector/reference, dashboard-series and rendered-output records; measured host costs are distinct from pure-core limits | [Issue #34](https://github.com/therealmitchconnors/headlamp-kiali/issues/34), open draft PR [#39](https://github.com/therealmitchconnors/headlamp-kiali/pull/39) |
+| Reconciliation and partial-release readiness | `parity-release` | All individual inventory rows retain their current evidence states; this task changes the handoff/readiness map only | [Issue #35](https://github.com/therealmitchconnors/headlamp-kiali/issues/35), this draft PR [#40](https://github.com/therealmitchconnors/headlamp-kiali/pull/40) |
+
+#### Real prerequisite ordering
+
+- #3 is the remaining effective-mesh-source prerequisite for expanding
+  configured mTLS to workloads, ports or subsets. Complete workload/account
+  attribution (#7) is a separate input for KIA1701/principal-absence and other
+  complete-workload claims. Those checker batches require the source-specific
+  evidence from **both** tracks; neither assignment alone enables them.
+- #8 owns relationship-check semantics. #15 can build guarded proposals
+  independently, but a form or submitted `parentRef` is not proof of attachment;
+  final Gateway API relationship parity needs the implemented checker and
+  complete target/grant evidence.
+- #9 may advance against the currently supported subjects, but complete health
+  coverage still requires supported workload/capability evidence; unsupported
+  variants must remain unavailable rather than inheriting health from #7's
+  assignment or current Pod correlation.
+- #25's store normalization does not establish configurable cross-context mesh
+  membership. Full cross-context graph claims require both the store mapping and
+  a separately evidenced membership model. #26 is single-context and can land
+  independently; full graph convergence also needs the individual #32 appender
+  and interaction gates, plus only those trace/security inputs whose behavior
+  is claimed.
+- #16 query grammar and #17 UID-proven resource association are separate trace
+  increments. Full trace parity additionally needs a real supported provider
+  and platform transport evidence. #18 metadata decoding and #30 sync/logging
+  controls are likewise separate; the observed 401 does not become a supported
+  sync path.
+- #23 external dashboard links and #24 VM/custom-workload attribution are
+  independent bounded dashboard increments. Neither closes native dashboard
+  family coverage, application authentication, or full source attribution.
+- #5 is a prerequisite for repeatable hosted smoke evidence, not a substitute
+  for Desktop, live-cluster, provider-authentication, or large-mesh measurements.
+  #34's pure analysis limits cannot stand in for host rendering/memory data.
+- `parity-release` remains pending until every in-scope ledger item is resolved
+  for the claimed release scope and each platform claim has its own evidence.
+  Open PRs, synthetic fixtures, passing tests, and generated inventories do not
+  satisfy these gates by themselves.
+
+## Validation and mesh context: next-task reconciliation (2026-11-03)
 
 The current validation prerequisite is complete managed-namespace/controller
 evidence. The new pinned GetRevision label projection is not that inventory,
@@ -1298,8 +1384,10 @@ comparison are now implemented without implicit context/telemetry fallback.
 The typed local/default-visibility scope now requires complete controller/tag/
 namespace reads and configuration, with supported local topology and explicit
 mapping. The scoped Gateway inspector now consumes it for complete default
-workload inclusion and Gateway evidence. Service inputs are a separate published
-milestone, pending integration into this base. Remote contexts
+workload inclusion and Gateway evidence. Service port checks were also integrated
+in merged PR #1 and are present in this base; neither these checks nor the scoped
+Gateway action has the newer browser/live verification requested by its ledger
+entry. Remote contexts
 and custom Kiali visibility remain unsupported; do not promote the comparison
 hint or prior label-based configuration inspection to complete membership.
 Service checks in the pinned caller pool Pods across all managed namespaces,
@@ -1315,13 +1403,16 @@ are reused without inventing new diagnostics. PILOT_SCOPE_GATEWAY_TO_NAMESPACE
 retains exact-true accumulation from the first declared container; unresolved
 flags or multiple eligible controllers block the scoped check. Custom workload
 owners, configured nondefault inclusion and full controller health remain open.
-Next validation work is remaining effective mesh-configuration sources before
-workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
-gates in an authorized environment independently; do not enable dormant port
-helpers or infer route attachment from this milestone.
+At this snapshot, issue #3 / PR #4 owns remaining effective mesh-configuration
+sources. Workload/port/subset mTLS and principal-absence checks remain blocked on
+the exact effective configuration and complete source-specific workload/account
+evidence; they are not made ready by #3 or #7 being assigned. Close the Gateway
+runtime gates independently in an authorized environment; do not enable dormant
+port helpers or infer route attachment from the integrated scope check.
 
-The dashboard continuation is external link support and broader
-VM/custom-controller attribution. Workload recommendations are now integrated
+The older dashboard “next” note is split into independent #23 external-link and
+#24 VM/custom-workload attribution assignments; both PRs are still unmerged.
+Workload recommendations are now integrated
 through an explicit inspector, reusing application recommendation/chart code
 while retaining paired app/version filters and a fresh workload overlay.
 Selected child controllers are rooted by UID without including sibling Pods.
