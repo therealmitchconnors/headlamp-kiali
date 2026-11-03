@@ -151,4 +151,36 @@ describe('external dashboard links', () => {
     ).toBeTruthy();
     expect(state.request).not.toHaveBeenCalled();
   });
+
+  it('distinguishes missing provider configuration from a failed discovery', () => {
+    state.stored = { schemaVersion: 1, clusters: { alpha: { prometheus: null } } };
+    render(<ExternalDashboards />);
+    expect(
+      screen.getByText(
+        'External dashboard endpoints are not configured. Add provider settings under Kiali > Connection settings; no provider credentials are stored.'
+      )
+    ).toBeTruthy();
+    expect(state.request).not.toHaveBeenCalled();
+  });
+
+  it('cancels an in-flight provider read when the saved endpoint changes', async () => {
+    state.request.mockImplementation(
+      (_path, options) =>
+        new Promise(resolve => {
+          options?.signal?.addEventListener(
+            'abort',
+            () => resolve([{ title: 'Istio Service Dashboard', url: '/d/stale/dashboard' }]),
+            { once: true }
+          );
+        })
+    );
+    render(<ExternalDashboards />);
+    fireEvent.click(screen.getByRole('button', { name: 'Discover grafana dashboards' }));
+    await waitFor(() => expect(state.request).toHaveBeenCalledTimes(1));
+    const requestSignal = state.request.mock.calls[0][1]?.signal;
+    await act(async () => setStored(config('https://replacement.example.test')));
+    await waitFor(() => expect(requestSignal?.aborted).toBe(true));
+    expect(screen.queryByRole('link', { name: /Open Istio Service Dashboard/ })).toBeNull();
+    expect(state.request).toHaveBeenCalledTimes(1);
+  });
 });

@@ -71,7 +71,7 @@ function ExternalDashboardResults({
                   { provider: submission.provider }
                 )
               : t(
-                  'No configured dashboard was found. The {{provider}} API capability is unverified; this may mean the dashboard is missing.',
+                  'No configured dashboard was verified. The {{provider}} API capability is unverified; the dashboard may be missing or this provider endpoint may not support the expected API.',
                   { provider: submission.provider }
                 )}
           </Alert>

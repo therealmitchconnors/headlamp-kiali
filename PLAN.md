@@ -112,6 +112,23 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **External Grafana/Perses links (2026-11-03):** added per-cluster anonymous
+  provider-Service discovery and a separate explicit external-link page. The
+  pinned Kiali v2.33 source audit is recorded in `docs/parity.md`: Grafana
+  dashboard search results are exact-title/same-origin checked; Perses project
+  and normalized dashboard identities are validated. Variable names are explicit,
+  URL-encoded mappings, cluster uses only saved `telemetryCluster`, and historical
+  links preserve provider-specific time parameters. Configured URLs accept only
+  plain HTTP(S), without userinfo/query/fragment. Provider API reads use the
+  Kubernetes Service proxy anonymously; Kubernetes proxy permission does not
+  authenticate to the provider, and no credentials are stored or forwarded.
+  Reads are captured, sequential, limited to 32 dashboards and share a 15-second
+  cancellation deadline. One selected cluster is required; stale results are
+  discarded on settings/input changes. Local fixtures cover identity, mapping,
+  encoding, history, explicit empty values, unsafe URLs, missing/denied/unsupported
+  endpoints, bounds and invalidation. No live provider, browser-host or Desktop
+  evidence was obtained; this is deep-link support, not authenticated integration
+  or native dashboard parity.
 - **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
   inspector, active Istio Gateway KIA0302 and captured exact-true controller
   scope semantics. Complete versioned Gateway/default-workload/VM sources are
@@ -1267,7 +1284,7 @@ the authority for individual behavior and platform claims.
 | `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
 | `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
 | `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
-| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
+| `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing and anonymous safe Grafana/Perses dashboard links implemented; provider authentication, live-provider checks, correlations and dashboard families remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
 | `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
 | `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
@@ -1577,8 +1594,9 @@ substitute for meaningful detail presentation.
   inspection, ztunnel configuration and confirmed logging controls.
 - Complete resource/control-plane/ztunnel/custom dashboards.
 - Extend the implemented Jaeger/Tempo HTTP trace/span search, details and
-  normalization with workload correlation and graph overlays; add
-  Grafana/Perses discovery and dashboard links.
+  normalization with workload correlation and graph overlays. External Grafana/
+  Perses deep links exist, but authenticated discovery, embedded/native rendering
+  and browser/provider reachability evidence remain open.
 - Use existing HTTP equivalents where they provide the same behavior.
   A deep link alone is not integrated-tracing parity, and browser fetch is not
   a substitute for native gRPC.

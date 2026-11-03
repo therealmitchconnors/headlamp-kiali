@@ -1,17 +1,17 @@
 import {
-  ExternalDashboardContext,
-  externalDashboardPath,
-  buildExternalDashboardLink,
-  decodeGrafanaDashboardSearch,
-  decodePersesDashboard,
-  persesDashboardID,
-} from './externalDashboards';
-import {
   ExternalDashboardDefinition,
   GrafanaDashboardConfig,
   PersesDashboardConfig,
   validateExternalDashboards,
 } from './config';
+import {
+  buildExternalDashboardLink,
+  decodeGrafanaDashboardSearch,
+  decodePersesDashboard,
+  ExternalDashboardContext,
+  externalDashboardPath,
+  persesDashboardID,
+} from './externalDashboards';
 
 const endpoint = {
   namespace: 'observability',
@@ -152,6 +152,12 @@ describe('external dashboard identity and safe links', () => {
       )
     ).toThrow('configured host');
     expect(() =>
+      decodeGrafanaDashboardSearch([{ title: name, url: '/api/admin' }], name, grafana.externalURL)
+    ).toThrow('supported dashboard route');
+    expect(() =>
+      decodeGrafanaDashboardSearch([{ title: name, url: '/d/%252e%252e/redirect' }], name, grafana.externalURL)
+    ).toThrow('safe path');
+    expect(() =>
       decodePersesDashboard(
         { metadata: { name: 'other', project: 'istio' } },
         'istio',
@@ -167,6 +173,7 @@ describe('external dashboard identity and safe links', () => {
     'https://dashboards.example.test/path?redirect=https://attacker.example',
     'https://dashboards.example.test/#fragment',
     'https://dashboards.example.test/%2f..',
+    'https://@dashboards.example.test',
   ])('rejects unsafe external URL %s and secret/unknown fields', url => {
     expect(() =>
       validateExternalDashboards({
@@ -209,6 +216,39 @@ describe('external dashboard identity and safe links', () => {
         },
       })
     ).toThrow('safe query parameter');
+    expect(() =>
+      validateExternalDashboards({
+        grafana: {
+          endpoint,
+          externalURL: 'https://dashboards.example.test',
+          dashboards: [
+            { name: 'Dashboard', variables: { namespace: 'var-value', cluster: 'var-value' } },
+          ],
+        },
+      })
+    ).toThrow('query parameter names must be unique');
+    expect(() =>
+      validateExternalDashboards({
+        grafana: {
+          endpoint,
+          externalURL: 'https://dashboards.example.test',
+          dashboards: [{ name: 'Dashboard', variables: { namespace: 'from' } }],
+        },
+      })
+    ).toThrow('cannot replace the time range');
+    expect(() =>
+      validateExternalDashboards({
+        perses: {
+          endpoint,
+          externalURL: 'https://dashboards.example.test',
+          project: 'istio',
+          dashboards: [
+            { name: 'Istio Dashboard', variables: {} },
+            { name: 'istio-dashboard', variables: {} },
+          ],
+        },
+      })
+    ).toThrow('names must be unique');
     const definition: ExternalDashboardDefinition = grafana.dashboards[0];
     for (const range of [
       { start: 100, end: 100 },

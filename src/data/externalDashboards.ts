@@ -17,6 +17,7 @@ import {
   InvalidResponseError,
   readCluster,
   serviceProxyPath,
+  UnsupportedTransportError,
   withDiagnosticDeadline,
 } from './requests';
 
@@ -73,7 +74,9 @@ export async function discoverExternalDashboards(
             continue;
           }
           if (provider === 'grafana' && statusCode(error) === 404)
-            throw new InvalidResponseError('Grafana search API is not supported at this endpoint');
+            throw new UnsupportedTransportError(
+              'Grafana search API is not supported at this endpoint'
+            );
           throw error;
         }
         requestSignal.throwIfAborted();
@@ -98,9 +101,14 @@ export async function discoverExternalDashboards(
             discovered.missing.push(dashboard.name);
           }
         } catch (error) {
-          throw new InvalidResponseError(
-            error instanceof Error ? error.message : `Unsupported ${provider} dashboard response`
-          );
+          const message =
+            error instanceof Error ? error.message : `Unsupported ${provider} dashboard response`;
+          if (
+            message.includes('did not return a supported dashboard list') ||
+            message.includes('unsupported dashboard identity')
+          )
+            throw new UnsupportedTransportError(message);
+          throw new InvalidResponseError(message);
         }
       }
       return discovered;

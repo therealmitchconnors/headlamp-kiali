@@ -99,6 +99,65 @@ empty base path. Missing, forbidden, unauthenticated and malformed responses are
 reported explicitly. Unknown configuration versions are not silently overwritten;
 resetting invalid Kiali settings requires confirmation.
 
+## External Grafana and Perses dashboards
+
+Select one Headlamp cluster, then open **Kiali > External dashboards**. Under
+**Connection settings**, configure Grafana and/or Perses per cluster using their
+JSON fields. Each provider configuration requires an existing Kubernetes Service
+endpoint for anonymous API discovery and a browser-reachable `externalURL`.
+Grafana also accepts a datasource UID; Perses requires a project. Configure
+explicit dashboard names and the provider query-parameter names for any
+`app`, `cluster`, `datasource`, `namespace`, `service`, `version`, or `workload`
+values you want linked. For example:
+
+```json
+{
+  "endpoint": {
+    "namespace": "telemetry",
+    "service": "grafana",
+    "port": "3000",
+    "basePath": ""
+  },
+  "externalURL": "https://grafana.example.test/grafana",
+  "datasourceUID": "prometheus",
+  "dashboards": [
+    {
+      "name": "Istio Service Dashboard",
+      "variables": {
+        "namespace": "var-namespace",
+        "service": "var-service",
+        "cluster": "var-cluster"
+      }
+    }
+  ]
+}
+```
+
+Perses uses the same endpoint/URL/dashboard structure, plus `"project": "istio"`
+instead of `datasourceUID`. Its configured dashboard name is normalized to the
+provider's lowercase hyphenated dashboard ID. The Service API is queried through
+Headlamp's Kubernetes proxy without provider credentials. Kubernetes permission
+to proxy to a Service does **not** authenticate to Grafana or Perses: a provider
+that requires application authentication will return an explicit failure. The
+external URL must be an absolute HTTP(S) URL without credentials, query or
+fragment. The page never fetches the external URL, forwards tokens, bypasses
+CORS/TLS, or verifies browser reachability; the link requires the user's own
+browser access to the provider.
+
+Discovery verifies the provider API response and configured dashboard identity.
+Grafana links use `from`/`to` in epoch milliseconds; Perses links use absolute
+ISO-8601 `start`/`end`. Variable names are used as configured query keys and
+values are URL-encoded; explicitly empty values remain empty. A cluster variable
+uses only the explicitly saved metric-cluster identity, never an inferred
+Headlamp context name. Service values follow Kiali's
+`service.namespace.svc.cluster.local` form. Application/workload inputs are
+literal link values, not verified resource correlations. The page requires one
+selected cluster, never a grouped target.
+
+These are safe external deep links, not authenticated provider integration,
+native chart rendering, or full Kiali dashboard parity. No live Grafana/Perses
+provider or provider-authentication behavior has been verified in this change.
+
 Use the native namespace selector to limit Services and Workloads to `bookinfo`.
 Workload-kind selection is kept in the URL. Replica counts are Kubernetes
 readiness only; they are not the ported Kiali mesh-health calculation.
@@ -1152,7 +1211,9 @@ numeric tables remain in normal page flow. Chart spans still stack below
 
 This is **not full custom-dashboard parity**: exact upstream parent-container layout, native histograms,
 background runtime discovery, VM/custom-controller recommendation integration
-and Grafana/Perses links remain unsupported. Unsupported fields are
+and external links embedded in native chart templates remain unsupported.
+Separate Grafana/Perses links are available from **Kiali > External dashboards**;
+they do not render or authenticate provider dashboards. Unsupported fields are
 rejected rather than silently ignored. The raw Bookinfo memory-metric aggregate
 was queried successfully through hosted Headlamp; other chart/error/budget
 scenarios were fixture-backed.

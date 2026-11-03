@@ -126,7 +126,13 @@ describe('external dashboard provider discovery', () => {
     vi.mocked(ApiProxy.request).mockRejectedValueOnce(
       Object.assign(new Error('missing API'), { status: 404 })
     );
-    await expect(discover('grafana')).rejects.toThrow('search API is not supported');
+    try {
+      await discover('grafana');
+      throw new Error('Expected an unsupported provider API');
+    } catch (error) {
+      expect(readFailure(error).kind).toBe('unsupported');
+      expect((error as Error).message).toContain('search API is not supported');
+    }
     vi.mocked(ApiProxy.request).mockRejectedValueOnce(
       Object.assign(new Error('provider denied'), { status: 403 })
     );
@@ -144,7 +150,7 @@ describe('external dashboard provider discovery', () => {
       await discover('grafana');
       throw new Error('Expected an unsupported response');
     } catch (error) {
-      expect(readFailure(error).kind).toBe('invalid-response');
+      expect(readFailure(error).kind).toBe('unsupported');
       expect(error).toHaveProperty('message', 'Grafana search API did not return a supported dashboard list');
     }
     vi.mocked(ApiProxy.request).mockResolvedValue({

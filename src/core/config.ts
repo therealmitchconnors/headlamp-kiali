@@ -133,6 +133,7 @@ function validateExternalURL(value: unknown): string {
   if (
     (url.protocol !== 'http:' && url.protocol !== 'https:') ||
     !url.hostname ||
+    /:\/\/[^/]*@/.test(value) ||
     url.username ||
     url.password ||
     url.search ||
@@ -186,6 +187,8 @@ function validateExternalDashboardVariables(value: unknown): ExternalDashboardVa
       throw new ConfigurationError(`Dashboard ${field} variable must be a safe query parameter name`);
     return [field, parameter];
   });
+  if (new Set(entries.map(([, parameter]) => parameter)).size !== entries.length)
+    throw new ConfigurationError('Dashboard variable query parameter names must be unique');
   return Object.fromEntries(entries) as ExternalDashboardVariables;
 }
 
@@ -198,12 +201,18 @@ function validateExternalDashboardDefinitions(
   const dashboards = value.map(dashboard => {
     if (!isRecord(dashboard)) throw new ConfigurationError('External dashboard must be an object');
     rejectUnknownFields(dashboard, ['name', 'variables']);
-    return {
-      name: validateExternalDashboardName(dashboard.name, provider),
-      variables: validateExternalDashboardVariables(dashboard.variables ?? {}),
-    };
+    const name = validateExternalDashboardName(dashboard.name, provider);
+    const variables = validateExternalDashboardVariables(dashboard.variables ?? {});
+    const reserved =
+      provider === 'grafana' ? new Set(['from', 'to']) : new Set(['start', 'end']);
+    if (Object.values(variables).some(parameter => reserved.has(parameter)))
+      throw new ConfigurationError('Dashboard variable mappings cannot replace the time range');
+    return { name, variables };
   });
-  if (new Set(dashboards.map(dashboard => dashboard.name)).size !== dashboards.length)
+  const identities = dashboards.map(dashboard =>
+    provider === 'perses' ? dashboard.name.toLowerCase().replace(/ /g, '-') : dashboard.name
+  );
+  if (new Set(identities).size !== dashboards.length)
     throw new ConfigurationError('External dashboard names must be unique');
   return dashboards;
 }

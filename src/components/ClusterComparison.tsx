@@ -32,6 +32,7 @@ function ComparisonResults({ query }: { query: ClusterComparisonQuery }) {
       unauthenticated: t('Unauthenticated'),
       unavailable: t('Unavailable'),
       'invalid-response': t('Invalid response'),
+      unsupported: t('Unsupported provider transport or capability'),
     };
     return `${labels[error.kind]}: ${error.message}`;
   };

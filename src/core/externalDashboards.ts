@@ -73,11 +73,22 @@ function dashboardPathFromGrafana(value: unknown, externalURL: string): string {
     dashboard.password ||
     dashboard.search ||
     dashboard.hash ||
-    !dashboard.pathname.startsWith('/') ||
-    dashboard.pathname.startsWith('//')
+    !/^\/(?:[A-Za-z0-9._~-]+\/)*[A-Za-z0-9._~-]+$/.test(dashboard.pathname)
   )
     throw new Error('Grafana dashboard URL is not a safe path on the configured host');
   const basePath = base.pathname.replace(/\/+$/, '');
+  const providerPath =
+    basePath && dashboard.pathname.startsWith(`${basePath}/`)
+      ? dashboard.pathname.slice(basePath.length)
+      : dashboard.pathname;
+  const segments = providerPath.split('/').filter(Boolean);
+  if (
+    !(
+      (segments[0] === 'd' && (segments.length === 2 || segments.length === 3)) ||
+      (segments[0] === 'dashboard' && segments[1] === 'db' && segments.length === 3)
+    )
+  )
+    throw new Error('Grafana dashboard URL is not a supported dashboard route');
   const dashboardPath =
     basePath && dashboard.pathname !== basePath && !dashboard.pathname.startsWith(`${basePath}/`)
       ? `${basePath}/${dashboard.pathname.replace(/^\/+/, '')}`
@@ -92,7 +103,17 @@ export function decodeGrafanaDashboardSearch(
   name: string,
   externalURL: string
 ): string | undefined {
-  if (!Array.isArray(response) || response.length > 1000)
+  if (
+    !Array.isArray(response) ||
+    response.length > 1000 ||
+    response.some(
+      item =>
+        !isRecord(item) ||
+        typeof item.title !== 'string' ||
+        typeof item.url !== 'string' ||
+        (item.type !== undefined && typeof item.type !== 'string')
+    )
+  )
     throw new Error('Grafana search API did not return a supported dashboard list');
   const matches = response.filter(
     item => isRecord(item) && item.title === name && item.type !== 'dash-folder'
