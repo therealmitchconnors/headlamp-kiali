@@ -30,6 +30,7 @@ import Configuration, {
 } from './components/configuration/Configuration';
 import CustomDashboards from './components/CustomDashboards';
 import Diagnostics from './components/Diagnostics';
+import ExternalDashboards from './components/ExternalDashboards';
 import Histograms from './components/Histograms';
 import Mesh from './components/Mesh';
 import Mtls from './components/Mtls';
@@ -67,6 +68,7 @@ const pages = [
   { name: 'histograms', label: 'Traffic histograms', component: Histograms },
   { name: 'signals', label: 'Traffic signals', component: TrafficSignals },
   { name: 'dashboards', label: 'Custom dashboards', component: CustomDashboards },
+  { name: 'external-dashboards', label: 'External dashboards', component: ExternalDashboards },
   { name: 'graph', label: 'Traffic graph', component: Topology },
   { name: 'health', label: 'Health', component: WorkloadHealth },
   { name: 'namespaces', label: 'Namespaces', component: Namespaces },

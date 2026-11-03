@@ -222,7 +222,7 @@ export function validateGrafanaDashboardConfig(value: unknown): GrafanaDashboard
   return {
     endpoint: validateServiceEndpoint(value.endpoint),
     externalURL: validateExternalURL(value.externalURL),
-    ...(datasourceUID === undefined ? {} : { datasourceUID }),
+    ...(datasourceUID === undefined ? {} : { datasourceUID: datasourceUID as string }),
     dashboards: validateExternalDashboardDefinitions(value.dashboards, 'grafana'),
   };
 }

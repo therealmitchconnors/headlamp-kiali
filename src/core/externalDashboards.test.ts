@@ -43,7 +43,12 @@ const perses: PersesDashboardConfig = {
   dashboards: [
     {
       name: 'Istio Workload Dashboard',
-      variables: { workload: 'var-workload', namespace: 'var-namespace', cluster: 'var-cluster' },
+      variables: {
+        datasource: 'var-datasource',
+        workload: 'var-workload',
+        namespace: 'var-namespace',
+        cluster: 'var-cluster',
+      },
     },
   ],
 };

@@ -12,11 +12,13 @@ import { useCallback, useState } from 'react';
 import { configStore, saveClusterConfig, useKialiConfig } from '../config';
 import {
   ConfigurationError,
+  ExternalDashboardsConfig,
   getClusterConfig,
   ServiceEndpoint,
   TracingConfig,
   validateAppLabels,
   validateIdentityDomain,
+  validateExternalDashboards,
   validateMeshClusterName,
   validateServiceEndpoint,
   validateTelemetryCluster,
@@ -88,6 +90,7 @@ function ClusterSettingsForm({
   initialMeshClusterName,
   initialSkipWildcardGatewayHosts,
   initialCustomDashboards,
+  initialExternalDashboards,
 }: {
   cluster: string;
   initialEndpoint: ServiceEndpoint | null;
@@ -100,6 +103,7 @@ function ClusterSettingsForm({
   initialMeshClusterName?: string | null;
   initialSkipWildcardGatewayHosts?: boolean;
   initialCustomDashboards?: CustomDashboardSettings;
+  initialExternalDashboards?: ExternalDashboardsConfig;
 }) {
   const { t } = useTranslation();
   const [enabled, setEnabled] = useState(initialEndpoint !== null);
@@ -123,6 +127,12 @@ function ClusterSettingsForm({
       null,
       2
     )
+  );
+  const [grafanaDashboardText, setGrafanaDashboardText] = useState(
+    initialExternalDashboards?.grafana ? JSON.stringify(initialExternalDashboards.grafana, null, 2) : ''
+  );
+  const [persesDashboardText, setPersesDashboardText] = useState(
+    initialExternalDashboards?.perses ? JSON.stringify(initialExternalDashboards.perses, null, 2) : ''
   );
   const [skipWildcardGatewayHosts, setSkipWildcardGatewayHosts] = useState(
     initialSkipWildcardGatewayHosts ?? false
@@ -222,6 +232,17 @@ function ClusterSettingsForm({
     dashboardValidation =
       error instanceof Error ? error.message : t('Invalid custom dashboard definitions');
   }
+  let externalDashboards: ExternalDashboardsConfig = {};
+  let externalDashboardValidation: string | undefined;
+  try {
+    const raw: Record<string, unknown> = {};
+    if (grafanaDashboardText.trim()) raw.grafana = JSON.parse(grafanaDashboardText);
+    if (persesDashboardText.trim()) raw.perses = JSON.parse(persesDashboardText);
+    externalDashboards = validateExternalDashboards(raw);
+  } catch (error) {
+    externalDashboardValidation =
+      error instanceof Error ? error.message : t('Invalid external dashboard settings');
+  }
   const validation =
     endpointValidation ??
     labelValidation ??
@@ -231,7 +252,8 @@ function ClusterSettingsForm({
     gatewayValidation ??
     telemetryValidation ??
     meshIdentityValidation ??
-    dashboardValidation;
+    dashboardValidation ??
+    externalDashboardValidation;
 
   function change(field: keyof ServiceEndpoint, value: string) {
     setDraft(current => ({ ...current, [field]: value }));
@@ -266,6 +288,12 @@ function ClusterSettingsForm({
           customDashboards.clusterLabel === 'cluster'
             ? undefined
             : customDashboards,
+        externalDashboards:
+          initialExternalDashboards === undefined &&
+          !externalDashboards.grafana &&
+          !externalDashboards.perses
+            ? undefined
+            : externalDashboards,
         skipWildcardGatewayHosts:
           initialSkipWildcardGatewayHosts === undefined && !skipWildcardGatewayHosts
             ? undefined
@@ -576,6 +604,36 @@ function ClusterSettingsForm({
           'Use namespaceLabel, clusterLabel, dashboards and optional includeBuiltins. Templates have name, title, optional runtime/discoverOn and 1 to 8 chart/include items. Includes use template or template$Chart name and retain literal text for discovery; composition trims them. Charts support name, dataType (raw/rate/histogram), optional unit, aggregator, unitScale, integer min/max display bounds and spans (1..12 columns). Supply metrics with metricName/displayName or a legacy metricName. Missing units remain unspecified; bounds never clamp numeric values. Fixed groupLabels and optional aggregations declarations ({label,displayName,singleSelection}) control grouping. Optional grouping is submitted on explicit load; returned values can then be hidden locally, without refetching. Combined grouping is limited to four distinct labels and 256 total name characters; __name__ and histogram le are excluded. Expanded queries, grouped responses and visible panels have separate eight-item limits. Background app discovery and external links remain unsupported. Set clusterLabel to null only for an explicitly acknowledged single-cluster source. Settings are browser-local, not Kubernetes changes.'
         )}
       />
+      <TextField
+        label={t('Grafana dashboard link settings (JSON)')}
+        multiline
+        minRows={3}
+        maxRows={10}
+        value={grafanaDashboardText}
+        onChange={event => {
+          setGrafanaDashboardText(event.target.value);
+          setFeedback(undefined);
+        }}
+        inputProps={{ maxLength: 32768 }}
+        helperText={t(
+          'Optional. Configure an existing Grafana Service endpoint, a browser-reachable HTTP(S) base URL, a datasource UID, and exact dashboard names with variable query-parameter mappings. The provider API is queried anonymously through the Kubernetes Service proxy; this does not authenticate to Grafana or store credentials. Leave blank to disable.'
+        )}
+      />
+      <TextField
+        label={t('Perses dashboard link settings (JSON)')}
+        multiline
+        minRows={3}
+        maxRows={10}
+        value={persesDashboardText}
+        onChange={event => {
+          setPersesDashboardText(event.target.value);
+          setFeedback(undefined);
+        }}
+        inputProps={{ maxLength: 32768 }}
+        helperText={t(
+          'Optional. Configure an existing Perses Service endpoint, browser-reachable HTTP(S) base URL, project, and exact dashboard names with variable query-parameter mappings. The provider API is queried anonymously through the Kubernetes Service proxy; this does not authenticate to Perses or store credentials. Leave blank to disable.'
+        )}
+      />
       <Typography variant="body2">
         {t(
           'Application inspection accepts optional discoveryMode ("auto", "enabled" or "disabled", default "auto") and discoveryAutoThreshold (integer 0..1000, default 10). These govern metric-name fallback only after an explicit inspection with no resolved Pod references. Auto skips applications above the observed Pod threshold; enabled bypasses it; disabled still allows explicit references. Namespace annotation reads remain required. This does not start background queries.'
@@ -721,6 +779,9 @@ export default function Settings() {
                 initialEndpoint={getClusterConfig(state.config, activeCluster).prometheus}
                 initialCustomDashboards={
                   getClusterConfig(state.config, activeCluster).customDashboards
+                }
+                initialExternalDashboards={
+                  getClusterConfig(state.config, activeCluster).externalDashboards
                 }
                 initialLabels={getClusterConfig(state.config, activeCluster).appLabels}
                 initialHealthRates={getClusterConfig(state.config, activeCluster).healthRates}

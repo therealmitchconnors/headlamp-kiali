@@ -96,6 +96,93 @@ async function fillEndpoint() {
 }
 
 describe('native per-cluster settings', () => {
+  it('saves safe anonymous Grafana and Perses discovery settings only for the selected cluster', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: { alpha: { prometheus: null }, beta: { prometheus: null } },
+    };
+    render(<Settings />);
+    fireEvent.change(screen.getByLabelText('Grafana dashboard link settings (JSON)'), {
+      target: {
+        value: JSON.stringify({
+          endpoint: {
+            namespace: 'observability',
+            service: 'grafana',
+            port: '3000',
+            basePath: '',
+          },
+          externalURL: 'https://grafana.example.test',
+          datasourceUID: 'prom',
+          dashboards: [
+            {
+              name: 'Istio Service Dashboard',
+              variables: { namespace: 'var-namespace', service: 'var-service' },
+            },
+          ],
+        }),
+      },
+    });
+    fireEvent.change(screen.getByLabelText('Perses dashboard link settings (JSON)'), {
+      target: {
+        value: JSON.stringify({
+          endpoint: {
+            namespace: 'observability',
+            service: 'perses',
+            port: '8080',
+            basePath: '',
+          },
+          externalURL: 'https://perses.example.test',
+          project: 'istio',
+          dashboards: [
+            {
+              name: 'Istio Workload Dashboard',
+              variables: { workload: 'var-workload' },
+            },
+          ],
+        }),
+      },
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: {
+          externalDashboards: {
+            grafana: { datasourceUID: 'prom', dashboards: [{ name: 'Istio Service Dashboard' }] },
+            perses: { project: 'istio', dashboards: [{ name: 'Istio Workload Dashboard' }] },
+          },
+        },
+        beta: { prometheus: null },
+      },
+    });
+    expect(JSON.stringify(state.stored)).not.toMatch(/password|token|authorization/i);
+    expect(state.request).not.toHaveBeenCalled();
+  });
+  it('rejects unsafe external dashboard URLs before saving', async () => {
+    render(<Settings />);
+    fireEvent.change(screen.getByLabelText('Grafana dashboard link settings (JSON)'), {
+      target: {
+        value: JSON.stringify({
+          endpoint: {
+            namespace: 'observability',
+            service: 'grafana',
+            port: '3000',
+            basePath: '',
+          },
+          externalURL: 'javascript:alert(1)',
+          dashboards: [{ name: 'Dashboard', variables: {} }],
+        }),
+      },
+    });
+    expect(
+      screen.getByText(
+        'Invalid settings: External dashboard URL must use HTTP(S) without credentials, query, or fragment'
+      )
+    ).toBeTruthy();
+    expect(
+      (screen.getByRole('button', { name: 'Save cluster settings' }) as HTMLButtonElement).disabled
+    ).toBe(true);
+    expect(state.writes).toHaveLength(0);
+  });
   it('retains discovery-only policy settings even with no saved templates or catalog', async () => {
     render(<Settings />);
     fireEvent.change(screen.getByLabelText('Custom aggregate dashboards (JSON)'), {
