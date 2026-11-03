@@ -67,11 +67,25 @@ Run `npm run parity:check` and `CI=1 npm test` for the offline inventory and
 core-logic checks. A successful build alone does not verify loading in Headlamp:
 check the actual Kiali route and browser console in a running instance.
 
+For focused tests, use the toolchain's runner configuration directly:
+`npx vitest run -c node_modules/@kinvolk/headlamp-plugin/config/vite.config.mjs <test-paths>`.
+The `npm test` wrapper does not forward Vitest runner arguments.
+
 ## Using the native slice
 
 Select one cluster, then open **Kiali > Overview**. Istio API presence is reported
 separately from control-plane health: having the CRDs does not prove a healthy
 mesh. Resource browsing works without configuring Prometheus.
+
+Istio and Gateway API detail pages now offer **Run scoped Gateway checks**.
+Configure an explicit logical mesh cluster name first. Complete versioned
+evidence is projected onto the declared local namespace scope; unavailable,
+stale or incomplete sources do not produce partial findings. Istio selector
+checks use pinned-default workload inclusion and the captured controller scope
+flag, not raw Pod matches. Existing listener/port-conflict/status/class checks
+remain bounded; dormant Istio port-name helpers and route attachment rules are
+not enabled. This increment has not passed browser, hosted fixture, Desktop or
+live-cluster verification in the current environment.
 
 Under **Kiali > Connection settings** (also available in Headlamp's plugin
 settings), select a cluster and enable an existing Prometheus Service connection.

@@ -13,6 +13,7 @@ export interface ControlPlaneObservation {
   name: string;
   namespace: string;
   uid: string;
+  resourceVersion?: string;
   revision: string;
   isMaistra?: boolean;
   configurationContainer?: string;
@@ -20,6 +21,7 @@ export interface ControlPlaneObservation {
   clusterId?: string;
   sharedMeshConfig?: string;
   managesExternal: boolean | null;
+  scopeGatewayToNamespace?: boolean | null;
   effectiveConfigBlocked: boolean;
   replicas: WorkloadStatus | null;
   stale: boolean;
@@ -270,6 +272,16 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     indirectExternal || noncanonicalExternal
       ? null
       : external.some(entry => entry.value === 'true');
+  const gatewayScope = env.filter(entry => entry.name === 'PILOT_SCOPE_GATEWAY_TO_NAMESPACE');
+  const unresolvedGatewayScope =
+    !container ||
+    gatewayScope.some(
+      entry =>
+        (entry.valueFrom !== undefined && entry.valueFrom !== null) ||
+        !['', 'true', 'false'].includes(typeof entry.value === 'string' ? entry.value : '')
+    );
+  if (container && unresolvedGatewayScope)
+    configurationWarnings.push('PILOT_SCOPE_GATEWAY_TO_NAMESPACE is not resolved');
   if (managesExternal !== false) {
     configurationWarnings.push('External control-plane topology is not resolved');
     effectiveConfigBlocked = true;
@@ -325,6 +337,10 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     name: value.metadata.name,
     namespace: value.metadata.namespace,
     uid: value.metadata.uid,
+    resourceVersion:
+      typeof value.metadata.resourceVersion === 'string'
+        ? value.metadata.resourceVersion
+        : undefined,
     revision,
     isMaistra: ['maistra.io/owner', 'maistra.io/owner-name', 'maistra-version'].some(key =>
       Object.prototype.hasOwnProperty.call(found, key)
@@ -334,6 +350,9 @@ export function controlPlaneObservation(value: Record<string, unknown>): Control
     clusterId,
     sharedMeshConfig: shared || undefined,
     managesExternal,
+    scopeGatewayToNamespace: unresolvedGatewayScope
+      ? null
+      : gatewayScope.some(entry => entry.value === 'true'),
     effectiveConfigBlocked,
     replicas: health.replicas,
     stale: health.stale,

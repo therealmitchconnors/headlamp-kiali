@@ -199,6 +199,15 @@ The skill files are preserved verbatim from a Claude Code harness. For Copilot:
   address-type/value pairs. The pinned checker excludes equal Gateway names
   even across namespaces; do not silently replace that with UID-based exclusion
   or add wildcard/default-type matching.
+- Scoped Istio Gateway KIA0302 uses default workload inclusion, not application
+  correlation or raw Pod matches. Owned Pods/child ReplicaSets are not independent
+  targets; Jobs/CronJobs/RCs/DeploymentConfigs are excluded. Custom/ambiguous
+  owners and incomplete sources block the scoped inspector. VM labels use the
+  first matching entry in captured managed-scope order without a namespace filter.
+- PILOT_SCOPE_GATEWAY_TO_NAMESPACE accumulates exact `true` declarations from
+  the first container; later `false` does not undo them. Indirect/noncanonical
+  evidence stays unavailable for Gateway checks without blocking unrelated mesh
+  configuration. Dormant Istio Gateway port-name rules remain disabled.
 - A resolved configuration with no root namespace uses the observed controller
   namespace, following pinned Kiali discovery. Keep that provenance separate
   from raw configuration; never apply this fallback to denied, missing,
