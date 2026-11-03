@@ -72,3 +72,22 @@ it('accepts the exact byte bound but rejects larger or invalid bounds', () => {
   for (const limit of [0, -1, 1.5, 4194305, Infinity])
     expect(() => new ProxyHttpResponse(limit)).toThrow('bounds');
 });
+
+it('decodes bounded plain-text logger responses only when the content type matches', () => {
+  const body = 'active loggers:\nrouter: info\n';
+  const response = encode(
+    `HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: ${encode(body).length}\r\n\r\n${body}`
+  );
+  const parser = new ProxyHttpResponse(128, 'text/plain');
+  parser.push(response);
+  expect(parser.text()).toBe(body);
+  const wrongContentType = new ProxyHttpResponse(128, 'text/plain');
+  expect(() =>
+    wrongContentType.push(
+      encode(
+        `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}`
+      )
+    )
+  ).toThrow('plain text');
+  expect(() => new ProxyHttpResponse(8, 'text/plain').push(response)).toThrow('byte limit');
+});

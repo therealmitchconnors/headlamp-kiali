@@ -10,6 +10,7 @@ export interface DiagnosticPod {
     nativeSidecar: boolean;
     ready: boolean | null;
     restarts: number | null;
+    ports?: { name?: string; containerPort: number }[];
   }[];
 }
 export interface PodLogQuery {
@@ -74,6 +75,24 @@ export function diagnosticPod(value: unknown, namespace: string, name: string): 
       if (!isRecord(entry) || !isDnsLabel(entry.name) || names.has(entry.name))
         throw new Error('Invalid or duplicate diagnostic container name');
       names.add(entry.name);
+      const ports = entry.ports ?? [];
+      if (!Array.isArray(ports) || ports.length > 100)
+        throw new Error('Malformed diagnostic container port inventory');
+      const declaredPorts: NonNullable<DiagnosticPod['containers'][number]['ports']> = [];
+      for (const port of ports) {
+        if (
+          !isRecord(port) ||
+          !Number.isInteger(port.containerPort) ||
+          (port.containerPort as number) < 1 ||
+          (port.containerPort as number) > 65535 ||
+          (port.name !== undefined && !isDnsLabel(port.name))
+        )
+          throw new Error('Malformed diagnostic container port inventory');
+        declaredPorts.push({
+          ...(typeof port.name === 'string' ? { name: port.name } : {}),
+          containerPort: port.containerPort as number,
+        });
+      }
       const matches = states.filter(state => isRecord(state) && state.name === entry.name);
       if (matches.length > 1) throw new Error('Ambiguous diagnostic container status');
       const state = matches[0];
@@ -87,6 +106,7 @@ export function diagnosticPod(value: unknown, namespace: string, name: string): 
           typeof restarts === 'number' && Number.isSafeInteger(restarts) && restarts >= 0
             ? restarts
             : null,
+        ports: declaredPorts,
       });
     }
   }

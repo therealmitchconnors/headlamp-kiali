@@ -1015,6 +1015,27 @@ The pure xDS comparator is **not wired into health or presented as live sync
 evidence**. Live control-plane sync remains blocked on a supported authorized
 endpoint; anonymous Envoy admin access does not solve this boundary.
 
+Issue #30 adds the bounded synchronization reader without relaxing that
+authorization boundary. It uses only the selected discovery container's
+uniquely declared `http-debug` port and Headlamp Pod proxy; it captures and
+rechecks the control-plane Pod UID, restart count and port, caps the body at
+256 KiB, and projects source-reported proxy IDs and sent/acknowledged resource
+versions without Kubernetes identity joins. A denial, unsupported endpoint,
+malformed/oversized response, stale identity or cancelled request is visible as
+a gap/error, never a sync verdict. This does not resolve the observed 401.
+
+The same increment adds confirmed per-`istio-proxy` Envoy logging controls using
+the public Headlamp port-forward operation to port 15000. It reads current
+levels with `POST /logging`, then applies only the allowlisted global logger
+level with `POST /logging?level=...` after an explicit target/current-state
+review and final confirmation; the returned and reread levels must verify.
+Kubernetes authorization is the actual `create pods/portforward` request, not
+an invented SSAR or dry-run. Envoy loopback admin has no separate application
+authorization in this flow; the UI warns that every logger on the proxy is
+affected and logs may grow or expose sensitive details. Fixture tests intercept
+and constrain writes to the synthetic owned target. No real logging change was
+made. Hosted UI, live authorized sync/logging and Desktop checks remain open.
+
 The Istio Gateway reference follow-up passed **7,300 tests in 68 files** and
 normal type/lint/schema/parity/i18n/build/package gates. KIA1102/KIA1108 now
 cover top-level and HTTP/TCP/TLS match references. Current namespace and explicit
@@ -1266,7 +1287,7 @@ the authority for individual behavior and platform claims.
 | `full-validation` | Partial / open | Incremental checker batches are implemented; most scoped checkers, effective policy context and incremental evaluation remain | `basic-validation`, `mesh-security` |
 | `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain | `safe-mutations`, `basic-validation` |
 | `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway/policy workflows remain | `basic-wizards`, `full-validation` |
-| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
+| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel tables implemented; pending issue #30 adds conditional authorized-sync observations and confirmed per-proxy logging controls, with the managed sync endpoint still 401 and live authorized sync/logging, live ztunnel/ambient coverage and Desktop checks remaining | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
 | `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |

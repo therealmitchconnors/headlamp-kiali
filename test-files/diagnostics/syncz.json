@@ -1,0 +1,33 @@
+[
+  {
+    "cluster_id": "cluster-a",
+    "proxy": "reviews-v1-7d9c8b7b7f-q2m5k.bookinfo",
+    "proxy_type": "sidecar",
+    "proxy_version": "1.31.0",
+    "istio_version": "1.31.0",
+    "cluster_sent": "cds-4",
+    "cluster_acked": "cds-4",
+    "listener_sent": "lds-9",
+    "listener_acked": "lds-9",
+    "route_sent": "rds-2",
+    "route_acked": "rds-2",
+    "endpoint_sent": "eds-5",
+    "endpoint_acked": "eds-4",
+    "extensionconfig_sent": "ecds-1",
+    "extensionconfig_acked": "ecds-1",
+    "resources": {
+      "networking.istio.io/VirtualService": {
+        "sent": "resource-18",
+        "acked": "resource-18",
+        "sentTime": "2026-10-29T12:00:00Z",
+        "lastError": ""
+      }
+    }
+  },
+  {
+    "cluster_id": "cluster-b",
+    "proxy": "ratings-v1-6f7d8f6df5-h8j4p.bookinfo",
+    "cluster_sent": "cds-7",
+    "cluster_acked": "cds-6"
+  }
+]

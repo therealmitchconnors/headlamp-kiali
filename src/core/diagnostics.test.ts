@@ -17,9 +17,30 @@ const pod = {
 it('retains all container categories, native sidecars and unknown status without exposing pod environment', () => {
   const result = diagnosticPod(pod, 'bookinfo', 'reviews-123');
   expect(result.containers).toEqual([
-    { name: 'reviews', type: 'regular', nativeSidecar: false, ready: true, restarts: 0 },
-    { name: 'istio-proxy', type: 'init', nativeSidecar: true, ready: true, restarts: 1 },
-    { name: 'debug', type: 'ephemeral', nativeSidecar: false, ready: null, restarts: null },
+    {
+      name: 'reviews',
+      type: 'regular',
+      nativeSidecar: false,
+      ready: true,
+      restarts: 0,
+      ports: [],
+    },
+    {
+      name: 'istio-proxy',
+      type: 'init',
+      nativeSidecar: true,
+      ready: true,
+      restarts: 1,
+      ports: [],
+    },
+    {
+      name: 'debug',
+      type: 'ephemeral',
+      nativeSidecar: false,
+      ready: null,
+      restarts: null,
+      ports: [],
+    },
   ]);
   expect(result).not.toHaveProperty('spec');
   expect(() =>
@@ -29,6 +50,34 @@ it('retains all container categories, native sidecars and unknown status without
       'reviews-123'
     )
   ).toThrow('identity');
+});
+it('retains a bounded, validated declared control-plane debug port', () => {
+  const controlPlane = {
+    ...pod,
+    spec: {
+      ...pod.spec,
+      containers: [{ name: 'discovery', ports: [{ name: 'http-debug', containerPort: 8080 }] }],
+    },
+  };
+  expect(diagnosticPod(controlPlane, 'bookinfo', 'reviews-123').containers[0].ports).toEqual([
+    { name: 'http-debug', containerPort: 8080 },
+  ]);
+  for (const ports of [
+    [{ name: 'http-debug', containerPort: 0 }],
+    [{ name: 'bad/name', containerPort: 8080 }],
+    Array.from({ length: 101 }, (_, index) => ({ containerPort: index + 1 })),
+  ]) {
+    expect(() =>
+      diagnosticPod(
+        {
+          ...controlPlane,
+          spec: { ...controlPlane.spec, containers: [{ name: 'discovery', ports }] },
+        },
+        'bookinfo',
+        'reviews-123'
+      )
+    ).toThrow('port inventory');
+  }
 });
 it('rejects duplicate names and malformed status instead of defaulting invalid restarts to zero', () => {
   expect(() =>

@@ -1,30 +1,77 @@
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { DiagnosticPod } from '../core/diagnostics';
 import { ProxyHttpResponse } from '../core/proxyHttp';
+import { ProxyLogLevel, proxyLogLevels } from '../core/proxyLogging';
 import { ClusterScope } from '../core/scope';
 import { loadDiagnosticPod } from './diagnostics';
 import { withDiagnosticDeadline } from './requests';
 
 export type ProxyRead = 'server-info' | 'configuration' | 'ztunnel-configuration';
+type ProxyAdminRequest =
+  | { operation: ProxyRead }
+  | { operation: 'logging-levels' }
+  | { operation: 'set-logging-level'; level: ProxyLogLevel };
+type ProxyAdminEndpoint = {
+  method: 'GET' | 'POST';
+  path: string;
+  maxBytes: number;
+  contentType: 'application/json' | 'text/plain';
+};
 const endpoints = {
-  'server-info': { path: '/server_info', maxBytes: 262144 },
-  configuration: { path: '/config_dump', maxBytes: 4194304 },
-  'ztunnel-configuration': { path: '/config_dump', maxBytes: 4194304 },
+  'server-info': {
+    method: 'GET',
+    path: '/server_info',
+    maxBytes: 262144,
+    contentType: 'application/json',
+  },
+  configuration: {
+    method: 'GET',
+    path: '/config_dump',
+    maxBytes: 4194304,
+    contentType: 'application/json',
+  },
+  'ztunnel-configuration': {
+    method: 'GET',
+    path: '/config_dump',
+    maxBytes: 4194304,
+    contentType: 'application/json',
+  },
 } as const;
+
+function endpointFor(request: ProxyAdminRequest): ProxyAdminEndpoint {
+  if (request.operation === 'logging-levels')
+    return {
+      method: 'POST',
+      path: '/logging',
+      maxBytes: 262144,
+      contentType: 'text/plain',
+    };
+  if (request.operation === 'set-logging-level') {
+    if (!proxyLogLevels.includes(request.level))
+      throw new Error('Unsupported proxy logging level');
+    return {
+      method: 'POST',
+      path: `/logging?level=${encodeURIComponent(request.level)}`,
+      maxBytes: 262144,
+      contentType: 'text/plain',
+    };
+  }
+  return endpoints[request.operation];
+}
 
 function readAdmin(
   scope: ClusterScope,
   pod: DiagnosticPod,
-  read: ProxyRead,
+  request: ProxyAdminRequest,
   signal: AbortSignal
-): Promise<unknown> {
+): Promise<unknown | string> {
   signal.throwIfAborted();
   if (typeof ApiProxy.stream !== 'function')
     throw new Error('This Headlamp host does not support the public proxy stream transport');
-  const endpoint = endpoints[read];
+  const endpoint = endpointFor(request);
   return new Promise((resolve, reject) => {
     const transport: { connection?: ReturnType<typeof ApiProxy.stream> } = {};
-    const response = new ProxyHttpResponse(endpoint.maxBytes);
+    const response = new ProxyHttpResponse(endpoint.maxBytes, endpoint.contentType);
     const greeted = new Set<number>();
     let finished = false;
     let sent = false;
@@ -60,7 +107,7 @@ function readAdmin(
       if (error) reject(error);
       else {
         try {
-          resolve(response.json());
+          resolve(endpoint.contentType === 'text/plain' ? response.text() : response.json());
         } catch (error) {
           reject(error);
         }
@@ -97,8 +144,11 @@ function readAdmin(
                 `Pod admin port-forward failed: ${new TextDecoder().decode(data.subarray(0, 512))}`
               );
             if (!sent && channel === 0) {
+              const contentType = endpoint.contentType;
               const request = new TextEncoder().encode(
-                `GET ${endpoint.path} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nAccept: application/json\r\nAccept-Encoding: identity\r\n\r\n`
+                `${endpoint.method} ${endpoint.path} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nAccept: ${contentType}\r\nAccept-Encoding: identity\r\n${
+                  endpoint.method === 'POST' ? 'Content-Length: 0\r\n' : ''
+                }\r\n`
               );
               const frame = new Uint8Array(request.length + 1);
               frame.set(request, 1);
@@ -159,7 +209,7 @@ export async function loadProxySnapshot(
             ? 'An observed istio-proxy or ztunnel container is required'
             : 'An observed istio-proxy container is required'
         );
-      const data = await readAdmin(scope, before, read, requestSignal);
+      const data = await readAdmin(scope, before, { operation: read }, requestSignal);
       const after = await loadDiagnosticPod(scope, pod.namespace, pod.name, requestSignal);
       const current = after.containers.find(container => container.name === proxy.name);
       if (after.uid !== before.uid || !current || current.restarts !== proxy.restarts)
@@ -170,5 +220,42 @@ export async function loadProxySnapshot(
         restartVerified: proxy.restarts !== null,
       };
     }
+  );
+}
+
+export async function readProxyLoggingLevels(
+  scope: ClusterScope,
+  pod: DiagnosticPod,
+  signal: AbortSignal
+): Promise<string> {
+  return withDiagnosticDeadline(
+    signal,
+    'The proxy logging read exceeded 15 seconds',
+    requestSignal => readAdmin(scope, pod, { operation: 'logging-levels' }, requestSignal).then(
+      value => {
+        if (typeof value !== 'string') throw new Error('Proxy logging response was not plain text');
+        return value;
+      }
+    )
+  );
+}
+
+export async function setProxyLoggingLevel(
+  scope: ClusterScope,
+  pod: DiagnosticPod,
+  level: ProxyLogLevel,
+  signal: AbortSignal
+): Promise<string> {
+  return withDiagnosticDeadline(
+    signal,
+    'The proxy logging update exceeded 15 seconds',
+    requestSignal =>
+      readAdmin(scope, pod, { operation: 'set-logging-level', level }, requestSignal).then(
+        value => {
+          if (typeof value !== 'string')
+            throw new Error('Proxy logging update response was not plain text');
+          return value;
+        }
+      )
   );
 }

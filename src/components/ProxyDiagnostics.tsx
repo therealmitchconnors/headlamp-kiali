@@ -18,6 +18,7 @@ import { loadProxySnapshot, ProxyRead } from '../data/proxyAdmin';
 import { useRequest } from '../hooks/useRequest';
 import CodeBlock from './configuration/CodeBlock';
 import ProxyEntryDetails from './ProxyEntryDetails';
+import ProxyLoggingControls from './ProxyLoggingControls';
 import RequestStatus from './RequestStatus';
 import ZtunnelDiagnostics from './ZtunnelDiagnostics';
 
@@ -198,6 +199,22 @@ export default function ProxyDiagnostics({
             'Choose the diagnostic format explicitly. The selection does not detect ambient enrollment or install a proxy.'
           )}
         </Typography>
+        {format === 'envoy' &&
+          pod.containers.some(container => container.name === 'istio-proxy') && (
+            <SectionBox title={t('Confirmed proxy logging controls')}>
+              <ProxyLoggingControls
+                key={JSON.stringify([
+                  cluster,
+                  pod.namespace,
+                  pod.name,
+                  pod.uid,
+                  pod.containers.find(container => container.name === 'istio-proxy')?.restarts,
+                ])}
+                cluster={cluster}
+                pod={pod}
+              />
+            </SectionBox>
+          )}
         <RadioGroup row aria-label={t('Proxy diagnostic format')} value={format}>
           <FormControlLabel
             value="envoy"
