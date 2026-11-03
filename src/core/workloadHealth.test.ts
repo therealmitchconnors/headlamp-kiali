@@ -124,3 +124,16 @@ it('preserves no-response codes and gRPC statuses and sums duplicate code bucket
     })
   ).toThrow();
 });
+it.each(['tcp', 'unknown'])('rejects %s observations as unsupported health protocols', protocol => {
+  expect(() =>
+    healthRequestRates({
+      warnings: [],
+      series: [
+        {
+          labels: { request_protocol: protocol, response_code: '200' },
+          samples: [{ timestamp: 10000, value: 1 }],
+        },
+      ],
+    })
+  ).toThrow('supported protocol');
+});

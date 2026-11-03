@@ -164,3 +164,62 @@ it('suppresses combined health when a backend drops required reporter labels', a
   expect(result.calculation).toBeNull();
   expect(result.calculationError?.message).toContain('reporter labels');
 });
+it('keeps an absent direction unavailable while retaining explicit zero-rate observations', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (String(path).startsWith('/apis/apps')) return resource;
+    const query = new URL(String(path), 'http://example.test').searchParams.get('query')!;
+    return query.includes('reporter="destination"')
+      ? { ...metric, data: { ...metric.data, result: [] } }
+      : metric;
+  });
+  const missing = await loadWorkloadHealth(
+    clusterScope('alpha'),
+    endpoint,
+    query,
+    [],
+    new AbortController().signal
+  );
+  expect(missing.calculation).toBeNull();
+  expect(missing.missingDirections).toEqual(['inbound']);
+
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (String(path).startsWith('/apis/apps')) return resource;
+    return {
+      ...metric,
+      data: {
+        ...metric.data,
+        result: metric.data.result.map(series => ({
+          ...series,
+          value: [10000, '0'],
+        })),
+      },
+    };
+  });
+  const zero = await loadWorkloadHealth(
+    clusterScope('alpha'),
+    endpoint,
+    query,
+    [],
+    new AbortController().signal
+  );
+  expect(zero.missingDirections).toEqual([]);
+  expect(zero.calculation).toMatchObject({ status: 'Healthy', errorRatio: -1, totalRequestRate: 0 });
+});
+it('keeps unsupported TCP observations from becoming healthy workload results', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (String(path).startsWith('/apis/apps')) return resource;
+    return {
+      ...metric,
+      data: {
+        ...metric.data,
+        result: [
+          { metric: { request_protocol: 'tcp', response_code: '200' }, value: [10000, '1'] },
+        ],
+      },
+    };
+  });
+  const result = await load();
+  expect(result.calculation).toBeNull();
+  expect(result.inbound).toMatchObject({ ok: false, error: { kind: 'invalid-response' } });
+  expect(result.outbound).toMatchObject({ ok: false, error: { kind: 'invalid-response' } });
+});
