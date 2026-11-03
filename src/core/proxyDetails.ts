@@ -1,4 +1,5 @@
 import { isRecord } from './object';
+import { proxyConfigurationTarget } from './proxyConfigurationReference';
 import {
   proxyApplicationProtocol,
   proxyConfigReference,
@@ -34,6 +35,8 @@ export interface ProxyRouteDetail {
   actionData: Record<string, unknown>;
   reference: string;
   referencePath: string;
+  referenceNamespace: string | null;
+  referenceName: string | null;
 }
 
 /** Preserve every route action and match field, not just Kiali's path-only summary. */
@@ -57,6 +60,8 @@ export function proxyRouteDetails(value: unknown): ProxyRouteDetail[] {
         actionData: {},
         reference: '',
         referencePath: '',
+        referenceNamespace: null,
+        referenceName: null,
       });
     }
     for (const rawRoute of routes) {
@@ -73,6 +78,10 @@ export function proxyRouteDetails(value: unknown): ProxyRouteDetail[] {
       if (selected.length > 1) throw new Error('Ambiguous Envoy route actions');
       const action = selected[0];
       const referencePath = readProxyMetadataPath(route.metadata);
+      const referenceTarget = proxyConfigurationTarget({
+        kind: 'VirtualService',
+        path: referencePath,
+      });
       result.push({
         index: result.length + 1,
         virtualHost,
@@ -83,6 +92,8 @@ export function proxyRouteDetails(value: unknown): ProxyRouteDetail[] {
         actionData: action ? object(route[action[0]], 'route action') : {},
         reference: proxyConfigReference(referencePath),
         referencePath,
+        referenceNamespace: referenceTarget.available ? referenceTarget.namespace : null,
+        referenceName: referenceTarget.available ? referenceTarget.name : null,
       });
     }
     if (result.length > 1000) throw new Error('Envoy route summary exceeds 1000 entries');

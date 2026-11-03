@@ -422,6 +422,15 @@ in the full entry. Summary-specific limits are 1,000 routes/chains and 10,000
 total network filters; ambiguous oneofs fail explicitly. This normalization has
 source-informed tests, not a full original-Go route/listener projection oracle.
 
+The pinned Kiali v2.33.0 caller (`0e8be887b8217bbcac5e3ae0bfcd258073949cca`,
+`kubernetes/envoy.go` and `models/config_dump.go`) consumes one Istio metadata
+encoding: the string at `metadata.filter_metadata.istio.config`. Cluster rows
+identify the expected `DestinationRule`; route rows identify the expected
+`VirtualService`. Native detail includes the complete observed path and only
+shows namespace/name when the canonical group/version/plural and identity match.
+There is no source basis here for decoding `typed_filter_metadata` or protobuf
+`Any`; unrecognized entry fields remain in the bounded selected-entry JSON.
+
 The checkpoint passed 7,279 tests in 66 files and the normal build/parity gates.
 Live hosted Bookinfo checks covered cluster DNS interpretation both ways,
 real route match/action inspection and listener filter-chain JSON. Temporary
@@ -539,9 +548,25 @@ the diagnostic stream. Real pod identity reads remained active. Tables, counters
 filtering and actual Monaco text were checked; the synthetic stream sent one
 GET and closed. A real Envoy response separately proved wrong-format rejection.
 All browser interception was removed. No ztunnel was installed, so live ztunnel
-and Desktop support remain unverified. Metrics, ambient enrollment/health,
-canonical resource linking and full runtime/certificate inspection remain open.
+and Desktop support remain unverified. Current Service/Pod candidate lookups are
+now implemented and have focused synthetic UI/data coverage; they do not prove
+live ambient membership. Metrics, ambient enrollment/health and full
+runtime/certificate inspection remain open.
 The checkpoint passed 7,637 tests in 71 files and the normal build/package gates.
+
+#### Diagnostic format support matrix
+
+| Source format | Pinned fields and native projection | Candidate gate | Deliberate gap |
+| --- | --- | --- | --- |
+| Envoy `ClustersConfigDump` / `RoutesConfigDump` metadata | Only `filter_metadata.istio.config` is caller-consumed. Show source-context kind, full path and canonical namespace/name beside existing summaries. | Current DestinationRule/VirtualService API read must match exact group, kind, namespace/name and return UID/resourceVersion before navigation. | No speculative typed metadata/`Any` decoder; the metadata reference does not identify a historical UID or prove accepted configuration. |
+| ztunnel `config_dump_ztunnel` root | `{config, certificates, policies, services, workloads}`; the parser requires service/workload arrays and rejects Envoy `{configs:[]}`. | None from runtime config, certificate or policy bodies. | Certificates/policies remain counts only; complete runtime config remains unprojected. |
+| ztunnel services/endpoints | Source-defined name/namespace/hostname/VIPs/IP families/ports/SANs/waypoint and endpoint-map key/status/workload UID/ports; unknown row fields remain in read-only JSON. | Service name/namespace are eligible only when reported `config.clusterId` equals explicit `meshClusterName`; a current core/v1 Service GET must match and expose current UID/resourceVersion. | A name candidate is not the historical object, endpoint health, ownership or proof of traffic. Empty/invalid scope is not linked. |
+| ztunnel workloads | Source-defined registry UID, name/namespace/cluster/node/addresses/protocol/status, workload/canonical names, network mode, service account, services, trust domain and waypoint; unknown fields remain in read-only JSON. | Only exact `clusterId//Pod/namespace/name` matching workload fields and the explicit local mesh mapping may trigger a current Pod lookup; response identity plus UID/resourceVersion is verified before link. | Registry UID is not Kubernetes `metadata.uid`; foreign, malformed or mismatched identities remain unlinked. |
+
+These are synthetic-source and code-level results only. The new candidate paths
+have no live ztunnel or Desktop evidence; the managed `/debug/syncz` authorization
+boundary remains unchanged (401), and no ambient enrollment, sync, readiness,
+security or policy verdict follows from admin HTTP success or active state.
 
 ## Health calculator and live telemetry increment
 
@@ -3853,7 +3878,7 @@ verified-parity.
 | Validations, references and ignore annotations | `src/core/validation`, configuration findings | Complete or explicitly partial snapshots | Initial checks implemented-unverified / partial, limited-check fixture verified |
 | Traffic graphs and summaries | `src/core/trafficGraph.ts`, `core/topology.ts`, `Topology.tsx` | Telemetry and explicit metric identity | Bounded four-mode projections verified hosted; broader graph pipeline remains partial |
 | Mesh graph, control planes, Istio status and TLS | `core/mesh.ts`, `data/mesh.ts`, `Mesh.tsx` | Discovery, policy scope and observed data | Inventory unverified in Desktop / bounded real hosted inventory; full mesh graph/security remain |
-| Logs and read-only Envoy observations | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `data/proxyAdmin.ts`, `Diagnostics.tsx` | Pod reads/logs/port-forward permissions; public SDK WebSocket transport | Desktop unverified / hosted live logs, server state and config entries verified; full projections, sync, ztunnel and logging mutations remain |
+| Logs and read-only Envoy/ztunnel observations | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `core/ztunnel.ts`, `data/proxyAdmin.ts`, diagnostic components | Bounded Pod reads/logs/port-forward; source-aligned Envoy metadata rows and ztunnel registry fields/candidates | Hosted live logs/Envoy state/config; new ztunnel fields/candidates synthetic-test only; Desktop, live ztunnel/ambient, sync and logging mutations remain |
 | Traces, spans, error traces and tracing diagnostics | `core/tracing.ts`, `data/tracing.ts`, `Traces.tsx`, `TraceMetadata.tsx` | Existing Jaeger/Tempo HTTP query Service | Desktop unverified / hosted search/detail/metadata fixture-verified; live provider, correlations, broader filters and authenticated transport remain |
 | Grafana and Perses | Integration adapters and dashboard links | Existing endpoint and compatible auth | Planned / planned |
 | Cluster aggregation | Scoped data adapters and cluster mapping | Headlamp cluster groups and telemetry labels | Planned / planned |

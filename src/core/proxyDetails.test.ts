@@ -55,6 +55,8 @@ it('retains all route actions, domains and complete match constraints', () => {
     domains: ['reviews', 'reviews.bookinfo'],
     match,
     reference: 'reviews.bookinfo',
+    referenceNamespace: 'bookinfo',
+    referenceName: 'reviews',
   });
   expect(result[0].actionData).toEqual({
     weighted_clusters: {
@@ -65,6 +67,72 @@ it('retains all route actions, domains and complete match constraints', () => {
     },
   });
   expect(result[3].actionData.cluster).toBe('PassthroughCluster');
+});
+it('does not derive metadata resource identities from unsupported kinds or path lookalikes', () => {
+  const [wrongKind, malformed] = proxyRouteDetails({
+    virtual_hosts: [
+      {
+        routes: [
+          {
+            route: {},
+            metadata: {
+              filter_metadata: {
+                istio: {
+                  config:
+                    '/apis/networking.istio.io/v1/namespaces/bookinfo/destinationrules/reviews',
+                },
+              },
+            },
+          },
+          {
+            route: {},
+            metadata: {
+              filter_metadata: {
+                istio: {
+                  config:
+                    '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices/reviews?x',
+                },
+              },
+            },
+          },
+        ],
+      },
+    ],
+  });
+  expect(wrongKind).toMatchObject({
+    referenceNamespace: null,
+    referenceName: null,
+  });
+  expect(malformed).toMatchObject({
+    referenceNamespace: null,
+    referenceName: null,
+  });
+});
+it('does not interpret typed metadata as a caller-supported Istio reference', () => {
+  const [route] = proxyRouteDetails({
+    virtual_hosts: [
+      {
+        routes: [
+          {
+            route: {},
+            metadata: {
+              typed_filter_metadata: {
+                istio: {
+                  config:
+                    '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices/reviews',
+                },
+              },
+            },
+          },
+        ],
+      },
+    ],
+  });
+  expect(route).toMatchObject({
+    referencePath: '',
+    referenceNamespace: null,
+    referenceName: null,
+  });
 });
 it('retains default chains, unknown match fields, protocol ordering and all recognized destinations', () => {
   const match = {

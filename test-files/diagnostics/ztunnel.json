@@ -20,7 +20,9 @@
       "namespace": "bookinfo",
       "hostname": "reviews.bookinfo.svc.example.test",
       "vips": ["network-a/192.0.2.1"],
+      "ipFamilies": "IPv4",
       "ports": { "9080": 9080 },
+      "subjectAltNames": ["spiffe://example.test/ns/bookinfo/sa/reviews"],
       "waypoint": { "destination": "bookinfo/waypoint.example.test", "hboneMtlsPort": 15008 },
       "endpoints": {
         "mesh-a//Pod/bookinfo/reviews-a": {
@@ -54,6 +56,7 @@
       "canonicalRevision": "v1",
       "clusterId": "mesh-a",
       "node": "node-a",
+      "networkMode": "REDIRECT",
       "protocol": "HBONE",
       "status": "Healthy",
       "workloadIps": ["192.0.2.10"],

@@ -1,4 +1,4 @@
-import { isRecord } from './object';
+import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import { assertProxyJson } from './proxyConfig';
 
 function text(value: unknown, field: string): string | null {
@@ -16,6 +16,18 @@ function strings(value: unknown, field: string): string[] | null {
     if (item === null) throw new Error(`Malformed ztunnel ${field}`);
     return item;
   });
+}
+function ports(value: unknown, field: string): Record<string, number> | null {
+  if (value === undefined || value === null) return null;
+  if (!isRecord(value) || Object.keys(value).length > 1000)
+    throw new Error(`Malformed or oversized ztunnel ${field}`);
+  const result: Record<string, number> = {};
+  for (const [name, port] of Object.entries(value)) {
+    if (name.length > 4096 || typeof port !== 'number' || !Number.isSafeInteger(port))
+      throw new Error(`Malformed ztunnel ${field}`);
+    result[name] = port;
+  }
+  return result;
 }
 function record(value: unknown, field: string): Record<string, unknown> {
   if (!isRecord(value)) throw new Error(`Malformed ztunnel ${field}`);
@@ -44,6 +56,7 @@ export interface ZtunnelEndpoint {
   key: string;
   workloadUid: string | null;
   status: string | null;
+  ports: Record<string, number> | null;
 }
 export interface ZtunnelService {
   index: number;
@@ -51,6 +64,9 @@ export interface ZtunnelService {
   namespace: string | null;
   hostname: string | null;
   addresses: string[] | null;
+  ipFamilies: string | null;
+  ports: Record<string, number> | null;
+  subjectAltNames: string[] | null;
   waypoint: ZtunnelWaypoint | null;
   endpoints: ZtunnelEndpoint[] | null;
   raw: Record<string, unknown>;
@@ -65,6 +81,14 @@ export interface ZtunnelWorkload {
   addresses: string[] | null;
   protocol: string | null;
   status: string | null;
+  workloadName: string | null;
+  workloadType: string | null;
+  canonicalName: string | null;
+  canonicalRevision: string | null;
+  networkMode: string | null;
+  serviceAccount: string | null;
+  services: string[] | null;
+  trustDomain: string | null;
   waypoint: ZtunnelWaypoint | null;
   raw: Record<string, unknown>;
 }
@@ -79,6 +103,58 @@ export interface ZtunnelSnapshot {
   };
   certificateCount: number | null;
   policyCount: number | null;
+}
+
+export interface ZtunnelResourceCandidate {
+  kind: 'Pod' | 'Service';
+  namespace: string;
+  name: string;
+}
+
+export function ztunnelServiceCandidate(
+  service: Pick<ZtunnelService, 'name' | 'namespace'>,
+  meshClusterName: string | null,
+  reportedClusterId: string | null
+): ZtunnelResourceCandidate | null {
+  if (
+    !meshClusterName ||
+    meshClusterName !== reportedClusterId ||
+    !service.namespace ||
+    !service.name ||
+    !isDnsLabel(service.namespace) ||
+    !isDnsLabel(service.name)
+  )
+    return null;
+  return { kind: 'Service', namespace: service.namespace, name: service.name };
+}
+
+export function ztunnelWorkloadCandidate(
+  workload: Pick<ZtunnelWorkload, 'uid' | 'name' | 'namespace' | 'clusterId'>,
+  meshClusterName: string | null,
+  reportedClusterId: string | null
+): ZtunnelResourceCandidate | null {
+  if (
+    !meshClusterName ||
+    meshClusterName !== reportedClusterId ||
+    workload.clusterId !== meshClusterName ||
+    !workload.uid ||
+    !workload.name ||
+    !workload.namespace
+  )
+    return null;
+  const parts = workload.uid.split('/');
+  if (
+    parts.length !== 5 ||
+    parts[0] !== meshClusterName ||
+    parts[1] !== '' ||
+    parts[2] !== 'Pod' ||
+    parts[3] !== workload.namespace ||
+    parts[4] !== workload.name ||
+    !isDnsLabel(parts[3]) ||
+    !isDnsSubdomain(parts[4])
+  )
+    return null;
+  return { kind: 'Pod', namespace: parts[3], name: parts[4] };
 }
 
 export function ztunnelSnapshot(value: unknown): ZtunnelSnapshot {
@@ -115,6 +191,7 @@ export function ztunnelSnapshot(value: unknown): ZtunnelSnapshot {
           key,
           workloadUid: text(endpoint.workloadUid, 'endpoint workload identity'),
           status: text(endpoint.status, 'endpoint status'),
+          ports: ports(endpoint.port, 'endpoint ports'),
         };
       });
     }
@@ -124,6 +201,9 @@ export function ztunnelSnapshot(value: unknown): ZtunnelSnapshot {
       namespace: text(service.namespace, 'service namespace'),
       hostname: text(service.hostname, 'service hostname'),
       addresses: strings(service.vips, 'service VIPs'),
+      ipFamilies: text(service.ipFamilies, 'service IP families'),
+      ports: ports(service.ports, 'service ports'),
+      subjectAltNames: strings(service.subjectAltNames, 'service subject alternative names'),
       waypoint: waypoint(service.waypoint),
       endpoints,
       raw: service,
@@ -141,6 +221,14 @@ export function ztunnelSnapshot(value: unknown): ZtunnelSnapshot {
       addresses: strings(workload.workloadIps, 'workload addresses'),
       protocol: text(workload.protocol, 'workload protocol'),
       status: text(workload.status, 'workload status'),
+      workloadName: text(workload.workloadName, 'workload name'),
+      workloadType: text(workload.workloadType, 'workload type'),
+      canonicalName: text(workload.canonicalName, 'canonical workload name'),
+      canonicalRevision: text(workload.canonicalRevision, 'canonical workload revision'),
+      networkMode: text(workload.networkMode, 'workload network mode'),
+      serviceAccount: text(workload.serviceAccount, 'workload service account'),
+      services: strings(workload.services, 'workload services'),
+      trustDomain: text(workload.trustDomain, 'workload trust domain'),
       waypoint: waypoint(workload.waypoint),
       raw: workload,
     };
