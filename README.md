@@ -31,7 +31,9 @@ The repository root is the plugin directory.
 See [PLAN.md](PLAN.md) for the current implementation roadmap and agent handoff,
 [the parity ledger](docs/parity.md) for scope, implementation evidence and
 Desktop/web capability gaps, and [the fixture guide](test-files/README.md) for
-reproducible checks. Full parity is not claimed.
+reproducible checks. The [hosted smoke guide](docs/hosted-smoke-tests.md)
+documents repeatable synthetic runtime checks without a real cluster. Full
+parity is not claimed.
 
 ## Development
 
