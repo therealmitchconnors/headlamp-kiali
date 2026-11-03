@@ -422,6 +422,60 @@ it('revalidates the captured Gateway API route on its exact cluster and API vers
   );
 });
 
+it('does not return a successful Gateway snapshot when the selected route changes after source reads', async () => {
+  const routeSpec = { parentRefs: [{ name: 'parent' }] };
+  const target = { ...routeTarget, spec: routeSpec };
+  let gatewayRead = false;
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    if (url.pathname === '/apis/gateway.networking.k8s.io')
+      return {
+        name: 'gateway.networking.k8s.io',
+        versions: [{ groupVersion: 'gateway.networking.k8s.io/v1' }],
+      };
+    if (url.pathname === '/apis/gateway.networking.k8s.io/v1')
+      return {
+        groupVersion: 'gateway.networking.k8s.io/v1',
+        resources: [{ name: 'gateways', kind: 'Gateway', namespaced: true }],
+      };
+    if (url.pathname.endsWith('/gateways')) {
+      gatewayRead = true;
+      return {
+        kind: 'GatewayList',
+        apiVersion: 'gateway.networking.k8s.io/v1',
+        metadata: { resourceVersion: 'gateway-rv' },
+        items: [
+          {
+            metadata: { name: 'parent', namespace: 'bookinfo', uid: 'gateway-uid' },
+            spec: {},
+          },
+        ],
+      };
+    }
+    if (url.pathname.endsWith('/httproutes/selected'))
+      return {
+        ...currentRoute,
+        metadata: { ...currentRoute.metadata, resourceVersion: 'new-rv' },
+        spec: routeSpec,
+      };
+    throw new Error(`Unexpected request ${path}`);
+  });
+  await expect(
+    loadValidationSnapshot(
+      clusterScope('alpha'),
+      'HTTPRoute',
+      'gateway.networking.k8s.io',
+      routeSpec,
+      null,
+      new AbortController().signal,
+      target.namespace,
+      undefined,
+      target
+    )
+  ).rejects.toThrow('changed during validation');
+  expect(gatewayRead).toBe(true);
+});
+
 it.each(['uid', 'resourceVersion', 'spec', 'apiVersion'])(
   'rejects stale Gateway route %s evidence rather than returning a successful snapshot',
   async field => {

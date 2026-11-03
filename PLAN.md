@@ -149,6 +149,17 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   their exact groups/fields. Inactive kinds no longer get spurious deferrals;
   malformed active selectors defer explicitly. Runtime absence checking remains
   gated on a complete mesh-workload model, not bounded correlation.
+  The Gateway API route audit confirmed Kiali v2.33.0 activates only HTTPRoute
+  and GRPCRoute v1 parent/Service-reference checkers (Gateway v1 and
+  ReferenceGrant v1beta1); TCPRoute/TLSRoute/UDPRoute have no active route
+  checker and remain disabled. HTTPRoute v1beta1 is a native model extension,
+  not pinned caller coverage. The existing active-route capture now re-reads
+  the selected object after source collection and rejects changed identity,
+  resourceVersion, API version or spec under the shared deadline. The focused
+  set passed 45 tests in two files; the full suite passed 22,605 tests in 189
+  files with one worker. Type-check, lint and build passed. No Headlamp CDP
+  target was available on :9222, so fresh browser contribution/console/i18n/
+  a11y verification remains open.
   Declared namespace revision selection now has a 1,538-case original-Go oracle
   and visible provenance separate from controller/injection hints. Maistra
   membership cannot be resolved through coincident Istiod labels; assessment
@@ -1318,7 +1329,10 @@ owners, configured nondefault inclusion and full controller health remain open.
 Next validation work is remaining effective mesh-configuration sources before
 workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
 gates in an authorized environment independently; do not enable dormant port
-helpers or infer route attachment from this milestone.
+helpers or infer listener attachment from this milestone. The separate HTTP/
+gRPC route-reference check covers only its documented parent-sharing and
+Service-reference predicates; listener selection/protocol/hostname attachment
+and TCP/TLS/UDP route predicates remain open.
 
 The dashboard continuation is external link support and broader
 VM/custom-controller attribution. Workload recommendations are now integrated
