@@ -16,9 +16,10 @@ import { getClusterConfig, TracingConfig } from '../core/config';
 import { clusterScope } from '../core/scope';
 import { traceIntrinsicName } from '../core/traceIntrinsics';
 import {
+  MAX_TEMPO_RELATED_GROUPS,
   TEMPO_SPAN_RELATIONS,
   TempoRelatedSpan,
-  tempoRelatedSpanClause,
+  tempoRelatedSpansetClause,
 } from '../core/traceRelations';
 import {
   traceDate,
@@ -335,11 +336,15 @@ function Search({
               }
             )}
           </Typography>
-          {query.tempoRelatedSpan && (
+          {(query.tempoRelatedSpan || query.tempoRelatedSpans?.length) && (
             <Stack spacing={1}>
               <Typography component="pre" sx={traceIdStyle}>
                 {t('Captured related-span clause: {{clause}}', {
-                  clause: tempoRelatedSpanClause(query.tempoRelatedSpan),
+                  clause: tempoRelatedSpansetClause(
+                    '{ Primary filters }',
+                    query.tempoRelatedSpans ??
+                      (query.tempoRelatedSpan ? [query.tempoRelatedSpan] : undefined)
+                  ),
                 })}
               </Typography>
               <Typography variant="body2">
@@ -486,12 +491,10 @@ function TraceScope({ cluster }: { cluster: string }) {
   const [intrinsicFilters, setIntrinsicFilters] = useState<IntrinsicFilterRow[]>([]);
   const nextIntrinsic = useRef(0);
   const [relatedEnabled, setRelatedEnabled] = useState(false);
-  const [relatedSpan, setRelatedSpan] = useState<TempoRelatedSpan>({
-    relation: 'and',
-    service: '',
-    operation: '',
-    errorsOnly: false,
-  });
+  const [relatedSpans, setRelatedSpans] = useState<(TempoRelatedSpan & { id: number })[]>([
+    { id: 0, relation: 'and', service: '', operation: '', errorsOnly: false },
+  ]);
+  const nextRelatedSpan = useRef(1);
   const [currentTime, setCurrentTime] = useState(true);
   const [endTime, setEndTime] = useState('');
   const [search, setSearch] = useState<{ query: TraceQuery; configKey: string }>();
@@ -502,11 +505,11 @@ function TraceScope({ cluster }: { cluster: string }) {
   const configKey = JSON.stringify(config);
   const relationNames = {
     and: t('Both groups match in the same trace'),
-    child: t('Related span is a child of a primary match'),
-    parent: t('Related span is a parent of a primary match'),
-    descendant: t('Related span is a descendant of a primary match'),
-    ancestor: t('Related span is an ancestor of a primary match'),
-    sibling: t('Related span is a sibling of a primary match'),
+    child: t('Right group is a child of the left group'),
+    parent: t('Right group is a parent of the left group'),
+    descendant: t('Right group is a descendant of the left group'),
+    ancestor: t('Right group is an ancestor of the left group'),
+    sibling: t('Right group is a sibling of the left group'),
   };
   useEffect(() => setSearch(undefined), [configKey]);
   function captureWindow() {
@@ -740,57 +743,133 @@ function TraceScope({ cluster }: { cluster: string }) {
                             'Related span filters require Tempo; disable them before searching Jaeger.'
                           )
                         : t(
-                            'One additional span group is evaluated within the same trace. Same-trace AND does not require distinct spans. Structural relations return matching right-group spans; parentage is not proof of request order or causality. Existing tags and attribute/intrinsic filters stay on the primary left group. No linked traces are fetched.'
+                            'Each added group joins the expression built so far, up to five groups total. Same-trace AND can match the same span and returns both groups; structural relations return matching right-group spans. These predicates do not prove request order or causality, and no linked traces are fetched. Existing tags, attributes and intrinsic filters stay on the primary group.'
                           )}
                     </Alert>
-                    <TextField
-                      select
-                      label={t('Span relationship')}
-                      value={relatedSpan.relation}
-                      onChange={event => {
-                        const relation = TEMPO_SPAN_RELATIONS.find(
-                          item => item.value === event.target.value
-                        );
-                        if (relation)
-                          setRelatedSpan(current => ({ ...current, relation: relation.value }));
-                      }}
-                    >
-                      {TEMPO_SPAN_RELATIONS.map(relation => (
-                        <MenuItem key={relation.value} value={relation.value}>
-                          {relationNames[relation.value]} ({relation.operator})
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      label={t('Related span service')}
-                      value={relatedSpan.service}
-                      inputProps={{ maxLength: 256 }}
-                      onChange={event =>
-                        setRelatedSpan(current => ({ ...current, service: event.target.value }))
-                      }
-                    />
-                    <TextField
-                      label={t('Related span operation (exact, optional)')}
-                      value={relatedSpan.operation ?? ''}
-                      inputProps={{ maxLength: 256 }}
-                      onChange={event =>
-                        setRelatedSpan(current => ({ ...current, operation: event.target.value }))
-                      }
-                    />
-                    <FormControlLabel
-                      label={t('Related span reported errors only')}
-                      control={
-                        <Switch
-                          checked={relatedSpan.errorsOnly === true}
+                    {relatedSpans.map((relatedSpan, index) => (
+                      <Stack key={relatedSpan.id} spacing={1}>
+                        <TextField
+                          select
+                          label={
+                            index === 0
+                              ? t('Span relationship')
+                              : t('Span relationship {{index}}', { index: index + 1 })
+                          }
+                          value={relatedSpan.relation}
+                          onChange={event => {
+                            const relation = TEMPO_SPAN_RELATIONS.find(
+                              item => item.value === event.target.value
+                            );
+                            if (relation)
+                              setRelatedSpans(current =>
+                                current.map(span =>
+                                  span.id === relatedSpan.id
+                                    ? { ...span, relation: relation.value }
+                                    : span
+                                )
+                              );
+                          }}
+                        >
+                          {TEMPO_SPAN_RELATIONS.map(relation => (
+                            <MenuItem key={relation.value} value={relation.value}>
+                              {relationNames[relation.value]} ({relation.operator})
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                        <TextField
+                          label={
+                            index === 0
+                              ? t('Related span service')
+                              : t('Related span service {{index}}', { index: index + 1 })
+                          }
+                          value={relatedSpan.service}
+                          inputProps={{ maxLength: 256 }}
                           onChange={event =>
-                            setRelatedSpan(current => ({
-                              ...current,
-                              errorsOnly: event.target.checked,
-                            }))
+                            setRelatedSpans(current =>
+                              current.map(span =>
+                                span.id === relatedSpan.id
+                                  ? { ...span, service: event.target.value }
+                                  : span
+                              )
+                            )
                           }
                         />
+                        <TextField
+                          label={
+                            index === 0
+                              ? t('Related span operation (exact, optional)')
+                              : t('Related span operation {{index}} (exact, optional)', {
+                                  index: index + 1,
+                                })
+                          }
+                          value={relatedSpan.operation ?? ''}
+                          inputProps={{ maxLength: 256 }}
+                          onChange={event =>
+                            setRelatedSpans(current =>
+                              current.map(span =>
+                                span.id === relatedSpan.id
+                                  ? { ...span, operation: event.target.value }
+                                  : span
+                              )
+                            )
+                          }
+                        />
+                        <FormControlLabel
+                          label={
+                            index === 0
+                              ? t('Related span reported errors only')
+                              : t('Related span {{index}} reported errors only', {
+                                  index: index + 1,
+                                })
+                          }
+                          control={
+                            <Switch
+                              checked={relatedSpan.errorsOnly === true}
+                              onChange={event =>
+                                setRelatedSpans(current =>
+                                  current.map(span =>
+                                    span.id === relatedSpan.id
+                                      ? { ...span, errorsOnly: event.target.checked }
+                                      : span
+                                  )
+                                )
+                              }
+                            />
+                          }
+                        />
+                        {index > 0 && (
+                          <Button
+                            onClick={() =>
+                              setRelatedSpans(current =>
+                                current.filter(span => span.id !== relatedSpan.id)
+                              )
+                            }
+                          >
+                            {t('Remove related span group {{index}}', { index: index + 1 })}
+                          </Button>
+                        )}
+                      </Stack>
+                    ))}
+                    <Button
+                      disabled={
+                        config?.provider !== 'tempo' ||
+                        relatedSpans.length >= MAX_TEMPO_RELATED_GROUPS
                       }
-                    />
+                      onClick={() =>
+                        setRelatedSpans(current => [
+                          ...current,
+                          {
+                            id: nextRelatedSpan.current++,
+                            relation: 'and',
+                            service: '',
+                            operation: '',
+                            errorsOnly: false,
+                          },
+                        ])
+                      }
+                    >
+                      {t('Add related span group')}
+                    </Button>
                   </>
                 )}
               </Stack>
@@ -835,7 +914,18 @@ function TraceScope({ cluster }: { cluster: string }) {
                       operator,
                       value,
                     })),
-                    ...(relatedEnabled ? { tempoRelatedSpan: { ...relatedSpan } } : {}),
+                    ...(relatedEnabled
+                      ? {
+                          tempoRelatedSpans: relatedSpans.map(
+                            ({ relation, service, operation, errorsOnly }) => ({
+                              relation,
+                              service,
+                              operation,
+                              errorsOnly,
+                            })
+                          ),
+                        }
+                      : {}),
                   };
                   if (!config) throw new Error(t('Tracing is not configured'));
                   traceSearchPath(config.provider, next);

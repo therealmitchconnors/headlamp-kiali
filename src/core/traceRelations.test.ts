@@ -1,4 +1,10 @@
-import { TEMPO_SPAN_RELATIONS, tempoRelatedSpanClause } from './traceRelations';
+import {
+  MAX_TEMPO_RELATED_GROUPS,
+  MAX_TEMPO_SPAN_GROUPS,
+  TEMPO_SPAN_RELATIONS,
+  tempoRelatedSpanClause,
+  tempoRelatedSpansetClause,
+} from './traceRelations';
 import { TraceQuery, traceSearchPath } from './tracing';
 
 const query: TraceQuery = {
@@ -86,7 +92,81 @@ it('keeps related groups Tempo-only and inside the single shared encoded URL bud
   expect(() =>
     traceSearchPath('tempo', {
       ...nearLimit,
-      tempoRelatedSpan: { ...tempoRelatedSpan, service: '\\'.repeat(256) },
+      tempoRelatedSpans: Array.from({ length: MAX_TEMPO_RELATED_GROUPS }, () => ({
+        ...tempoRelatedSpan,
+        service: '\\'.repeat(256),
+      })),
     })
   ).toThrow('16 KiB');
+});
+
+it('composes a bounded left-nested spanset expression without changing single-group syntax', () => {
+  const primary = '{ .service.name = "reviews" }';
+  const groups = [
+    { relation: 'descendant', service: 'ratings' },
+    { relation: 'parent', service: 'db' },
+  ] as const;
+  expect(tempoRelatedSpansetClause(primary, [groups[0]])).toBe(
+    '{ .service.name = "reviews" } >> { .service.name = "ratings" }'
+  );
+  expect(tempoRelatedSpansetClause(primary, groups)).toBe(
+    '({ .service.name = "reviews" } >> { .service.name = "ratings" }) < { .service.name = "db" }'
+  );
+  expect(tempoRelatedSpansetClause(primary, undefined)).toBe(primary);
+  expect(tempoRelatedSpansetClause(primary, [])).toBe(primary);
+});
+
+it('limits nested span-group depth and rejects malformed, raw or unsupported nodes', () => {
+  const primary = '{ .service.name = "reviews" }';
+  const groups = Array.from({ length: MAX_TEMPO_RELATED_GROUPS }, (_, index) => ({
+    relation: 'and',
+    service: `service-${index}`,
+  }));
+  expect(tempoRelatedSpansetClause(primary, groups)).toContain(
+    `service-${MAX_TEMPO_RELATED_GROUPS - 1}`
+  );
+  expect(MAX_TEMPO_SPAN_GROUPS).toBe(MAX_TEMPO_RELATED_GROUPS + 1);
+  expect(() =>
+    tempoRelatedSpansetClause(primary, [...groups, { relation: 'and', service: 'overflow' }])
+  ).toThrow('at most 5');
+  for (const invalid of [
+    null,
+    {},
+    [null],
+    [{ relation: 'or', service: 'reviews' }],
+    [{ relation: 'and', service: 'reviews', raw: '{ true }' }],
+    [{ relation: 'and', service: 'reviews', left: { relation: 'or' } }],
+  ])
+    expect(() => tempoRelatedSpansetClause(primary, invalid)).toThrow();
+});
+
+it('keeps count filters on the primary spanset and rejects Jaeger emulation', () => {
+  const tempoRelatedSpans = [
+    { relation: 'descendant' as const, service: 'ratings' },
+    { relation: 'and' as const, service: 'db', operation: 'SELECT' },
+  ];
+  const withCount = {
+    ...query,
+    tempoIntrinsics: [{ field: 'childCount' as const, operator: '>=' as const, value: '2' }],
+    tempoRelatedSpans,
+  };
+  const url = new URL(traceSearchPath('tempo', withCount), 'http://example.test');
+  expect(url.searchParams.get('q')).toBe(
+    '({ .service.name = "reviews" && name = "GET /reviews" && status = error && span.http.method = "GET" && span:childCount >= 2 } >> { .service.name = "ratings" }) && { .service.name = "db" && span:name = "SELECT" }'
+  );
+  expect(() =>
+    traceSearchPath('jaeger', {
+      ...query,
+      tempoFilters: [],
+      tempoIntrinsics: [],
+      tempoRelatedSpans,
+    })
+  ).toThrow('Related span filters require Tempo');
+  expect(() =>
+    traceSearchPath('tempo', {
+      ...query,
+      tempoRelatedSpan: tempoRelatedSpans[0],
+      tempoRelatedSpans,
+    })
+  ).toThrow('either the legacy');
 });

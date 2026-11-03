@@ -16,6 +16,11 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
+The bounded Tempo TraceQL extension adds the source-confirmed direct-child
+count intrinsic and nested composition of the existing same-trace/structural
+operators. It does not add raw TraceQL, OR/negated relations or linked-trace
+traversal; provider/storage compatibility and live matching remain open.
+
 ### Resume status — 2026-10-31
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
@@ -366,6 +371,13 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   **484 focused tests in seven files** and normal gates passed. No provider
   matching is claimed; unions, negated relations, additional groups and raw
   pipelines remain unsupported.
+- Tempo search now exposes `span:childCount` as a nonnegative signed-64-bit
+  intrinsic and composes up to five total spanset groups (primary plus four
+  related) with the six existing operators. The typed tree nests left-to-right;
+  count filters remain on the primary group. Tempo vParquet5 supports the
+  intrinsic, while vParquet4 reports it unsupported. Focused AST/UI regressions,
+  numeric bounds, malformed groups, provider mismatch and URL-size limits are
+  covered; no hosted provider or independent parser run is claimed.
 - Event/link/instrumentation attribute scopes now share typed filtering,
   exact literals, nil predicates and bounded captured reads. Five hosted
   groups covered the three scopes/five scalar types, mixed trace intrinsics,
@@ -1405,9 +1417,10 @@ panel and query cardinality limits.
    Application/Service consumers are now wired. Extend service-driven traffic
    workflows using existing correlation and guarded mutation adapters.
    Multi-object proposals require per-object outcomes; no blind retry or rollback.
-4. Continue tracing workload/graph correlations and remaining
-   structural/count intrinsic filters and broader cross-span pipelines. One
-   explicit related group with six fixed relationships is implemented.
+4. Continue tracing workload/graph correlations and broader cross-span
+   pipelines. Direct-child count plus up to four additional left-nested groups
+   over the six fixed spanset relationships are implemented; OR, negated
+   relations, raw pipelines and linked-trace traversal remain unsupported.
    Trace-wide root/duration,
    event-name/offset, trace/span/parent/link IDs and instrumentation name/version intrinsics and
    event/link/instrumentation attribute scopes are now implemented.

@@ -3,6 +3,7 @@ import {
   TEMPO_ID_INTRINSICS,
   TEMPO_INTRINSICS,
   TEMPO_METADATA_INTRINSICS,
+  TEMPO_SPAN_INTRINSICS,
   TEMPO_SPAN_KINDS,
   TEMPO_SPAN_STATUSES,
   tempoIntrinsicClauses,
@@ -91,6 +92,28 @@ it.each([
       `${field === 'duration' ? 'span' : 'trace'}:duration >= ${expected}ns`,
     ]);
 });
+it('serializes direct-child counts as bounded nonnegative integer predicates', () => {
+  expect(TEMPO_SPAN_INTRINSICS).toContain('childCount');
+  expect(
+    tempoIntrinsicClauses([
+      { field: 'childCount', operator: '=', value: '0' },
+      { field: 'childCount', operator: '>=', value: '9007199254740993' },
+      { field: 'childCount', operator: '<', value: '9223372036854775807' },
+    ])
+  ).toEqual([
+    'span:childCount = 0',
+    'span:childCount >= 9007199254740993',
+    'span:childCount < 9223372036854775807',
+  ]);
+  for (const operator of ['!=', '>', '>=', '<', '<='] as const)
+    expect(tempoIntrinsicClauses([{ field: 'childCount', operator, value: '1' }])).toHaveLength(1);
+});
+it.each(['', '-0', '-1', '+1', '01', '1.0', '1e3', ' 1', '1\n', '9223372036854775808'])(
+  'rejects invalid direct-child count %j',
+  value => {
+    expect(() => tempoIntrinsicClauses([{ field: 'childCount', operator: '=', value }])).toThrow();
+  }
+);
 it.each([
   '',
   ' 1ms',
@@ -121,7 +144,9 @@ it.each(
   )
 )('enforces field/operator compatibility: $field $operator', ({ field, operator }) => {
   const value =
-    field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
+    field === 'childCount'
+      ? '1'
+      : field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
       ? '1ns'
       : TEMPO_ID_INTRINSICS.some(id => id === field)
       ? 'AbC'
@@ -133,7 +158,10 @@ it.each(
   const supported =
     field === 'kind' || field === 'status' || TEMPO_ID_INTRINSICS.some(id => id === field)
       ? ['=', '!='].includes(operator)
-      : field === 'duration' || field === 'traceDuration' || field === 'eventTimeSinceStart'
+      : field === 'childCount' ||
+        field === 'duration' ||
+        field === 'traceDuration' ||
+        field === 'eventTimeSinceStart'
       ? !['=~', '!~'].includes(operator)
       : true;
   if (supported) expect(tempoIntrinsicClauses([{ field, operator, value }])).toHaveLength(1);

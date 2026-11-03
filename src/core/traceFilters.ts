@@ -25,9 +25,17 @@ export function traceAttributeOperatorAllowed(
   if (type === 'boolean' || type === 'nil') return operator === '=' || operator === '!=';
   return type === 'string' || (operator !== '=~' && operator !== '!~');
 }
-function integerLiteral(value: string): string {
-  if (value.length > 20 || /^-?(?:0|[1-9][0-9]*)$/.exec(value)?.[0] !== value)
-    throw new Error('Integer trace filters require a canonical signed 64-bit decimal');
+export function traceIntegerLiteral(
+  value: string,
+  domain: 'signed' | 'nonnegative' = 'signed'
+): string {
+  const pattern = domain === 'nonnegative' ? /^(?:0|[1-9][0-9]*)$/ : /^-?(?:0|[1-9][0-9]*)$/;
+  const label =
+    domain === 'nonnegative'
+      ? 'Tempo span child counts require a canonical nonnegative signed 64-bit decimal'
+      : 'Integer trace filters require a canonical signed 64-bit decimal';
+  if (value.length > (domain === 'nonnegative' ? 19 : 20) || pattern.exec(value)?.[0] !== value)
+    throw new Error(label);
   const parsed = BigInt(value);
   if (parsed < BigInt('-9223372036854775808') || parsed > BigInt('9223372036854775807'))
     throw new Error('Integer trace filter exceeds signed 64-bit bounds');
@@ -95,7 +103,7 @@ export function tempoAttributeClauses(filters: readonly TempoAttributeFilter[] =
       throw new Error('Typed trace filter values must be strings of at most 1024 characters');
     let literal: string;
     if (type === 'string') literal = traceStringLiteral(filter.value, operator);
-    else if (type === 'integer') literal = integerLiteral(filter.value);
+    else if (type === 'integer') literal = traceIntegerLiteral(filter.value);
     else if (type === 'float') literal = floatLiteral(filter.value);
     else if (type === 'nil') {
       if (filter.value !== '') throw new Error('Missing/null trace filters do not take a value');
