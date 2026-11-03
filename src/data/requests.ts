@@ -8,7 +8,8 @@ export type FailureKind =
   | 'forbidden'
   | 'unauthenticated'
   | 'unavailable'
-  | 'invalid-response';
+  | 'invalid-response'
+  | 'unsupported';
 
 export interface ReadFailure {
   kind: FailureKind;
@@ -17,6 +18,7 @@ export interface ReadFailure {
 }
 
 export class InvalidResponseError extends Error {}
+export class UnsupportedTransportError extends Error {}
 
 export function observedResourceIdentity(
   value: unknown,
@@ -52,7 +54,9 @@ export function readFailure(error: unknown): ReadFailure {
       ? error.message
       : 'The request failed without an error message';
   const kind: FailureKind =
-    error instanceof InvalidResponseError
+    error instanceof UnsupportedTransportError
+      ? 'unsupported'
+      : error instanceof InvalidResponseError
       ? 'invalid-response'
       : status === 404
       ? 'not-found'

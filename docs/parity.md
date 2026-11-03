@@ -1010,8 +1010,61 @@ replaces transport with an expression sink and supplies literal scope labels;
 it does not execute discovery, full dashboard conversion or a Prometheus parser.
 The source caller, schema and unit-scale-zero default were inspected at the
 existing baseline. Template includes and label-grouped charts are covered below;
-builtins, automatic application-runtime discovery, namespace/workload annotations, layout contracts
-and external Grafana/Perses links remain unsupported and are rejected explicitly.
+builtins, automatic application-runtime discovery, namespace/workload annotations,
+layout contracts and links embedded in native dashboard templates remain outside
+this renderer.
+
+## External Grafana and Perses dashboard links
+
+The independent external-link page uses explicit per-cluster settings and public
+Headlamp `ApiProxy` Service-proxy reads. It is not a Kiali API client or a native
+dashboard renderer. The exact upstream baseline, Kiali v2.33.0 commit
+`0e8be887b8217bbcac5e3ae0bfcd258073949cca`, was audited:
+
+- `grafana/grafana.go` searches `GET /api/search?query={configured name}` and
+  uses the first dashboard result's `url`; the frontend `GrafanaLinks.tsx`
+  appends configured variable names and values. The plugin instead requires one
+  exact title match and a same-origin path from the response, rejecting ambiguity
+  and unsafe paths.
+- `perses/perses.go` lowercases configured names, replaces spaces with hyphens,
+  checks `GET /api/v1/projects/{project}/dashboards/{id}` and links to
+  `/projects/{project}/dashboards/{id}`. The plugin validates the returned
+  dashboard/project identity before constructing that route.
+- Pinned Kiali maps `app`, `datasource`, `namespace`, `service`, `version` and
+  `workload`; Grafana's datasource value is its configured UID and Perses uses
+  its project. Service values use
+  `service.namespace.svc.cluster.local`. The original frontend interpolates
+  values without URL encoding and has no cluster or time-range mapping. This
+  adapter uses `URLSearchParams`, supports explicit cluster mapping only from
+  the saved metric-cluster identity, preserves explicit empty values, and adds
+  historical ranges: Grafana `from`/`to` in epoch milliseconds, Perses `start`/
+  `end` as absolute ISO-8601 timestamps.
+
+Each configured provider has a Kubernetes Service endpoint for API discovery and
+a separate browser-facing `externalURL`. Only HTTP(S) URLs without credentials,
+query or fragment are accepted. API discovery is anonymous through the selected
+cluster's Kubernetes proxy: Kubernetes authorization to proxy a Service does not
+authenticate to the destination application. Provider credentials, tokens,
+cookies, client certificates, auth headers, backend bridges, direct cross-origin
+fetches and TLS bypasses are not supported. A 401/403 is reported as an
+authentication/authorization failure; missing provider settings, missing
+dashboards and unsupported response/transport capabilities remain distinct.
+The browser's ability to reach or authenticate to a generated external URL is
+not verified.
+
+Discovery validates and captures settings, scope, mapped values and time before
+transport; it permits at most 32 named dashboards and uses the existing shared
+15-second abortable deadline. Results are discarded when the selected cluster,
+settings or link inputs change. The UI requires exactly one selected cluster
+and opens links explicitly in a new tab. Focused source-bound fixtures cover both
+provider identities, variable mappings, URL encoding, historical ranges,
+explicit empty values, unsafe URLs, missing/denied endpoints, capability
+mismatch, bounds, cancellation and stale-setting invalidation. No real Grafana
+or Perses endpoint, provider-auth behavior, Desktop/browser contribution or
+external link navigation was available for verification; this fixture support
+does not close live external-auth or host gates. The Perses OpenShift console
+dashboard URL format is not implemented; only the standard project dashboard API
+and route are supported.
 
 The shared metric-range reader now accepts a common captured time-range shape,
 retaining the stricter Istio label validation in its existing query builders.

@@ -31,6 +31,7 @@ export default function RequestStatus<T>({
       unauthenticated: t('Authentication required'),
       unavailable: t('Unavailable'),
       'invalid-response': t('Unexpected response'),
+      unsupported: t('Unsupported provider transport or capability'),
     };
     return (
       <Alert severity="error">

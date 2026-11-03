@@ -1,5 +1,6 @@
 import {
   ConfigurationError,
+  ExternalDashboardsConfig,
   getClusterConfig,
   KialiConfig,
   readConfig,
@@ -96,6 +97,58 @@ describe('versioned, cluster-scoped configuration', () => {
           alpha: {
             prometheus: null,
             customDashboards: { ...definitions, credentials: 'not-allowed' },
+          },
+        },
+      }).valid
+    ).toBe(false);
+  });
+  it('round-trips explicit provider endpoints and dashboard mappings per cluster without credentials', () => {
+    const externalDashboards: ExternalDashboardsConfig = {
+      grafana: {
+        endpoint,
+        externalURL: 'https://grafana.example.test/observe',
+        datasourceUID: 'prom-main',
+        dashboards: [
+          {
+            name: 'Istio Service Dashboard',
+            variables: { namespace: 'var-namespace', service: 'var-service', cluster: 'var-cluster' },
+          },
+        ],
+      },
+      perses: {
+        endpoint: { ...endpoint, service: 'perses', port: '8080' },
+        externalURL: 'https://perses.example.test',
+        project: 'istio',
+        dashboards: [
+          { name: 'Istio Workload Dashboard', variables: { workload: 'var-workload' } },
+        ],
+      },
+    };
+    const source: KialiConfig = { schemaVersion: 1, clusters: { beta: { prometheus: null } } };
+    const next = updateClusterConfig(source, 'alpha', {
+      prometheus: null,
+      externalDashboards,
+    });
+    expect(readConfig(next)).toEqual({ valid: true, config: next });
+    expect(next.clusters.alpha.externalDashboards).toEqual(externalDashboards);
+    expect(next.clusters.beta).toEqual({ prometheus: null });
+    expect(
+      updateClusterConfig(next, 'alpha', { prometheus: null }).clusters.alpha.externalDashboards
+    ).toEqual(externalDashboards);
+    expect(
+      readConfig({
+        schemaVersion: 1,
+        clusters: {
+          alpha: {
+            prometheus: null,
+            externalDashboards: {
+              grafana: {
+                endpoint,
+                externalURL: 'https://grafana.example.test',
+                token: 'not persisted',
+                dashboards: [{ name: 'Dashboard', variables: {} }],
+              },
+            },
           },
         },
       }).valid

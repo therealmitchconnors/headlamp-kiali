@@ -14,6 +14,36 @@ export interface TracingConfig {
   provider: 'jaeger' | 'tempo';
   endpoint: ServiceEndpoint;
 }
+export interface ExternalDashboardVariables {
+  app?: string;
+  cluster?: string;
+  datasource?: string;
+  namespace?: string;
+  service?: string;
+  version?: string;
+  workload?: string;
+}
+export interface ExternalDashboardDefinition {
+  name: string;
+  variables: ExternalDashboardVariables;
+}
+export interface GrafanaDashboardConfig {
+  endpoint: ServiceEndpoint;
+  externalURL: string;
+  datasourceUID?: string;
+  dashboards: ExternalDashboardDefinition[];
+}
+export interface PersesDashboardConfig {
+  endpoint: ServiceEndpoint;
+  externalURL: string;
+  project: string;
+  dashboards: ExternalDashboardDefinition[];
+}
+export interface ExternalDashboardsConfig {
+  grafana?: GrafanaDashboardConfig;
+  perses?: PersesDashboardConfig;
+}
+export type ExternalDashboardProvider = 'grafana' | 'perses';
 
 export interface ClusterConfig {
   prometheus: ServiceEndpoint | null;
@@ -26,6 +56,7 @@ export interface ClusterConfig {
   meshClusterName?: string | null;
   skipWildcardGatewayHosts?: boolean;
   customDashboards?: CustomDashboardSettings;
+  externalDashboards?: ExternalDashboardsConfig;
 }
 
 export interface KialiConfig {
@@ -88,6 +119,146 @@ export function validateTracingConfig(value: unknown): TracingConfig {
     throw new ConfigurationError('Select a supported tracing provider');
   rejectUnknownFields(value, ['provider', 'endpoint']);
   return { provider: value.provider, endpoint: validateServiceEndpoint(value.endpoint) };
+}
+
+function validateExternalURL(value: unknown): string {
+  if (typeof value !== 'string' || value.length > 2048 || value.trim() !== value)
+    throw new ConfigurationError('External dashboard URL must be a plain HTTP(S) URL');
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new ConfigurationError('External dashboard URL must be a plain HTTP(S) URL');
+  }
+  if (
+    (url.protocol !== 'http:' && url.protocol !== 'https:') ||
+    !url.hostname ||
+    /:\/\/[^/]*@/.test(value) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname
+      .split('/')
+      .filter(Boolean)
+      .some(part => !/^[A-Za-z0-9._~-]+$/.test(part) || part === '.' || part === '..')
+  )
+    throw new ConfigurationError(
+      'External dashboard URL must use HTTP(S) without credentials, query, or fragment'
+    );
+  return `${url.origin}${url.pathname.replace(/\/+$/, '')}`;
+}
+
+function validateExternalDashboardName(value: unknown, provider: 'grafana' | 'perses'): string {
+  if (
+    typeof value !== 'string' ||
+    !value ||
+    value.length > 256 ||
+    value.trim() !== value ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  )
+    throw new ConfigurationError('Dashboard names must be 1 to 256 plain characters');
+  if (
+    provider === 'perses' &&
+    !/^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/.test(value.toLowerCase().replace(/ /g, '-'))
+  )
+    throw new ConfigurationError('Perses dashboard names must produce a safe dashboard identifier');
+  return value;
+}
+
+function validateExternalDashboardVariables(value: unknown): ExternalDashboardVariables {
+  if (!isRecord(value)) throw new ConfigurationError('Dashboard variables must be an object');
+  rejectUnknownFields(value, [
+    'app',
+    'cluster',
+    'datasource',
+    'namespace',
+    'service',
+    'version',
+    'workload',
+  ]);
+  const entries = Object.entries(value).map(([field, parameter]) => {
+    if (
+      typeof parameter !== 'string' ||
+      !parameter ||
+      parameter.length > 128 ||
+      !/^[A-Za-z0-9_.-]+$/.test(parameter)
+    )
+      throw new ConfigurationError(`Dashboard ${field} variable must be a safe query parameter name`);
+    return [field, parameter];
+  });
+  if (new Set(entries.map(([, parameter]) => parameter)).size !== entries.length)
+    throw new ConfigurationError('Dashboard variable query parameter names must be unique');
+  return Object.fromEntries(entries) as ExternalDashboardVariables;
+}
+
+function validateExternalDashboardDefinitions(
+  value: unknown,
+  provider: 'grafana' | 'perses'
+): ExternalDashboardDefinition[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 32)
+    throw new ConfigurationError('Configure between 1 and 32 external dashboards');
+  const dashboards = value.map(dashboard => {
+    if (!isRecord(dashboard)) throw new ConfigurationError('External dashboard must be an object');
+    rejectUnknownFields(dashboard, ['name', 'variables']);
+    const name = validateExternalDashboardName(dashboard.name, provider);
+    const variables = validateExternalDashboardVariables(dashboard.variables ?? {});
+    const reserved =
+      provider === 'grafana' ? new Set(['from', 'to']) : new Set(['start', 'end']);
+    if (Object.values(variables).some(parameter => reserved.has(parameter)))
+      throw new ConfigurationError('Dashboard variable mappings cannot replace the time range');
+    return { name, variables };
+  });
+  const identities = dashboards.map(dashboard =>
+    provider === 'perses' ? dashboard.name.toLowerCase().replace(/ /g, '-') : dashboard.name
+  );
+  if (new Set(identities).size !== dashboards.length)
+    throw new ConfigurationError('External dashboard names must be unique');
+  return dashboards;
+}
+
+export function validateGrafanaDashboardConfig(value: unknown): GrafanaDashboardConfig {
+  if (!isRecord(value)) throw new ConfigurationError('Grafana dashboard settings must be an object');
+  rejectUnknownFields(value, ['endpoint', 'externalURL', 'datasourceUID', 'dashboards']);
+  const datasourceUID = value.datasourceUID;
+  if (
+    datasourceUID !== undefined &&
+    (typeof datasourceUID !== 'string' ||
+      datasourceUID.length > 256 ||
+      /[\u0000-\u001f\u007f]/.test(datasourceUID))
+  )
+    throw new ConfigurationError('Grafana datasource UID must be at most 256 plain characters');
+  return {
+    endpoint: validateServiceEndpoint(value.endpoint),
+    externalURL: validateExternalURL(value.externalURL),
+    ...(datasourceUID === undefined ? {} : { datasourceUID: datasourceUID as string }),
+    dashboards: validateExternalDashboardDefinitions(value.dashboards, 'grafana'),
+  };
+}
+
+export function validatePersesDashboardConfig(value: unknown): PersesDashboardConfig {
+  if (!isRecord(value)) throw new ConfigurationError('Perses dashboard settings must be an object');
+  rejectUnknownFields(value, ['endpoint', 'externalURL', 'project', 'dashboards']);
+  if (
+    typeof value.project !== 'string' ||
+    !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value.project)
+  )
+    throw new ConfigurationError('Perses project must be a safe path identifier');
+  return {
+    endpoint: validateServiceEndpoint(value.endpoint),
+    externalURL: validateExternalURL(value.externalURL),
+    project: value.project,
+    dashboards: validateExternalDashboardDefinitions(value.dashboards, 'perses'),
+  };
+}
+
+export function validateExternalDashboards(value: unknown): ExternalDashboardsConfig {
+  if (!isRecord(value)) throw new ConfigurationError('External dashboard settings must be an object');
+  rejectUnknownFields(value, ['grafana', 'perses']);
+  return {
+    ...(value.grafana === undefined ? {} : { grafana: validateGrafanaDashboardConfig(value.grafana) }),
+    ...(value.perses === undefined ? {} : { perses: validatePersesDashboardConfig(value.perses) }),
+  };
 }
 
 function rejectUnknownFields(value: Record<string, unknown>, fields: string[]) {
@@ -180,6 +351,7 @@ export function readConfig(value: unknown): ConfigResult {
         'meshClusterName',
         'skipWildcardGatewayHosts',
         'customDashboards',
+        'externalDashboards',
       ]);
       const prometheus =
         settings.prometheus === null ? null : validateServiceEndpoint(settings.prometheus);
@@ -190,6 +362,9 @@ export function readConfig(value: unknown): ConfigResult {
           ...(settings.customDashboards === undefined
             ? {}
             : { customDashboards: customDashboardsSetting(settings.customDashboards) }),
+          ...(settings.externalDashboards === undefined
+            ? {}
+            : { externalDashboards: validateExternalDashboards(settings.externalDashboards) }),
           ...(settings.skipWildcardGatewayHosts === undefined
             ? {}
             : {
@@ -274,6 +449,9 @@ export function updateClusterConfig(
         ...(settings.customDashboards === undefined
           ? {}
           : { customDashboards: customDashboardsSetting(settings.customDashboards) }),
+        ...(settings.externalDashboards === undefined
+          ? {}
+          : { externalDashboards: validateExternalDashboards(settings.externalDashboards) }),
         ...(settings.skipWildcardGatewayHosts === undefined
           ? {}
           : {

@@ -7,6 +7,7 @@ import {
   readCluster,
   readFailure,
   serviceProxyPath,
+  UnsupportedTransportError,
 } from './requests';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
@@ -70,6 +71,9 @@ describe('Headlamp request boundary', () => {
 
   it('does not equate a malformed response with absent Istio', () => {
     expect(readFailure(new InvalidResponseError('Invalid payload')).kind).toBe('invalid-response');
+    expect(readFailure(new UnsupportedTransportError('Unsupported service API')).kind).toBe(
+      'unsupported'
+    );
   });
 });
 
