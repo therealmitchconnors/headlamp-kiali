@@ -22,6 +22,7 @@ export interface ClusterConfig {
   identityDomain?: string | null;
   tracing?: TracingConfig | null;
   gatewayClasses?: GatewayClassSettings;
+  telemetryStore?: string | null;
   telemetryCluster?: string | null;
   meshClusterName?: string | null;
   skipWildcardGatewayHosts?: boolean;
@@ -68,6 +69,10 @@ function boundedClusterName(value: unknown, label: string): string {
 
 export function validateTelemetryCluster(value: unknown): string {
   return boundedClusterName(value, 'Metric cluster label');
+}
+
+export function validateTelemetryStore(value: unknown): string {
+  return boundedClusterName(value, 'Telemetry store identity');
 }
 
 export function validateMeshClusterName(value: unknown): string {
@@ -176,6 +181,7 @@ export function readConfig(value: unknown): ConfigResult {
         'identityDomain',
         'tracing',
         'gatewayClasses',
+        'telemetryStore',
         'telemetryCluster',
         'meshClusterName',
         'skipWildcardGatewayHosts',
@@ -202,6 +208,14 @@ export function readConfig(value: unknown): ConfigResult {
                   settings.telemetryCluster === null
                     ? null
                     : validateTelemetryCluster(settings.telemetryCluster),
+              }),
+          ...(settings.telemetryStore === undefined
+            ? {}
+            : {
+                telemetryStore:
+                  settings.telemetryStore === null
+                    ? null
+                    : validateTelemetryStore(settings.telemetryStore),
               }),
           ...(settings.meshClusterName === undefined
             ? {}
@@ -286,6 +300,14 @@ export function updateClusterConfig(
                 settings.telemetryCluster === null
                   ? null
                   : validateTelemetryCluster(settings.telemetryCluster),
+            }),
+        ...(settings.telemetryStore === undefined
+          ? {}
+          : {
+              telemetryStore:
+                settings.telemetryStore === null
+                  ? null
+                  : validateTelemetryStore(settings.telemetryStore),
             }),
         ...(settings.meshClusterName === undefined
           ? {}

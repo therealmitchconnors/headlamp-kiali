@@ -275,6 +275,38 @@ describe('native per-cluster settings', () => {
     expect(state.stored).toMatchObject({ clusters: { alpha: { telemetryCluster: null } } });
     expect(state.request).not.toHaveBeenCalled();
   });
+  it('saves and clears an explicit shared telemetry-store identity without cluster reads', async () => {
+    state.stored = {
+      schemaVersion: 1,
+      clusters: {
+        alpha: { prometheus: null, telemetryStore: 'old-store' },
+        beta: { prometheus: null, telemetryStore: 'other-store' },
+      },
+    };
+    render(<Settings />);
+    const user = userEvent.setup();
+    const field = screen.getByLabelText('Telemetry store identity (optional)');
+    await user.clear(field);
+    await user.type(field, ' shared-store');
+    expect(
+      screen.getByRole('button', { name: 'Save cluster settings' }).hasAttribute('disabled')
+    ).toBe(true);
+    await user.clear(field);
+    await user.type(field, 'shared-store');
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: {
+        alpha: { telemetryStore: 'shared-store' },
+        beta: { telemetryStore: 'other-store' },
+      },
+    });
+    await user.clear(field);
+    await user.click(screen.getByRole('button', { name: 'Save cluster settings' }));
+    expect(state.stored).toMatchObject({
+      clusters: { alpha: { telemetryStore: null }, beta: { telemetryStore: 'other-store' } },
+    });
+    expect(state.request).not.toHaveBeenCalled();
+  });
   it('persists logical mesh identity independently and clears it without changing telemetry or other clusters', async () => {
     state.stored = {
       schemaVersion: 1,
