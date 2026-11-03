@@ -12,19 +12,19 @@ vi.mock('./validation', () => ({ loadValidationSnapshot: vi.fn() }));
 const routeSpec = {
   hostnames: ['reviews.example.test'],
   parentRefs: [{ name: 'public', namespace: 'edge', sectionName: 'https', port: 443 }],
-  rules: [
-    { backendRefs: [{ name: 'reviews', namespace: 'preview', port: 9080, weight: 100 }] },
-  ],
+  rules: [{ backendRefs: [{ name: 'reviews', namespace: 'preview', port: 9080, weight: 100 }] }],
 };
 
 function snapshot({
   version = '1',
   grant = true,
   incomplete,
+  ambiguousServicePort = false,
 }: {
   version?: string;
   grant?: boolean;
   incomplete?: ValidationSourceKey;
+  ambiguousServicePort?: boolean;
 } = {}) {
   const sources = (
     ['gateways', 'namespaces', 'services', 'referenceGrants'] as ValidationSourceKey[]
@@ -79,7 +79,9 @@ function snapshot({
             uid: 'service-uid',
             resourceVersion: version,
             labels: {},
-            spec: { ports: [{ port: 9080 }] },
+            spec: {
+              ports: ambiguousServicePort ? [{ port: 9080 }, { port: 9080 }] : [{ port: 9080 }],
+            },
           },
         ],
       },
@@ -166,7 +168,9 @@ it('blocks unsupported API discovery and denied reference reads', async () => {
     available: true,
     apiVersion: 'gateway.networking.k8s.io/v1',
   });
-  vi.mocked(loadValidationSnapshot).mockResolvedValue(snapshot({ incomplete: 'services' }) as never);
+  vi.mocked(loadValidationSnapshot).mockResolvedValue(
+    snapshot({ incomplete: 'services' }) as never
+  );
   await expect(
     inspectGatewayRouteReferences(
       { cluster: 'alpha' },
@@ -179,11 +183,26 @@ it('blocks unsupported API discovery and denied reference reads', async () => {
   ).rejects.toThrow('services reference evidence is incomplete: forbidden');
 });
 
+it('requires complete namespace evidence for the route target', async () => {
+  const signal = new AbortController().signal;
+  const evidence = snapshot();
+  evidence.context.namespaces.items = [];
+  vi.mocked(loadValidationSnapshot).mockResolvedValue(evidence as never);
+  await expect(
+    inspectGatewayRouteReferences(
+      { cluster: 'alpha' },
+      'HTTPRoute',
+      'gateway.networking.k8s.io/v1',
+      'bookinfo',
+      routeSpec,
+      signal
+    )
+  ).rejects.toThrow('Route namespace bookinfo is missing');
+});
+
 it('requires explicit listener and backend ports to match observed targets', async () => {
   const signal = new AbortController().signal;
-  vi.mocked(loadValidationSnapshot).mockResolvedValue(
-    snapshot() as never
-  );
+  vi.mocked(loadValidationSnapshot).mockResolvedValue(snapshot() as never);
   await expect(
     inspectGatewayRouteReferences(
       { cluster: 'alpha' },
@@ -196,7 +215,24 @@ it('requires explicit listener and backend ports to match observed targets', asy
       },
       signal
     )
-  ).rejects.toThrow('does not expose port 8080');
+  ).rejects.toThrow('one unambiguous TCP port 8080');
+});
+
+it('rejects a backend port that ambiguously matches multiple Service ports', async () => {
+  const signal = new AbortController().signal;
+  vi.mocked(loadValidationSnapshot).mockResolvedValue(
+    snapshot({ ambiguousServicePort: true }) as never
+  );
+  await expect(
+    inspectGatewayRouteReferences(
+      { cluster: 'alpha' },
+      'HTTPRoute',
+      'gateway.networking.k8s.io/v1',
+      'bookinfo',
+      routeSpec,
+      signal
+    )
+  ).rejects.toThrow('one unambiguous TCP port 9080');
 });
 
 it('rejects review confirmation when reference evidence changed after dry-run', async () => {

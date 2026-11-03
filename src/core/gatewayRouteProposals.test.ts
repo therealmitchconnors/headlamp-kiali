@@ -1,5 +1,7 @@
+import proposalFixtureText from '../../test-files/configuration/gateway-route-proposals.json?raw';
 import {
   GatewayRouteDraft,
+  GatewayRouteKind,
   planGatewayRouteAttachment,
   planGatewayRouteCreation,
 } from './gatewayRouteProposals';
@@ -16,6 +18,7 @@ const draft: GatewayRouteDraft = {
   serviceNamespace: 'bookinfo',
   servicePort: '9080',
 };
+const proposalFixture = JSON.parse(proposalFixtureText);
 
 describe('Gateway API route proposals', () => {
   it('creates HTTPRoute and GRPCRoute proposals with pinned wizard defaults', () => {
@@ -38,13 +41,39 @@ describe('Gateway API route proposals', () => {
     }
   });
 
+  it('matches the source-bound Kiali HTTPRoute creation default fixture', () => {
+    expect(
+      planGatewayRouteCreation(
+        proposalFixture.creationDefaults.kind as GatewayRouteKind,
+        proposalFixture.creationDefaults.apiVersion,
+        proposalFixture.creationDefaults.draft
+      )
+    ).toEqual(proposalFixture.creationDefaults.expected);
+  });
+
+  it('rejects unsupported kinds and explicit short hostnames', () => {
+    expect(() =>
+      planGatewayRouteCreation(
+        'TCPRoute' as GatewayRouteKind,
+        'gateway.networking.k8s.io/v1',
+        draft
+      )
+    ).toThrow('Only HTTPRoute and GRPCRoute are supported');
+    expect(() =>
+      planGatewayRouteCreation('HTTPRoute', 'gateway.networking.k8s.io/v1', {
+        ...draft,
+        hostnames: 'reviews',
+      })
+    ).toThrow('Route hostnames must be DNS names');
+  });
+
   it('preserves same-namespace and omitted optional identity defaults', () => {
     const result = planGatewayRouteCreation('HTTPRoute', 'gateway.networking.k8s.io/v1', {
       ...draft,
-      parentNamespace: 'bookinfo',
+      parentNamespace: '',
       sectionName: '',
       parentPort: '',
-      serviceNamespace: 'bookinfo',
+      serviceNamespace: '',
       hostnames: '*.example.test, api.example.test',
     });
     expect(result.spec).toEqual({
@@ -67,7 +96,6 @@ describe('Gateway API route proposals', () => {
     { ...draft, namespace: 'Bad_Namespace' },
     { ...draft, name: '../reviews' },
     { ...draft, parentName: '' },
-    { ...draft, parentNamespace: '' },
     { ...draft, serviceName: 'bad/name' },
     { ...draft, serviceNamespace: 'bad_namespace' },
     { ...draft, servicePort: '0' },
@@ -77,7 +105,9 @@ describe('Gateway API route proposals', () => {
     { ...draft, sectionName: 'bad/name' },
     { ...draft, hostnames: '192.0.2.1' },
   ])('rejects invalid route identities and ports', invalid => {
-    expect(() => planGatewayRouteCreation('HTTPRoute', 'gateway.networking.k8s.io/v1', invalid)).toThrow();
+    expect(() =>
+      planGatewayRouteCreation('HTTPRoute', 'gateway.networking.k8s.io/v1', invalid)
+    ).toThrow();
   });
 
   it('omits parent namespace when attaching within the route namespace', () => {
@@ -85,7 +115,10 @@ describe('Gateway API route proposals', () => {
       'GRPCRoute',
       'gateway.networking.k8s.io/v1',
       'bookinfo',
-      { hostnames: ['reviews.example.test'], rules: [{ matches: [{ method: { service: 'reviews' } }] }] },
+      {
+        hostnames: ['reviews.example.test'],
+        rules: [{ matches: [{ method: { service: 'reviews' } }] }],
+      },
       { name: 'internal', namespace: 'bookinfo', sectionName: '', port: '' }
     );
     expect(proposal.parentRefs).toEqual([{ name: 'internal' }]);
@@ -107,10 +140,7 @@ describe('Gateway API route proposals', () => {
     );
     expect(proposal).toEqual({
       ...original,
-      parentRefs: [
-        ...original.parentRefs,
-        { name: 'internal', sectionName: 'http', port: 80 },
-      ],
+      parentRefs: [...original.parentRefs, { name: 'internal', sectionName: 'http', port: 80 }],
     });
     expect(original).toEqual(before);
     expect(() =>

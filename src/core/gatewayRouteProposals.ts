@@ -1,5 +1,5 @@
-import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import type { GRPCRouteSpec, HTTPRouteSpec } from '../resources/schema-types';
+import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 
 const GROUP = 'gateway.networking.k8s.io';
 const HTTP_VERSIONS = [`${GROUP}/v1`, `${GROUP}/v1beta1`];
@@ -38,7 +38,8 @@ function port(value: string, label: string, optional = false): number | undefine
 }
 
 function hostnames(value: string, fallback: string): string[] {
-  const names = value.trim() ? value.split(',').map(host => host.trim()) : [fallback];
+  const useDefault = !value.trim();
+  const names = useDefault ? [fallback] : value.split(',').map(host => host.trim());
   if (
     !names.length ||
     names.length > 16 ||
@@ -47,8 +48,10 @@ function hostnames(value: string, fallback: string): string[] {
         !host ||
         host.length > 253 ||
         /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host) ||
-        !(host === fallback && isDnsLabel(host)) &&
-        !/^(?:\*\.)?[a-z0-9](?:[-a-z0-9]*[a-z0-9])?(?:\.[a-z0-9](?:[-a-z0-9]*[a-z0-9])?)+$/.test(host)
+        (!(useDefault && host === fallback && isDnsLabel(host)) &&
+          !/^(?:\*\.)?[a-z0-9](?:[-a-z0-9]*[a-z0-9])?(?:\.[a-z0-9](?:[-a-z0-9]*[a-z0-9])?)+$/.test(
+            host
+          ))
     )
   )
     throw new Error('Route hostnames must be DNS names or wildcard DNS names');
@@ -56,12 +59,12 @@ function hostnames(value: string, fallback: string): string[] {
 }
 
 function assertTarget(kind: GatewayRouteKind, apiVersion: string, namespace: string) {
+  if (kind !== 'HTTPRoute' && kind !== 'GRPCRoute')
+    throw new Error('Only HTTPRoute and GRPCRoute are supported by this form');
   if (
-    !(
-      kind === 'HTTPRoute'
-        ? HTTP_VERSIONS.includes(apiVersion)
-        : GRPC_VERSIONS.includes(apiVersion)
-    )
+    !(kind === 'HTTPRoute'
+      ? HTTP_VERSIONS.includes(apiVersion)
+      : GRPC_VERSIONS.includes(apiVersion))
   )
     throw new Error(`${kind} API version is unsupported`);
   if (!isDnsLabel(namespace)) throw new Error('Route namespace must be a valid DNS label');
@@ -71,14 +74,15 @@ function parentReference(
   routeNamespace: string,
   parent: GatewayRouteIdentity
 ): NonNullable<HTTPRouteSpec['parentRefs']>[number] {
-  if (!isDnsSubdomain(parent.name) || !isDnsLabel(parent.namespace))
+  const namespace = parent.namespace || routeNamespace;
+  if (!isDnsSubdomain(parent.name) || !isDnsLabel(namespace))
     throw new Error('Gateway identity and namespace are required');
   const parentPort = port(parent.port, 'Gateway port', true);
   if (parent.sectionName && !isDnsSubdomain(parent.sectionName))
     throw new Error('Gateway section must be a valid DNS name');
   return {
     name: parent.name,
-    ...(parent.namespace === routeNamespace ? {} : { namespace: parent.namespace }),
+    ...(namespace === routeNamespace ? {} : { namespace }),
     ...(parent.sectionName ? { sectionName: parent.sectionName } : {}),
     ...(parentPort === undefined ? {} : { port: parentPort }),
   };
@@ -88,10 +92,18 @@ export function planGatewayRouteCreation(
   kind: GatewayRouteKind,
   apiVersion: string,
   draft: GatewayRouteDraft
-): { name: string; namespace: string; apiVersion: string; kind: GatewayRouteKind; spec: GatewayRouteSpec } {
+): {
+  name: string;
+  namespace: string;
+  apiVersion: string;
+  kind: GatewayRouteKind;
+  spec: GatewayRouteSpec;
+} {
   assertTarget(kind, apiVersion, draft.namespace);
-  if (!isDnsSubdomain(draft.name)) throw new Error('Route name must be a valid DNS subdomain');
-  if (!isDnsSubdomain(draft.serviceName) || !isDnsLabel(draft.serviceNamespace))
+  const name = draft.name || draft.serviceName;
+  if (!isDnsSubdomain(name)) throw new Error('Route name must be a valid DNS subdomain');
+  const backendNamespace = draft.serviceNamespace || draft.namespace;
+  if (!isDnsSubdomain(draft.serviceName) || !isDnsLabel(backendNamespace))
     throw new Error('Backend Service identity and namespace are required');
   const backendPort = port(draft.servicePort, 'Backend Service port');
   const parentRef = parentReference(draft.namespace, {
@@ -104,7 +116,7 @@ export function planGatewayRouteCreation(
     backendRefs: [
       {
         name: draft.serviceName,
-        ...(draft.serviceNamespace === draft.namespace ? {} : { namespace: draft.serviceNamespace }),
+        ...(backendNamespace === draft.namespace ? {} : { namespace: backendNamespace }),
         port: backendPort,
         weight: 100,
       },
@@ -127,7 +139,7 @@ export function planGatewayRouteCreation(
     spec.rules[0].backendRefs[0].port !== backendPort
   )
     throw new Error('The proposed route does not match the supported Gateway API schema subset');
-  return { name: draft.name, namespace: draft.namespace, apiVersion, kind, spec };
+  return { name, namespace: draft.namespace, apiVersion, kind, spec };
 }
 
 export function planGatewayRouteAttachment(

@@ -159,7 +159,8 @@ export async function loadValidationSnapshot(
   identityDomain: string | null,
   signal: AbortSignal,
   namespace?: string,
-  gatewayClasses?: GatewayClassSettings
+  gatewayClasses?: GatewayClassSettings,
+  additionalSources: readonly ValidationSourceKey[] = []
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   const capturedScope = clusterScope(scope.cluster);
@@ -175,7 +176,8 @@ export async function loadValidationSnapshot(
       identityDomain,
       requestSignal,
       namespace,
-      capturedClasses
+      capturedClasses,
+      additionalSources
     )
   );
 }
@@ -188,7 +190,8 @@ async function readValidationSnapshot(
   identityDomain: string | null,
   signal: AbortSignal,
   namespace?: string,
-  gatewayClasses?: GatewayClassSettings
+  gatewayClasses?: GatewayClassSettings,
+  additionalSources: readonly ValidationSourceKey[] = []
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   if (namespace !== undefined && namespace !== '' && !isDnsLabel(namespace))
@@ -197,9 +200,12 @@ async function readValidationSnapshot(
     gatewayClasses ?? { classes: [], selector: {} }
   );
   const classesRequested = gatewayClassNeedsRegistry(kind, group, spec);
-  let keys = referenceValidationSources(kind, group, spec, identityDomain, namespace).filter(
-    key => key !== 'gatewayClasses' || !classSettings.classes.length
-  );
+  let keys = [
+    ...new Set([
+      ...referenceValidationSources(kind, group, spec, identityDomain, namespace),
+      ...additionalSources,
+    ]),
+  ].filter(key => key !== 'gatewayClasses' || !classSettings.classes.length);
   const registryRequested =
     sidecarNeedsRegistry(kind, group, spec, identityDomain) ||
     virtualServiceNeedsRegistry(kind, group, spec, identityDomain) ||
