@@ -112,6 +112,17 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Mixed-reporter topology (2026-11-03):** the advanced traffic graph now
+  defaults to source-aligned combined mode while retaining explicit source and
+  destination modes. Combined selectors cover selected-namespace source egress,
+  destination workload ingress and source-reported unserviced ingress. Exact
+  paired identities count once only when rates/labels agree; single-reporter
+  buckets remain, and partial/conflicting overlapping buckets fail closed.
+  Kiali's reversed TCP sent/received counter mapping is applied. Focused graph
+  core/adapter/UI gates passed
+  **1,802 tests in three files**; TypeScript, lint and production build passed.
+  Mixed-mode hosted/console/i18n/a11y, Desktop and live-cluster evidence remain
+  open; no real traffic or cluster fixtures were changed. See `docs/parity.md`.
 - **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
   inspector, active Istio Gateway KIA0302 and captured exact-true controller
   scope semantics. Complete versioned Gateway/default-workload/VM sources are
@@ -201,8 +212,12 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   trace metadata and explicit UID-verified trace-to-Pod links.
 - Separate traffic topology page with workload/application/versioned-application/
   Service projections, captured historical windows, request/byte/message units,
-  local filtering and edge metadata. Source/destination reporters are explicit,
-  not combined; Service adjacency is marked as derived.
+  local filtering and edge metadata. Explicit single-reporter modes remain
+  available; combined mode source-aligns egress, destination ingress and
+  source-reported unserviced ingress, deduplicating only exact equal-rate reporter
+  pairs and retaining their identities/provenance. Conflicting pairs fail closed.
+  TCP sent/received measures follow Kiali's reversed Istio L4 counter mapping.
+  Service adjacency is marked as derived.
 - Exact trace string-tag filters, historical search end time, a 24-hour range
   option and a captured 15-second search deadline are also implemented.
   Six hosted intercepted scenarios passed and tracing fixture settings were
@@ -1421,9 +1436,12 @@ panel and query cardinality limits.
    Backend service names are not automatically Kubernetes identities.
    Existing HTTP search/detail needs no reimplementation. Live-provider success
    requires an existing backend or separately approved test infrastructure.
-   The traffic graph now has its own verified bounded projection/query surface;
-   preserve its explicit single-reporter limitation and do not infer Kubernetes
-   identity, resource health or policy enforcement from metric labels.
+   The traffic graph has a bounded source-aligned mixed-reporter projection/query
+   surface as well as explicit single-reporter modes. Preserve exact identity,
+   missing-label and conflict semantics; broader upstream query/default,
+   ambient/waypoint, appender and missing-report reconciliation remains open.
+   Do not infer Kubernetes identity, resource health or policy enforcement from
+   metric labels.
 5. Preserve all 23 generated models and checksum-bound schema captures. Read
    the focused skills for any new resource/detail/settings work rather than
    invoking the whole operator-installing build workflow.

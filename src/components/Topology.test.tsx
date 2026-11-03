@@ -202,6 +202,7 @@ it('exposes keyboard node inspection, edge response/security distributions and n
   expect(inspected.getByText('503')).toBeDefined();
   expect(inspected.getByText('UF')).toBeDefined();
   expect(inspected.getByText('none')).toBeDefined();
+  expect(inspected.getByText('Reporter provenance: Source across 1 exact series')).toBeDefined();
   expect(screen.queryByText('Reported revisions: v3')).toBeNull();
 });
 it('renders total-byte metadata with byte units, never request units', () => {
@@ -219,6 +220,8 @@ it('renders total-byte metadata with byte units, never request units', () => {
           },
         ],
         warnings: [],
+        reporterMode: 'source',
+        includeIdle: false,
       }}
     />
   );
@@ -241,12 +244,30 @@ it('requires explicit loading, captures historical time, and clears snapshots im
   await userEvent.type(input, '2026-01-02T03:04');
   await userEvent.click(screen.getByRole('button', { name: 'Load graph snapshot' }));
   await screen.findByRole('group', { name: 'Observed traffic graph' });
+  expect(vi.mocked(loadTopology).mock.calls[0][2].reporter).toBe('combined');
   expect(vi.mocked(loadTopology).mock.calls[0][2].end).toBe(
     Math.floor(new Date('2026-01-02T03:04').getTime() / 1000)
   );
   await userEvent.type(screen.getByRole('textbox', { name: 'Namespace' }), '-other');
   expect(screen.queryByRole('group', { name: 'Observed traffic graph' })).toBeNull();
   expect(vi.mocked(loadTopology).mock.calls[0][3].aborted).toBe(true);
+});
+it('retains explicit single-reporter selection in the query form', async () => {
+  render(
+    <MemoryRouter>
+      <TopologyScope cluster="alpha" />
+    </MemoryRouter>
+  );
+  await userEvent.type(screen.getByRole('textbox', { name: 'Namespace' }), 'bookinfo');
+  await userEvent.type(
+    screen.getByRole('textbox', { name: 'Istio metric cluster label' }),
+    'Kubernetes'
+  );
+  await userEvent.click(screen.getByRole('combobox', { name: 'Telemetry reporter' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Destination' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load graph snapshot' }));
+  await screen.findByRole('group', { name: 'Observed traffic graph' });
+  expect(vi.mocked(loadTopology).mock.calls[0][2].reporter).toBe('destination');
 });
 it('suppresses late cross-cluster data and exposes denied reads rather than an empty success', async () => {
   let resolve: (value: typeof snapshot) => void = () => {};

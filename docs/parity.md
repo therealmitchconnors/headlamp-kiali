@@ -291,15 +291,39 @@ upstream underscore concatenation; explicit collision tests cover that deliberat
 identity-safety difference. Versioned apps use workload identity when available,
 retain conflicting reported revisions and warn rather than selecting one label.
 
-Query grouping is source-informed by `graph/telemetry/istio/istio.go`.
-The bounded native adapter deliberately selects **one reporter**, not upstream's
-complete multi-query reporter/ambient pipeline. Three unioned selectors cover
-traffic touching the selected workload or destination-Service namespace, with
-explicit cluster matching. They preserve canonical labels, protocol, response
-code/status, flags and connection-security labels. HTTP/gRPC requests,
-TCP sent/received/total bytes and gRPC sent/received/total messages never mix
-units. Total measures require both counters; failures abort outstanding siblings.
-The shared diagnostic deadline now aborts its internal signal on every exit.
+Query grouping is source-informed by pinned
+`graph/telemetry/istio/istio.go` at Kiali `0e8be887b8217bbcac5e3ae0bfcd258073949cca`.
+Explicit **Source** and **Destination** modes preserve their prior single-reporter
+selectors. The default **Combined source + destination** mode uses one bounded
+query per metric with three aligned selector branches: source-reported egress
+from the selected namespace, destination-reported ingress to selected-namespace
+workloads, and source-reported ingress to unserviced destination hosts in the
+selected namespace. It retains `reporter` in the aggregation, does not infer
+ambient/waypoint traffic, and does not issue extra requests for a mixed batch.
+The query preserves canonical labels, protocol, response code/status, flags and
+connection-security labels.
+
+Combined observations are paired before any of the four projections. Exact
+reporter-independent metric-label identities are retained on each projected
+edge, together with the reporters that supplied them. A pair contributes once
+only when both sides have the same identity and rate; the source observation is
+the representative. Protocols remain separate. A metric/endpoint/protocol
+bucket reported by only one reporter remains visible. If both reporters appear
+in a bucket, their complete response/status/flag/security identity sets and rates
+must agree; partial sets and conflicting labels/rates fail closed rather than
+choosing an arbitrary side or adding both.
+Missing labels remain distinct from explicit `unknown` values in identity
+matching; missing endpoint values still display as unknown and retain their
+existing warnings. Duplicate same-reporter series still fail.
+
+The supported metric directions follow Kiali's graph selection: requests use
+`istio_requests_total`; TCP sent bytes use `istio_tcp_received_bytes_total` and
+TCP received bytes use `istio_tcp_sent_bytes_total` because Istio's L4 counters
+are reversed; total bytes use both. gRPC sent/received messages use request/
+response message counters respectively, and totals use both. Request, byte and
+message measures remain separate. Total measures require both counter reads;
+failures abort outstanding siblings. The shared diagnostic deadline aborts its
+internal signal on every exit.
 
 Service projection follows the observed Service-injection/reduction model in
 `graph/telemetry/common.go`: it retains non-Service roots and creates derived
@@ -311,14 +335,16 @@ are counted. This projection has source-informed tests, not an independent
 whole-graph Go differential oracle.
 
 Historical end time and rate windows are captured explicitly. Every returned
-instant sample must be finite/nonnegative, within one second of that time,
-from the selected reporter and inside the captured namespace/cluster scope.
-Duplicate series, invalid protocol families and malformed totals fail explicitly.
-Limits: two concurrent reads/15 seconds, 2,000 series per read, 4,000 total
-observations, 1,000 intermediate nodes, 2,000 projected edges and 20,000
-projection contributions. Boundary tests exercise the exact node/edge/
+instant sample must be finite/nonnegative, within one second of that time, from
+the selected reporter branch and inside its captured namespace/cluster scope.
+Duplicate series, conflicting reporter pairs, invalid protocol families and
+malformed totals fail explicitly. Limits: two concurrent reads/15 seconds,
+2,000 series per read, 4,000 total observations, 4,000,000 characters of exact
+reporter identities, 1,000 intermediate nodes, 2,000 projected edges and 20,000
+projection contributions. Boundary tests exercise the existing node/edge/
 contribution limits. Optional zero-rate edges are dashed and do not imply
-activity. The 50-node/200-edge diagram cap does not truncate the paginated tables.
+activity; paired zero/positive disagreement fails. The 50-node/200-edge diagram
+cap does not truncate the paginated tables.
 
 Hosted stock Headlamp 0.35.0 checks used real Bookinfo telemetry after 18 bounded
 read-only productpage GETs: six source-reported workload nodes/edges, four app
@@ -326,6 +352,8 @@ nodes/three app edges, six versioned nodes, and four Service-projection nodes/
 three edges. Destination reporting additionally retained the unknown ingress
 source and exposed `mutual_tls`; the source reporter's missing security label
 stayed unknown. Actual TCP counters were empty, not presented as healthy zero.
+These are earlier explicit single-reporter checks; they do not verify the new
+combined reporter mode in a running Headlamp instance.
 An intercepted 11-scenario browser run covered app/versioned/Service modes,
 edge metadata, local filtering, TCP and gRPC totals, historical window/end time,
 backend warnings, denied/stale responses and complete pagination beyond the
@@ -333,11 +361,13 @@ diagram limit. Interceptors were removed in `finally`; settings were unchanged.
 Normal gates passed **9,493 tests in 80 files**; independent Go evidence now
 totals **8,731 cases**.
 
-Still open: upstream mixed-reporter coverage and missing-report reconciliation,
-unserviced destination normalization, ambient/waypoint semantics, full graph
-appenders, idle inventory/dead-node detection, aggregate boxes, health and
-configuration overlays, trace correlation, verified Kubernetes links and
-current Desktop evidence. Reported security labels are not enforcement proof.
+Still open: complete upstream query/default and missing-report reconciliation
+outside this bounded batch, unserviced destination normalization beyond the
+source-reported host case, ambient/waypoint semantics, full graph appenders,
+idle inventory/dead-node detection, aggregate boxes, health and configuration
+overlays, trace correlation, verified Kubernetes links, and current mixed-mode
+hosted/console/i18n/a11y and Desktop evidence. Reported security labels are not
+enforcement proof.
 
 ## Read-only pod and Envoy diagnostics
 
@@ -3685,7 +3715,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |
-| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; 1,728 Go identity cases; hosted Bookinfo and negative fixtures | Mixed reporter pipeline, complete appenders, ambient/waypoint, historical resource identity/trace links and Desktop |
+| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections, source/destination/combined reporter modes with exact paired-series identity and provenance, source-aligned unserviced ingress, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; 1,728 Go identity cases; hosted Bookinfo single-reporter and negative fixtures | Complete upstream query/default/missing-report parity, complete appenders, ambient/waypoint, historical resource identity/trace links, mixed-mode hosted/console/i18n/a11y verification and Desktop |
 
 These are **partial implementations**, not closure of their corresponding full
 milestones. The captured Istio kinds are VirtualService, DestinationRule, Gateway,

@@ -55,6 +55,55 @@ it('does not turn a failed total-counter read into a partial success; aborts its
   ).rejects.toMatchObject({ status: 403 });
   expect(vi.mocked(ApiProxy.request).mock.calls[1][1]?.signal?.aborted).toBe(true);
 });
+it('loads both source-aligned reporters in one bounded metric request and preserves partial warnings', async () => {
+  const labels = {
+    source_cluster: 'Kubernetes',
+    source_workload_namespace: 'bookinfo',
+    source_workload: 'productpage-v1',
+    source_canonical_service: 'productpage',
+    source_canonical_revision: 'v1',
+    destination_cluster: 'Kubernetes',
+    destination_service_namespace: 'bookinfo',
+    destination_service: 'reviews.bookinfo.svc.cluster.local',
+    destination_service_name: 'reviews',
+    destination_workload_namespace: 'bookinfo',
+    destination_workload: 'reviews-v1',
+    destination_canonical_service: 'reviews',
+    destination_canonical_revision: 'v1',
+    request_protocol: 'http',
+    response_code: '200',
+    response_flags: '-',
+    connection_security_policy: 'mutual_tls',
+  };
+  vi.mocked(ApiProxy.request).mockResolvedValue({
+    status: 'success',
+    warnings: ['partial backend result'],
+    data: {
+      resultType: 'vector',
+      result: ['source', 'destination'].map(reporter => ({
+        metric: { ...labels, reporter },
+        value: [query.end, '2'],
+      })),
+    },
+  });
+  const result = await loadTopology(
+    clusterScope('alpha'),
+    endpoint,
+    { ...query, reporter: 'combined', measure: 'requests' },
+    new AbortController().signal
+  );
+  expect(result.observations.map(item => item.reporter)).toEqual(['source', 'destination']);
+  expect(result.observations[0].identity).toBe(result.observations[1].identity);
+  expect(result.warnings).toEqual([{ code: 'prometheus', message: 'partial backend result' }]);
+  expect(ApiProxy.request).toHaveBeenCalledTimes(1);
+  const path = String(vi.mocked(ApiProxy.request).mock.calls[0][0]);
+  expect(new URL(path, 'http://example.test').searchParams.get('query')).toContain(
+    'reporter="source"'
+  );
+  expect(new URL(path, 'http://example.test').searchParams.get('query')).toContain(
+    'reporter="destination"'
+  );
+});
 it('reports malformed vectors as invalid responses', async () => {
   vi.mocked(ApiProxy.request).mockResolvedValue({});
   await expect(
