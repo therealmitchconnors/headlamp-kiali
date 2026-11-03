@@ -378,3 +378,113 @@ it.each(['private', 'public', 'denied', 'virtual-only'])(
     }
   }
 );
+
+const routeTarget = {
+  apiVersion: 'gateway.networking.k8s.io/v1',
+  kind: 'HTTPRoute',
+  name: 'selected',
+  namespace: 'bookinfo',
+  resourceVersion: 'route-rv',
+  spec: {},
+  uid: 'route-uid',
+};
+const currentRoute = {
+  apiVersion: routeTarget.apiVersion,
+  kind: routeTarget.kind,
+  metadata: {
+    name: routeTarget.name,
+    namespace: routeTarget.namespace,
+    resourceVersion: routeTarget.resourceVersion,
+    uid: routeTarget.uid,
+  },
+  spec: routeTarget.spec,
+};
+
+it('revalidates the captured Gateway API route on its exact cluster and API version', async () => {
+  vi.mocked(ApiProxy.request).mockResolvedValue(currentRoute);
+  const signal = new AbortController().signal;
+  const result = await loadValidationSnapshot(
+    clusterScope('alpha'),
+    'HTTPRoute',
+    'gateway.networking.k8s.io',
+    routeTarget.spec,
+    null,
+    signal,
+    routeTarget.namespace,
+    undefined,
+    routeTarget
+  );
+  expect(result.sources).toEqual([]);
+  expect(ApiProxy.request).toHaveBeenCalledWith(
+    '/apis/gateway.networking.k8s.io/v1/namespaces/bookinfo/httproutes/selected',
+    expect.objectContaining({ cluster: 'alpha', signal }),
+    false
+  );
+});
+
+it.each(['uid', 'resourceVersion', 'spec', 'apiVersion'])(
+  'rejects stale Gateway route %s evidence rather than returning a successful snapshot',
+  async field => {
+    const stale = structuredClone(currentRoute);
+    if (field === 'uid' || field === 'resourceVersion') stale.metadata[field] = 'changed';
+    else if (field === 'apiVersion') stale.apiVersion = 'gateway.networking.k8s.io/v1beta1';
+    else stale.spec = { parentRefs: [] };
+    vi.mocked(ApiProxy.request).mockResolvedValue(stale);
+    await expect(
+      loadValidationSnapshot(
+        clusterScope('alpha'),
+        'HTTPRoute',
+        'gateway.networking.k8s.io',
+        routeTarget.spec,
+        null,
+        new AbortController().signal,
+        routeTarget.namespace,
+        undefined,
+        routeTarget
+      )
+    ).rejects.toThrow();
+  }
+);
+
+it('rejects unsupported selected Gateway route versions before reading evidence', async () => {
+  await expect(
+    loadValidationSnapshot(
+      clusterScope('alpha'),
+      'HTTPRoute',
+      'gateway.networking.k8s.io',
+      routeTarget.spec,
+      null,
+      new AbortController().signal,
+      routeTarget.namespace,
+      undefined,
+      { ...routeTarget, apiVersion: 'gateway.networking.k8s.io/v9' }
+    )
+  ).rejects.toThrow('API version is unsupported');
+  expect(ApiProxy.request).not.toHaveBeenCalled();
+});
+
+it('cancels a pending selected-route revalidation with the captured request', async () => {
+  let markStarted: () => void = () => {};
+  const started = new Promise<void>(resolve => {
+    markStarted = resolve;
+  });
+  vi.mocked(ApiProxy.request).mockImplementation(async () => {
+    markStarted();
+    return new Promise(() => {});
+  });
+  const controller = new AbortController();
+  const pending = loadValidationSnapshot(
+    clusterScope('alpha'),
+    'HTTPRoute',
+    'gateway.networking.k8s.io',
+    routeTarget.spec,
+    null,
+    controller.signal,
+    routeTarget.namespace,
+    undefined,
+    routeTarget
+  );
+  await started;
+  controller.abort();
+  await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+});
