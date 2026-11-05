@@ -1,3 +1,4 @@
+import fixtureText from '../../test-files/parity/entity-health-oracle.json?raw';
 import { CORRELATION_SOURCES, decodeCorrelationResource } from '../data/correlation';
 import { correlateResources } from './correlation';
 import {
@@ -7,6 +8,22 @@ import {
   serviceHealthResource,
 } from './entityHealth';
 import { namespaceScope } from './scope';
+import { healthWorkloadKinds, workloadHealthQueries } from './workloadHealth';
+
+const queryOracle: {
+  commit: string;
+  sources: string[];
+  queries: {
+    kind: string;
+    direction: 'inbound' | 'outbound';
+    reporterMode: 'single' | 'combined';
+    namespace: string;
+    name: string;
+    telemetryCluster: string;
+    telemetryApp?: string;
+    expected: string;
+  }[];
+} = JSON.parse(fixtureText);
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   ApiProxy: { request: vi.fn() },
@@ -42,6 +59,31 @@ it('uses canonical-service identity for apps and inbound Service-name identity f
   expect(entityHealthQueries({ ...query, telemetryApp: escaped }).inbound).toContain(
     `destination_canonical_service=${JSON.stringify(escaped)}`
   );
+});
+it('matches pinned health query identity, direction and reporter fixtures', () => {
+  expect(queryOracle.commit).toBe('0e8be887b8217bbcac5e3ae0bfcd258073949cca');
+  expect(queryOracle.sources).toContain('models/health.go:CombineReporters');
+  for (const fixture of queryOracle.queries) {
+    const scope = {
+      namespace: fixture.namespace,
+      name: fixture.name,
+      telemetryCluster: fixture.telemetryCluster,
+      reporterMode: fixture.reporterMode,
+      end: 10000,
+    };
+    const generated =
+      fixture.kind === 'Application' || fixture.kind === 'Service'
+        ? entityHealthQueries({
+            ...scope,
+            kind: fixture.kind,
+            ...(fixture.kind === 'Application' ? { telemetryApp: fixture.telemetryApp! } : {}),
+          } as EntityHealthQuery)
+        : workloadHealthQueries({
+            ...scope,
+            kind: fixture.kind as (typeof healthWorkloadKinds)[number],
+          });
+    expect(generated[fixture.direction]).toBe(fixture.expected);
+  }
 });
 it('keeps empty application labels addressable but requires a nonempty explicit telemetry identity', () => {
   expect(entityHealthQueries({ ...query, name: '' }).inbound).toContain(

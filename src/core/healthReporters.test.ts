@@ -1,3 +1,4 @@
+import entityFixtureText from '../../test-files/parity/entity-health-oracle.json?raw';
 import fixtureText from '../../test-files/parity/health-reporters-oracle.json?raw';
 import { RequestHealth } from './health';
 import {
@@ -15,6 +16,14 @@ const fixtures: {
     expected: RequestHealth;
   }[];
 } = JSON.parse(fixtureText);
+const entityFixture: {
+  commit: string;
+  combinedRequests: {
+    inbound: ReportedRequestRate[];
+    outbound: ReportedRequestRate[];
+    expected: RequestHealth;
+  };
+} = JSON.parse(entityFixtureText);
 it('retains the pinned reporter oracle identity and count', () => {
   expect(fixtures.commit).toBe('0e8be887b8217bbcac5e3ae0bfcd258073949cca');
   expect(fixtures.cases).toHaveLength(372);
@@ -34,6 +43,22 @@ it('gives no-response codes priority over a successful gRPC status and preserves
       grpc_response_status: '13',
     })
   ).toBe('13');
+});
+it('matches pinned entity health reporter outputs for source/destination, HTTP, gRPC and no-response data', () => {
+  expect(entityFixture.commit).toBe('0e8be887b8217bbcac5e3ae0bfcd258073949cca');
+  const metric = (rates: readonly ReportedRequestRate[]) => ({
+    warnings: [],
+    series: rates.map(({ labels, value }) => ({
+      labels: { ...labels },
+      samples: [{ timestamp: 10000, value }],
+    })),
+  });
+  expect(
+    combinedMetricHealth(
+      metric(entityFixture.combinedRequests.inbound),
+      metric(entityFixture.combinedRequests.outbound)
+    )
+  ).toEqual(entityFixture.combinedRequests.expected);
 });
 it('keeps the existing single reporter query contract and explicitly tags combined results', () => {
   const query = {

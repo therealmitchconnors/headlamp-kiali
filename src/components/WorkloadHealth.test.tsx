@@ -54,6 +54,7 @@ beforeEach(() => {
     resource: { ok: false, error: { kind: 'forbidden', message: 'Access denied' } },
     inbound: { ok: true, result: { series: [], warnings: [] } },
     outbound: { ok: true, result: { series: [], warnings: [] } },
+    missingDirections: [],
   }));
 });
 it('retains the linked resource, sends one scoped request and never shows healthy for missing data', async () => {
@@ -85,4 +86,22 @@ it('retains the linked resource, sends one scoped request and never shows health
   await user.type(screen.getByLabelText('Workload name'), '-different');
   expect(screen.queryByText(/Combined health is unavailable/)).toBeNull();
   expect(signal.aborted).toBe(true);
+});
+it('aborts a submitted workload snapshot when its saved telemetry endpoint changes', async () => {
+  const route = () => (
+    <MemoryRouter initialEntries={['/health?kind=Deployment&namespace=bookinfo&name=reviews-v1']}>
+      <WorkloadHealth />
+    </MemoryRouter>
+  );
+  const view = render(route());
+  const user = userEvent.setup();
+  await user.type(screen.getByLabelText('Istio metric cluster label'), 'east');
+  await user.click(screen.getByRole('button', { name: 'Load health' }));
+  await waitFor(() => expect(loadWorkloadHealth).toHaveBeenCalledTimes(1));
+  const signal = vi.mocked(loadWorkloadHealth).mock.calls[0][4];
+  state.config.config.clusters.alpha.prometheus.port = '9091';
+  view.rerender(route());
+  await waitFor(() => expect(signal.aborted).toBe(true));
+  expect(screen.queryByText(/Combined health is unavailable/)).toBeNull();
+  expect(loadWorkloadHealth).toHaveBeenCalledTimes(1);
 });

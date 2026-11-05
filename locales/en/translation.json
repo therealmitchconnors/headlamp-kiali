@@ -659,6 +659,8 @@
   "Service health uses inbound requests and Service health annotations only. It does not assess endpoint readiness, replica availability, proxy synchronization or security.": "Service health uses inbound requests and Service health annotations only. It does not assess endpoint readiness, replica availability, proxy synchronization or security.",
   "Inbound": "Inbound",
   "Outbound": "Outbound",
+  "Inbound request telemetry is missing; health cannot be assessed.": "Inbound request telemetry is missing; health cannot be assessed.",
+  "Outbound request telemetry is missing; health cannot be assessed.": "Outbound request telemetry is missing; health cannot be assessed.",
   "Replica and request health": "Replica and request health",
   "Service request health": "Service request health",
   "Health is unavailable from incomplete, missing or invalid evidence. No healthy status was inferred.": "Health is unavailable from incomplete, missing or invalid evidence. No healthy status was inferred.",
