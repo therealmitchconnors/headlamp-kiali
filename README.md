@@ -31,7 +31,9 @@ The repository root is the plugin directory.
 See [PLAN.md](PLAN.md) for the current implementation roadmap and agent handoff,
 [the parity ledger](docs/parity.md) for scope, implementation evidence and
 Desktop/web capability gaps, and [the fixture guide](test-files/README.md) for
-reproducible checks. Full parity is not claimed.
+reproducible checks. The [hosted smoke guide](docs/hosted-smoke-tests.md)
+documents repeatable synthetic runtime checks without a real cluster. Full
+parity is not claimed.
 
 ## Development
 
@@ -645,8 +647,11 @@ Denied or unresolved configuration never receives this fallback.
 Local checks also cover omitted Sidecar outbound mode (KIA1007) and current
 Gateway/controller conditions (GWAPI). ServiceEntry and Istio Gateway
 port-naming helpers are not enabled by the pinned Kiali checker pipeline, so
-the plugin does not enforce them. Active Kubernetes Service port checks remain
-separate implementation work.
+the plugin does not enforce them. Kubernetes Service port checks are a
+separate, explicit read-only inspector linked from the Services list. It
+implements KIA0601/KIA0602/KIA0701 over the declared local namespace scope and
+complete Pod/Deployment reads; this bounded slice is not a reachability verdict
+and has not passed live browser/cluster verification in this environment.
 Explicit JSON outbound modes remain unambiguous. Stale/missing condition
 generations are not treated as current configuration errors.
 

@@ -14,7 +14,7 @@ import {
   HealthRateRule,
   validateHealthRules,
 } from '../core/healthCalculator';
-import { combinedMetricHealth } from '../core/healthReporters';
+import { combinedMetricHealth, HealthDirection } from '../core/healthReporters';
 import { AppLabels } from '../core/labels';
 import { ClusterScope, clusterScope, namespaceScope } from '../core/scope';
 import { healthRequestRates } from '../core/workloadHealth';
@@ -33,6 +33,7 @@ export interface EntityHealthSnapshot {
   query: EntityHealthQuery;
   application?: Application;
   issues: string[];
+  missingDirections: HealthDirection[];
   resourceError?: ReadFailure;
   inbound?: MetricRead;
   outbound?: MetricRead;
@@ -75,7 +76,12 @@ async function readEntityHealth(
 ): Promise<EntityHealthSnapshot> {
   const queries = entityHealthQueries(query);
   const rules = [...validateHealthRules(customRules), ...DEFAULT_HEALTH_RATES];
-  const result: EntityHealthSnapshot = { query, issues: [], calculation: null };
+  const result: EntityHealthSnapshot = {
+    query,
+    issues: [],
+    missingDirections: [],
+    calculation: null,
+  };
   let annotations: Record<string, string> = {};
   let replicas: WorkloadStatus[] | undefined;
   try {
@@ -144,8 +150,9 @@ async function readEntityHealth(
     result.issues.push('Prometheus returned warnings; health observations may be incomplete');
     return result;
   }
-  if (!inbound.result.series.length && !(outbound?.ok && outbound.result.series.length)) {
-    result.issues.push('Request telemetry is missing; no healthy status was inferred');
+  if (!inbound.result.series.length) result.missingDirections.push('inbound');
+  if (outbound?.ok && !outbound.result.series.length) result.missingDirections.push('outbound');
+  if (result.missingDirections.length) {
     return result;
   }
   try {

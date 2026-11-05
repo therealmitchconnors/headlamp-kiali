@@ -1,0 +1,148 @@
+{
+  "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+  "version": "v2.33.0",
+  "sources": [
+    "business/health.go:getAppRequestsHealth",
+    "business/health.go:getServiceRequestsHealth",
+    "business/health.go:getWorkloadRequestsHealth",
+    "prometheus/metrics.go:getServiceRequestRates",
+    "prometheus/metrics.go:getItemRequestRates",
+    "models/health.go:AggregateInbound",
+    "models/health.go:AggregateOutbound",
+    "models/health.go:CombineReporters",
+    "models/health.go:aggregate"
+  ],
+  "queries": [
+    {
+      "kind": "Deployment",
+      "direction": "inbound",
+      "reporterMode": "single",
+      "namespace": "bookinfo",
+      "name": "reviews-v1",
+      "telemetryCluster": "east",
+      "expected": "sum by (request_protocol,response_code,grpc_response_status) (rate(istio_requests_total{reporter=\"destination\",destination_workload_namespace=\"bookinfo\",destination_cluster=\"east\",destination_workload=\"reviews-v1\"}[5m]))"
+    },
+    {
+      "kind": "Application",
+      "direction": "inbound",
+      "reporterMode": "combined",
+      "namespace": "bookinfo",
+      "name": "reviews",
+      "telemetryApp": "reviews",
+      "telemetryCluster": "external",
+      "expected": "sum by (reporter,request_protocol,response_code,grpc_response_status) (rate(istio_requests_total{destination_workload_namespace=\"bookinfo\",destination_cluster=\"external\",destination_canonical_service=\"reviews\"}[5m]))"
+    },
+    {
+      "kind": "Application",
+      "direction": "outbound",
+      "reporterMode": "combined",
+      "namespace": "bookinfo",
+      "name": "reviews",
+      "telemetryApp": "reviews",
+      "telemetryCluster": "east",
+      "expected": "sum by (reporter,request_protocol,response_code,grpc_response_status) (rate(istio_requests_total{reporter=\"source\",source_workload_namespace=\"bookinfo\",source_cluster=\"east\",source_canonical_service=\"reviews\"}[5m]))"
+    },
+    {
+      "kind": "Service",
+      "direction": "inbound",
+      "reporterMode": "combined",
+      "namespace": "bookinfo",
+      "name": "reviews",
+      "telemetryCluster": "unknown",
+      "expected": "sum by (reporter,request_protocol,response_code,grpc_response_status) (rate(istio_requests_total{destination_service_namespace=\"bookinfo\",destination_cluster=\"unknown\",destination_service_name=\"reviews\"}[5m]))"
+    }
+  ],
+  "combinedRequests": {
+    "inbound": [
+      {
+        "labels": {
+          "reporter": "source",
+          "request_protocol": "http",
+          "response_code": "200"
+        },
+        "value": 100
+      },
+      {
+        "labels": {
+          "reporter": "destination",
+          "request_protocol": "http",
+          "response_code": "200"
+        },
+        "value": 90
+      },
+      {
+        "labels": {
+          "reporter": "source",
+          "request_protocol": "http",
+          "response_code": "503"
+        },
+        "value": 10
+      },
+      {
+        "labels": {
+          "reporter": "destination",
+          "request_protocol": "http",
+          "response_code": "503"
+        },
+        "value": 20
+      },
+      {
+        "labels": {
+          "reporter": "source",
+          "request_protocol": "grpc",
+          "response_code": "200",
+          "grpc_response_status": "13"
+        },
+        "value": 2
+      },
+      {
+        "labels": {
+          "reporter": "destination",
+          "request_protocol": "grpc",
+          "response_code": "0",
+          "grpc_response_status": "14"
+        },
+        "value": 1
+      }
+    ],
+    "outbound": [
+      {
+        "labels": {
+          "reporter": "source",
+          "request_protocol": "http",
+          "response_code": "200"
+        },
+        "value": 50
+      },
+      {
+        "labels": {
+          "reporter": "source",
+          "request_protocol": "grpc",
+          "response_code": "200",
+          "grpc_response_status": "0"
+        },
+        "value": 3
+      }
+    ],
+    "expected": {
+      "inbound": {
+        "http": {
+          "200": 100,
+          "503": 20
+        },
+        "grpc": {
+          "13": 2,
+          "-": 1
+        }
+      },
+      "outbound": {
+        "http": {
+          "200": 50
+        },
+        "grpc": {
+          "0": 3
+        }
+      }
+    }
+  }
+}

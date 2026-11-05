@@ -1,7 +1,19 @@
 import { isRecord } from './object';
+import type { MetricResult, Sample } from './telemetry';
 
 export type MetricChartType = 'line' | 'area' | 'bar' | 'scatter';
 export type MetricChartAxis = 'time' | 'series';
+export const MAX_METRIC_CHART_POINTS = 1928;
+
+export function metricChartPoints(result: MetricResult): Sample[] {
+  let count = 0;
+  for (const series of result.series) {
+    count += series.samples.length;
+    if (count > MAX_METRIC_CHART_POINTS)
+      throw new Error(`Metric chart exceeds the ${MAX_METRIC_CHART_POINTS}-sample display limit`);
+  }
+  return result.series.flatMap(series => series.samples);
+}
 
 export function validateDashboardRows(value: unknown): number | undefined {
   if (value === undefined || value === null) return undefined;
@@ -76,8 +88,13 @@ export function metricAxis(
   const { min, max } = validateChartDisplay(bounds);
   const anchor = min ?? max;
   if (anchor === undefined) return { outside: 0 };
-  if (values.length > 1928 || values.some(value => value !== null && !Number.isFinite(value)))
-    throw new Error('Chart display bounds require at most 1928 finite or unavailable samples');
+  if (
+    values.length > MAX_METRIC_CHART_POINTS ||
+    values.some(value => value !== null && !Number.isFinite(value))
+  )
+    throw new Error(
+      `Chart display bounds require at most ${MAX_METRIC_CHART_POINTS} finite or unavailable samples`
+    );
   const finite = values.filter((value): value is number => value !== null);
   let low = min ?? Math.min(anchor, ...finite);
   let high = max ?? Math.max(anchor, ...finite);

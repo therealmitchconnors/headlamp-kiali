@@ -111,6 +111,11 @@ it('renders Service data without requiring newer Headlamp class helper methods',
   expect(screen.getByText('9080/TCP')).toBeDefined();
   expect(screen.getByText('app=productpage')).toBeDefined();
   expect(screen.getByText('10.0.0.1')).toBeDefined();
+  const validation = screen.getByRole('link', { name: 'Inspect port checks' });
+  expect(validation.getAttribute('data-cluster')).toBe('alpha');
+  expect(validation.getAttribute('href')).toBe(
+    'kiali-service-validation?namespace=bookinfo&name=productpage'
+  );
   expect(screen.queryByRole('link', { name: 'Inspect dashboards' })).toBeNull();
 });
 it('links workloads to a single-cluster UID-bound dashboard inspector without changing native names', () => {
