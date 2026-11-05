@@ -5,6 +5,7 @@ import {
   assertTrafficSourceCurrent,
   assertTrafficTargetsAbsent,
   loadServiceTrafficSource,
+  prepareExistingServiceTraffic,
   prepareServiceTraffic,
 } from './serviceTraffic';
 
@@ -123,7 +124,7 @@ it('blocks incomplete ownership, changed Service identity and potentially overla
       : response(String(path))
   );
   await expect(assertTrafficProposalFresh(source, new AbortController().signal)).rejects.toThrow(
-    'Overlapping'
+    'changed or was replaced'
   );
   const overlapping = await loadServiceTrafficSource(
     'alpha',
@@ -132,6 +133,150 @@ it('blocks incomplete ownership, changed Service identity and potentially overla
     new AbortController().signal
   );
   expect(overlapping.conflicts).toHaveLength(1);
+});
+
+it('captures a unique existing pair immutably and prepares only spec-preserving update operations', async () => {
+  const host = 'reviews.bookinfo.svc.cluster.local';
+  const existingRule = {
+    apiVersion: 'networking.istio.io/v1',
+    kind: 'DestinationRule',
+    metadata: {
+      name: 'reviews-policy',
+      namespace: 'bookinfo',
+      uid: 'dr-uid',
+      resourceVersion: '5',
+      labels: { keep: 'yes' },
+    },
+    spec: {
+      host,
+      exportTo: ['.'],
+      subsets: [
+        { name: 'v1', labels: { version: 'v1' } },
+        { name: 'v2', labels: { version: 'v2' } },
+      ],
+      trafficPolicy: { loadBalancer: { simple: 'RANDOM', futureField: true } },
+    },
+  };
+  const existingService = {
+    apiVersion: 'networking.istio.io/v1',
+    kind: 'VirtualService',
+    metadata: {
+      name: 'reviews-routes',
+      namespace: 'bookinfo',
+      uid: 'vs-uid',
+      resourceVersion: '9',
+      annotations: { keep: 'yes' },
+    },
+    spec: {
+      hosts: [host],
+      gateways: ['mesh'],
+      http: [
+        {
+          match: [{ uri: { prefix: '/reviews' } }],
+          route: [
+            { destination: { host, subset: 'v1' }, weight: 60 },
+            { destination: { host, subset: 'v2' }, weight: 40 },
+          ],
+        },
+        { route: [{ destination: { host: 'ratings.bookinfo.svc.cluster.local' } }] },
+      ],
+    },
+  };
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    if (url.pathname.endsWith('/destinationrules'))
+      return list('DestinationRule', 'networking.istio.io/v1', [existingRule]);
+    if (url.pathname.endsWith('/virtualservices'))
+      return list('VirtualService', 'networking.istio.io/v1', [existingService]);
+    return response(String(path));
+  });
+  const source = await loadServiceTrafficSource('alpha', query, null, new AbortController().signal);
+  expect(source.conflicts).toEqual([
+    { kind: 'DestinationRule', namespace: 'bookinfo', name: 'reviews-policy' },
+    { kind: 'VirtualService', namespace: 'bookinfo', name: 'reviews-routes' },
+  ]);
+  expect(Object.isFrozen(source.routingResources[0].object.spec)).toBe(true);
+  const draft = {
+    destinationRuleName: 'ignored-name',
+    virtualServiceName: 'ignored-name',
+    protocol: 'http' as const,
+    port: 9080,
+    subsets: [
+      { name: 'v1', version: 'v1', weight: 25 },
+      { name: 'v2', version: 'v2', weight: 75 },
+    ],
+  };
+  const before = JSON.stringify(source.routingResources.map(resource => resource.object));
+  const mutations = prepareExistingServiceTraffic(source, draft);
+  expect(mutations.map(mutation => [mutation.action, mutation.target.name])).toEqual([
+    ['update', 'reviews-routes'],
+  ]);
+  expect(mutations[0].original).toEqual({ uid: 'vs-uid', resourceVersion: '9' });
+  expect(mutations[0].spec).toMatchObject({
+    hosts: [host],
+    gateways: ['mesh'],
+    http: [
+      {
+        match: [{ uri: { prefix: '/reviews' } }],
+        route: [
+          { destination: { host, subset: 'v1' }, weight: 25 },
+          { destination: { host, subset: 'v2' }, weight: 75 },
+        ],
+      },
+      { route: [{ destination: { host: 'ratings.bookinfo.svc.cluster.local' } }] },
+    ],
+  });
+  expect(JSON.stringify(source.routingResources.map(resource => resource.object))).toBe(before);
+  await expect(
+    assertTrafficProposalFresh(source, new AbortController().signal)
+  ).resolves.toBeUndefined();
+});
+
+it('rejects a replaced existing capture before review and never treats a missing pair as permission to create', async () => {
+  const existingRule = {
+    apiVersion: 'networking.istio.io/v1',
+    kind: 'DestinationRule',
+    metadata: {
+      name: 'reviews-policy',
+      namespace: 'bookinfo',
+      uid: 'dr-uid',
+      resourceVersion: '5',
+    },
+    spec: { host: 'reviews.bookinfo.svc.cluster.local', subsets: [] },
+  };
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    if (url.pathname.endsWith('/destinationrules'))
+      return list('DestinationRule', 'networking.istio.io/v1', [existingRule]);
+    if (url.pathname.endsWith('/virtualservices'))
+      return list('VirtualService', 'networking.istio.io/v1', []);
+    return response(String(path));
+  });
+  const source = await loadServiceTrafficSource('alpha', query, null, new AbortController().signal);
+  const draft = {
+    destinationRuleName: 'reviews',
+    virtualServiceName: 'reviews',
+    port: 9080,
+    subsets: source.versions.map(version => ({
+      name: version.subset,
+      version: version.value,
+      weight: version.weight,
+    })),
+  };
+  expect(() => prepareExistingServiceTraffic(source, draft)).toThrow('exactly one existing');
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    if (url.pathname.endsWith('/destinationrules'))
+      return list('DestinationRule', 'networking.istio.io/v1', [
+        { ...existingRule, metadata: { ...existingRule.metadata, uid: 'replacement-uid' } },
+      ]);
+    if (url.pathname.endsWith('/virtualservices'))
+      return list('VirtualService', 'networking.istio.io/v1', []);
+    return response(String(path));
+  });
+  await expect(assertTrafficProposalFresh(source, new AbortController().signal)).rejects.toThrow(
+    'changed or was replaced'
+  );
 });
 it('never treats forbidden reads as proof of absence and cancels without additional API calls', async () => {
   const source = await loadServiceTrafficSource('alpha', query, null, new AbortController().signal);

@@ -1,0 +1,52 @@
+{
+  "source": {
+    "project": "kiali",
+    "version": "v2.33.0",
+    "commit": "0e8be887b8217bbcac5e3ae0bfcd258073949cca",
+    "files": [
+      "frontend/src/components/IstioWizards/K8sRouteHosts.tsx",
+      "frontend/src/components/IstioWizards/K8sGRPCRouteHosts.tsx",
+      "frontend/src/components/IstioWizards/K8sGatewaySelector.tsx",
+      "frontend/src/components/IstioWizards/K8sTrafficShifting.tsx",
+      "frontend/src/components/IstioWizards/WizardActions.ts"
+    ]
+  },
+  "creationDefaults": {
+    "kind": "HTTPRoute",
+    "apiVersion": "gateway.networking.k8s.io/v1",
+    "draft": {
+      "name": "",
+      "namespace": "bookinfo",
+      "hostnames": "",
+      "parentName": "public",
+      "parentNamespace": "edge",
+      "sectionName": "https",
+      "parentPort": "443",
+      "serviceName": "reviews",
+      "serviceNamespace": "",
+      "servicePort": "9080"
+    },
+    "expected": {
+      "name": "reviews",
+      "namespace": "bookinfo",
+      "apiVersion": "gateway.networking.k8s.io/v1",
+      "kind": "HTTPRoute",
+      "spec": {
+        "hostnames": ["reviews"],
+        "parentRefs": [
+          {
+            "name": "public",
+            "namespace": "edge",
+            "sectionName": "https",
+            "port": 443
+          }
+        ],
+        "rules": [
+          {
+            "backendRefs": [{ "name": "reviews", "port": 9080, "weight": 100 }]
+          }
+        ]
+      }
+    }
+  }
+}

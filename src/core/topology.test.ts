@@ -2,8 +2,11 @@ import oracleText from '../../test-files/parity/topology-oracle.json?raw';
 import fixtureText from '../../test-files/topology/fixture.json?raw';
 import { MetricResult } from './telemetry';
 import {
+  appendTopologyNodeStates,
   decodeTopology,
   filterTopology,
+  focusTopology,
+  groupTopologyNodes,
   projectTopology,
   TopologyEndpoint,
   topologyIdentity,
@@ -537,4 +540,112 @@ it('bounds Service alias expansion by contributions rather than only final edge 
   expect(() =>
     projectTopology(projectionInput([...parents, ...children, child]), 'service')
   ).toThrow(/20000/);
+});
+
+it.each(['workload', 'app', 'versionedApp', 'service'] as const)(
+  'appends captured namespace state after the %s projection without inferring health',
+  mode => {
+    const data = decode(result(), { ...query, includeIdle: true });
+    const base = data.observations[0];
+    data.observations.push(
+      {
+        ...base,
+        source: { ...base.source, cluster: 'remote', namespace: 'edge', workload: 'outside' },
+        rate: 1,
+      },
+      {
+        ...base,
+        source: {
+          ...base.source,
+          cluster: 'unknown',
+          namespace: 'unknown',
+          workload: 'unknown',
+          app: 'unknown',
+          service: '',
+          serviceNamespace: 'unknown',
+          version: 'unknown',
+        },
+        rate: 1,
+      },
+      {
+        ...base,
+        destination: {
+          ...base.destination,
+          workload: 'zero-only',
+          app: 'zero-only',
+          service: 'zero-only',
+          serviceNamespace: 'bookinfo',
+        },
+        rate: 0,
+      }
+    );
+    const captured = { ...query, includeIdle: true };
+    const projection = projectTopology(data, mode);
+    expect(projection.scope).toBeUndefined();
+    expect(projection.nodes.every(node => node.namespacePosition === undefined)).toBe(true);
+    const graph = appendTopologyNodeStates(projection, captured);
+    expect(graph.nodes.some(node => node.namespacePosition === 'selected')).toBe(true);
+    expect(graph.nodes.some(node => node.namespacePosition === 'outside')).toBe(true);
+    expect(graph.nodes.some(node => node.namespacePosition === 'unknown')).toBe(true);
+    const zeroEdge = graph.edges.find(edge => edge.rate === 0);
+    expect(zeroEdge).toBeDefined();
+    expect(graph.nodes.find(node => node.id === zeroEdge?.target)?.namespacePosition).toBe(
+      'selected'
+    );
+    expect(graph.scope).toEqual(captured);
+    expect(graph.nodes.every(node => !('dead' in node) && !('idle' in node))).toBe(true);
+
+    const missingHistorical = appendTopologyNodeStates(projectTopology(decode(), mode), query);
+    expect(missingHistorical.nodes.some(node => node.label === 'zero-only')).toBe(false);
+    expect(missingHistorical.nodes.every(node => !('dead' in node) && !('idle' in node))).toBe(
+      true
+    );
+  }
+);
+
+it('groups nodes by source identities in deterministic order without changing their identities', () => {
+  const graph = appendTopologyNodeStates(projectTopology(decode(), 'workload'), query);
+  const groups = groupTopologyNodes([...graph.nodes].reverse(), 'namespace');
+  expect(groups.map(group => group.value)).toEqual(['bookinfo', 'ingress']);
+  expect(groups.flatMap(group => group.nodes.map(node => node.id))).toEqual(
+    graph.nodes.map(node => node.id)
+  );
+  expect(groupTopologyNodes(graph.nodes, 'app').map(group => group.value)).toEqual([
+    'gateway',
+    'productpage',
+    'ratings',
+    'reviews',
+  ]);
+  expect(groupTopologyNodes(graph.nodes, 'cluster').map(group => group.value)).toEqual([
+    'Kubernetes',
+    'remote-east',
+  ]);
+  const ambiguous = { ...graph.nodes[0], apps: ['alpha', 'beta'] };
+  expect(groupTopologyNodes([ambiguous], 'app').map(group => group.value)).toEqual(['multiple']);
+  expect(groupTopologyNodes(graph.nodes, 'none')).toHaveLength(1);
+  expect(() => groupTopologyNodes(graph.nodes, '__proto__' as never)).toThrow(/grouping/);
+});
+
+it('focuses only the selected node and its observed adjacent edges in the captured query', () => {
+  const graph = appendTopologyNodeStates(projectTopology(decode(), 'workload'), query);
+  const selected = graph.nodes.find(node => node.label === 'reviews-v3')!;
+  const focused = focusTopology(graph, selected.id, query);
+  expect(
+    focused.edges.every(edge => edge.source === selected.id || edge.target === selected.id)
+  ).toBe(true);
+  expect(focused.nodes.map(node => node.id)).toEqual(
+    graph.nodes
+      .filter(
+        node =>
+          node.id === selected.id ||
+          focused.edges.some(edge => edge.source === node.id || edge.target === node.id)
+      )
+      .map(node => node.id)
+  );
+  expect(focused.edges.length).toBe(2);
+  expect(focused.scope).toEqual(query);
+  expect(() => focusTopology(graph, selected.id, { ...query, end: query.end + 1 })).toThrow(
+    /captured scope and time/
+  );
+  expect(() => focusTopology(graph, 'stale-node', query)).toThrow(/not present/);
 });

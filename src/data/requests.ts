@@ -67,7 +67,8 @@ export function readFailure(error: unknown): ReadFailure {
 export async function withDiagnosticDeadline<T>(
   signal: AbortSignal,
   timeoutMessage: string,
-  read: (signal: AbortSignal) => Promise<T>
+  read: (signal: AbortSignal) => Promise<T>,
+  timeoutMs = 15000
 ): Promise<T> {
   signal.throwIfAborted();
   const controller = new AbortController();
@@ -82,7 +83,7 @@ export async function withDiagnosticDeadline<T>(
   const timer = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, 15000);
+  }, timeoutMs);
   try {
     const result = await Promise.race([
       Promise.resolve().then(() => {

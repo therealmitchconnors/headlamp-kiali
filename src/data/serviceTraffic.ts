@@ -11,6 +11,12 @@ import {
   serviceTrafficVersions,
   ServiceVersion,
 } from '../core/serviceTraffic';
+import {
+  planServiceTrafficEdit,
+  ServiceRoutingCapture,
+  serviceTrafficEditContext,
+} from '../core/serviceTrafficEdit';
+import { ConfigurationObject } from '../resources/common';
 import { ConfigurationDefinition, configurationDefinitions } from '../resources/registry';
 import { readCollection } from './collections';
 import { discoverConfiguration } from './configuration';
@@ -31,6 +37,7 @@ export interface ServiceTrafficSource {
   versions: ServiceVersion[];
   conflicts: { kind: string; namespace: string; name: string }[];
   definitions: { definition: ConfigurationDefinition; apiVersion: string }[];
+  routingResources: ServiceRoutingCapture[];
 }
 export async function loadServiceTrafficSource(
   cluster: string,
@@ -107,6 +114,7 @@ export async function loadServiceTrafficSource(
             name: item.metadata.name,
             namespace,
             matches: hosts.some(host => matches(String(host), namespace)),
+            object: item,
           };
         },
         signal
@@ -118,14 +126,31 @@ export async function loadServiceTrafficSource(
       return result.items.filter(item => item.matches);
     })
   );
+  const routingResources = collections.flat().map(item => {
+    const definition = definitions.find(value => value.definition.kind === item.kind)!;
+    return {
+      kind: item.kind as ServiceRoutingCapture['kind'],
+      apiVersion: definition.apiVersion,
+      namespace: item.namespace,
+      name: item.name,
+      object: deepFreeze({ ...item.object }),
+    };
+  });
   return {
     service,
     identityDomain: query.identityDomain,
     versionLabel: versions.label,
     versions: versions.versions,
-    conflicts: collections.flat(),
+    conflicts: routingResources.map(({ kind, namespace, name }) => ({ kind, namespace, name })),
     definitions,
+    routingResources,
   };
+}
+
+function deepFreeze<T>(value: T): T {
+  if (typeof value !== 'object' || value === null || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
 }
 
 export function prepareServiceTraffic(
@@ -161,6 +186,42 @@ export function prepareServiceTraffic(
       )
     )
   );
+}
+
+export function prepareExistingServiceTraffic(
+  source: ServiceTrafficSource,
+  draft: ServiceTrafficDraft
+): PreparedMutation[] {
+  const context = serviceTrafficEditContext(
+    source.service,
+    source.identityDomain,
+    source.versionLabel,
+    source.versions,
+    source.routingResources
+  );
+  const planned = planServiceTrafficEdit(context, draft);
+  return (['DestinationRule', 'VirtualService'] as const).flatMap(kind => {
+    const spec = kind === 'DestinationRule' ? planned.destinationRule : planned.virtualService;
+    if (!spec) return [];
+    const capture = kind === 'DestinationRule' ? context.destinationRule : context.virtualService;
+    const definition = source.definitions.find(item => item.definition.kind === kind);
+    if (!definition || definition.apiVersion !== capture.apiVersion)
+      throw new Error(`The existing ${kind} API version is no longer available`);
+    return [
+      prepareMutation(
+        {
+          cluster: source.service.cluster,
+          namespace: capture.namespace,
+          name: capture.name,
+          apiVersion: capture.apiVersion,
+          definition: definition.definition,
+        },
+        'update',
+        JSON.stringify(spec),
+        capture.object as ConfigurationObject<object>
+      ),
+    ];
+  });
 }
 
 export async function assertTrafficSourceCurrent(service: RoutingService, signal: AbortSignal) {
@@ -205,8 +266,28 @@ export async function assertTrafficProposalFresh(
     throw new MutationConflict(
       'Service or version membership changed; load a new routing proposal'
     );
-  if (current.conflicts.length)
-    throw new MutationConflict('Overlapping routing configuration appeared; load a new proposal');
+  if (captureIdentities(current.routingResources) !== captureIdentities(source.routingResources))
+    throw new MutationConflict(
+      'Existing routing configuration changed or was replaced; load a new proposal'
+    );
+}
+
+function captureIdentities(resources: readonly ServiceRoutingCapture[]) {
+  return JSON.stringify(
+    resources
+      .map(resource => {
+        const metadata = resource.object.metadata;
+        return [
+          resource.kind,
+          resource.namespace,
+          resource.name,
+          resource.apiVersion,
+          isRecord(metadata) ? metadata.uid : '',
+          isRecord(metadata) ? metadata.resourceVersion : '',
+        ];
+      })
+      .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)))
+  );
 }
 
 export async function assertTrafficTargetsAbsent(

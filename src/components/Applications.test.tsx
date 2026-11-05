@@ -1,10 +1,12 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { ReactNode } from 'react';
-import { Link as RouterLink, MemoryRouter } from 'react-router-dom';
+import { Link as RouterLink, MemoryRouter, Router } from 'react-router-dom';
 import { readConfig } from '../core/config';
 import { CorrelationKind, CorrelationResource } from '../core/correlation';
 import { virtualWorkloadResources } from '../core/virtualWorkloads';
+import type { CorrelationSource } from '../data/correlation';
 import type { CorrelationSnapshot } from '../data/correlation';
 import Applications from './Applications';
 
@@ -107,6 +109,7 @@ function fixture(partial = false, emptyLabel = false): CorrelationSnapshot {
       },
       labels: { app: 'reviews', version: 'v1' },
       workloadLabels: { app: emptyLabel ? '' : 'reviews', version: 'v1' },
+      resourceVersion: `${kind}:${name}:version`,
       serviceSelector: kind === 'Service' ? { app: 'reviews' } : null,
       owners: [],
       proxyMode: kind === 'Pod' ? 'native-sidecar' : 'none',
@@ -116,8 +119,27 @@ function fixture(partial = false, emptyLabel = false): CorrelationSnapshot {
   const deployment = resource('Deployment', 'reviews-v1');
   const service = resource('Service', 'reviews');
   const pod = resource('Pod', 'reviews-pod');
-  pod.owners = [{ ...deployment.identity, controller: true }];
+  pod.owners = [{ apiVersion: 'apps/v1', ...deployment.identity, controller: true }];
   const resources = partial ? [deployment, pod] : [deployment, pod, service];
+  const sourceKinds: CorrelationSource[] = [
+    { kind: 'StatefulSet', group: 'apps', apiVersion: 'apps/v1', plural: 'statefulsets' },
+    { kind: 'DaemonSet', group: 'apps', apiVersion: 'apps/v1', plural: 'daemonsets' },
+    { kind: 'ReplicaSet', group: 'apps', apiVersion: 'apps/v1', plural: 'replicasets' },
+    {
+      kind: 'ReplicationController',
+      group: '',
+      apiVersion: 'v1',
+      plural: 'replicationcontrollers',
+    },
+    { kind: 'Job', group: 'batch', apiVersion: 'batch/v1', plural: 'jobs' },
+    { kind: 'CronJob', group: 'batch', apiVersion: 'batch/v1', plural: 'cronjobs' },
+    {
+      kind: 'WorkloadGroup',
+      group: 'networking.istio.io',
+      apiVersion: 'networking.istio.io/v1',
+      plural: 'workloadgroups',
+    },
+  ];
   return {
     scope: { cluster: 'alpha', namespace: 'bookinfo' },
     resources,
@@ -140,6 +162,26 @@ function fixture(partial = false, emptyLabel = false): CorrelationSnapshot {
         ...(partial
           ? { error: { kind: 'forbidden' as const, message: 'Forbidden', status: 403 } }
           : {}),
+      },
+      ...sourceKinds.map(source => ({
+        source,
+        resources: [],
+        complete: true,
+        resourceVersion: `${source.kind}-version`,
+        ...(source.kind === 'WorkloadGroup' ? { notServed: true } : {}),
+      })),
+    ],
+    accountSources: [
+      {
+        source: {
+          kind: 'DeploymentConfig',
+          group: 'apps.openshift.io',
+          apiVersion: 'apps.openshift.io/v1',
+          plural: 'deploymentconfigs',
+        },
+        resources: [],
+        complete: true,
+        notServed: true,
       },
     ],
   };
@@ -165,13 +207,84 @@ it('requires an explicit namespace before reading workload data', () => {
   expect(state.load).not.toHaveBeenCalled();
 });
 
+it('cancels the captured account projection when the namespace scope changes', async () => {
+  const history = createMemoryHistory({
+    initialEntries: ['/kiali/applications?namespace=bookinfo'],
+  });
+  let firstSignal: AbortSignal | undefined;
+  state.load.mockImplementation((scope, signal) => {
+    if (scope.namespace === 'bookinfo') {
+      firstSignal = signal;
+      return new Promise(resolve => {
+        signal.addEventListener('abort', () => resolve(fixture()), { once: true });
+      });
+    }
+    return Promise.resolve(fixture());
+  });
+  render(
+    <Router history={history}>
+      <Applications />
+    </Router>
+  );
+  await waitFor(() => expect(state.load).toHaveBeenCalledTimes(1));
+  act(() => history.push('/kiali/applications?namespace=other'));
+  await waitFor(() => expect(state.load).toHaveBeenCalledTimes(2));
+  expect(firstSignal?.aborted).toBe(true);
+  expect(state.load).toHaveBeenNthCalledWith(
+    2,
+    { cluster: 'alpha', namespace: 'other' },
+    expect.any(AbortSignal),
+    true
+  );
+  expect(await screen.findByText('Applications in other')).toBeDefined();
+});
+
+it('invalidates captured account evidence when application label settings change', async () => {
+  const history = createMemoryHistory({
+    initialEntries: ['/kiali/applications?namespace=bookinfo'],
+  });
+  let firstSignal: AbortSignal | undefined;
+  state.load.mockImplementation((_scope, signal) => {
+    if (!firstSignal) {
+      firstSignal = signal;
+      return new Promise(resolve => {
+        signal.addEventListener('abort', () => resolve(fixture()), { once: true });
+      });
+    }
+    return Promise.resolve(fixture());
+  });
+  const view = render(
+    <Router history={history}>
+      <Applications />
+    </Router>
+  );
+  await waitFor(() => expect(state.load).toHaveBeenCalledTimes(1));
+  state.config = {
+    schemaVersion: 1,
+    clusters: {
+      alpha: {
+        prometheus: null,
+        appLabels: { app: 'team/app', version: 'team/version' },
+      },
+    },
+  };
+  view.rerender(
+    <Router history={history}>
+      <Applications />
+    </Router>
+  );
+  await waitFor(() => expect(state.load).toHaveBeenCalledTimes(2));
+  expect(firstSignal?.aborted).toBe(true);
+});
+
 it('renders a logical application and drills into workloads, selectors and native sidecars', async () => {
   state.load.mockResolvedValue(fixture());
   open('?namespace=bookinfo');
   const link = await screen.findByRole('link', { name: 'reviews' });
   expect(state.load).toHaveBeenCalledWith(
     { cluster: 'alpha', namespace: 'bookinfo' },
-    expect.any(AbortSignal)
+    expect.any(AbortSignal),
+    true
   );
   await userEvent.setup().click(link);
   expect(await screen.findByText('Application: reviews')).toBeDefined();
@@ -205,10 +318,31 @@ it('renders VM label provenance and group/entry links without treating entries a
         uid: 'entry-uid',
         resourceVersion: 'entry-version',
         labels: { app: 'vm', version: 'v1' },
+        serviceAccount: { ok: true, name: 'vm-account' },
       },
     ]
   );
-  state.load.mockResolvedValue({ ...base, resources: [...base.resources, ...resources] });
+  const sources = base.sources.map(source =>
+    source.source.kind === 'WorkloadGroup'
+      ? {
+          ...source,
+          notServed: undefined,
+          resources,
+          relatedVersions: [
+            {
+              kind: 'WorkloadEntry',
+              apiVersion: 'networking.istio.io/v1',
+              resourceVersion: 'entry-list-version',
+            },
+          ],
+        }
+      : source
+  );
+  state.load.mockResolvedValue({
+    ...base,
+    sources,
+    resources: [...base.resources, ...resources],
+  });
   open('?namespace=bookinfo&application=vm');
   await screen.findByText('Application: vm');
   expect(screen.getByRole('link', { name: 'vm-group' }).getAttribute('href')).toBe(
@@ -229,6 +363,7 @@ it('renders VM label provenance and group/entry links without treating entries a
   expect(screen.getByText('No owned pods were found.')).toBeDefined();
   expect(screen.queryByText('Sidecar')).toBeNull();
   expect(screen.getByText('VM entry accounts are not Pod account evidence')).toBeDefined();
+  expect(screen.getByText(/vm-account \(WorkloadEntry entry-one\)/)).toBeDefined();
 });
 it('shows missing Pod accounts without replacing them with default', async () => {
   const data = fixture();
