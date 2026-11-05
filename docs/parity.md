@@ -3397,22 +3397,66 @@ port preserves that behavior while the conservative consumer corrects scope.
 Raw inherited status names are explained without equating an enabled mesh
 indicator with STRICT enforcement or observed encryption.
 
-The separate traffic panel queries `connection_security_policy` from destination
-telemetry even for outbound scope, following the source direction rule in
-`graph/telemetry/istio/appender/security_policy.go`. It aggregates HTTP/gRPC
-observations by protocol/policy, includes unknown labels in denominators, and
-leaves zero-rate shares unavailable. This is not the complete per-edge security
-appender, principal mapping, TCP/ambient handling or a certificate/authz check.
-Fresh real Bookinfo traffic reported `mutual_tls` at 100% of returned HTTP rates.
-A transient request-chart HTTP 500 stayed isolated to that panel; the exact
-query then succeeded through the Service proxy and manual refresh recovered the
-chart. Prometheus had no restart and had completed block compaction successfully.
+## Observed connection-security telemetry
 
-Real hosted Bookinfo reads yielded UNSET, with no namespace/root policy. Browser
-interception separately proved root STRICT inheritance, denied-source
-suppression and conflict handling; no policy was installed. Per-service,
-per-port/subset, authorization, full validation and observed-traffic security
-are outside this initial consumer. Desktop evidence remains open.
+The pinned `graph/telemetry/istio/appender/security_policy.go` is the active graph
+security caller when `securityPolicy` or all appenders are requested. It uses
+destination reporter data and conditionally queries `istio_requests_total`,
+gRPC message counters, and TCP byte counters, grouping by source/destination
+identity, principals and `connection_security_policy`. Its mapper treats a
+missing policy label as `Unknown`; the graph's `isMTLS` percentage is attached
+only when the `mutual_tls` rate is positive and is calculated against all other
+returned policy rates for that edge. The caller also maps policy rates to graph
+edges and principals, which is not part of this bounded surface. See the pinned
+[security appender](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/graph/telemetry/istio/appender/security_policy.go),
+[appender selection](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/graph/telemetry/istio/appender/appender.go),
+and [reporter/ambient filters](https://github.com/kiali/kiali/blob/0e8be887b8217bbcac5e3ae0bfcd258073949cca/graph/telemetry/istio/util/util.go).
+
+The native traffic panel uses the saved explicit telemetry identity and one
+Headlamp context. Its security query is one grouped request in the existing
+bounded five-metric batch: destination reporter, `istio_requests_total`, and
+`request_protocol,connection_security_policy` grouping for the selected
+namespace/direction. It uses the captured 5/15/60-minute range, a five-minute
+rate window, 15-second steps, a 15-second shared deadline, at most eight
+returned groups and at most 241 samples per group. Additional labels,
+duplicate groups, malformed samples, negative rates and over-budget results are
+rejected as invalid response; decoded non-finite samples remain unavailable
+rather than being treated as zero. A denied security read remains isolated from other
+panels. Cancellation and the existing scope-keyed stale-completion guard are
+tested. These are source-bound native fixtures, not execution of the full Go
+appender or an independent security-policy oracle.
+
+The projection reports `mutual_tls`-labeled, `none`-labeled, mixed, unknown,
+unsupported-protocol and unavailable categories from positive labels observed
+over the selected range; rate rows use the latest aligned sample. Unknown or
+absent policy labels remain visible and contribute to returned-sample
+denominators. Shares are only shown when every returned group has the expected
+15-second sample grid, latest samples are aligned and finite/current to the
+captured end, and Prometheus returned no warnings. Zero-only, empty, sparse,
+stale and missing samples do not imply plaintext, mTLS or health. UI provenance
+names the explicit metric cluster, namespace, captured
+range and destination reporter. Its wording limits percentages/categories to
+returned samples and separately disclaims policy intent, proxy synchronization,
+certificate validity and authorization.
+
+The pinned appender's ambient handling is a different evidence path: ambient
+`total`/`ztunnel` modes can add source-reported ztunnel TCP queries, while
+waypoint edges can receive a graph-specific 100% mTLS fallback without a
+matching security-policy sample. Those modes depend on graph topology, ambient
+rate selection and additional metric families; this request-level panel does not
+have those inputs and labels TCP/ambient/waypoint coverage unsupported. It does
+not infer ambient enrollment or workload/certificate identity.
+
+Earlier hosted Bookinfo evidence observed `mutual_tls` at 100% of returned HTTP
+rates; a transient request-chart HTTP 500 stayed isolated and later recovered.
+That is historical evidence for the earlier instant query, not fresh verification
+of this range implementation. No new hosted/real telemetry run or Desktop load
+check was available for this increment. Real hosted Bookinfo configuration reads
+previously yielded UNSET with no namespace/root policy; browser interception
+separately proved root STRICT inheritance, denied-source suppression and
+conflict handling without installing a policy. Effective per-service,
+per-port/subset security, graph edge/principal mapping, TCP security, ambient and
+waypoint evidence, authorization, and full validation remain open.
 
 ## Native HTTP trace browsing
 

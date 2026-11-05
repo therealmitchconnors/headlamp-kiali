@@ -1,11 +1,12 @@
 import { ServiceEndpoint, validateServiceEndpoint } from '../core/config';
+import { decodeGroupedRange } from '../core/metricRanges';
 import { ClusterScope, clusterScope } from '../core/scope';
 import {
   decodePrometheus,
   MetricResult,
   prometheusQueries,
   requestPoints,
-  securityRates,
+  securityTelemetry,
   trafficEdges,
   TrafficQuery,
 } from '../core/telemetry';
@@ -52,7 +53,7 @@ async function readTelemetry(
   const queries = prometheusQueries(query);
   async function fetchMetric(key: keyof typeof queries): Promise<MetricRead> {
     try {
-      const vector = key === 'traffic' || key === 'security';
+      const vector = key === 'traffic';
       const params = new URLSearchParams({ query: queries[key] });
       if (vector) params.set('time', String(query.end));
       else {
@@ -66,10 +67,16 @@ async function readTelemetry(
         signal
       );
       try {
-        const result = decodePrometheus(response, vector ? 'vector' : 'matrix');
+        const result =
+          key === 'security'
+            ? decodeGroupedRange(response, query, 'Security observations', true, [
+                'request_protocol',
+                'connection_security_policy',
+              ])
+            : decodePrometheus(response, vector ? 'vector' : 'matrix');
         if (key === 'requests') requestPoints(result);
         if (key === 'traffic') trafficEdges(result);
-        if (key === 'security') securityRates(result);
+        if (key === 'security') securityTelemetry(result, query);
         if ((key === 'latency' || key === 'tcp') && result.series.length > 1) {
           throw new Error('Expected one aggregated metric series');
         }

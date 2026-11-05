@@ -1,3 +1,4 @@
+import { metricGroupIdentity } from './metricGroups';
 import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 
 export interface TrafficQuery {
@@ -223,46 +224,152 @@ export interface TrafficEdge {
 export interface SecurityRate {
   protocol: string;
   policy: string;
-  rate: number;
+  rate: number | null;
   observedPercent: number | null;
+  timestamp: number | null;
 }
 
-export function securityRates(result: MetricResult): SecurityRate[] {
-  const rows = new Map<string, SecurityRate>();
-  const totals = new Map<string, number>();
+export type SecurityCategory =
+  | 'encrypted'
+  | 'plaintext'
+  | 'mixed'
+  | 'unknown'
+  | 'unsupported'
+  | 'unavailable';
+
+export interface SecurityObservation {
+  protocol: string;
+  category: SecurityCategory;
+  completeness: 'available' | 'partial' | 'unavailable';
+  timestamp: number | null;
+}
+
+export interface SecurityProjection {
+  rates: SecurityRate[];
+  protocols: SecurityObservation[];
+}
+
+const SECURITY_GROUPS = ['request_protocol', 'connection_security_policy'] as const;
+const MAX_SECURITY_SERIES = 8;
+
+export function securityTelemetry(
+  result: MetricResult,
+  query: Pick<TrafficQuery, 'minutes' | 'end'>
+): SecurityProjection {
+  if (
+    ![5, 15, 60].includes(query.minutes) ||
+    !Number.isSafeInteger(query.end) ||
+    query.end <= query.minutes * 60 ||
+    query.end > 8640000000000
+  )
+    throw new Error('Invalid security observation time range');
+  if (result.series.length > MAX_SECURITY_SERIES)
+    throw new Error('Security observations exceeded the 8-series display limit');
+
   const seen = new Set<string>();
+  const byProtocol = new Map<string, MetricSeries[]>();
+  const expectedSamples = (query.minutes * 60) / 15 + 1;
+  const rangeStart = query.end - query.minutes * 60;
   for (const series of result.series) {
-    const identity = JSON.stringify(
-      Object.entries(series.labels).sort(([a], [b]) => a.localeCompare(b))
-    );
+    const identity = metricGroupIdentity(series.labels, SECURITY_GROUPS).key;
     if (seen.has(identity)) throw new Error('Duplicate security metric series');
     seen.add(identity);
-    const rate = series.samples[0]?.value;
-    if (
-      series.samples.length !== 1 ||
-      rate === null ||
-      rate === undefined ||
-      rate < 0 ||
-      !Number.isFinite(rate)
-    )
-      throw new Error('Security observations require a finite nonnegative instant rate');
+    if (series.samples.length > expectedSamples)
+      throw new Error('Security observations exceeded the captured sample budget');
+    for (let index = 0; index < series.samples.length; index++) {
+      const sample = series.samples[index];
+      if (
+        !Number.isFinite(sample.timestamp) ||
+        sample.timestamp < query.end - query.minutes * 60 - 1 ||
+        sample.timestamp > query.end + 1 ||
+        (index > 0 && sample.timestamp <= series.samples[index - 1].timestamp) ||
+        (sample.value !== null && (!Number.isFinite(sample.value) || sample.value < 0))
+      )
+        throw new Error('Invalid security metric sample');
+    }
     const protocol = series.labels.request_protocol || 'unknown';
-    const policy = series.labels.connection_security_policy || 'unknown';
-    const key = JSON.stringify([protocol, policy]);
-    const total = (totals.get(protocol) ?? 0) + rate;
-    const combined = (rows.get(key)?.rate ?? 0) + rate;
-    if (!Number.isFinite(total) || !Number.isFinite(combined))
-      throw new Error('Security rates exceeded numeric limits');
-    totals.set(protocol, total);
-    rows.set(key, { protocol, policy, rate: combined, observedPercent: null });
+    const seriesForProtocol = byProtocol.get(protocol) ?? [];
+    seriesForProtocol.push(series);
+    byProtocol.set(protocol, seriesForProtocol);
   }
-  return [...rows.values()]
-    .map(row => ({
-      ...row,
-      observedPercent:
-        (totals.get(row.protocol) ?? 0) > 0 ? (row.rate / totals.get(row.protocol)!) * 100 : null,
-    }))
-    .sort((a, b) => a.protocol.localeCompare(b.protocol) || a.policy.localeCompare(b.policy));
+
+  const rates: SecurityRate[] = [];
+  const protocols: SecurityObservation[] = [];
+  for (const [protocol, series] of byProtocol) {
+    const timestamp = Math.max(
+      ...series.flatMap(item => item.samples.map(sample => sample.timestamp)),
+      -Infinity
+    );
+    const rows = series.map(item => {
+      const sample = item.samples.find(value => value.timestamp === timestamp);
+      return {
+        protocol,
+        policy: item.labels.connection_security_policy || 'unknown',
+        rate: sample?.value ?? null,
+        timestamp: Number.isFinite(timestamp) ? timestamp : null,
+      };
+    });
+    const complete =
+      result.warnings.length === 0 &&
+      rows.every(row => row.rate !== null) &&
+      series.every(item => item.samples.every(sample => sample.value !== null)) &&
+      timestamp >= query.end - 1 &&
+      series.every(
+        item =>
+          item.samples.length === expectedSamples &&
+          item.samples.every(
+            (sample, index) => Math.abs(sample.timestamp - (rangeStart + index * 15)) <= 1
+          )
+      );
+    const total = rows.reduce((sum, row) => sum + (row.rate ?? 0), 0);
+    if (!Number.isFinite(total)) throw new Error('Security rates exceeded numeric limits');
+    rates.push(
+      ...rows.map(row => ({
+        ...row,
+        observedPercent:
+          complete && total > 0 && row.rate !== null ? (row.rate / total) * 100 : null,
+      }))
+    );
+
+    const positivePolicies = new Set(
+      series.flatMap(item =>
+        item.samples.some(sample => sample.value !== null && sample.value > 0)
+          ? [item.labels.connection_security_policy || 'unknown']
+          : []
+      )
+    );
+    const knownPolicies = new Set(
+      [...positivePolicies].filter(policy => policy === 'mutual_tls' || policy === 'none')
+    );
+    const hasUnknown = [...positivePolicies].some(
+      policy => policy !== 'mutual_tls' && policy !== 'none'
+    );
+    const supportedProtocol = protocol === 'http' || protocol === 'grpc';
+    const category: SecurityCategory = !supportedProtocol
+      ? 'unsupported'
+      : positivePolicies.size === 0
+      ? 'unavailable'
+      : knownPolicies.size > 1
+      ? 'mixed'
+      : knownPolicies.has('mutual_tls')
+      ? 'encrypted'
+      : knownPolicies.has('none')
+      ? 'plaintext'
+      : 'unknown';
+    const partial = !complete || hasUnknown || !supportedProtocol || category === 'unknown';
+    protocols.push({
+      protocol,
+      category,
+      completeness: category === 'unavailable' ? 'unavailable' : partial ? 'partial' : 'available',
+      timestamp: Number.isFinite(timestamp) ? timestamp : null,
+    });
+  }
+  return {
+    rates: rates.sort(
+      (a, b) => a.protocol.localeCompare(b.protocol) || a.policy.localeCompare(b.policy)
+    ),
+    protocols: protocols.sort((a, b) => a.protocol.localeCompare(b.protocol)),
+  };
 }
 
 export function trafficEdges(result: MetricResult): TrafficEdge[] {
