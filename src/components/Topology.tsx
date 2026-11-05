@@ -14,9 +14,13 @@ import { useKialiConfig } from '../config';
 import { getClusterConfig, ServiceEndpoint } from '../core/config';
 import { clusterScope } from '../core/scope';
 import {
+  appendTopologyNodeStates,
   filterTopology,
+  focusTopology,
+  groupTopologyNodes,
   projectTopology,
   TopologyEdge,
+  TopologyGroupBy,
   TopologyMode,
   topologyNamespacePosition,
   TopologyNode,
@@ -109,7 +113,7 @@ function Distribution({
   );
 }
 
-export function TopologyResults({
+function TopologyResultsSnapshot({
   snapshot,
   cluster,
 }: {
@@ -118,11 +122,16 @@ export function TopologyResults({
 }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<TopologyMode>('workload');
+  const [groupBy, setGroupBy] = useState<TopologyGroupBy>('none');
   const [search, setSearch] = useState('');
   const [selection, setSelection] = useState<{ kind: 'node' | 'edge'; id: string }>();
+  const [focusedNode, setFocusedNode] = useState<string>();
   const projected = useMemo(() => {
     try {
-      return { graph: projectTopology(snapshot, mode), error: '' };
+      return {
+        graph: appendTopologyNodeStates(projectTopology(snapshot, mode), snapshot.query),
+        error: '',
+      };
     } catch (error) {
       return {
         graph: undefined,
@@ -133,6 +142,14 @@ export function TopologyResults({
   const graph = useMemo(
     () => (projected.graph ? filterTopology(projected.graph, search) : undefined),
     [projected.graph, search]
+  );
+  const diagramGraph = useMemo(() => {
+    if (!graph || !focusedNode || !graph.nodes.some(node => node.id === focusedNode)) return graph;
+    return focusTopology(graph, focusedNode, snapshot.query);
+  }, [graph, focusedNode, snapshot.query]);
+  const nodeGroups = useMemo(
+    () => (graph ? groupTopologyNodes(graph.nodes, groupBy) : []),
+    [graph, groupBy]
   );
   const unitKind = topologyUnit(snapshot.query.measure);
   const unit =
@@ -147,7 +164,8 @@ export function TopologyResults({
     selection?.kind === 'edge' ? graph?.edges.find(edge => edge.id === selection.id) : undefined;
   const nodeNames = new Map(graph?.nodes.map(node => [node.id, name(node)]));
   const namespaceCaption = (node: TopologyNode) => {
-    const position = topologyNamespacePosition(node, snapshot.query.namespace);
+    const position =
+      node.namespacePosition ?? topologyNamespacePosition(node, snapshot.query.namespace);
     return position === 'selected'
       ? t('Selected namespace')
       : position === 'outside'
@@ -192,12 +210,28 @@ export function TopologyResults({
           <MenuItem value="service">{t('Services')}</MenuItem>
         </TextField>
         <TextField
+          select
+          label={t('Group nodes by')}
+          value={groupBy}
+          onChange={event => {
+            const value = event.target.value;
+            if (value === 'none' || value === 'app' || value === 'cluster' || value === 'namespace')
+              setGroupBy(value);
+          }}
+        >
+          <MenuItem value="none">{t('No grouping')}</MenuItem>
+          <MenuItem value="app">{t('Application')}</MenuItem>
+          <MenuItem value="cluster">{t('Cluster')}</MenuItem>
+          <MenuItem value="namespace">{t('Namespace')}</MenuItem>
+        </TextField>
+        <TextField
           label={t('Filter nodes and their neighbors')}
           value={search}
           inputProps={{ maxLength: 256 }}
           onChange={event => {
             setSearch(event.target.value);
             setSelection(undefined);
+            setFocusedNode(undefined);
           }}
         />
       </Stack>
@@ -238,8 +272,11 @@ export function TopologyResults({
             </Alert>
             <TrafficDiagram
               graph={{
-                ...graph,
-                nodes: graph.nodes.map(node => ({ ...node, caption: namespaceCaption(node) })),
+                ...diagramGraph!,
+                nodes: diagramGraph!.nodes.map(node => ({
+                  ...node,
+                  caption: namespaceCaption(node),
+                })),
               }}
               unit={unit}
               selection={{
@@ -249,41 +286,58 @@ export function TopologyResults({
             />
           </SectionBox>
           <SectionBox title={t('Observed graph nodes')}>
-            <SimpleTable
-              data={graph.nodes}
-              columns={[
-                {
-                  label: t('Cluster / namespace / node'),
-                  getter: (node: TopologyNode) => name(node),
-                },
-                {
-                  label: t('Node type'),
-                  getter: (node: TopologyNode) =>
-                    node.kind === 'app'
-                      ? t('Application')
-                      : node.kind === 'service'
-                      ? t('Service')
-                      : node.kind === 'workload'
-                      ? t('Workload')
-                      : t('Unknown'),
-                },
-                {
-                  label: t('Namespace selection'),
-                  getter: (node: TopologyNode) => namespaceCaption(node),
-                },
-                {
-                  label: t('Inspect'),
-                  getter: (node: TopologyNode) => (
-                    <Button
-                      aria-label={t('Inspect node {{name}}', { name: name(node) })}
-                      onClick={() => setSelection({ kind: 'node', id: node.id })}
-                    >
-                      {t('Inspect')}
-                    </Button>
-                  ),
-                },
-              ]}
-            />
+            {nodeGroups.map(group => (
+              <div key={group.key}>
+                <Typography component="h3" variant="subtitle1">
+                  {group.value === 'all'
+                    ? t('All nodes')
+                    : group.value === 'unknown'
+                    ? groupBy === 'cluster'
+                      ? t('Unknown cluster')
+                      : groupBy === 'namespace'
+                      ? t('Namespace not established')
+                      : t('Application not reported')
+                    : group.value === 'multiple'
+                    ? t('Multiple reported applications')
+                    : group.value}
+                </Typography>
+                <SimpleTable
+                  data={group.nodes}
+                  columns={[
+                    {
+                      label: t('Cluster / namespace / node'),
+                      getter: (node: TopologyNode) => name(node),
+                    },
+                    {
+                      label: t('Node type'),
+                      getter: (node: TopologyNode) =>
+                        node.kind === 'app'
+                          ? t('Application')
+                          : node.kind === 'service'
+                          ? t('Service')
+                          : node.kind === 'workload'
+                          ? t('Workload')
+                          : t('Unknown'),
+                    },
+                    {
+                      label: t('Namespace selection'),
+                      getter: (node: TopologyNode) => namespaceCaption(node),
+                    },
+                    {
+                      label: t('Inspect'),
+                      getter: (node: TopologyNode) => (
+                        <Button
+                          aria-label={t('Inspect node {{name}}', { name: name(node) })}
+                          onClick={() => setSelection({ kind: 'node', id: node.id })}
+                        >
+                          {t('Inspect')}
+                        </Button>
+                      ),
+                    },
+                  ]}
+                />
+              </div>
+            ))}
           </SectionBox>
           <SectionBox title={t('Observed graph connections')}>
             <SimpleTable
@@ -355,6 +409,13 @@ export function TopologyResults({
                 />
               )}
               <Button onClick={() => setSelection(undefined)}>{t('Close node inspection')}</Button>
+              <Button
+                onClick={() =>
+                  setFocusedNode(previous => (previous === node.id ? undefined : node.id))
+                }
+              >
+                {focusedNode === node.id ? t('Show full graph') : t('Focus graph on this node')}
+              </Button>
             </SectionBox>
           )}
           {edge && (
@@ -395,6 +456,22 @@ export function TopologyResults({
         </>
       )}
     </Stack>
+  );
+}
+
+export function TopologyResults({
+  snapshot,
+  cluster,
+}: {
+  snapshot: TopologyObservations & { query: TopologyQuery };
+  cluster?: string;
+}) {
+  return (
+    <TopologyResultsSnapshot
+      key={JSON.stringify([cluster, snapshot.query])}
+      snapshot={snapshot}
+      cluster={cluster}
+    />
   );
 }
 

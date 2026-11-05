@@ -320,6 +320,93 @@ projection contributions. Boundary tests exercise the exact node/edge/
 contribution limits. Optional zero-rate edges are dashed and do not imply
 activity. The 50-node/200-edge diagram cap does not truncate the paginated tables.
 
+### Bounded node-state and graph interactions
+
+`appendTopologyNodeStates` runs after the mode projection and records the
+immutable query scope/time with each projected namespace-position snapshot.
+Selected/outside/unknown position is derived only from the graph's reported
+namespace names and the captured selected namespace, consistent with the narrow
+`isOutside` comparison in pinned
+`graph/telemetry/istio/appender/outsider.go`. It is not cluster-qualified
+authorization, inaccessible-namespace discovery, egress classification,
+Kubernetes existence, mesh membership, or health. Unknown identity and empty
+namespace remain unknown in every graph mode.
+
+Zero-rate metric samples remain edges (when requested) and can still have a
+selected/outside/unknown namespace position; that position is not an idle/dead
+verdict. A missing historical sample creates no node and does not establish
+current inventory, deletion, or health. The current topology query has no
+complete workload/service inventory, pod count, ServiceEntry export resolution,
+or WorkloadEntry-to-metric-node join. Accordingly, the new state stage adds no
+inventory nodes and does not label these states.
+
+The node table can group by `none`, `app`, `cluster`, or `namespace`, the values
+accepted by pinned `graph/options.go#boxBy`. Group order and node order are
+deterministic. This is table grouping only: it does not create upstream
+`isBox`/parent nodes, cluster/namespace boxes, or Kiali's group-summary panels.
+Ambiguous multi-application nodes are shown in a separate explicit bucket.
+Focusing a selected node limits only the diagram to that existing node and its
+directly observed adjacent edges; complete filtered node/edge tables remain
+available. Focus requires an exact captured query scope/time, rejects stale or
+absent node IDs, performs no additional reads, and resets with projection/query
+scope changes. Selection remains inspection-only and does not choose a mutation
+target.
+
+#### Pinned graph appender coverage
+
+Source inventory: `test-files/parity/upstream.json`; pinned Kiali
+`0e8be887b8217bbcac5e3ae0bfcd258073949cca`. The `topology` fixture, four-mode
+projection tests and new appender/group/focus tests use
+`test-files/topology/fixture.json`; these native tests are source-informed, not a
+new Go differential oracle. An inventory entry proves the source symbol is
+catalogued, not that its behavior is implemented or verified.
+
+| Upstream appender | Coverage in this plugin | Remaining evidence/behavior |
+| --- | --- | --- |
+| `AggregateNodeAppenderName` | Deferred | Aggregate values, aggregation, and aggregate node/edge behavior |
+| `AmbientAppenderName` | Deferred | Ambient traffic, waypoint/ztunnel and deduplication semantics |
+| `DeadNodeAppenderName` | Deferred | Complete inventory, pod counts, accessibility, iterative pruning and edge cleanup |
+| `ExtensionsAppenderName` | Deferred | Extension discovery and graph overlays |
+| `HealthAppenderName` | Deferred | Complete per-node health inputs and graph health summaries |
+| `IdleNodeAppenderName` | Deferred | Complete current workload/service inventory; zero-rate metrics are not sufficient |
+| `IstioAppenderName` | Deferred | Configuration overlays and Istio-specific graph details |
+| `LabelerAppenderName` | Deferred | Upstream node labeling semantics |
+| `MeshCheckAppenderName` | Deferred | Complete accessible mesh evidence |
+| `OutsiderAppenderName` | Partial | Captured namespace-name comparison only; inaccessible, egress and authorization states are not implemented |
+| `ResponseTimeAppenderName` | Deferred | Latency metric query, bounds and edge aggregation |
+| `SecurityPolicyAppenderName` | Deferred | Per-edge security evidence and complete protocol semantics; raw reported labels are not a verdict |
+| `ServiceEntryAppenderName` | Deferred | Host matching, export/access checks, node replacement and edge aggregation |
+| `SidecarsCheckAppenderName` | Deferred | Complete scoped Pod/proxy evidence |
+| `ThroughputAppenderName` | Partial | TCP byte measures exist separately; upstream appender and `throughputType` behavior are not implemented |
+| `TrafficGeneratorAppenderName` | Deferred | Upstream traffic-generator classification |
+| `WorkloadEntryAppenderName` | Deferred | Scoped app/version label join against current WorkloadEntry inventory |
+
+Unknown telemetry identities are preserved in projection as unknown nodes; they
+are not an independent upstream appender and do not imply inaccessible or dead.
+The separate structural Map WorkloadGroup label association is not a graph
+WorkloadEntry appender match.
+
+#### Graph defaults and parameters
+
+The current four projection values (`graphType`) are implemented as local
+projections, not all Kiali graph API semantics. `includeIdleEdges` retains only
+explicit zero-rate metric observations; it is not `idleNode`. Captured `queryTime`
+and bounded rate windows provide a historical snapshot. The table grouping
+supports the four `boxBy` values, with the limitations above.
+
+Deferred individually: `ambientTraffic`, `appenders`, `aggregate`,
+`configVendor`, `injectServiceNodes`, multi-namespace `namespaces`,
+`refreshInterval`, upstream `rateGrpc`/`rateHttp`/`rateTcp` option semantics,
+`responseTime`, `telemetryVendor`, `throughputType`, and `waypoints`. Existing
+measure choices for requests, TCP bytes and gRPC messages are separately scoped
+native query behavior, not a claim that the upstream rate defaults/options have
+parity. Blackhole/passthrough, aggregate boxes, security/health/config overlays,
+and ambient/waypoint families remain explicit gaps.
+
+Focused validation for this increment passed 1,777 topology core tests and
+9 topology component tests after dependency installation. No new hosted/Desktop
+or live graph verification was performed; those checks remain open.
+
 Hosted stock Headlamp 0.35.0 checks used real Bookinfo telemetry after 18 bounded
 read-only productpage GETs: six source-reported workload nodes/edges, four app
 nodes/three app edges, six versioned nodes, and four Service-projection nodes/
@@ -3822,7 +3909,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |
-| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; 1,728 Go identity cases; hosted Bookinfo and negative fixtures | Mixed reporter pipeline, complete appenders, ambient/waypoint, historical resource identity/trace links and Desktop |
+| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections, separate request/byte/message units, captured history, filtering, edge metadata, current-resource candidates, namespace-position stage, source-aligned table grouping and neighbor focus; 1,728 Go identity cases and focused interaction tests | Mixed reporters, complete appender parity (per-appender ledger above), upstream graph boxes/node-detail routes, ambient/waypoint, historical resource identity/trace links and current Desktop verification |
 
 These are **partial implementations**, not closure of their corresponding full
 milestones. The captured Istio kinds are VirtualService, DestinationRule, Gateway,

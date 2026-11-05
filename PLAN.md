@@ -1319,7 +1319,7 @@ the authority for individual behavior and platform claims.
 | `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
-| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
+| `advanced-graph` | Partial / open | Four projections, request/byte/message units, captured history, per-node selected/outside/unknown namespace position, source-aligned table grouping and bounded neighbor focus; appender ledger and limits are in `docs/parity.md` | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
 | `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
 | `parity-release` | Pending | Close the ledger, verify live, document and package with explicit remaining gaps | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster` |
 
@@ -1645,12 +1645,44 @@ substitute for meaningful detail presentation.
   explicit mapping rather than assuming names match.
 - Support cluster-group fan-out and shared/per-cluster metric stores without
   double counting or cross-scope cache leakage.
-- Complete application/version/workload/Service/aggregate graph modes, grouping,
-  node-focused views, idle/dead/unknown/outsider nodes, ServiceEntry/WorkloadEntry
-  enrichment, blackhole/passthrough semantics, security/health/config decorations,
-  ambient/waypoint behavior, historical queries and baseline UI interactions.
+- Keep graph coverage at the behavior level. The bounded single-context increment
+  appends selected/outside/unknown namespace position after each of the four
+  projections, groups the node table by none/app/cluster/namespace, and focuses the
+  existing diagram on a selected node and its directly observed neighbors. Grouping
+  and focus carry the exact captured query scope/time and reset on scope changes.
+  These are not Kiali `isBox` graph nodes or node-detail graph requests.
+- Unknown identity remains explicit in projections; it is not an independent
+  appender and does not imply inaccessible or dead. In particular, zero-rate
+  observations are not definition-backed idle nodes, and missing historical
+  samples do not prove dead, missing, or healthy. The full per-appender evidence
+  boundaries are in `docs/parity.md`.
+- Preserve blackhole/passthrough semantics as unsupported; no security/health/config
+  decorations, ambient/waypoint behavior, multi-context graph fan-out, or full
+  upstream option/default parity is inferred from labels or partial inventories.
 - Preserve per-cluster errors and provenance. A graph selection must not silently
   change a mutation target.
+
+#### Current appender coverage
+
+| Appender | Coverage |
+| --- | --- |
+| AggregateNode | Deferred |
+| Ambient | Deferred |
+| DeadNode | Deferred |
+| Extensions | Deferred |
+| Health | Deferred |
+| IdleNode | Deferred |
+| Istio | Deferred |
+| Labeler | Deferred |
+| MeshCheck | Deferred |
+| Outsider | Partial: namespace-name position only |
+| ResponseTime | Deferred |
+| SecurityPolicy | Deferred |
+| ServiceEntry | Deferred |
+| SidecarsCheck | Deferred |
+| Throughput | Partial: separate TCP byte measures only |
+| TrafficGenerator | Deferred |
+| WorkloadEntry | Deferred |
 
 ### Runtime and release closure
 

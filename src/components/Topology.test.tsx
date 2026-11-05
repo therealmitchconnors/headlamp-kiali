@@ -113,6 +113,17 @@ it('provides local projections and neighbor filtering without issuing additional
   expect(screen.getByText('Showing 2 of 4 nodes and 1 of 4 connections')).toBeDefined();
   expect(loadTopology).not.toHaveBeenCalled();
 });
+it('groups nodes by source identity and keeps grouping controls named', async () => {
+  render(<TopologyResults snapshot={snapshot} />);
+  const grouping = screen.getByRole('combobox', { name: 'Group nodes by' });
+  expect(grouping).toBeDefined();
+  await userEvent.click(grouping);
+  await userEvent.click(screen.getByRole('option', { name: 'Namespace' }));
+  const nodes = within(screen.getByRole('region', { name: 'Observed graph nodes' }));
+  expect(nodes.getByRole('heading', { name: 'bookinfo' })).toBeDefined();
+  expect(nodes.getByRole('heading', { name: 'ingress' })).toBeDefined();
+  expect(loadTopology).not.toHaveBeenCalled();
+});
 it('annotates selected/outside/unknown namespaces consistently without issuing reads', async () => {
   const base = snapshot.observations[0];
   const observed = {
@@ -203,6 +214,45 @@ it('exposes keyboard node inspection, edge response/security distributions and n
   expect(inspected.getByText('UF')).toBeDefined();
   expect(inspected.getByText('none')).toBeDefined();
   expect(screen.queryByText('Reported revisions: v3')).toBeNull();
+});
+it('focuses the diagram on a selected node without changing the full graph tables', async () => {
+  render(<TopologyResults snapshot={snapshot} />);
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Inspect node Kubernetes / bookinfo / reviews-v3' })
+  );
+  const focus = screen.getByRole('button', { name: 'Focus graph on this node' });
+  act(() => focus.focus());
+  await userEvent.keyboard('{Enter}');
+  const diagram = within(screen.getByRole('group', { name: 'Observed traffic graph' }));
+  expect(diagram.getAllByRole('button')).toHaveLength(3);
+  expect(
+    diagram.getByRole('button', { name: 'Inspect Kubernetes / bookinfo / reviews-v3' })
+  ).toBeDefined();
+  expect(
+    within(screen.getByRole('region', { name: 'Observed graph nodes' })).getAllByRole('button')
+  ).toHaveLength(6);
+  expect(screen.getByRole('button', { name: 'Show full graph' })).toBeDefined();
+  expect(screen.getByText('Reported revisions: v3')).toBeDefined();
+  expect(loadTopology).not.toHaveBeenCalled();
+});
+it('resets grouping and focus when the captured graph scope or time changes', async () => {
+  const { rerender } = render(<TopologyResults snapshot={snapshot} />);
+  await userEvent.click(screen.getByRole('combobox', { name: 'Group nodes by' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Namespace' }));
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Inspect node Kubernetes / bookinfo / reviews-v3' })
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Focus graph on this node' }));
+  rerender(
+    <TopologyResults
+      snapshot={{ ...snapshot, query: { ...query, namespace: 'other', end: query.end + 1 } }}
+    />
+  );
+  expect(screen.getByRole('combobox', { name: 'Group nodes by' }).textContent).toBe('No grouping');
+  expect(screen.queryByRole('button', { name: 'Show full graph' })).toBeNull();
+  expect(
+    within(screen.getByRole('group', { name: 'Observed traffic graph' })).getAllByRole('button')
+  ).toHaveLength(6);
 });
 it('renders total-byte metadata with byte units, never request units', () => {
   render(
