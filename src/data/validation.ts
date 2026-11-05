@@ -210,6 +210,10 @@ async function readSource(
         return {
           name: item.metadata.name,
           uid: item.metadata.uid,
+          resourceVersion:
+            typeof item.metadata.resourceVersion === 'string'
+              ? item.metadata.resourceVersion
+              : undefined,
           namespace: typeof item.metadata.namespace === 'string' ? item.metadata.namespace : '',
           labels: Object.fromEntries(
             Object.entries(labels).map(([key, value]) => [key, String(value)])
@@ -236,7 +240,8 @@ export async function loadValidationSnapshot(
   signal: AbortSignal,
   namespace?: string,
   gatewayClasses?: GatewayClassSettings,
-  target?: ValidationTarget
+  target?: ValidationTarget,
+  additionalSources: readonly ValidationSourceKey[] = []
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   const capturedScope = clusterScope(scope.cluster);
@@ -254,7 +259,8 @@ export async function loadValidationSnapshot(
       requestSignal,
       namespace,
       capturedClasses,
-      capturedTarget
+      capturedTarget,
+      additionalSources
     )
   );
 }
@@ -268,7 +274,8 @@ async function readValidationSnapshot(
   signal: AbortSignal,
   namespace?: string,
   gatewayClasses?: GatewayClassSettings,
-  target?: ValidationTarget
+  target?: ValidationTarget,
+  additionalSources: readonly ValidationSourceKey[] = []
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   if (namespace !== undefined && namespace !== '' && !isDnsLabel(namespace))
@@ -277,9 +284,12 @@ async function readValidationSnapshot(
     gatewayClasses ?? { classes: [], selector: {} }
   );
   const classesRequested = gatewayClassNeedsRegistry(kind, group, spec);
-  let keys = referenceValidationSources(kind, group, spec, identityDomain, namespace).filter(
-    key => key !== 'gatewayClasses' || !classSettings.classes.length
-  );
+  let keys = [
+    ...new Set([
+      ...referenceValidationSources(kind, group, spec, identityDomain, namespace),
+      ...additionalSources,
+    ]),
+  ].filter(key => key !== 'gatewayClasses' || !classSettings.classes.length);
   const registryRequested =
     sidecarNeedsRegistry(kind, group, spec, identityDomain) ||
     virtualServiceNeedsRegistry(kind, group, spec, identityDomain) ||

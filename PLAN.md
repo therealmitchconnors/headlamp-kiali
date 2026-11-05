@@ -161,9 +161,12 @@ are implemented** as active-caller-only, declared-scope increments. Gateway
 details offer explicit scoped checks: Istio KIA0302 uses complete default
 workload inclusion and captured controller namespace-scope flags; existing
 Istio/Gateway API conflicts, listener/status and class checks reuse the same
-complete local scope. Dormant Gateway port-name helpers and new route-attachment/
-port rules remain disabled. Service details link to an explicit, read-only
-inspector requiring declared local namespace scope, a complete pooled
+complete local scope. Dormant Gateway port-name helpers and attachment/port
+validation checkers remain disabled. A separate guarded route-form increment
+now creates or attaches existing-host-supported HTTPRoute/GRPCRoute resources;
+listener/controller acceptance and advanced route matching remain open. Service
+details link to an explicit, read-only inspector requiring declared local
+namespace scope, a complete pooled
 managed-namespace Pod snapshot and complete cluster-wide Deployments. It ports
 the active KIA0601/KIA0602/KIA0701 checks and keeps denied, stale, malformed,
 truncated or unresolved evidence unavailable, using status annotations rather

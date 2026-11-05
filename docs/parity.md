@@ -3092,6 +3092,57 @@ Five specification writes and seven SSARs were intercepted; no Gateway API
 was installed and no real configuration changed. Gates pass **15,754 tests
 in 118 files**. Actual admission/controller behavior remains unverified.
 
+## Confirmed HTTPRoute/GRPCRoute create and attachment forms
+
+`core/gatewayRouteProposals.ts`, `data/gatewayRouteReferences.ts` and
+`components/configuration/GatewayRouteEditor.tsx` add a bounded, single-object
+create form for HTTPRoute and GRPCRoute, plus an attach-existing-route form.
+The source audit is Kiali v2.33.0
+`0e8be887b8217bbcac5e3ae0bfcd258073949cca`: `K8sRouteHosts.tsx`,
+`K8sGRPCRouteHosts.tsx`, `K8sGatewaySelector.tsx`, `K8sTrafficShifting.tsx`
+and `WizardActions.ts`. The source defaults route name and hostname to the
+selected Service name and its one-Service backend weight to 100. The native
+form keeps those defaults, requires the Service port, and leaves same-namespace
+parent/backend namespaces omitted in the resulting references. A blank parent
+section or parent port remains unspecified; explicit section/port values must
+match an observed Gateway listener.
+
+Only the generated Gateway API schema subset for HTTPRoute `v1`/`v1beta1` and
+GRPCRoute `v1` is available. Forms use one core Service backend and one
+Gateway parent per create proposal. Attach preserves the captured route and
+adds one nonduplicate parent reference. Cross-namespace Gateway parents are
+checked against observed namespace-sharing rules; cross-namespace Service
+backends require a matching ReferenceGrant. Route discovery, complete
+reference evidence, a single unambiguous TCP Service port, and optional
+listener selectors are checked before the permission review and server
+dry-run. Update operations retain the original route UID/resourceVersion guard.
+Before the separately confirmed operation, fresh discovery and complete reads
+are repeated and captured object evidence (identity, UID, object resourceVersion,
+labels, spec and relevant Service export annotation) is compared independently
+of list order. Advancing collection/list resourceVersions alone does not
+invalidate unchanged evidence; changed, removed, recreated or newly listed
+objects do.
+
+The review shows the complete proposed manifest and reports which existing
+reference checks could not run. It explicitly does not claim controller
+acceptance or listener attachment: protocol/hostname intersections, listener
+status and controller-specific behavior remain unsupported. HTTP path/method
+matches, GRPC service/method matches, filters, multi-backend editing, new
+Gateway creation and TCP/TLS/UDP route forms are not part of this increment.
+Istio Service VirtualService/DestinationRule workflows are unchanged. There is
+no automatic retry, multi-object write or rollback.
+
+Focused source-fixture, proposal, reference and UI tests cover source defaults,
+invalid identities/ports, cross-namespace grants, unsupported discovery,
+denied reference reads and permission review, changed references, dry-run
+failure, create review and explicit confirmation. They are unit/intercepted
+tests, not live API or controller evidence. Actual Headlamp contribution,
+browser console, host i18n/a11y, live-cluster and Desktop verification remain
+open; no Gateway API resources were installed or changed. The focused set passes
+66 tests; `npm run tsc`, `npm run lint` and `npm run build` pass. Headlamp's
+remote-debugging endpoint was not available, so no live contribution or browser
+console check is claimed.
+
 ## Guarded inbound mTLS editing
 
 `core/peerMtlsEditing.ts` and `PeerMtlsEditor.tsx` extend existing

@@ -295,4 +295,76 @@ describe('cluster-scoped GatewayClass operations', () => {
       resourceVersion: '1',
     });
   });
+
+  describe('Gateway API route mutation guards', () => {
+    const route = JSON.parse(gatewayFixtureText).httpRoute;
+    const target = {
+      cluster: 'alpha',
+      namespace: route.metadata.namespace,
+      name: route.metadata.name,
+      apiVersion: route.apiVersion,
+      definition: configurationDefinitions.find(
+        entry => entry.kind === 'HTTPRoute' && entry.group === 'gateway.networking.k8s.io'
+      )!,
+    };
+
+    it('uses the Gateway API group and HTTPRoute resource in permission and dry-run requests', async () => {
+      const prepared = prepareMutation(target, 'create', JSON.stringify(route.spec));
+      vi.mocked(ApiProxy.request).mockResolvedValueOnce(allowed).mockResolvedValueOnce({});
+      await executeMutation(prepared, true, new AbortController().signal);
+      const calls = vi.mocked(ApiProxy.request).mock.calls;
+      expect(JSON.parse(String(calls[0][1]?.body)).spec.resourceAttributes).toEqual({
+        group: 'gateway.networking.k8s.io',
+        version: 'v1',
+        resource: 'httproutes',
+        namespace: 'bookinfo',
+        verb: 'create',
+      });
+      expect(calls[1][0]).toBe(
+        '/apis/gateway.networking.k8s.io/v1/namespaces/bookinfo/httproutes?dryRun=All'
+      );
+      expect(JSON.parse(String(calls[1][1]?.body))).toMatchObject({
+        apiVersion: 'gateway.networking.k8s.io/v1',
+        kind: 'HTTPRoute',
+        metadata: { name: route.metadata.name, namespace: 'bookinfo' },
+        spec: route.spec,
+      });
+    });
+
+    it('does not write after a denied route permission review or failed dry-run', async () => {
+      const prepared = prepareMutation(target, 'create', JSON.stringify(route.spec));
+      vi.mocked(ApiProxy.request).mockResolvedValueOnce({
+        status: { allowed: false, reason: 'route creation denied' },
+      });
+      await expect(executeMutation(prepared, true, new AbortController().signal)).rejects.toThrow(
+        'route creation denied'
+      );
+      expect(ApiProxy.request).toHaveBeenCalledTimes(1);
+
+      vi.mocked(ApiProxy.request)
+        .mockReset()
+        .mockResolvedValueOnce(allowed)
+        .mockRejectedValueOnce(new Error('dry-run rejected'));
+      await expect(executeMutation(prepared, true, new AbortController().signal)).rejects.toThrow(
+        'dry-run rejected'
+      );
+      expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(ApiProxy.request).mock.calls[1][0]).toContain('?dryRun=All');
+    });
+
+    it('rejects a stale captured HTTPRoute before sending an update', async () => {
+      const prepared = prepareMutation(target, 'update', JSON.stringify(route.spec), route);
+      vi.mocked(ApiProxy.request)
+        .mockResolvedValueOnce(allowed)
+        .mockResolvedValueOnce({
+          ...route,
+          metadata: { ...route.metadata, resourceVersion: '2' },
+        });
+      await expect(
+        executeMutation(prepared, false, new AbortController().signal)
+      ).rejects.toBeInstanceOf(MutationConflict);
+      expect(ApiProxy.request).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(ApiProxy.request).mock.calls[1][0]).toContain('/httproutes/reviews');
+    });
+  });
 });

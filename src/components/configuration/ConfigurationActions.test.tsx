@@ -2,6 +2,10 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import { VALIDATION_IGNORE_ANNOTATION } from '../../core/validationAnnotations';
+import {
+  assertGatewayRouteReferencesFresh,
+  inspectGatewayRouteReferences,
+} from '../../data/gatewayRouteReferences';
 import { executeMutation } from '../../data/mutations';
 import { DestinationRule } from '../../resources/destination-rule';
 import { GRPCRoute } from '../../resources/grpc-route';
@@ -51,11 +55,24 @@ vi.mock('../../data/mutations', async importOriginal => {
   const original = await importOriginal<typeof import('../../data/mutations')>();
   return { ...original, executeMutation: vi.fn() };
 });
+vi.mock('../../data/gatewayRouteReferences', () => ({
+  inspectGatewayRouteReferences: vi.fn(),
+  assertGatewayRouteReferencesFresh: vi.fn(),
+}));
 vi.mock('./CodeBlock', () => ({
   default: ({ value }: { value: string }) => <pre>{value}</pre>,
 }));
 beforeEach(() => {
   vi.mocked(executeMutation).mockReset();
+  vi.mocked(inspectGatewayRouteReferences)
+    .mockReset()
+    .mockResolvedValue({
+      sourceEvidence: '{"gateways":[],"services":[]}',
+      uncertainty: [
+        'Gateway listener protocol/hostname acceptance and controller status are not verified; a proposed parentRef does not prove route attachment.',
+      ],
+    });
+  vi.mocked(assertGatewayRouteReferencesFresh).mockReset().mockResolvedValue(undefined);
 });
 afterEach(cleanup);
 
@@ -70,6 +87,34 @@ function open() {
     />
   );
   return onChanged;
+}
+
+function openGatewayRoute(kind: 'HTTPRoute' | 'GRPCRoute', resource?: HTTPRoute | GRPCRoute) {
+  const onChanged = vi.fn();
+  const definition = configurationDefinitions.find(
+    value => value.kind === kind && value.group === 'gateway.networking.k8s.io'
+  )!;
+  render(
+    <ConfigurationActions
+      definition={definition}
+      apiVersion="gateway.networking.k8s.io/v1"
+      cluster="alpha"
+      resource={resource}
+      onChanged={onChanged}
+    />
+  );
+  return onChanged;
+}
+
+async function fillGatewayRouteForm(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText('Route name'), 'reviews-route');
+  await user.type(screen.getByLabelText('Route namespace'), 'bookinfo');
+  await user.type(screen.getByLabelText('Gateway name'), 'public');
+  await user.type(screen.getByLabelText('Gateway namespace'), 'edge');
+  await user.type(screen.getByLabelText('Gateway section name'), 'https');
+  await user.type(screen.getByLabelText('Gateway listener port'), '443');
+  await user.type(screen.getByLabelText('Backend Service name'), 'reviews');
+  await user.type(screen.getByLabelText('Backend Service port'), '9080');
 }
 
 async function prepare() {
@@ -595,7 +640,10 @@ it('keeps denied dry-runs in edit mode and shows the reason', async () => {
 it('prevents blind retry after an uncertain write outcome', async () => {
   vi.mocked(executeMutation)
     .mockResolvedValueOnce(undefined)
-    .mockRejectedValueOnce(new Error('Network failed'));
+    .mockImplementationOnce(async (_mutation, _dryRun, _signal, beforeWrite) => {
+      beforeWrite?.();
+      throw new Error('Network failed');
+    });
   const onChanged = open();
   const user = await prepare();
   await user.click(await screen.findByRole('button', { name: 'Confirm operation' }));
@@ -1060,7 +1108,10 @@ it('reviews an annotation-only proposal from the immutable opening snapshot befo
 it('makes restoration distinct from ignore-all and blocks retry after an uncertain annotation write', async () => {
   vi.mocked(executeMutation)
     .mockResolvedValueOnce(undefined)
-    .mockRejectedValueOnce(new Error('Uncertain annotation result'));
+    .mockImplementationOnce(async (_mutation, _dryRun, _signal, beforeWrite) => {
+      beforeWrite?.();
+      throw new Error('Uncertain annotation result');
+    });
   const { onChanged } = exclusionResource('');
   const user = userEvent.setup();
   await user.click(screen.getByRole('button', { name: 'Edit validation exclusions' }));
@@ -1131,3 +1182,113 @@ it('aborts and clears a pending annotation review when the cluster changes, even
   await act(async () => finish());
   expect(onChanged).not.toHaveBeenCalled();
 });
+
+it('reviews the complete HTTPRoute manifest and requires fresh references plus explicit confirmation', async () => {
+  vi.mocked(executeMutation).mockResolvedValue(undefined);
+  const onChanged = openGatewayRoute('HTTPRoute');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Create {{kind}} with form' }));
+  await fillGatewayRouteForm(user);
+  await user.click(screen.getByRole('button', { name: 'Check and review' }));
+  await screen.findByText(
+    'The Kubernetes permission review allowed this operation and server dry-run succeeded. Confirm to perform the route operation.'
+  );
+  expect(executeMutation).toHaveBeenCalledTimes(1);
+  expect(vi.mocked(executeMutation).mock.calls[0][1]).toBe(true);
+  expect(inspectGatewayRouteReferences).toHaveBeenCalledWith(
+    { cluster: 'alpha' },
+    'HTTPRoute',
+    'gateway.networking.k8s.io/v1',
+    'bookinfo',
+    {
+      hostnames: ['reviews'],
+      parentRefs: [{ name: 'public', namespace: 'edge', sectionName: 'https', port: 443 }],
+      rules: [{ backendRefs: [{ name: 'reviews', port: 9080, weight: 100 }] }],
+    },
+    expect.any(AbortSignal)
+  );
+  const manifest = Array.from(document.querySelectorAll('pre'))
+    .map(element => JSON.parse(element.textContent ?? '{}'))
+    .find(value => value.kind === 'HTTPRoute');
+  expect(manifest).toEqual({
+    apiVersion: 'gateway.networking.k8s.io/v1',
+    kind: 'HTTPRoute',
+    metadata: { name: 'reviews-route', namespace: 'bookinfo' },
+    spec: {
+      hostnames: ['reviews'],
+      parentRefs: [{ name: 'public', namespace: 'edge', sectionName: 'https', port: 443 }],
+      rules: [{ backendRefs: [{ name: 'reviews', port: 9080, weight: 100 }] }],
+    },
+  });
+  expect(screen.getAllByText(/controller status are not verified/).length).toBeGreaterThan(0);
+  expect(onChanged).not.toHaveBeenCalled();
+
+  vi.mocked(assertGatewayRouteReferencesFresh).mockRejectedValueOnce(
+    new Error(
+      'Gateway, Service, namespace or ReferenceGrant evidence changed; review the route again'
+    )
+  );
+  await user.click(screen.getByRole('button', { name: 'Confirm operation' }));
+  await screen.findByText(/evidence changed/);
+  expect(executeMutation).toHaveBeenCalledTimes(1);
+  expect(onChanged).not.toHaveBeenCalled();
+});
+
+it('adds an existing route parent without losing its other fields', async () => {
+  vi.mocked(executeMutation).mockResolvedValue(undefined);
+  const data = {
+    apiVersion: 'gateway.networking.k8s.io/v1',
+    kind: 'HTTPRoute',
+    metadata: {
+      name: 'reviews',
+      namespace: 'bookinfo',
+      uid: 'route-uid',
+      resourceVersion: '7',
+      creationTimestamp: '2026-01-01T00:00:00Z',
+    },
+    spec: {
+      hostnames: ['reviews.example.test'],
+      parentRefs: [{ name: 'old', namespace: 'edge' }],
+      rules: [{ backendRefs: [{ name: 'reviews', port: 9080, weight: 40 }] }],
+    },
+  };
+  const onChanged = openGatewayRoute('HTTPRoute', new HTTPRoute(data, 'alpha'));
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: 'Attach route to Gateway' }));
+  await user.type(screen.getByLabelText('Gateway name'), 'public');
+  await user.type(screen.getByLabelText('Gateway namespace'), 'edge');
+  await user.type(screen.getByLabelText('Gateway section name'), 'https');
+  await user.click(screen.getByRole('button', { name: 'Check and review' }));
+  await screen.findByText(
+    'The Kubernetes permission review allowed this operation and server dry-run succeeded. Confirm to perform the route operation.'
+  );
+  const mutation = vi.mocked(executeMutation).mock.calls[0][0];
+  expect(mutation.original?.resourceVersion).toBe('7');
+  expect(mutation.spec).toEqual({
+    ...data.spec,
+    parentRefs: [
+      { name: 'old', namespace: 'edge' },
+      { name: 'public', namespace: 'edge', sectionName: 'https' },
+    ],
+  });
+  await user.click(screen.getByRole('button', { name: 'Confirm operation' }));
+  await waitFor(() => expect(onChanged).toHaveBeenCalledTimes(1));
+  expect(vi.mocked(executeMutation).mock.calls[1][1]).toBe(false);
+  expect(assertGatewayRouteReferencesFresh).toHaveBeenCalledTimes(1);
+});
+
+it.each(['permission review denied', 'server dry-run failed'])(
+  'does not offer confirmation when the route review fails: %s',
+  async failure => {
+    vi.mocked(executeMutation).mockRejectedValueOnce(new Error(failure));
+    openGatewayRoute('GRPCRoute');
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Create {{kind}} with form' }));
+    await fillGatewayRouteForm(user);
+    await user.click(screen.getByRole('button', { name: 'Check and review' }));
+    await screen.findByText(failure);
+    expect(screen.queryByRole('button', { name: 'Confirm operation' })).toBeNull();
+    expect(vi.mocked(executeMutation).mock.calls).toHaveLength(1);
+    expect(vi.mocked(executeMutation).mock.calls[0][1]).toBe(true);
+  }
+);
