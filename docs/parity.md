@@ -2315,6 +2315,38 @@ Reference traversal is shared with native links and additionally covers mirror
 backends. API defaults distinguish Gateway parents from core Service backends;
 Gateway identities use exact namespace/name rather than DNS-host alias parsing.
 
+The caller audit is against Kiali v2.33.0 (baseline
+`0e8be887b8217bbcac5e3ae0bfcd258073949cca`). Its
+[`K8sHTTPRouteChecker`](https://github.com/kiali/kiali/blob/v2.33.0/business/checkers/k8shttproute_checker.go)
+and
+[`K8sGRPCRouteChecker`](https://github.com/kiali/kiali/blob/v2.33.0/business/checkers/k8sgrpcroute_checker.go)
+activate only `NoK8sGatewayChecker` and `NoHostChecker`. Those callers consume
+HTTPRoute/GRPCRoute v1, Gateway v1, and ReferenceGrant v1beta1. The native models
+also expose HTTPRoute v1beta1, so running the same reference predicates for that
+model version is a native extension, not evidence of pinned v1beta1 parity.
+TCPRoute, TLSRoute and UDPRoute have schema/resource models but no route-checker
+caller in this baseline. Their relationship findings remain disabled; the
+regression test prevents model availability alone from activating checks.
+
+The active parent predicate resolves exact Gateway group/kind/name and defaults
+the parent namespace to the route namespace. Same-namespace parents need no
+sharing rule. A cross-namespace parent is accepted when any Gateway listener has
+`allowedRoutes.namespaces.from: All`, or a non-null `Selector` matching the
+complete route-Namespace labels; an omitted/`Same` rule does not allow cross-
+namespace sharing. This predicate does not evaluate `allowedRoutes.kinds`,
+parent section/port selection, listener protocol, hostname intersections, or
+route/Gateway status conditions. These remain gaps rather than inferred
+attachment success or new findings.
+
+The active backend predicate covers Service-kind parent references and rule
+`backendRefs`; Service existence is checked in its effective namespace and a
+cross-namespace reference requires a ReferenceGrant from the route kind/group.
+The native traversal also inspects request-mirror backends, and its grant matcher
+requires exact source/target groups and kinds plus an optional exact target
+name, which is stricter than the pinned helper. These differences are bounded
+native behavior, not a claim of exact checker parity. Service backend port
+validity remains unevaluated.
+
 Cross-namespace Gateway sharing supports matchLabels and matchExpressions via
 the reusable bounded selector decoder. Missing/forbidden collections and invalid
 selectors defer conclusions. Service references require complete Service
@@ -2325,10 +2357,17 @@ When the Service exists but permission is missing, KIA1402 explains the
 ReferenceGrant denial rather than falsely saying the Service name is absent.
 
 Limits are 200 route references and three simultaneous source readers, each
-with four 250-item pages. Unsupported groups/kinds are explicitly unevaluated.
-Listener attachment, section/port selection, protocol/hostname intersections,
-Service port validity and controller acceptance remain outside this check slice.
-TCP/TLS/UDP/inference route validation is not claimed.
+with four 250-item pages. Cross-namespace Gateway checks require complete
+Gateway and Namespace evidence; Service checks require complete Service
+evidence, and cross-namespace Service checks also require a complete
+ReferenceGrant list. Selected HTTP/gRPC route evidence is captured on its exact
+cluster/API version and re-read after supporting sources; UID, resourceVersion,
+and spec must still match. The re-read shares the 15-second deadline and abort
+signal, and stale or changed captures fail instead of returning findings. Other
+unsupported groups/kinds remain explicitly unevaluated. Listener attachment,
+section/port selection, protocol/hostname intersections, backend port validity,
+controller acceptance, and TCP/TLS/UDP/inference route validation are not
+claimed.
 
 Nine hosted HTTP/gRPC scenarios exercised missing/shared parents, selector
 matching, wrong grant groups/names/kinds, denied grants and invalid selectors.
@@ -2337,6 +2376,15 @@ were real. No Gateway API or resource was installed. Named controls and findings
 rendered without a plugin execution failure, and real absence returned after
 handlers were removed. Tests are source-informed, not an independent Go checker
 oracle; Desktop and populated live-Gateway evidence remain open.
+
+The selected-object revalidation increment passed 45 focused tests in two files,
+and the full suite passed 22,605 tests in 189 files with one worker. Two
+concurrent/default-worker attempts encountered distinct unrelated 5-second test
+timeouts; each affected test file passed when rerun alone. Type-check, lint and
+production build passed. A fresh stock Headlamp run was not available: no CDP
+listener was present on `:9222`. Therefore this increment's contribution
+rendering, browser console, i18n and accessibility tree remain unverified; the
+earlier hosted scenarios do not close those gates.
 
 ## Local helpers, outbound mode and Gateway conditions
 

@@ -23,7 +23,13 @@ import { configurationDefinitions } from '../resources/registry';
 import { CollectionRead, readCollection } from './collections';
 import { discoverConfiguration } from './configuration';
 import { loadMeshSnapshot, namespaceMeshConfiguration } from './mesh';
-import { InvalidResponseError, readFailure, withDiagnosticDeadline } from './requests';
+import {
+  InvalidResponseError,
+  observedResourceIdentity,
+  readCluster,
+  readFailure,
+  withDiagnosticDeadline,
+} from './requests';
 
 export interface ValidationSource extends CollectionRead<ValidationRecord> {
   key: ValidationSourceKey;
@@ -32,6 +38,80 @@ export interface ValidationSource extends CollectionRead<ValidationRecord> {
 export interface ValidationSnapshot {
   context: ReferenceValidationContext;
   sources: ValidationSource[];
+}
+export interface ValidationTarget {
+  apiVersion: string;
+  kind: string;
+  name: string;
+  namespace: string;
+  resourceVersion: string;
+  spec: unknown;
+  uid: string;
+}
+
+function captureGatewayRouteTarget(
+  target: ValidationTarget | undefined,
+  kind: string,
+  group: string,
+  namespace: string | undefined,
+  spec: unknown
+): ValidationTarget | undefined {
+  if (!target) return undefined;
+  if (
+    group !== 'gateway.networking.k8s.io' ||
+    !['HTTPRoute', 'GRPCRoute'].includes(kind) ||
+    target.kind !== kind ||
+    target.namespace !== namespace ||
+    !isDnsLabel(target.namespace) ||
+    !isDnsSubdomain(target.name) ||
+    typeof target.uid !== 'string' ||
+    !target.uid ||
+    typeof target.resourceVersion !== 'string' ||
+    !target.resourceVersion ||
+    !isRecord(spec) ||
+    JSON.stringify(target.spec) !== JSON.stringify(spec)
+  )
+    throw new Error('Gateway route validation requires a matching, versioned selected object');
+  const definition = configurationDefinitions.find(
+    item => item.kind === kind && item.group === group
+  );
+  const versions = definition?.resourceClass.apiVersion;
+  if (
+    !definition ||
+    !(Array.isArray(versions) ? versions : [versions]).includes(target.apiVersion) ||
+    target.apiVersion.split('/')[0] !== group
+  )
+    throw new Error('Gateway route API version is unsupported or changed');
+  return structuredClone(target);
+}
+
+async function revalidateGatewayRoute(
+  scope: ClusterScope,
+  target: ValidationTarget | undefined,
+  signal: AbortSignal
+) {
+  if (!target) return;
+  const definition = configurationDefinitions.find(
+    item => item.kind === target.kind && item.group === 'gateway.networking.k8s.io'
+  );
+  if (!definition) throw new Error('Gateway route resource definition is unavailable');
+  const path =
+    `/apis/${target.apiVersion}/namespaces/${encodeURIComponent(target.namespace)}/` +
+    `${definition.plural}/${encodeURIComponent(target.name)}`;
+  const current: unknown = await readCluster(scope, path, signal);
+  const identity = observedResourceIdentity(current, {
+    kind: target.kind,
+    apiVersion: target.apiVersion,
+    namespace: target.namespace,
+    name: target.name,
+  });
+  if (
+    identity.uid !== target.uid ||
+    identity.resourceVersion !== target.resourceVersion ||
+    !isRecord(current) ||
+    JSON.stringify(current.spec) !== JSON.stringify(target.spec)
+  )
+    throw new Error('Gateway route changed during validation; reload before checking');
 }
 
 async function readSource(
@@ -155,11 +235,13 @@ export async function loadValidationSnapshot(
   identityDomain: string | null,
   signal: AbortSignal,
   namespace?: string,
-  gatewayClasses?: GatewayClassSettings
+  gatewayClasses?: GatewayClassSettings,
+  target?: ValidationTarget
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   const capturedScope = clusterScope(scope.cluster);
   const capturedSpec = structuredClone(spec);
+  const capturedTarget = captureGatewayRouteTarget(target, kind, group, namespace, capturedSpec);
   const capturedClasses =
     gatewayClasses === undefined ? undefined : validateGatewayClassSettings(gatewayClasses);
   return withDiagnosticDeadline(signal, 'Configuration checks exceeded 15 seconds', requestSignal =>
@@ -171,7 +253,8 @@ export async function loadValidationSnapshot(
       identityDomain,
       requestSignal,
       namespace,
-      capturedClasses
+      capturedClasses,
+      capturedTarget
     )
   );
 }
@@ -184,7 +267,8 @@ async function readValidationSnapshot(
   identityDomain: string | null,
   signal: AbortSignal,
   namespace?: string,
-  gatewayClasses?: GatewayClassSettings
+  gatewayClasses?: GatewayClassSettings,
+  target?: ValidationTarget
 ): Promise<ValidationSnapshot> {
   signal.throwIfAborted();
   if (namespace !== undefined && namespace !== '' && !isDnsLabel(namespace))
@@ -330,5 +414,6 @@ async function readValidationSnapshot(
       [...names].map(name => [name, namespaceMeshConfiguration(mesh, name)])
     );
   }
+  await revalidateGatewayRoute(scope, target, signal);
   return snapshot;
 }

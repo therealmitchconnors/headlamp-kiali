@@ -123,6 +123,18 @@ function Checks({
       const spec = structuredClone(resource.spec);
       const metadata = structuredClone(resource.metadata);
       const status = structuredClone(resource.jsonData.status);
+      const routeTarget =
+        group === 'gateway.networking.k8s.io' && ['HTTPRoute', 'GRPCRoute'].includes(kind)
+          ? {
+              apiVersion: resource.jsonData.apiVersion ?? '',
+              kind,
+              name: metadata.name,
+              namespace,
+              resourceVersion: metadata.resourceVersion ?? '',
+              spec,
+              uid: metadata.uid ?? '',
+            }
+          : undefined;
       const snapshot = await loadValidationSnapshot(
         clusterScope(cluster),
         kind,
@@ -131,7 +143,8 @@ function Checks({
         identityDomain,
         signal,
         namespace,
-        gatewayClasses
+        gatewayClasses,
+        routeTarget
       );
       return {
         skipWildcardGatewayHosts,
