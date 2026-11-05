@@ -1,4 +1,9 @@
-import { metricAxis, validateChartDisplay } from './chartDisplay';
+import {
+  MAX_METRIC_CHART_POINTS,
+  metricAxis,
+  metricChartPoints,
+  validateChartDisplay,
+} from './chartDisplay';
 import { customDashboardJobs, validateCustomDashboard } from './customDashboards';
 
 it('preserves explicit zero bounds and supported spans while omitting null/default display options', () => {
@@ -48,6 +53,22 @@ it('bounds geometry and samples rather than emitting nonfinite SVG coordinates',
   expect(() => metricAxis(Array(1929).fill(1), { min: 0 })).toThrow('1928');
   expect(() => metricAxis([Infinity], { min: 0 })).toThrow('finite');
   expect(() => metricAxis([Number.MAX_VALUE], { min: 0, max: 1 })).toThrow('safely');
+});
+it('accepts exactly 1928 chart points and rejects the next point before flattening', () => {
+  const series = {
+    labels: {},
+    samples: Array.from({ length: MAX_METRIC_CHART_POINTS }, (_, index) => ({
+      timestamp: index,
+      value: index,
+    })),
+  };
+  expect(metricChartPoints({ warnings: [], series: [series] })).toHaveLength(1928);
+  expect(() =>
+    metricChartPoints({
+      warnings: [],
+      series: [{ ...series, samples: [...series.samples, { timestamp: 1928, value: 1928 }] }],
+    })
+  ).toThrow('1928-sample display limit');
 });
 it('captures display options without changing metric query construction or scale', () => {
   const dashboard = validateCustomDashboard({

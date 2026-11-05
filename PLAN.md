@@ -1575,6 +1575,34 @@ If multiple agents work independently, agree on ownership of shared registration
 configuration, locale and ledger files. Do not run concurrent watchers that
 overwrite the same installed plugin.
 
+### Runtime-hardening checkpoint — 2026-11-03
+
+Measured the code at PR base `655e75109cf27f964f55045bdadfe39c72d22022` and
+added `scripts/bench-analysis.ts`, runnable with:
+
+```sh
+node_modules/.bin/vite-node --script -c node_modules/@kinvolk/headlamp-plugin/config/vite.config.mjs scripts/bench-analysis.ts
+```
+
+The dense correlation fixture previously retained 2,000,000 Service relation
+matches plus 1,000,000 reverse workload-to-Service references from 1,000
+Services, 1,000 Deployments and 1,000 owned Pods. Correlation now fails closed
+beyond 20,000 total workload/Pod matches; exact accepted and next-match tests preserve complete-result semantics. Resource decoding also
+bounds per-map labels/text, owner references and aggregate source labels/text.
+The general metric chart now accepts at most 1,928 total points, matching the
+existing eight-series × 241-sample comparison shape; larger decoded results show
+an explicit error instead of being flattened into chart/table output.
+
+The same harness verifies the existing 4,000-observation/1,000-node/2,000-edge
+topology shape and the exact 20,000 VirtualService host×gateway contributions.
+Their thresholds and semantics were not changed. Before/after scenario sizes,
+counts, single-run measurements, test commands, and the distinction from actual
+Headlamp rendering are recorded in `docs/parity.md`. Initial HTTP buffering and
+JSON parsing by Headlamp/transport remain outside plugin-side decoding limits.
+No live Headlamp browser target was available; browser rendering, memory,
+accessibility and responsiveness evidence remain open. No cluster or live
+traffic was used.
+
 ## Full scoped target and later acceptance gates
 
 ### Resource and configuration inventory

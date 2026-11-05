@@ -229,6 +229,39 @@ describe('reusable application/workload/service correlation', () => {
       correlateResources([item, { ...item, identity: { ...item.identity, uid: 'new' } }])
     ).toThrow('duplicate scoped name');
   });
+
+  it('accepts 20000 Service relation matches and rejects the next match without truncating', () => {
+    const deployments = Array.from({ length: 1000 }, (_, index) =>
+      resource('Deployment', `deployment-${index}`, { shared: 'yes' })
+    );
+    const pods = deployments.map((deployment, index) =>
+      resource('Pod', `pod-${index}`, { shared: 'yes' }, { owners: [owner(deployment)] })
+    );
+    const services = Array.from({ length: 10 }, (_, index) =>
+      resource(
+        'Service',
+        `service-${index}`,
+        { shared: 'yes' },
+        { serviceSelector: { shared: 'yes' } }
+      )
+    );
+    const result = correlateResources([...deployments, ...pods, ...services]);
+    expect(
+      result.serviceRelations.reduce(
+        (sum, relation) => sum + relation.workloads.length + relation.pods.length,
+        0
+      )
+    ).toBe(20_000);
+    const extra = resource(
+      'Service',
+      'service-10',
+      { shared: 'yes' },
+      { serviceSelector: { shared: 'yes' } }
+    );
+    expect(() => correlateResources([...deployments, ...pods, ...services, extra])).toThrow(
+      '20000 Service-to-workload/Pod matches'
+    );
+  });
 });
 
 describe('Service host correlation', () => {

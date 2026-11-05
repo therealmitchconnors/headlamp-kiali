@@ -96,6 +96,7 @@ const uidKey = (identity: { cluster: string; namespace?: string; uid?: string })
   JSON.stringify([identity.cluster, identity.namespace ?? '', identity.uid]);
 const sortedResources = (items: readonly CorrelationResource[]) =>
   [...items].sort((a, b) => compare(resourceKey(a.identity), resourceKey(b.identity)));
+const MAX_SERVICE_RELATION_MATCHES = 20_000;
 
 export function correlateResources(
   resources: readonly CorrelationResource[],
@@ -205,6 +206,7 @@ export function correlateResources(
   );
   const workloadIndex = labelIndex(workloads, workload => workload.resource.workloadLabels);
   const podIndex = labelIndex(pods, pod => pod.labels);
+  let serviceRelationMatches = 0;
   const serviceRelations: ServiceRelations[] = ordered
     .filter(item => item.identity.kind === 'Service')
     .map(service => {
@@ -216,11 +218,19 @@ export function correlateResources(
       const matches = workloadIndex.select(scope.cluster, scope.namespace, {
         matchLabels: selector,
       });
+      const selectedPods = podIndex.select(scope.cluster, scope.namespace, {
+        matchLabels: selector,
+      });
+      serviceRelationMatches += matches.length + selectedPods.length;
+      if (serviceRelationMatches > MAX_SERVICE_RELATION_MATCHES)
+        throw new Error(
+          `Correlation exceeds ${MAX_SERVICE_RELATION_MATCHES} Service-to-workload/Pod matches`
+        );
       for (const workload of matches) workload.services.push(service);
       return {
         service,
         workloads: matches,
-        pods: podIndex.select(scope.cluster, scope.namespace, { matchLabels: selector }),
+        pods: selectedPods,
       };
     });
 
