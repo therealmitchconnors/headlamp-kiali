@@ -33,6 +33,7 @@ const configured: ConfigResult = {
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   K8s: {
+    cluster: { KubeObject: class {} },
     useSelectedClusters: () => [state.cluster],
     useClustersConf: () => ({ alpha: {}, beta: {} }),
   },

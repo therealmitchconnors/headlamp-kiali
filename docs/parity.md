@@ -4244,6 +4244,51 @@ public ConfigStore value before reload, inspecting only Kiali's slice. The
 test profile's tracing setting is now disabled in both memory and storage.
 This was test-harness cleanup, not a host patch or a change to ConfigStore.
 
+### Current workload owner-chain links and graph uncertainty
+
+`data/traceCorrelation.ts` adds a second, explicit action after Pod UID
+verification. It captures the selected cluster and reported Pod namespace, then
+requires every bounded namespace correlation source to complete. The current Pod
+must still have the exact reported name and UID. `core/traceCorrelation.ts`
+reuses `correlateResources()` and only returns supported workload identities
+when the owner references resolve by scoped UID, group, kind and name without
+ownership issues. A current application link is derived from that same complete
+correlation model and the captured application-label settings. The UI shows
+reported Pod, current Pod and current workload identities separately; historical
+trace attributes are not rewritten as current Kubernetes identity.
+
+Deleted/replaced Pods, UID mismatch, missing or ambiguous owners, unsupported
+roots, out-of-scope resources and denied/incomplete namespace reads do not
+produce workload/application links. Reads retain the shared 15-second deadline
+and cancellation behavior. Cluster, selected trace/span, span time interval and
+plugin settings participate in the view capture key; changed captures clear
+links and abort pending work.
+
+The traffic graph is reachable only as an explicit namespace-scoped navigation
+from a verified current workload. No graph edge or highlight is claimed: the
+existing graph snapshot uses Prometheus telemetry cluster/namespace/workload
+names and an independent rate window, and carries neither Kubernetes UIDs nor
+trace/span IDs. The UI states this uncertainty and does not infer a traffic
+relationship, cause, health verdict or policy conclusion. No host overlay
+limitation was tested or claimed.
+
+The pinned Kiali v2.33.0 audit at
+[`0e8be887`](https://github.com/kiali/kiali/commit/0e8be887b8217bbcac5e3ae0bfcd258073949cca)
+confirms this gate: `frontend/src/types/Graph.ts` represents graph nodes with
+cluster/namespace and workload/app/service/version names, but no Kubernetes UID.
+`frontend/src/pages/Graph/SummaryPanelNodeTraces.tsx` uses the selected node and
+`queryTime` to request workload/service/application traces, while
+`business/tracing.go` filters workload traces using `node_id` or hostname tags.
+Those are name/time-scoped trace retrieval paths, not a UID-proven trace-to-edge
+relationship. This implementation therefore keeps verified workload navigation
+and does not import or bridge Kiali's private graph renderer.
+
+Local focused tests cover a Pod→ReplicaSet→Deployment chain, replaced/deleted
+Pods, mismatched and ambiguous owners, cycles, unsupported roots, cross-context
+and cross-namespace snapshot collisions, incomplete/denied reads, and stale UI
+capture cancellation. This increment has not been live-verified in Headlamp;
+hosted, Desktop, provider and accessibility evidence remain open.
+
 ## Current configuration and telemetry increment
 
 The configuration-kind inventory now covers **23** kinds: the original 14

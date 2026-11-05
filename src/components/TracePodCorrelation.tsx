@@ -5,15 +5,104 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useCallback, useMemo, useState } from 'react';
+import { useKialiConfig } from '../config';
+import { getClusterConfig } from '../core/config';
 import { clusterScope } from '../core/scope';
 import { ReportedPodIdentity, reportedTracePod } from '../core/traceCorrelation';
 import { TraceSpan } from '../core/tracing';
-import { verifyTracePod } from '../data/traceCorrelation';
+import { verifyTracePod, verifyTraceWorkload } from '../data/traceCorrelation';
 import { useRequest } from '../hooks/useRequest';
+import CorrelatedResourceName from './CorrelatedResourceName';
 import RequestStatus from './RequestStatus';
 
-function VerifiedPod({ cluster, identity }: { cluster: string; identity: ReportedPodIdentity }) {
+function CurrentWorkload({
+  cluster,
+  identity,
+  labels,
+  captureKey,
+  allowApplication,
+}: {
+  cluster: string;
+  identity: ReportedPodIdentity;
+  labels: ReturnType<typeof getClusterConfig>['appLabels'] | null;
+  captureKey: string;
+  allowApplication: boolean;
+}) {
   const { t } = useTranslation();
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      verifyTraceWorkload(clusterScope(cluster), identity, labels ?? null, signal),
+    [cluster, identity, labels]
+  );
+  const result = useRequest(JSON.stringify([cluster, identity, labels, captureKey]), load);
+  return (
+    <RequestStatus state={result} loadingLabel={t('Capturing current UID owner relationships...')}>
+      {current => (
+        <Stack spacing={1}>
+          <Alert severity="info">
+            {t(
+              'Current Kubernetes identities were captured at {{time}}. These are separate from the reported or historical trace attributes.',
+              { time: new Date(current.checkedAt).toLocaleString() }
+            )}
+          </Alert>
+          <Typography>
+            {t('Reported Pod')}: {current.reportedPod.namespace}/{current.reportedPod.name}{' '}
+            <code>{current.reportedPod.uid}</code>
+          </Typography>
+          <Typography>
+            {t('Current Pod')}: {current.pod.namespace}/{current.pod.name}{' '}
+            <code>{current.pod.uid}</code>
+          </Typography>
+          <Typography>
+            {t('Current workload')}:{' '}
+            <CorrelatedResourceName resource={{ identity: current.workload }} />{' '}
+            <code>{current.workload.uid}</code>
+          </Typography>
+          {allowApplication && current.application && (
+            <Link
+              routeName="kiali-applications"
+              activeCluster={current.application.cluster}
+              search={new URLSearchParams({
+                namespace: current.application.namespace,
+                application: current.application.name,
+              }).toString()}
+            >
+              {t('Open current application')}
+            </Link>
+          )}
+          <Alert severity="info">
+            {t(
+              'Graph association is not established. The traffic graph is a separate Prometheus rate-window snapshot with name-based telemetry identities, not this Kubernetes UID or trace/span ID. No edge, highlight, cause, or health verdict is inferred.'
+            )}
+          </Alert>
+          <Link
+            routeName="kiali-graph"
+            activeCluster={current.workload.cluster}
+            search={new URLSearchParams({ namespace: current.workload.namespace }).toString()}
+          >
+            {t('Open traffic graph for this namespace')}
+          </Link>
+        </Stack>
+      )}
+    </RequestStatus>
+  );
+}
+
+function VerifiedPod({
+  cluster,
+  identity,
+  labels,
+  captureKey,
+  allowApplication,
+}: {
+  cluster: string;
+  identity: ReportedPodIdentity;
+  labels: ReturnType<typeof getClusterConfig>['appLabels'] | null;
+  captureKey: string;
+  allowApplication: boolean;
+}) {
+  const { t } = useTranslation();
+  const [workloadAttempt, setWorkloadAttempt] = useState(0);
   const load = useCallback(
     (signal: AbortSignal) => verifyTracePod(clusterScope(cluster), identity, signal),
     [cluster, identity]
@@ -43,6 +132,19 @@ function VerifiedPod({ cluster, identity }: { cluster: string; identity: Reporte
           >
             {t('Open Pod diagnostics')}
           </Link>
+          <Button onClick={() => setWorkloadAttempt(attempt => attempt + 1)}>
+            {t('Verify current workload owner')}
+          </Button>
+          {workloadAttempt > 0 && (
+            <CurrentWorkload
+              key={`${captureKey}:${workloadAttempt}`}
+              cluster={cluster}
+              identity={identity}
+              labels={labels}
+              captureKey={captureKey}
+              allowApplication={allowApplication}
+            />
+          )}
         </Stack>
       )}
     </RequestStatus>
@@ -52,16 +154,28 @@ function VerifiedPod({ cluster, identity }: { cluster: string; identity: Reporte
 export default function TracePodCorrelation({
   cluster,
   span,
+  traceCaptureKey = '',
 }: {
   cluster: string;
   span: TraceSpan;
+  traceCaptureKey?: string;
 }) {
   const { t } = useTranslation();
+  const config = useKialiConfig();
   const reference = useMemo(() => reportedTracePod(span), [span]);
-  const key = JSON.stringify([
+  const labels =
+    config.valid === true ? getClusterConfig(config.config, cluster).appLabels ?? null : null;
+  const captureKey = JSON.stringify([
     cluster,
     span.traceId,
     span.id,
+    span.startNs,
+    span.durationNs,
+    traceCaptureKey,
+    config,
+  ]);
+  const key = JSON.stringify([
+    captureKey,
     reference.status === 'ready' ? reference.identity : null,
   ]);
   const [request, setRequest] = useState<{ key: string; attempt: number }>();
@@ -121,6 +235,9 @@ export default function TracePodCorrelation({
               key={`${key}:${active.attempt}`}
               cluster={cluster}
               identity={reference.identity}
+              labels={labels}
+              captureKey={captureKey}
+              allowApplication={config.valid === true}
             />
           )}
         </>
