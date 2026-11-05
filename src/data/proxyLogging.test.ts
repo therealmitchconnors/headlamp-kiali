@@ -74,6 +74,23 @@ it('captures only the named proxy container and verifies Pod UID/restarts around
   );
 });
 
+it('projects the real indented Envoy logger response into the captured snapshot', async () => {
+  vi.mocked(readProxyLoggingLevels).mockResolvedValueOnce(
+    'active loggers:\r\n  a2a: warning\r\n  admin: warning\r\n  alternate_protocols_cache: warning\r\n'
+  );
+  const result = await loadProxyLoggingSnapshot(
+    clusterScope('alpha'),
+    pod,
+    new AbortController().signal
+  );
+  expect(result.loggers).toEqual([
+    { logger: 'a2a', level: 'warning' },
+    { logger: 'admin', level: 'warning' },
+    { logger: 'alternate_protocols_cache', level: 'warning' },
+  ]);
+  expect(setProxyLoggingLevel).not.toHaveBeenCalled();
+});
+
 it.each(['uid', 'restart'])('rejects a stale %s before allowing a proposal', async change => {
   const changed: DiagnosticPod =
     change === 'uid'

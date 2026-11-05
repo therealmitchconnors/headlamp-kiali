@@ -52,17 +52,13 @@ export function parseProxyLoggerLevels(value: unknown): ProxyLoggerLevel[] {
   const seen = new Set<string>();
   for (const line of lines.slice(1)) {
     if (!line) continue;
-    const separator = line.lastIndexOf(': ');
-    const logger = line.slice(0, separator);
-    const level = line.slice(separator + 2);
-    if (
-      separator < 1 ||
-      logger.length > 256 ||
-      logger.trim() !== logger ||
-      /[\u0000-\u001f\u007f]/.test(logger) ||
-      !isProxyLogLevel(level) ||
-      seen.has(logger)
-    )
+    const match =
+      /^(?:  )?([A-Za-z0-9_.-]{1,256}): (off|trace|debug|info|warning|error|critical)$/.exec(
+        line
+      );
+    if (!match) throw new Error('Proxy logging response contains an invalid or duplicate logger');
+    const [, logger, level] = match;
+    if (!isProxyLogLevel(level) || seen.has(logger))
       throw new Error('Proxy logging response contains an invalid or duplicate logger');
     seen.add(logger);
     loggers.push({ logger, level });

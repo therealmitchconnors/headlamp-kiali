@@ -29,14 +29,37 @@ it('parses the source-supported logger listing without losing logger names or le
 });
 
 it.each([
+  'active loggers:\n  a2a: warning\n  admin: warning\n  alternate_protocols_cache: warning',
+  'active loggers:\r\n  a2a: warning\r\n  admin: warning\r\n  alternate_protocols_cache: warning\r\n',
+  'active loggers:\n  a2a: warning\n  admin: warning\n  alternate_protocols_cache: warning\n',
+])('parses Envoy-indented logger listings and line-ending variants', response => {
+  expect(parseProxyLoggerLevels(response)).toEqual([
+    { logger: 'a2a', level: 'warning' },
+    { logger: 'admin', level: 'warning' },
+    { logger: 'alternate_protocols_cache', level: 'warning' },
+  ]);
+});
+
+it.each([
   ['', 'unsupported format'],
+  ['Unauthorized', 'unsupported format'],
+  ['active loggers:\nError: unavailable', 'invalid or duplicate'],
   ['active loggers:\n', 'did not report any loggers'],
   ['active loggers:\nrouter: verbose', 'invalid or duplicate'],
   ['active loggers:\nrouter: info\nrouter: debug', 'invalid or duplicate'],
+  ['active loggers:\nrouter: info\n  router: debug', 'invalid or duplicate'],
   ['active loggers:\n router: info', 'invalid or duplicate'],
-  ['active loggers:\nrouter: info\n\nextra', 'invalid or duplicate'],
+  ['active loggers:\n   router: info', 'invalid or duplicate'],
+  ['active loggers:\n  bad name: info', 'invalid or duplicate'],
+  ['active loggers:\n  bad:name: info', 'invalid or duplicate'],
+  ['active loggers:\n  router : info', 'invalid or duplicate'],
+  ['active loggers:\n  router: info\n\nextra', 'invalid or duplicate'],
 ])('rejects unsupported logger state %#', (response, reason) => {
   expect(() => parseProxyLoggerLevels(response)).toThrow(reason);
+});
+
+it('retains the response-size limit', () => {
+  expect(() => parseProxyLoggerLevels('x'.repeat(262145))).toThrow('exceeds 256 KiB');
 });
 
 it('captures an immutable all-loggers proposal and rejects no-op or unsupported changes', () => {
