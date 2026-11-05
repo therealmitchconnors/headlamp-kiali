@@ -67,7 +67,7 @@ beforeEach(() => {
   vi.mocked(inspectGatewayRouteReferences)
     .mockReset()
     .mockResolvedValue({
-      sourceVersions: { gateways: '1', services: '1' },
+      sourceEvidence: '{"gateways":[],"services":[]}',
       uncertainty: [
         'Gateway listener protocol/hostname acceptance and controller status are not verified; a proposed parentRef does not prove route attachment.',
       ],

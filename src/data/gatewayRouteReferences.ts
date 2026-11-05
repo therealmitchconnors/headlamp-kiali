@@ -14,7 +14,7 @@ import { loadValidationSnapshot } from './validation';
 const GROUP = 'gateway.networking.k8s.io';
 
 export interface GatewayRouteReferenceReview {
-  sourceVersions: Readonly<Partial<Record<ValidationSourceKey, string>>>;
+  sourceEvidence: string;
   uncertainty: readonly string[];
 }
 
@@ -22,11 +22,23 @@ function sourceMap(
   sources: readonly {
     key: ValidationSourceKey;
     complete: boolean;
+    items: readonly ValidationRecord[];
     resourceVersion?: string;
     error?: { message: string };
   }[]
 ) {
   return new Map(sources.map(source => [source.key, source]));
+}
+
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort()
+      .map(key => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
 }
 
 function expectedName(value: unknown, namespace: string) {
@@ -168,14 +180,20 @@ async function reviewGatewayRouteReferences(
     ['namespaces']
   );
   const sources = sourceMap(snapshot.sources);
-  const sourceVersions: Partial<Record<ValidationSourceKey, string>> = {};
+  const evidence: Partial<Record<ValidationSourceKey, string[]>> = {};
   for (const key of required) {
     const source = sources.get(key);
     if (!source?.complete || !source.resourceVersion)
       throw new Error(
         `${key} reference evidence is incomplete: ${source?.error?.message ?? 'source unavailable'}`
       );
-    sourceVersions[key] = source.resourceVersion;
+    evidence[key] = source.items
+      .map(item => {
+        if (!item.uid || !item.resourceVersion)
+          throw new Error(`${key} reference evidence is missing an object UID or resourceVersion`);
+        return stableStringify(item);
+      })
+      .sort();
   }
   if (!snapshot.context.namespaces.items.some(item => item.name === namespace))
     throw new Error(`Route namespace ${namespace} is missing from complete namespace evidence`);
@@ -194,7 +212,14 @@ async function reviewGatewayRouteReferences(
     'Gateway listener protocol/hostname acceptance and controller status are not verified; a proposed parentRef does not prove route attachment.',
     'Reference evidence is read-only and can change after review; it is rechecked before confirmation.',
   ];
-  return { sourceVersions: Object.freeze(sourceVersions), uncertainty: Object.freeze(uncertainty) };
+  const sourceEvidence = JSON.stringify(
+    Object.fromEntries(
+      Object.entries(evidence)
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([key, records]) => [key, records])
+    )
+  );
+  return { sourceEvidence, uncertainty: Object.freeze(uncertainty) };
 }
 
 export async function inspectGatewayRouteReferences(
@@ -232,7 +257,7 @@ export async function assertGatewayRouteReferencesFresh(
     structuredClone(spec),
     signal
   );
-  if (JSON.stringify(current.sourceVersions) !== JSON.stringify(expected.sourceVersions))
+  if (current.sourceEvidence !== expected.sourceEvidence)
     throw new Error(
       'Gateway, Service, namespace or ReferenceGrant evidence changed; review the route again'
     );

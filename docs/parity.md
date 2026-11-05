@@ -2623,7 +2623,12 @@ backends require a matching ReferenceGrant. Route discovery, complete
 reference evidence, a single unambiguous TCP Service port, and optional
 listener selectors are checked before the permission review and server
 dry-run. Update operations retain the original route UID/resourceVersion guard.
-Reference-list versions are rechecked before the separately confirmed operation.
+Before the separately confirmed operation, fresh discovery and complete reads
+are repeated and captured object evidence (identity, UID, object resourceVersion,
+labels, spec and relevant Service export annotation) is compared independently
+of list order. Advancing collection/list resourceVersions alone does not
+invalidate unchanged evidence; changed, removed, recreated or newly listed
+objects do.
 
 The review shows the complete proposed manifest and reports which existing
 reference checks could not run. It explicitly does not claim controller

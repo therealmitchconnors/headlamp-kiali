@@ -16,82 +16,125 @@ const routeSpec = {
 };
 
 function snapshot({
-  version = '1',
+  listVersion = '1',
+  objectVersion = '1',
   grant = true,
   incomplete,
   ambiguousServicePort = false,
+  reverseItems = false,
+  gatewayUid = 'gateway-uid',
+  gatewayZone = 'edge-zone',
+  removeGateway = false,
+  extraService = false,
 }: {
-  version?: string;
+  listVersion?: string;
+  objectVersion?: string;
   grant?: boolean;
   incomplete?: ValidationSourceKey;
   ambiguousServicePort?: boolean;
+  reverseItems?: boolean;
+  gatewayUid?: string;
+  gatewayZone?: string;
+  removeGateway?: boolean;
+  extraService?: boolean;
 } = {}) {
-  const sources = (
-    ['gateways', 'namespaces', 'services', 'referenceGrants'] as ValidationSourceKey[]
-  ).map(key => ({
-    key,
-    complete: key !== incomplete,
-    resourceVersion: version,
-    ...(key === incomplete ? { error: { message: 'forbidden' } } : {}),
-  }));
-  return {
-    sources,
-    context: {
-      cluster: 'alpha',
-      identityDomain: null,
-      namespaces: {
-        complete: true,
-        items: [
-          { name: 'bookinfo', namespace: '', labels: {}, spec: {} },
-          { name: 'edge', namespace: '', labels: {}, spec: {} },
-          { name: 'preview', namespace: '', labels: {}, spec: {} },
-        ],
-      },
-      destinationRules: { complete: false, items: [] },
-      sidecars: { complete: false, items: [] },
-      gateways: {
-        complete: true,
-        items: [
-          {
-            name: 'public',
-            namespace: 'edge',
-            uid: 'gateway-uid',
-            resourceVersion: version,
-            labels: {},
-            spec: {
-              listeners: [
-                {
-                  name: 'https',
-                  port: 443,
-                  allowedRoutes: { namespaces: { from: 'All' } },
+  const order = <T>(items: T[]) => (reverseItems ? [...items].reverse() : items);
+  const context = {
+    cluster: 'alpha',
+    identityDomain: null,
+    namespaces: {
+      complete: true,
+      items: order([
+        {
+          name: 'bookinfo',
+          namespace: '',
+          uid: 'bookinfo-uid',
+          resourceVersion: objectVersion,
+          labels: {},
+          spec: {},
+        },
+        {
+          name: 'edge',
+          namespace: '',
+          uid: 'edge-uid',
+          resourceVersion: objectVersion,
+          labels: { zone: gatewayZone },
+          spec: {},
+        },
+        {
+          name: 'preview',
+          namespace: '',
+          uid: 'preview-uid',
+          resourceVersion: objectVersion,
+          labels: {},
+          spec: {},
+        },
+      ]),
+    },
+    destinationRules: { complete: false, items: [] },
+    sidecars: { complete: false, items: [] },
+    gateways: {
+      complete: true,
+      items: order(
+        removeGateway
+          ? []
+          : [
+              {
+                name: 'public',
+                namespace: 'edge',
+                uid: gatewayUid,
+                resourceVersion: objectVersion,
+                labels: {},
+                spec: {
+                  listeners: [
+                    {
+                      name: 'https',
+                      port: 443,
+                      allowedRoutes: { namespaces: { from: 'All' } },
+                    },
+                  ],
                 },
-              ],
-            },
+              },
+            ]
+      ),
+    },
+    services: {
+      complete: true,
+      items: order([
+        {
+          name: 'reviews',
+          namespace: 'preview',
+          uid: 'service-uid',
+          resourceVersion: objectVersion,
+          labels: {},
+          spec: {
+            ports: ambiguousServicePort ? [{ port: 9080 }, { port: 9080 }] : [{ port: 9080 }],
           },
-        ],
-      },
-      services: {
-        complete: true,
-        items: [
-          {
-            name: 'reviews',
-            namespace: 'preview',
-            uid: 'service-uid',
-            resourceVersion: version,
-            labels: {},
-            spec: {
-              ports: ambiguousServicePort ? [{ port: 9080 }, { port: 9080 }] : [{ port: 9080 }],
-            },
-          },
-        ],
-      },
-      referenceGrants: {
-        complete: true,
-        items: grant
+        },
+        ...(extraService
+          ? [
+              {
+                name: 'other',
+                namespace: 'preview',
+                uid: 'other-service-uid',
+                resourceVersion: objectVersion,
+                labels: {},
+                spec: { ports: [{ port: 8080 }] },
+              },
+            ]
+          : []),
+      ]),
+    },
+    referenceGrants: {
+      complete: true,
+      items: order(
+        grant
           ? [
               {
                 name: 'routes',
                 namespace: 'preview',
+                uid: 'grant-uid',
+                resourceVersion: objectVersion,
                 labels: {},
                 spec: {
                   from: [
@@ -105,10 +148,24 @@ function snapshot({
                 },
               },
             ]
-          : [],
-      },
+          : []
+      ),
     },
   };
+  const sourceItems = {
+    gateways: context.gateways.items,
+    namespaces: context.namespaces.items,
+    services: context.services.items,
+    referenceGrants: context.referenceGrants.items,
+  };
+  const sources = (['gateways', 'namespaces', 'services', 'referenceGrants'] as const).map(key => ({
+    key: key as ValidationSourceKey,
+    items: sourceItems[key],
+    complete: key !== incomplete,
+    resourceVersion: listVersion,
+    ...(key === incomplete ? { error: { message: 'forbidden' } } : {}),
+  }));
+  return { sources, context };
 }
 
 beforeEach(() => {
@@ -131,7 +188,7 @@ it('requires matching cross-namespace Gateway sharing and Service ReferenceGrant
       signal
     )
   ).resolves.toMatchObject({
-    sourceVersions: { gateways: '1', namespaces: '1', services: '1', referenceGrants: '1' },
+    sourceEvidence: expect.any(String),
     uncertainty: expect.arrayContaining([
       expect.stringContaining('controller status are not verified'),
     ]),
@@ -235,11 +292,68 @@ it('rejects a backend port that ambiguously matches multiple Service ports', asy
   ).rejects.toThrow('one unambiguous TCP port 9080');
 });
 
-it('rejects review confirmation when reference evidence changed after dry-run', async () => {
+it('allows list snapshot resourceVersions to advance when object evidence is unchanged', async () => {
   const signal = new AbortController().signal;
   vi.mocked(loadValidationSnapshot)
-    .mockResolvedValueOnce(snapshot({ version: '1' }) as never)
-    .mockResolvedValueOnce(snapshot({ version: '2' }) as never);
+    .mockResolvedValueOnce(snapshot({ listVersion: '1', objectVersion: '1' }) as never)
+    .mockResolvedValueOnce(snapshot({ listVersion: '2', objectVersion: '1' }) as never);
+  const reviewed = await inspectGatewayRouteReferences(
+    { cluster: 'alpha' },
+    'HTTPRoute',
+    'gateway.networking.k8s.io/v1',
+    'bookinfo',
+    routeSpec,
+    signal
+  );
+  await expect(
+    assertGatewayRouteReferencesFresh(
+      { cluster: 'alpha' },
+      'HTTPRoute',
+      'gateway.networking.k8s.io/v1',
+      'bookinfo',
+      routeSpec,
+      reviewed,
+      signal
+    )
+  ).resolves.toBeUndefined();
+});
+
+it('ignores collection item ordering when checking reviewed reference evidence', async () => {
+  const signal = new AbortController().signal;
+  vi.mocked(loadValidationSnapshot)
+    .mockResolvedValueOnce(snapshot() as never)
+    .mockResolvedValueOnce(snapshot({ reverseItems: true }) as never);
+  const reviewed = await inspectGatewayRouteReferences(
+    { cluster: 'alpha' },
+    'HTTPRoute',
+    'gateway.networking.k8s.io/v1',
+    'bookinfo',
+    routeSpec,
+    signal
+  );
+  await expect(
+    assertGatewayRouteReferencesFresh(
+      { cluster: 'alpha' },
+      'HTTPRoute',
+      'gateway.networking.k8s.io/v1',
+      'bookinfo',
+      routeSpec,
+      reviewed,
+      signal
+    )
+  ).resolves.toBeUndefined();
+});
+
+it.each([
+  ['changed object resourceVersion', { objectVersion: '2' }],
+  ['changed object fields', { gatewayZone: 'replacement-zone' }],
+  ['recreated Gateway UID', { gatewayUid: 'replacement-gateway-uid' }],
+  ['new collection member', { extraService: true }],
+])('rejects confirmation when reference evidence has %s', async (_change, changed) => {
+  const signal = new AbortController().signal;
+  vi.mocked(loadValidationSnapshot)
+    .mockResolvedValueOnce(snapshot() as never)
+    .mockResolvedValueOnce(snapshot(changed) as never);
   const reviewed = await inspectGatewayRouteReferences(
     { cluster: 'alpha' },
     'HTTPRoute',
@@ -259,4 +373,30 @@ it('rejects review confirmation when reference evidence changed after dry-run', 
       signal
     )
   ).rejects.toThrow('evidence changed');
+});
+
+it('rejects confirmation when a referenced Gateway was deleted', async () => {
+  const signal = new AbortController().signal;
+  vi.mocked(loadValidationSnapshot)
+    .mockResolvedValueOnce(snapshot() as never)
+    .mockResolvedValueOnce(snapshot({ removeGateway: true }) as never);
+  const reviewed = await inspectGatewayRouteReferences(
+    { cluster: 'alpha' },
+    'HTTPRoute',
+    'gateway.networking.k8s.io/v1',
+    'bookinfo',
+    routeSpec,
+    signal
+  );
+  await expect(
+    assertGatewayRouteReferencesFresh(
+      { cluster: 'alpha' },
+      'HTTPRoute',
+      'gateway.networking.k8s.io/v1',
+      'bookinfo',
+      routeSpec,
+      reviewed,
+      signal
+    )
+  ).rejects.toThrow('non-existent or inaccessible K8s gateway');
 });
