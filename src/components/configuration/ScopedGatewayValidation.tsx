@@ -17,6 +17,7 @@ import type { ConfigurationResource } from '../../resources/common';
 import { Gateway } from '../../resources/gateway';
 import { K8sGateway } from '../../resources/k8s-gateway';
 import RequestStatus from '../RequestStatus';
+import StructuredValue from './StructuredValue';
 
 function Results({
   cluster,
@@ -38,6 +39,12 @@ function Results({
     <RequestStatus state={state} loadingLabel={t('Running declared-scope Gateway checks...')}>
       {data => (
         <>
+          {data.scope?.configurationSources && (
+            <details>
+              <summary>{t('Captured mesh configuration sources')}</summary>
+              <StructuredValue value={data.scope.configurationSources} />
+            </details>
+          )}
           {data.excluded ? (
             <Alert severity="info">
               {t('All Gateway checks are excluded by annotation; no evidence was read.')}

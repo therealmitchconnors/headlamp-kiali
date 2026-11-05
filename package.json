@@ -14,6 +14,7 @@
     "storybook": "headlamp-plugin storybook",
     "storybook-build": "headlamp-plugin storybook-build",
     "test": "headlamp-plugin test",
+    "smoke:hosted": "node scripts/smoke/run.mjs",
     "i18n": "headlamp-plugin i18n",
     "parity:check": "node scripts/parity/check-catalog.mjs",
     "resources:generate": "node scripts/generate-resources.mjs",
@@ -41,7 +42,8 @@
     "typescript": "5.6.2"
   },
   "devDependencies": {
-    "@kinvolk/headlamp-plugin": "^0.14.0"
+    "@kinvolk/headlamp-plugin": "^0.14.0",
+    "playwright": "1.56.1"
   },
   "dependencies": {
     "js-yaml": "4.3.2",

@@ -5,6 +5,12 @@ import { DirectionalRates, RequestHealth } from './health';
 import { MetricResult, requestRateQuery } from './telemetry';
 
 export type HealthReporterMode = 'single' | 'combined';
+export type HealthDirection = 'inbound' | 'outbound';
+
+export function isSupportedHealthProtocol(protocol: string): boolean {
+  return protocol === 'http' || protocol === 'grpc';
+}
+
 export interface ReportedRequestRate {
   labels: Readonly<Record<string, string>>;
   value: number;
@@ -87,9 +93,10 @@ export function combinedMetricHealth(
         value === null ||
         value === undefined ||
         !series.labels.request_protocol ||
+        !isSupportedHealthProtocol(series.labels.request_protocol) ||
         !requestHealthCode(series.labels)
       )
-        throw new Error('Invalid combined request-health observation');
+        throw new Error('Invalid or unsupported combined request-health observation');
       return { labels: series.labels, value };
     });
   return combineReportedRequests(samples(inbound, 'inbound'), samples(outbound, 'outbound'));

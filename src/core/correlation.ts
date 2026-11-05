@@ -11,17 +11,21 @@ export type CorrelationKind =
   | 'ReplicationController'
   | 'Job'
   | 'CronJob'
+  | 'DeploymentConfig'
   | 'Pod'
   | 'WorkloadGroup'
   | 'Service';
 
 export interface OwnerReference {
+  apiVersion?: string;
   group: string;
   kind: string;
   name: string;
   uid: string;
   controller: boolean;
 }
+
+export type AccountObservation = { ok: true; name: string } | { ok: false; message: string };
 
 export interface CorrelationResource {
   identity: ResourceIdentity & { kind: CorrelationKind; namespace: string; uid: string };
@@ -31,12 +35,19 @@ export interface CorrelationResource {
   serviceSelector: Labels | null;
   proxyMode: 'sidecar' | 'native-sidecar' | 'none';
   resourceVersion?: string;
-  podAccount?: { ok: true; name: string } | { ok: false; message: string };
+  podAccount?: AccountObservation;
   dashboardRefs?: PodDashboardReferences;
   virtualMachine?: {
     labelSource: 'group' | 'entry';
     matchingEntries: number;
+    selectorEmpty: boolean;
     entry?: { name: string; uid: string; resourceVersion: string };
+    accountEntries?: {
+      name: string;
+      uid: string;
+      resourceVersion: string;
+      serviceAccount: AccountObservation;
+    }[];
   };
   health?:
     | { ok: true; value: Pick<WorkloadHealthResource, 'replicas' | 'stale'> }
@@ -85,6 +96,7 @@ const uidKey = (identity: { cluster: string; namespace?: string; uid?: string })
   JSON.stringify([identity.cluster, identity.namespace ?? '', identity.uid]);
 const sortedResources = (items: readonly CorrelationResource[]) =>
   [...items].sort((a, b) => compare(resourceKey(a.identity), resourceKey(b.identity)));
+const MAX_SERVICE_RELATION_MATCHES = 20_000;
 
 export function correlateResources(
   resources: readonly CorrelationResource[],
@@ -194,6 +206,7 @@ export function correlateResources(
   );
   const workloadIndex = labelIndex(workloads, workload => workload.resource.workloadLabels);
   const podIndex = labelIndex(pods, pod => pod.labels);
+  let serviceRelationMatches = 0;
   const serviceRelations: ServiceRelations[] = ordered
     .filter(item => item.identity.kind === 'Service')
     .map(service => {
@@ -205,11 +218,19 @@ export function correlateResources(
       const matches = workloadIndex.select(scope.cluster, scope.namespace, {
         matchLabels: selector,
       });
+      const selectedPods = podIndex.select(scope.cluster, scope.namespace, {
+        matchLabels: selector,
+      });
+      serviceRelationMatches += matches.length + selectedPods.length;
+      if (serviceRelationMatches > MAX_SERVICE_RELATION_MATCHES)
+        throw new Error(
+          `Correlation exceeds ${MAX_SERVICE_RELATION_MATCHES} Service-to-workload/Pod matches`
+        );
       for (const workload of matches) workload.services.push(service);
       return {
         service,
         workloads: matches,
-        pods: podIndex.select(scope.cluster, scope.namespace, { matchLabels: selector }),
+        pods: selectedPods,
       };
     });
 
