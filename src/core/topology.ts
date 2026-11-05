@@ -439,9 +439,19 @@ export interface TopologyEdge {
   responses: Record<string, number>;
   flags: Record<string, number>;
   security: Record<string, number>;
+  securityObservations: {
+    identity: string;
+    reporter: TopologyReporter;
+    value: string;
+    rate: number;
+  }[];
   hosts: string[];
   metrics: string[];
-  observations: { identity: string; reporters: TopologyReporter[] }[];
+  observations: {
+    identity: string;
+    reporters: TopologyReporter[];
+    reporterIdentities: { reporter: TopologyReporter; identity: string }[];
+  }[];
 }
 export interface TopologyGraph {
   nodes: TopologyNode[];
@@ -498,11 +508,38 @@ function reporterBucketIdentity(observation: TopologyObservation) {
   return JSON.stringify([observation.metric, labels]);
 }
 
+function reporterPairIdentity(observation: TopologyObservation) {
+  const labels = LABELS.filter(
+    name => name !== 'reporter' && name !== 'connection_security_policy'
+  ).map(name => [
+    name,
+    Object.prototype.hasOwnProperty.call(observation.labels, name)
+      ? observation.labels[name]
+      : null,
+  ]);
+  return JSON.stringify([observation.metric, labels]);
+}
+
+type ReporterIdentity = { reporter: TopologyReporter; identity: string };
+type ReporterSecurity = { reporter: TopologyReporter; identity: string; value: string };
+
+function reporterSecurity(observation: TopologyObservation): ReporterSecurity {
+  return {
+    reporter: observation.reporter,
+    identity: observation.identity,
+    value: Object.prototype.hasOwnProperty.call(observation.labels, 'connection_security_policy')
+      ? observation.labels.connection_security_policy
+      : 'missing',
+  };
+}
+
 function normalizeReporters(input: TopologyObservations) {
   if (input.reporterMode !== 'combined')
     return input.observations.map(observation => ({
       observation,
       reporters: [observation.reporter],
+      reporterIdentities: [{ reporter: observation.reporter, identity: observation.identity }],
+      securityObservations: [reporterSecurity(observation)],
     }));
 
   const buckets = new Map<string, Map<TopologyReporter, Map<string, TopologyObservation>>>();
@@ -511,9 +548,9 @@ function normalizeReporters(input: TopologyObservations) {
     const bucket =
       buckets.get(bucketId) ?? new Map<TopologyReporter, Map<string, TopologyObservation>>();
     const series = bucket.get(observation.reporter) ?? new Map<string, TopologyObservation>();
-    if (series.has(observation.identity))
-      throw new Error('Duplicate topology reporter series identity');
-    series.set(observation.identity, observation);
+    const pairIdentity = reporterPairIdentity(observation);
+    if (series.has(pairIdentity)) throw new Error('Ambiguous topology reporter policy partitions');
+    series.set(pairIdentity, observation);
     bucket.set(observation.reporter, series);
     buckets.set(bucketId, bucket);
   }
@@ -521,6 +558,8 @@ function normalizeReporters(input: TopologyObservations) {
   const normalized: {
     observation: TopologyObservation;
     reporters: TopologyReporter[];
+    reporterIdentities: ReporterIdentity[];
+    securityObservations: ReporterSecurity[];
   }[] = [];
   for (const bucket of buckets.values()) {
     const source = bucket.get('source');
@@ -528,7 +567,12 @@ function normalizeReporters(input: TopologyObservations) {
     if (!source || !destination) {
       for (const [reporter, series] of bucket)
         for (const observation of series.values())
-          normalized.push({ observation, reporters: [reporter] });
+          normalized.push({
+            observation,
+            reporters: [reporter],
+            reporterIdentities: [{ reporter, identity: observation.identity }],
+            securityObservations: [reporterSecurity(observation)],
+          });
       continue;
     }
     if (
@@ -536,11 +580,21 @@ function normalizeReporters(input: TopologyObservations) {
       [...source.keys()].some(identity => !destination.has(identity))
     )
       throw new Error('Conflicting source/destination topology reporter identities');
-    for (const [identity, observation] of source) {
-      const counterpart = destination.get(identity)!;
+    for (const [pairIdentity, observation] of source) {
+      const counterpart = destination.get(pairIdentity)!;
       if (!Object.is(observation.rate, counterpart.rate))
         throw new Error('Conflicting source/destination topology reporter rates');
-      normalized.push({ observation, reporters: ['source', 'destination'] });
+      // Match Kiali's traffic identity without the reporter-specific security label.
+      // Source is the deterministic representative; both exact reporter records survive below.
+      normalized.push({
+        observation,
+        reporters: ['source', 'destination'],
+        reporterIdentities: [
+          { reporter: 'source', identity: observation.identity },
+          { reporter: 'destination', identity: counterpart.identity },
+        ],
+        securityObservations: [reporterSecurity(observation), reporterSecurity(counterpart)],
+      });
     }
   }
   return input.includeIdle ? normalized : normalized.filter(row => row.observation.rate !== 0);
@@ -589,7 +643,8 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     unique(node.versions, endpoint.version);
     return node;
   }
-  const rows = observations.map(({ observation, reporters }) => {
+  const rows = observations.map(row => {
+    const { observation } = row;
     if (!Number.isFinite(observation.rate) || observation.rate < 0)
       throw new Error('Invalid projected topology rate');
     const source = node(observation.source);
@@ -613,7 +668,7 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
       values.add(service.id);
       parents.set(destination.id, values);
     }
-    return { observation, reporters, source, destination, service };
+    return { ...row, source, destination, service };
   });
   function sum(values: Record<string, number>, key: string, rate: number) {
     const next = (Object.prototype.hasOwnProperty.call(values, key) ? values[key] : 0) + rate;
@@ -628,10 +683,10 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
   function add(
     source: TopologyNode,
     target: TopologyNode,
-    observation: TopologyObservation,
-    inferred: boolean,
-    reporters: TopologyReporter[]
+    row: (typeof rows)[number],
+    inferred: boolean
   ) {
+    const { observation, reporters, reporterIdentities, securityObservations } = row;
     if (++contributions > 20000) throw new Error('Topology exceeds 20000 projected contributions');
     const id = JSON.stringify([source.id, target.id, observation.protocol]);
     let edge = edges.get(id);
@@ -647,6 +702,7 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
         responses: {},
         flags: {},
         security: {},
+        securityObservations: [],
         hosts: [],
         metrics: [],
         observations: [],
@@ -664,12 +720,19 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     edge.observations.push({
       identity: observation.identity,
       reporters,
+      reporterIdentities,
     });
+    for (const policy of securityObservations) {
+      edge.securityObservations.push({
+        ...policy,
+        rate: observation.rate,
+      });
+    }
   }
   let omitted = 0;
   for (const row of rows) {
     if (mode !== 'service') {
-      add(row.source, row.destination, row.observation, false, row.reporters);
+      add(row.source, row.destination, row, false);
       continue;
     }
     const target =
@@ -681,10 +744,9 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     const mapped = parents.get(row.source.id);
     if (mapped?.size) {
       if (mapped.size > 1) warnings.push({ code: 'service-aliases' });
-      for (const parent of mapped)
-        add(nodes.get(parent)!, target, row.observation, true, row.reporters);
+      for (const parent of mapped) add(nodes.get(parent)!, target, row, true);
     } else if (!incoming.has(row.source.id) || row.source.kind === 'service') {
-      add(row.source, target, row.observation, false, row.reporters);
+      add(row.source, target, row, false);
     } else omitted++;
   }
   if (mode === 'service') {
@@ -694,6 +756,11 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
   const visible = new Set([...edges.values()].flatMap(edge => [edge.source, edge.target]));
   for (const edge of edges.values()) {
     edge.observations.sort((a, b) => a.identity.localeCompare(b.identity));
+    edge.securityObservations.sort(
+      (a, b) =>
+        (a.reporter === 'source' ? -1 : 1) - (b.reporter === 'source' ? -1 : 1) ||
+        a.identity.localeCompare(b.identity)
+    );
     edge.observations.forEach(observation =>
       observation.reporters.sort((a, b) => (a === 'source' ? -1 : 1) - (b === 'source' ? -1 : 1))
     );

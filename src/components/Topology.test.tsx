@@ -216,6 +216,57 @@ it('exposes keyboard node inspection, edge response/security distributions and n
   expect(inspected.getByText('Reporter provenance: Source across 1 exact series')).toBeDefined();
   expect(screen.queryByText('Reported revisions: v3')).toBeNull();
 });
+it('shows differing source and destination security labels without summing their rate', async () => {
+  const combinedQuery = { ...query, reporter: 'combined' as const };
+  const sourceLabels = {
+    ...fixture.labels,
+    reporter: 'source',
+    connection_security_policy: 'unknown',
+  };
+  const paired = decodeTopology(
+    [
+      {
+        metric: 'istio_requests_total',
+        result: {
+          warnings: [],
+          series: [
+            { labels: sourceLabels, samples: [{ timestamp: query.end, value: 2 }] },
+            {
+              labels: {
+                ...sourceLabels,
+                reporter: 'destination',
+                connection_security_policy: 'mutual_tls',
+              },
+              samples: [{ timestamp: query.end, value: 2 }],
+            },
+          ],
+        },
+      },
+    ],
+    combinedQuery
+  );
+  render(<TopologyResults snapshot={{ ...paired, query: combinedQuery }} />);
+  await userEvent.click(
+    screen.getByRole('button', {
+      name: 'Inspect http connection from Kubernetes / bookinfo / productpage-v1 to Kubernetes / bookinfo / reviews-v1',
+    })
+  );
+  const inspected = within(screen.getByRole('region', { name: 'Selected graph connection' }));
+  expect(inspected.getByText(/2\.0000\s+Requests \/ second/)).toBeDefined();
+  const policyTable = within(
+    inspected.getByRole('region', { name: 'Reporter-specific connection-security labels' })
+  );
+  expect(policyTable.getByText('unknown')).toBeDefined();
+  expect(policyTable.getByText('mutual_tls')).toBeDefined();
+  expect(policyTable.getByText('Source')).toBeDefined();
+  expect(policyTable.getByText('Destination')).toBeDefined();
+  expect(policyTable.getAllByText('2.0000')).toHaveLength(2);
+  expect(
+    inspected.getByText(
+      'Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.'
+    )
+  ).toBeDefined();
+});
 it('focuses the diagram on a selected node without changing the full graph tables', async () => {
   render(<TopologyResults snapshot={snapshot} />);
   await userEvent.click(

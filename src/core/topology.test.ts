@@ -307,7 +307,6 @@ it('distinguishes missing from explicit unknown labels and rejects an ambiguous 
   expect(() => projectTopology(mixed, 'workload')).toThrow(/Conflicting source\/destination/);
 });
 it.each([
-  ['security', { connection_security_policy: 'none' }],
   ['rate', undefined],
   ['response code', { response_code: '503' }],
 ])('rejects conflicting paired reporter %s instead of choosing one', (conflict, labels) => {
@@ -325,6 +324,145 @@ it.each([
   expect(() =>
     projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
   ).toThrow(/Conflicting source\/destination/);
+});
+it.each([
+  ['different policies', 'unknown', 'mutual_tls'],
+  ['missing versus explicit unknown', undefined, 'unknown'],
+])(
+  'deduplicates %s while preserving reporter identities and policy labels',
+  (_, sourcePolicy, destinationPolicy) => {
+    const data = result();
+    data.series = data.series.slice(0, 1);
+    data.series[0].samples[0].value = 2;
+    if (sourcePolicy === undefined) delete data.series[0].labels.connection_security_policy;
+    else data.series[0].labels.connection_security_policy = sourcePolicy;
+    data.series.push({
+      ...data.series[0],
+      labels: { ...data.series[0].labels, reporter: 'destination' },
+      samples: [{ timestamp: query.end, value: 2 }],
+    });
+    if (destinationPolicy === undefined) delete data.series[1].labels.connection_security_policy;
+    else data.series[1].labels.connection_security_policy = destinationPolicy;
+
+    const decoded = decode(data, { ...query, reporter: 'combined' });
+    expect(decoded.observations[0].identity).not.toBe(decoded.observations[1].identity);
+    const sourceIdentity = decoded.observations.find(row => row.reporter === 'source')!.identity;
+    const destinationIdentity = decoded.observations.find(
+      row => row.reporter === 'destination'
+    )!.identity;
+    for (const mode of ['workload', 'app', 'versionedApp', 'service'] as const) {
+      const graph = projectTopology(decoded, mode);
+      expect(graph.edges).toHaveLength(1);
+      expect(graph.edges[0].rate).toBe(2);
+      expect(graph.edges[0].security).toEqual({ [sourcePolicy ?? 'unknown']: 2 });
+      expect(graph.edges[0].observations).toEqual([
+        {
+          identity: sourceIdentity,
+          reporters: ['source', 'destination'],
+          reporterIdentities: [
+            { reporter: 'source', identity: sourceIdentity },
+            { reporter: 'destination', identity: destinationIdentity },
+          ],
+        },
+      ]);
+      expect(graph.edges[0].securityObservations).toEqual([
+        {
+          reporter: 'source',
+          identity: sourceIdentity,
+          value: sourcePolicy ?? 'missing',
+          rate: 2,
+        },
+        {
+          reporter: 'destination',
+          identity: destinationIdentity,
+          value: destinationPolicy ?? 'missing',
+          rate: 2,
+        },
+      ]);
+    }
+    const graph = projectTopology(decoded, 'workload');
+    expect(graph.nodes.map(node => node.id)).toEqual([
+      '["wl","Kubernetes","bookinfo","productpage-v1"]',
+      '["wl","Kubernetes","bookinfo","reviews-v1"]',
+    ]);
+    expect(graph.edges[0].id).toBe(
+      JSON.stringify([
+        '["wl","Kubernetes","bookinfo","productpage-v1"]',
+        '["wl","Kubernetes","bookinfo","reviews-v1"]',
+        'http',
+      ])
+    );
+  }
+);
+it.each([
+  [
+    'workload',
+    { source_workload: 'other-productpage' },
+    '["wl","Kubernetes","bookinfo","other-productpage"]',
+  ],
+  [
+    'cluster',
+    { source_cluster: 'remote-east' },
+    '["wl","remote-east","bookinfo","productpage-v1"]',
+  ],
+])(
+  'retains separate source and destination edges when %s identity differs',
+  (_, labels, otherNode) => {
+    const data = result();
+    data.series = data.series.slice(0, 1);
+    const source = data.series[0];
+    source.samples[0].value = 2;
+    source.labels.connection_security_policy = 'unknown';
+    data.series.push({
+      ...source,
+      labels: {
+        ...source.labels,
+        reporter: 'destination',
+        ...labels,
+        connection_security_policy: 'mutual_tls',
+      },
+      samples: [{ timestamp: query.end, value: 2 }],
+    });
+    const graph = projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload');
+    expect(graph.edges).toHaveLength(2);
+    expect(graph.edges.map(edge => edge.rate)).toEqual([2, 2]);
+    expect(
+      graph.edges
+        .flatMap(edge => edge.observations)
+        .map(observation => observation.reporters[0])
+        .sort()
+    ).toEqual(['destination', 'source']);
+    expect(graph.nodes.map(node => node.id)).toContain(otherNode);
+  }
+);
+it('fails closed when one reporter splits one traffic identity across security policies', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].labels.connection_security_policy = 'unknown';
+  data.series[0].samples[0].value = 2;
+  data.series.push(
+    {
+      ...data.series[0],
+      labels: {
+        ...data.series[0].labels,
+        reporter: 'destination',
+        connection_security_policy: 'mutual_tls',
+      },
+      samples: [{ timestamp: query.end, value: 2 }],
+    },
+    {
+      ...data.series[0],
+      labels: {
+        ...data.series[0].labels,
+        reporter: 'destination',
+        connection_security_policy: 'none',
+      },
+      samples: [{ timestamp: query.end, value: 1 }],
+    }
+  );
+  expect(() =>
+    projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
+  ).toThrow(/Ambiguous topology reporter policy partitions/);
 });
 it('fails closed when a reporter is missing one same-protocol response series', () => {
   const data = result();

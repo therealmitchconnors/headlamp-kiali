@@ -208,6 +208,16 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Mixed-reporter security-label reconciliation (2026-11-05):** compatible
+  source/destination series pair when all requested traffic labels except
+  `reporter` and `connection_security_policy` match, preserving missing versus
+  explicit policy values and each exact reporter identity. Equal-rate pairs count
+  once using the source series as deterministic representative; one-sided rows
+  remain, while mismatched rates, non-policy identities, and ambiguous
+  same-reporter policy partitions fail closed. Focused topology core/adapter/UI
+  tests passed (**1,815 tests in three files**), as did formatting, type-check,
+  lint and production build. No live Headlamp/Bookinfo access is available here,
+  so the reproduced hosted Combined failure remains to be rechecked.
 - **Mixed-reporter topology (2026-11-03):** the advanced traffic graph now
   defaults to source-aligned combined mode while retaining explicit source and
   destination modes. Combined selectors cover selected-namespace source egress,

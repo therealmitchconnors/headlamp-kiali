@@ -451,7 +451,7 @@ function TopologyResultsSnapshot({
               </Typography>
               <Alert severity="info">
                 {t(
-                  'Response codes and flags are observations, not the configurable health calculation. Reported security policy is not proof of enforcement.'
+                  'Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.'
                 )}
               </Alert>
               <Distribution
@@ -460,11 +460,26 @@ function TopologyResultsSnapshot({
                 unit={unit}
               />
               <Distribution title={t('Response flags')} rates={edge.flags} unit={unit} />
-              <Distribution
-                title={t('Reported connection security')}
-                rates={edge.security}
-                unit={unit}
-              />
+              <SectionBox title={t('Reporter-specific connection-security labels')}>
+                <SimpleTable
+                  data={edge.securityObservations}
+                  emptyMessage={t('Not reported for this measure')}
+                  columns={[
+                    {
+                      label: t('Reported by'),
+                      getter: ({ reporter }) => t(reporter === 'source' ? 'Source' : 'Destination'),
+                    },
+                    {
+                      label: t('Connection-security label'),
+                      getter: ({ value }) => value || t('Empty reported value'),
+                    },
+                    {
+                      label: unit,
+                      getter: ({ rate }) => rate.toPrecision(5),
+                    },
+                  ]}
+                />
+              </SectionBox>
               <Button onClick={() => setSelection(undefined)}>
                 {t('Close connection inspection')}
               </Button>
