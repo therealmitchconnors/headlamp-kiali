@@ -95,7 +95,10 @@ it.each([
           ...collection('WorkloadEntry', apiVersion, []),
           metadata: { resourceVersion: 'changed' },
         };
-      const item = object('first-entry', { labels: { app: 'vm', version: 'v1' } });
+      const item = object('first-entry', {
+        labels: { app: 'vm', version: 'v1' },
+        serviceAccount: 'vm-account',
+      });
       if (mode === 'wrong-namespace') item.metadata.namespace = 'other';
       if (mode === 'label-budget')
         return collection(
@@ -133,6 +136,14 @@ it.each([
       workloadLabels: { app: 'vm', version: 'v1' },
       virtualMachine: { matchingEntries: 1, entry: { name: 'first-entry', uid: 'first-entry' } },
     });
+    expect(result.resources[0].virtualMachine?.accountEntries).toEqual([
+      {
+        name: 'first-entry',
+        uid: 'first-entry',
+        resourceVersion: 'first-entry-version',
+        serviceAccount: { ok: true, name: 'vm-account' },
+      },
+    ]);
   } else if (mode === 'empty-selector') expect(result.resources[0].workloadLabels).toEqual({});
   else expect(result.resources).toEqual([]);
   if (mode === 'absent') expect(result.notServed).toBe(true);

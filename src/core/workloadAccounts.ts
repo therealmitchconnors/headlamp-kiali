@@ -1,9 +1,7 @@
-import type { CorrelatedWorkload, CorrelationResource } from './correlation';
+import type { AccountObservation, CorrelatedWorkload } from './correlation';
 import { isDnsSubdomain } from './object';
 
-export function observedPodAccount(
-  spec: Record<string, unknown>
-): NonNullable<CorrelationResource['podAccount']> {
+export function observedPodAccount(spec: Record<string, unknown>): AccountObservation {
   const name = spec.serviceAccountName;
   if (name === undefined || name === '')
     return {
@@ -12,6 +10,19 @@ export function observedPodAccount(
     };
   if (!isDnsSubdomain(name)) return { ok: false, message: 'Pod service account name is malformed' };
   return { ok: true, name };
+}
+
+export function observedVmAccount(value: unknown): AccountObservation {
+  if (value === undefined || value === '')
+    return { ok: false, message: 'WorkloadEntry service account was not reported' };
+  if (
+    typeof value !== 'string' ||
+    value.length > 1024 ||
+    value.trim() !== value ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  )
+    return { ok: false, message: 'WorkloadEntry service account is malformed' };
+  return { ok: true, name: value };
 }
 
 export function workloadPodAccounts(workload: CorrelatedWorkload) {

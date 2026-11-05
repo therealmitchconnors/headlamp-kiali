@@ -47,6 +47,7 @@ beforeEach(() => {
   vi.mocked(loadEntityHealth).mockImplementation(async (_scope, _endpoint, query) => ({
     query,
     issues: [],
+    missingDirections: [],
     calculation: { status: 'Degraded', totalRequestRate: 10, errorRatio: 1, warnings: [] },
   }));
 });
@@ -135,6 +136,7 @@ it('does not present successful health when Service evidence is forbidden', asyn
   vi.mocked(loadEntityHealth).mockImplementation(async (_scope, _endpoint, query) => ({
     query,
     issues: [],
+    missingDirections: [],
     resourceError: { kind: 'forbidden', message: 'Service denied' },
     calculation: null,
   }));
@@ -149,6 +151,38 @@ it('does not present successful health when Service evidence is forbidden', asyn
   await screen.findByText('Service denied');
   expect(screen.getByText(/Health is unavailable/)).toBeDefined();
   expect(screen.queryByText(/Service request health:/)).toBeNull();
+});
+it('announces per-direction telemetry gaps and failures accessibly without a healthy result', async () => {
+  vi.mocked(loadEntityHealth).mockImplementation(async (_scope, _endpoint, query) => ({
+    query,
+    issues: [],
+    missingDirections: ['outbound'],
+    inbound: { ok: false, error: { kind: 'forbidden', message: 'Inbound metrics denied' } },
+    outbound: { ok: true, result: { series: [], warnings: [] } },
+    calculation: null,
+  }));
+  render(
+    <MemoryRouter initialEntries={['/health?kind=Application&namespace=bookinfo&name=reviews']}>
+      <WorkloadHealth />
+    </MemoryRouter>
+  );
+  const user = userEvent.setup();
+  await user.type(screen.getByLabelText('Istio metric cluster label'), 'east');
+  await user.type(screen.getByLabelText('Istio canonical service label'), 'reviews');
+  await user.click(screen.getByRole('button', { name: 'Load health' }));
+  const missing = await screen.findByText(
+    'Outbound request telemetry is missing; health cannot be assessed.'
+  );
+  expect(missing.closest('[role="alert"]')).not.toBeNull();
+  expect(
+    screen.getByText('Inbound: Inbound metrics denied').closest('[role="alert"]')
+  ).not.toBeNull();
+  expect(
+    screen
+      .getByText(/Health is unavailable from incomplete, missing or invalid evidence/)
+      .closest('[role="alert"]')
+  ).not.toBeNull();
+  expect(screen.queryByText('Replica and request health: Degraded')).toBeNull();
 });
 it('aborts and ignores a late entity response after cluster selection changes', async () => {
   let resolve!: (value: EntityHealthSnapshot) => void;
@@ -180,6 +214,7 @@ it('aborts and ignores a late entity response after cluster selection changes', 
     resolve({
       query: args[2],
       issues: [],
+      missingDirections: [],
       calculation: { status: 'Healthy', errorRatio: 0, totalRequestRate: 10, warnings: [] },
     })
   );
