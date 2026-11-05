@@ -20,6 +20,19 @@ hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
+### Mounted-source continuation — 2026-11-01
+
+Issue #3 continues from the declared-scope Gateway prerequisite (#2), integrated
+into this implementation branch; the validated branches are now being integrated.
+The selected source batch is same-context, direct ConfigMap-backed mounted mesh
+files, audited against the existing pinned Kiali discovery caller. Indirect
+environment resolution and cross-context configuration remain unsupported.
+See the source audit in `docs/parity.md` before extending this batch.
+The issue #3 continuation now accepts the audited protobuf field-name aliases
+without silently defaulting configured root/discovery/automatic-mTLS values,
+and closes the argument-parser oracle gap using pinned `parseArgsInto`/pflag.
+The batch remains a selected-field projection, not full effective configuration.
+
 ### Resume status — 2026-11-03
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
@@ -93,6 +106,21 @@ with cloud agents rather than keeping the laptop running. The working branch is
 task must explicitly use the working branch as its base or it will miss this
 port. Read this plan, `AGENTS.md` and `docs/parity.md` before implementation.
 
+The configuration-source continuation selects supported mounted mesh files from
+the first container's `--meshConfig` arguments and direct ConfigMap volume
+mapping. It preserves shared/local precedence and reports selected map/key/path
+and captured identity through Mesh, namespace validation, scoped Gateway checks
+and the configured mTLS indicator. Selected-file failures do not fall back to the
+standard ConfigMap. New mounted captures verify controller and source versions;
+existing unsupported topology and completeness guards remain in force.
+
+The next bounded prerequisite is nonempty networks acceptance and complete
+protobuf parse/fusion/default evidence, followed by separately audited
+cross-context configuration-cluster association, not arbitrary environment
+expansion. Full ProxyConfig/extensions and runtime configuration remain separate
+work. Do not enable workload/port/subset mTLS or principal-absence checks from
+this selected-field projection.
+
 The **Gateway listener/port/controller and Service port-validation milestones
 are implemented** as active-caller-only, declared-scope increments. Gateway
 details offer explicit scoped checks: Istio KIA0302 uses complete default
@@ -142,6 +170,49 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Issue #3 completion audit (2026-11-01):** the existing mounted-source batch
+  retains its no-fallback, bounded-read and source-revalidation guards. Fixed
+  silent omission of protobuf snake_case names for the nine projected mesh
+  fields, including disabled automatic mTLS and namespace discovery. Pinned
+  legacy jsonpb gives present camelCase names precedence even when null; nested
+  selectors and label-map keys are not recursively renamed. Unit/adapter/mTLS
+  regressions cover aliases, conflicting spellings, malformed values and
+  downstream scope/default behavior. Added 122 original-Go argument cases
+  (106 comparisons and 16 explicitly stricter guards) to the existing 141-case
+  path/reference artifact. The generator pins pflag through Kiali's go.mod/go.sum;
+  no plugin runtime dependency changed. Transport, networks parsing and full
+  protobuf fusion/default evidence remain gaps, not completed parity.
+  Focused verification passed **521 tests in five files**, type-check, lint,
+  production build, formatting, parity/resource/dashboard checks and oracle
+  regeneration (both fetched and local pinned sources).
+  The full suite passed **22,939 tests in 188 files** with the existing Vitest
+  runner and `--maxWorkers=2`. A default-worker run had two unrelated five-second
+  UI timeouts (ServiceTrafficWizard and Traces); both files passed a **32-test**
+  focused rerun before the complete two-worker run. No tests or timeouts changed.
+  Read-only code review found no significant issues. Secret scans passed.
+  CodeQL reported only a pre-existing mocked-request assertion in
+  `gatewayScopedValidation.test.ts:224`; its substring filter checks that a
+  request did not occur, not URL trust or transport, so it is a false positive.
+  No Headlamp endpoint or configured Kubernetes context is available; contribution,
+  console, i18n/a11y, hosted fixture, Desktop and live-cluster gates remain open.
+- **Mounted mesh configuration sources (2026-11-01, issue #3):** integrated
+  prerequisite #2 and added first-container `--meshConfig`/direct-volume
+  resolution, selected map/key/path provenance and bounded shared/local merging.
+  The new file-source branch checks mapped networks dependencies, accepting only
+  absent keys/empty configuration. Unsupported, missing, denied, malformed or
+  changed sources remain unavailable; no fallback or new validator is enabled.
+  All relevant consumers retain captured provenance. The original-Go helper
+  artifact has 116 source comparisons and 25 explicit native guard cases;
+  argument parsing was still an oracle gap at this earlier checkpoint; it is
+  covered by the continuation above. Transport and full protobuf fusion/defaults remain gaps.
+  Final local verification passed **22,785 tests in 188 files**, including
+  **106 targeted consumer tests**. Type-check, lint, production build, changed-code
+  formatting, parity/resource/dashboard checks and oracle regeneration passed.
+  An unrelated wizard test timed out once during concurrent gates; a targeted
+  retry and subsequent full suites passed without changing that test.
+  No Headlamp endpoint or configured Kubernetes context was available.
+  Browser contribution/console/i18n/a11y, hosted fixture, Desktop and live-cluster
+  gates remain open, including all earlier Gateway runtime gates.
 - **Hosted Headlamp smoke foundation (2026-11-03):** added a reproducible
   Docker/Chromium run against the pinned stock Headlamp 0.35.0 image and built
   plugin, a loopback-only read-only synthetic Kubernetes/Prometheus API, and a
@@ -850,8 +921,10 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
 - Mesh inventory discovers local `app=istiod` controllers, namespace labels,
   revision tags and standard/shared configuration fields. It preserves unknown
   values and uses label hints rather than claiming actual injection or security.
-  Selected shared/local fields merge without runtime defaults; mounted files,
-  external config clusters and full ProxyConfig/extension merging remain open.
+  Selected shared/local fields merge without runtime defaults. Direct ConfigMap
+  mounted mesh files now have guarded source selection and empty-networks
+  acceptance; unsupported mounts, nonempty networks, external configuration
+  clusters and full ProxyConfig/extension merging remain open.
 - Configured mTLS has a reusable pinned composition engine with 2,600 independent
   Go cases and a namespace-wide consumer using an explicit controller. It
   suppresses output on partial policy reads, conflicts and unsupported contexts.
@@ -1373,8 +1446,11 @@ are reused without inventing new diagnostics. PILOT_SCOPE_GATEWAY_TO_NAMESPACE
 retains exact-true accumulation from the first declared container; unresolved
 flags or multiple eligible controllers block the scoped check. Custom workload
 owners, configured nondefault inclusion and full controller health remain open.
-Next validation work is remaining effective mesh-configuration sources before
-workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
+The mounted ConfigMap source batch is now implemented with selected-source
+provenance, version rechecks and bounded networks-dependency guards. Next audit
+nonempty networks acceptance and full protobuf parse/fusion/backend defaults,
+then remaining configuration-cluster topology and caller-specific TLS context,
+before workload/port/subset mTLS or principal-absence checks. Close the Gateway runtime
 gates in an authorized environment independently; do not enable dormant port
 helpers or infer route attachment from this milestone.
 
@@ -1460,7 +1536,9 @@ panel and query cardinality limits.
    remain separate; do not activate KIA1701 or infer absence until those policy
    and scope gates are resolved.
 2. Resolve remaining effective mesh configuration sources before extending
-   configured mTLS to workloads, ports and subsets. Preserve the distinction
+   configured mTLS to workloads, ports and subsets. The mounted-file batch is
+   implemented; nonempty networks, full parse/fusion/default evidence and
+   external configuration mapping remain unsupported. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
 3. Complete health query coverage and supported workload variants.
    Application/Service consumers are now wired. Extend service-driven traffic

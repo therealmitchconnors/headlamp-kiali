@@ -39,6 +39,9 @@ vi.mock('../../data/gatewayValidation', async importOriginal => ({
   ...(await importOriginal<typeof import('../../data/gatewayValidation')>()),
   loadScopedGatewayValidation: vi.fn(),
 }));
+vi.mock('./StructuredValue', () => ({
+  default: ({ value }: { value: unknown }) => <pre>{JSON.stringify(value)}</pre>,
+}));
 vi.mock('../../config', () => ({
   useKialiConfig: () => ({
     valid: true,
@@ -119,6 +122,20 @@ function result(): Result {
     },
     scope: {
       cluster: 'alpha',
+      configurationSources: [
+        {
+          controller: 'istio-system/istiod',
+          sources: {
+            local: {
+              kind: 'mounted',
+              cluster: 'alpha',
+              namespace: 'istio-system',
+              name: 'mounted',
+              key: 'custom-mesh',
+            },
+          },
+        },
+      ],
       logicalName: 'logical-alpha',
       visibility: 'pinned-default-system-exclusion',
       membership: [
