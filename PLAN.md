@@ -78,9 +78,10 @@ inspector requiring declared local namespace scope, a complete pooled
 managed-namespace Pod snapshot and complete cluster-wide Deployments. It ports
 the active KIA0601/KIA0602/KIA0701 checks and keeps denied, stale, malformed,
 truncated or unresolved evidence unavailable, using status annotations rather
-than correlation `proxyMode`. Browser, hosted fixture, Desktop and live-cluster
-verification remain open; full Gateway/controller parity is not claimed. See
-`docs/parity.md`.
+than correlation `proxyMode`. The synthetic hosted browser and fixture checks
+are now exercised by the repeatable smoke described below; Desktop and
+live-cluster verification remain open, and full Gateway/controller parity is
+not claimed. See `docs/parity.md`.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -88,20 +89,23 @@ Open PRs against the working branch and integrate prerequisite PRs before
 starting dependent tasks. Do not treat a single open-ended prompt as a reliable
 weekend-long completion queue.
 
-The repository is public and `.github/` currently contains skills, not a CI or
-Copilot setup workflow. Cloud agents can install dependencies with `npm ci` and
-use the documented npm gates and committed oracle fixtures. For Actions-based
-agents, an optional `.github/workflows/copilot-setup-steps.yml` must be present
-on the default branch; it does not configure cloud-sandbox sessions. See
+The repository is public and now has a normal CI workflow for plugin checks and
+the hosted smoke, but no Copilot setup workflow. Cloud agents can install
+dependencies with `npm ci` and use the documented npm gates and committed
+oracle fixtures. For Actions-based agents, an optional
+`.github/workflows/copilot-setup-steps.yml` must be present on the default
+branch; it does not configure cloud-sandbox sessions. See
 [GitHub's environment guidance](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment).
 
-The local pinned-source checkout, browser runners/screenshots and kubeconfig
-are not in the repository. Cloud agents must not assume `/Users/...` paths
-exist or copy personal kube credentials. Fetch pinned public references when
-regenerating source evidence. Set up a repeatable hosted Headlamp fixture smoke
-environment in cloud if needed; unit/build success alone is not runtime proof.
-Actual AKS/provider/Desktop gates still require an authorized verification
-environment and approved fixtures. They must remain explicitly open otherwise.
+The local pinned-source checkout, browser runners/screenshots and real kubeconfig
+are not in the repository. Cloud agents must not assume `/Users/...` paths exist
+or copy personal kube credentials. Fetch pinned public references when
+regenerating source evidence. The repeatable synthetic hosted Headlamp smoke is
+`npm run smoke:hosted`; it launches the pinned stock 0.35.0 host and the actual
+built plugin without a real cluster. Unit/build success alone is not runtime
+proof. Actual AKS/provider/Desktop gates still require an authorized
+verification environment and approved fixtures. They must remain explicitly
+open otherwise.
 
 GitHub cloud tasks run without this laptop. Current built-in cloud automations
 are limited to private/internal repositories, so this public repository cannot
@@ -112,6 +116,20 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Hosted Headlamp smoke foundation (2026-11-03):** added a reproducible
+  Docker/Chromium run against the pinned stock Headlamp 0.35.0 image and built
+  plugin, a loopback-only read-only synthetic Kubernetes/Prometheus API, and a
+  GitHub Actions workflow. The smoke exercises real host authentication,
+  contribution/navigation, English labels and named controls, debounced public
+  ConfigStore persistence across reload, Prometheus build-info, and positive,
+  denied, incomplete and stale outcomes for both scoped Gateway and Service
+  port inspectors. The successful run observed 181 authenticated reads and no
+  Kubernetes writes. Exact commands, fixture scope and classified stock-host
+  diagnostics are in `docs/hosted-smoke-tests.md` and `docs/parity.md`. This
+  closes only the synthetic hosted-web smoke gate; Desktop, live-cluster,
+  live-provider and OIDC/authentication evidence remain open. The CI-equivalent
+  local checks passed type-check, lint, build and parity inventory; the full
+  suite passed **22,594 tests in 189 files**.
 - **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
   inspector, active Istio Gateway KIA0302 and captured exact-true controller
   scope semantics. Complete versioned Gateway/default-workload/VM sources are

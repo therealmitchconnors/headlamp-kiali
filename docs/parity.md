@@ -2518,6 +2518,57 @@ were intercepted; no resources or traffic changed, and no settings were modified
 Gates pass **15,524 tests in 102 files**. Actual TCP reconciliation/telemetry
 remains unverified.
 
+## Repeatable synthetic hosted smoke
+
+On 2026-11-03, the repository added a repeatable smoke against the actual
+production bundle in stock Headlamp 0.35.0. The Docker image is pinned by digest
+in `scripts/smoke/run.mjs`; Chromium is pinned through Playwright 1.56.1.
+`npm run smoke:hosted` stages the built plugin and a temporary synthetic
+kubeconfig, starts a loopback-only fake Kubernetes/Prometheus API, enters its
+synthetic token through Headlamp's actual auth dialog, and cleans up only its
+owned resources. Reproduce locally with:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run build
+npm run smoke:hosted
+```
+
+The successful run loaded the plugin bundle, manifest and English locale,
+rendered the Kiali overview and its English/named controls, saved settings
+through the public ConfigStore, waited for the 500 ms debounce and matching
+`pluginConfigs.kiali` storage, then reloaded and confirmed persistence. It
+reached the synthetic Prometheus build-info endpoint (`smoke-v1`) through
+Headlamp. Both inspectors completed all four owned cases: positive
+Gateway KIA0302 with controller provenance, denied namespace evidence,
+incomplete Pod evidence, and stale Gateway; Service KIA0601/KIA0701,
+denied namespace evidence, incomplete Pod evidence, and stale Service. One
+successful run recorded 181 authenticated fixture requests and no Kubernetes
+writes. The count is observational; background host requests may vary.
+
+The runner asserts no plugin/page console errors, visible contribution,
+resolved labels, named controls, and HTTP 200 for `main.js`, `package.json` and
+the English locale. It distinguishes observed stock-host bootstrap 401,
+CRD-v1beta1 discovery 404, synthetic watch/multiplexer diagnostics, the
+fixture's expected denied namespace request, and the host parser message only
+when correlated to a successful authenticated fixture read. Other console
+errors, unexpected WebSocket endpoints, unauthenticated post-auth reads, or
+resource writes fail. Failure-only browser artifacts are bounded, do not
+include request authorization headers, clear the token field before screenshot,
+and are retained by Actions for seven days.
+
+Local type-check, lint, production build and parity inventory passed; the full
+existing suite passed **22,594 tests in 189 files**.
+
+`.github/workflows/headlamp-smoke.yml` runs type-check, lint, the existing test
+suite, parity check, production build and this host smoke on push, pull request
+and manual dispatch. This is synthetic hosted-web evidence only; it does not
+install cluster fixtures or close Desktop, live-cluster, live-provider or
+OIDC/authentication gates. No Copilot setup workflow is added: the Actions-backed
+setup file only applies from the default branch and does not configure cloud
+sandboxes.
+
 ## Guarded circuit-breaker workflows
 
 `core/circuitBreaker.ts` and `CircuitBreakerEditor.tsx` port the pinned wizard's
