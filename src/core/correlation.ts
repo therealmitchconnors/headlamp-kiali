@@ -11,17 +11,21 @@ export type CorrelationKind =
   | 'ReplicationController'
   | 'Job'
   | 'CronJob'
+  | 'DeploymentConfig'
   | 'Pod'
   | 'WorkloadGroup'
   | 'Service';
 
 export interface OwnerReference {
+  apiVersion?: string;
   group: string;
   kind: string;
   name: string;
   uid: string;
   controller: boolean;
 }
+
+export type AccountObservation = { ok: true; name: string } | { ok: false; message: string };
 
 export interface CorrelationResource {
   identity: ResourceIdentity & { kind: CorrelationKind; namespace: string; uid: string };
@@ -31,12 +35,19 @@ export interface CorrelationResource {
   serviceSelector: Labels | null;
   proxyMode: 'sidecar' | 'native-sidecar' | 'none';
   resourceVersion?: string;
-  podAccount?: { ok: true; name: string } | { ok: false; message: string };
+  podAccount?: AccountObservation;
   dashboardRefs?: PodDashboardReferences;
   virtualMachine?: {
     labelSource: 'group' | 'entry';
     matchingEntries: number;
+    selectorEmpty: boolean;
     entry?: { name: string; uid: string; resourceVersion: string };
+    accountEntries?: {
+      name: string;
+      uid: string;
+      resourceVersion: string;
+      serviceAccount: AccountObservation;
+    }[];
   };
   health?:
     | { ok: true; value: Pick<WorkloadHealthResource, 'replicas' | 'stale'> }

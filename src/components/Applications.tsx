@@ -19,6 +19,7 @@ import {
 import { AppLabels } from '../core/labels';
 import { isDnsLabel } from '../core/object';
 import { namespaceScope } from '../core/scope';
+import { projectWorkloadAccounts, WorkloadAccountProjection } from '../core/workloadInclusion';
 import { loadCorrelationSnapshot } from '../data/correlation';
 import { useRequest } from '../hooks/useRequest';
 import ApplicationDashboards from './ApplicationDashboards';
@@ -32,10 +33,12 @@ function ApplicationDetails({
   app,
   complete,
   labels,
+  accountProjection,
 }: {
   app: Application;
   complete: boolean;
   labels: AppLabels | null;
+  accountProjection: WorkloadAccountProjection;
 }) {
   const { t } = useTranslation();
   return (
@@ -121,7 +124,9 @@ function ApplicationDetails({
             },
             {
               label: t('Observed Pod accounts'),
-              getter: (workload: CorrelatedWorkload) => <WorkloadAccounts workload={workload} />,
+              getter: (workload: CorrelatedWorkload) => (
+                <WorkloadAccounts workload={workload} projection={accountProjection} />
+              ),
             },
             {
               label: t('Label evidence'),
@@ -242,15 +247,23 @@ function ApplicationSnapshot({
   const [filter, setFilter] = useState('');
   const load = useCallback(
     async (signal: AbortSignal) => {
-      const snapshot = await loadCorrelationSnapshot(namespaceScope(cluster, namespace), signal);
-      return { snapshot, correlation: correlateResources(snapshot.resources, labels) };
+      const snapshot = await loadCorrelationSnapshot(
+        namespaceScope(cluster, namespace),
+        signal,
+        true
+      );
+      return {
+        snapshot,
+        correlation: correlateResources(snapshot.resources, labels),
+        accountProjection: projectWorkloadAccounts(snapshot),
+      };
     },
     [cluster, namespace, labels]
   );
   const result = useRequest(JSON.stringify([cluster, namespace, labels, refresh]), load);
   return (
     <RequestStatus state={result} loadingLabel={t('Loading application relationships...')}>
-      {({ snapshot, correlation }) => {
+      {({ snapshot, correlation, accountProjection }) => {
         const complete = snapshot.complete && correlation.issues.length === 0;
         const app = correlation.applications.find(app => app.name === selected);
         function count(value: number) {
@@ -265,6 +278,22 @@ function ApplicationSnapshot({
             <Alert severity="info">
               {t(
                 'Namespace correlation includes supported WorkloadGroups, with a 15-second deadline. VM entry labels require complete entry evidence; denied or limited reads remain partial and never fall back silently to group labels.'
+              )}
+            </Alert>
+            <Alert severity={accountProjection.complete ? 'info' : 'warning'}>
+              {accountProjection.complete
+                ? t(
+                    'The captured account projection is complete for the pinned Kiali default workload set in this namespace. Runtime Kiali workload exclusions are not captured. VM WorkloadEntry accounts remain separate; this does not run KIA1701 or prove account absence, ServiceAccount existence, permissions or cross-context coverage.'
+                  )
+                : t(
+                    'The captured workload/account projection is incomplete. Positive observations remain visible, but the inventory cannot support absence conclusions.'
+                  )}
+              {!accountProjection.complete && (
+                <ul>
+                  {accountProjection.issues.map((issue, index) => (
+                    <li key={index}>{issue}</li>
+                  ))}
+                </ul>
               )}
             </Alert>
             {snapshot.sources.some(source => source.notServed) && (
@@ -311,7 +340,12 @@ function ApplicationSnapshot({
             )}
             {selected !== null ? (
               app ? (
-                <ApplicationDetails app={app} complete={complete} labels={labels} />
+                <ApplicationDetails
+                  app={app}
+                  complete={complete}
+                  labels={labels}
+                  accountProjection={accountProjection}
+                />
               ) : (
                 <Alert severity={complete ? 'info' : 'warning'}>
                   {complete

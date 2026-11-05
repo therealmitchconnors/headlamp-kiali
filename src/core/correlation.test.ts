@@ -36,7 +36,11 @@ function resource(
 }
 
 function owner(parent: CorrelationResource, controller = true): OwnerReference {
-  return { ...parent.identity, controller };
+  return {
+    apiVersion: parent.identity.group ? `${parent.identity.group}/v1` : 'v1',
+    ...parent.identity,
+    controller,
+  };
 }
 
 function bookinfo(): CorrelationResource[] {
