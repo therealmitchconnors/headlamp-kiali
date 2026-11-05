@@ -15,7 +15,7 @@ import {
   MetricResult,
   prometheusQueries,
   requestPoints,
-  securityRates,
+  securityTelemetry,
   trafficEdges,
   TrafficQuery,
 } from '../core/telemetry';
@@ -193,27 +193,91 @@ function Results({
           <SectionBox title={t('Observed connection security')}>
             <Alert severity="info">
               {t(
-                'These are destination-reported HTTP/gRPC connection_security_policy labels for the selected scope and five-minute window. Shares describe returned samples only, not all traffic, certificate validity, authorization or enforced policy. Missing labels remain unknown; zero rates do not prove absence.'
+                'This is a destination-reported istio_requests_total view for the selected namespace and explicit telemetry identity, regardless of inbound/outbound scope. It uses a five-minute rate window over the captured range, sampled every 15 seconds. Categories describe returned HTTP/gRPC request labels only; they do not prove all traffic, configured policy, proxy synchronization, certificate validity, authorization, or ambient/waypoint security. TCP and ambient security are unsupported by this request-level query.'
               )}
             </Alert>
-            <MetricView read={snapshot.security}>
-              {data => (
-                <SimpleTable
-                  data={securityRates(data)}
-                  columns={[
-                    { label: t('Protocol'), getter: row => row.protocol },
-                    { label: t('Reported connection security policy'), getter: row => row.policy },
-                    { label: t('Requests / second'), getter: row => row.rate.toPrecision(5) },
-                    {
-                      label: t('Share of observed protocol requests (%)'),
-                      getter: row =>
-                        row.observedPercent === null
-                          ? t('Unavailable')
-                          : row.observedPercent.toFixed(2),
-                    },
-                  ]}
-                />
+            <Typography variant="body2">
+              {t(
+                'Reporter: destination; namespace: {{namespace}}; metric cluster: {{cluster}}; range: {{minutes}} minutes ending {{time}}',
+                {
+                  namespace: query.namespace,
+                  cluster: query.telemetryCluster,
+                  minutes: query.minutes,
+                  time: new Date(query.end * 1000).toISOString(),
+                }
               )}
+            </Typography>
+            <MetricView read={snapshot.security}>
+              {data => {
+                const projection = securityTelemetry(data, query);
+                const categories = {
+                  encrypted: t('mTLS-labeled observations'),
+                  plaintext: t('none-labeled observations'),
+                  mixed: t('Both mTLS and none labels observed'),
+                  unknown: t('Unknown labels or incomplete samples'),
+                  unsupported: t('Unsupported protocol'),
+                  unavailable: t('Unavailable (no positive sample)'),
+                };
+                return (
+                  <Stack spacing={2}>
+                    <SimpleTable
+                      data={projection.protocols}
+                      columns={[
+                        { label: t('Protocol'), getter: row => row.protocol },
+                        {
+                          label: t('Observed category over range'),
+                          getter: row => categories[row.category],
+                        },
+                        {
+                          label: t('Sample availability'),
+                          getter: row =>
+                            row.completeness === 'available'
+                              ? t('Available')
+                              : row.completeness === 'partial'
+                              ? t('Partial')
+                              : t('Unavailable'),
+                        },
+                        {
+                          label: t('Latest sample time'),
+                          getter: row =>
+                            row.timestamp === null
+                              ? t('Unavailable')
+                              : new Date(row.timestamp * 1000).toISOString(),
+                        },
+                      ]}
+                    />
+                    <SimpleTable
+                      data={projection.rates}
+                      columns={[
+                        { label: t('Protocol'), getter: row => row.protocol },
+                        {
+                          label: t('Reported connection security policy label'),
+                          getter: row => row.policy,
+                        },
+                        {
+                          label: t('Latest requests / second'),
+                          getter: row =>
+                            row.rate === null ? t('Unavailable') : row.rate.toPrecision(5),
+                        },
+                        {
+                          label: t('Share of returned same-protocol rates (%)'),
+                          getter: row =>
+                            row.observedPercent === null
+                              ? t('Unavailable')
+                              : row.observedPercent.toFixed(2),
+                        },
+                        {
+                          label: t('Latest sample time'),
+                          getter: row =>
+                            row.timestamp === null
+                              ? t('Unavailable')
+                              : new Date(row.timestamp * 1000).toISOString(),
+                        },
+                      ]}
+                    />
+                  </Stack>
+                );
+              }}
             </MetricView>
           </SectionBox>
         </>

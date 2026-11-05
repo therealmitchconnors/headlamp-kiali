@@ -12,7 +12,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { metricAxis, MetricChartType } from '../core/chartDisplay';
+import {
+  MAX_METRIC_CHART_POINTS,
+  metricAxis,
+  metricChartPoints,
+  MetricChartType,
+} from '../core/chartDisplay';
 import { MetricResult } from '../core/telemetry';
 import MetricAxisNotice from './MetricAxisNotice';
 import { metricSeries } from './metricSeries';
@@ -38,7 +43,21 @@ export default function MetricChart({
 }) {
   const { t } = useTranslation();
   const Plot = chartType === 'line' || chartType === 'scatter' ? LineChart : ComposedChart;
-  const points = result.series.flatMap(series => series.samples);
+  let points: ReturnType<typeof metricChartPoints>;
+  try {
+    points = metricChartPoints(result);
+  } catch (error) {
+    const message =
+      error instanceof Error &&
+      error.message === `Metric chart exceeds the ${MAX_METRIC_CHART_POINTS}-sample display limit`
+        ? t('Metric chart exceeds the {{count}}-sample display limit', {
+            count: MAX_METRIC_CHART_POINTS,
+          })
+        : error instanceof Error
+        ? error.message
+        : t('Metric chart exceeds its display limit');
+    return <Alert severity="error">{message}</Alert>;
+  }
   const available = points.reduce((count, point) => count + (point.value === null ? 0 : 1), 0);
   const isolated = points.some(
     (point, index) =>
