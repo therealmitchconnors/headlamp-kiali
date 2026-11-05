@@ -60,6 +60,118 @@ it('keeps queries on the explicit cluster/endpoint and retains a failed panel', 
   }
 });
 
+it('captures the security range and reporter filter on one bounded grouped query', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    const promql = url.searchParams.get('query')!;
+    if (promql.includes('connection_security_policy')) {
+      expect(url.pathname).toMatch(/\/api\/v1\/query_range$/);
+      expect(url.searchParams.get('start')).toBe('9100');
+      expect(url.searchParams.get('end')).toBe('10000');
+      expect(url.searchParams.get('step')).toBe('15');
+      expect(promql).toContain('reporter="destination"');
+      expect(promql).toContain('sum by (request_protocol,connection_security_policy)');
+      return {
+        status: 'success',
+        data: {
+          resultType: 'matrix',
+          result: [
+            {
+              metric: { request_protocol: 'http', connection_security_policy: 'mutual_tls' },
+              values: [
+                [9985, '2'],
+                [10000, '3'],
+              ],
+            },
+          ],
+        },
+      };
+    }
+    return {
+      status: 'success',
+      data: { resultType: url.pathname.endsWith('/query') ? 'vector' : 'matrix', result: [] },
+    };
+  });
+  const result = await loadTelemetry(
+    clusterScope('headlamp-alpha'),
+    endpoint,
+    query,
+    new AbortController().signal
+  );
+  expect(result.security.ok).toBe(true);
+  expect(ApiProxy.request).toHaveBeenCalledTimes(5);
+});
+
+it('rejects security results above the bounded group count without losing other panels', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    const promql = url.searchParams.get('query')!;
+    if (promql.includes('connection_security_policy')) {
+      return {
+        status: 'success',
+        data: {
+          resultType: 'matrix',
+          result: Array.from({ length: 9 }, (_, index) => ({
+            metric: { request_protocol: 'http', connection_security_policy: `policy-${index}` },
+            values: [[10000, '1']],
+          })),
+        },
+      };
+    }
+    return {
+      status: 'success',
+      data: { resultType: url.pathname.endsWith('/query') ? 'vector' : 'matrix', result: [] },
+    };
+  });
+  const result = await loadTelemetry(
+    clusterScope('alpha'),
+    endpoint,
+    query,
+    new AbortController().signal
+  );
+  expect(result.requests.ok).toBe(true);
+  expect(result.security).toMatchObject({
+    ok: false,
+    error: { kind: 'invalid-response', message: expect.stringContaining('8 series') },
+  });
+});
+
+it('rejects security samples above the captured range budget', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    const url = new URL(String(path), 'http://example.test');
+    const promql = url.searchParams.get('query')!;
+    if (promql.includes('connection_security_policy')) {
+      return {
+        status: 'success',
+        data: {
+          resultType: 'matrix',
+          result: [
+            {
+              metric: { request_protocol: 'http', connection_security_policy: 'mutual_tls' },
+              values: Array.from({ length: 242 }, (_, index) => [9100 + index, '1']),
+            },
+          ],
+        },
+      };
+    }
+    return {
+      status: 'success',
+      data: { resultType: url.pathname.endsWith('/query') ? 'vector' : 'matrix', result: [] },
+    };
+  });
+  const result = await loadTelemetry(
+    clusterScope('alpha'),
+    endpoint,
+    query,
+    new AbortController().signal
+  );
+  expect(result.requests.ok).toBe(true);
+  expect(result.security).toMatchObject({
+    ok: false,
+    error: { kind: 'invalid-response', message: expect.stringContaining('sample budget') },
+  });
+});
+
 it('keeps a failed security query explicit while retaining independent successful charts', async () => {
   vi.mocked(ApiProxy.request).mockImplementation(async path => {
     const url = new URL(String(path), 'http://example.test');
@@ -82,4 +194,16 @@ it('keeps a failed security query explicit while retaining independent successfu
     ok: false,
     error: { kind: 'forbidden', message: 'Security metric denied' },
   });
+});
+
+it('aborts in-flight telemetry requests when the captured query is cancelled', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(() => new Promise(() => {}));
+  const controller = new AbortController();
+  const pending = loadTelemetry(clusterScope('alpha'), endpoint, query, controller.signal);
+  await vi.waitFor(() => expect(ApiProxy.request).toHaveBeenCalled());
+  controller.abort();
+  await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+  expect(
+    vi.mocked(ApiProxy.request).mock.calls.every(([, options]) => options?.signal?.aborted)
+  ).toBe(true);
 });

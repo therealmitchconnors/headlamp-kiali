@@ -14,6 +14,7 @@ import { clusterScope } from '../core/scope';
 import { loadMtlsSnapshot, MtlsQuery } from '../data/mtls';
 import { useRequest } from '../hooks/useRequest';
 import ClusterScope from './ClusterScope';
+import StructuredValue from './configuration/StructuredValue';
 import RequestStatus from './RequestStatus';
 
 function Results({
@@ -45,6 +46,13 @@ function Results({
               <Typography>
                 {t('Selected controller')}: {query.controllerNamespace}/{query.controller}
               </Typography>
+              {snapshot.controller.effective?.status === 'ready' &&
+                snapshot.controller.effective.sources && (
+                  <details>
+                    <summary>{t('Captured mesh configuration sources')}</summary>
+                    <StructuredValue value={snapshot.controller.effective.sources} />
+                  </details>
+                )}
               <Typography>
                 {t('Mesh root namespace')}: {snapshot.rootNamespace}
               </Typography>

@@ -20,6 +20,9 @@ vi.mock('../config', () => ({
   }),
 }));
 vi.mock('../data/mtls', () => ({ loadMtlsSnapshot: vi.fn() }));
+vi.mock('./configuration/StructuredValue', () => ({
+  default: ({ value }: { value: unknown }) => <pre>{JSON.stringify(value)}</pre>,
+}));
 vi.mock('@kinvolk/headlamp-plugin/lib/CommonComponents', () => ({
   SectionBox: ({ title, children }: { title: string; children: ReactNode }) => (
     <section>
@@ -88,6 +91,21 @@ it('labels a resolved controller-namespace fallback instead of presenting it as 
         },
         mesh: { status: 'ready', name: 'istio', value: { hasDiscoverySelectors: false } },
         injector: { status: 'ready', name: 'injector', value: {} },
+        effective: {
+          status: 'ready',
+          value: { hasDiscoverySelectors: false },
+          sharedAbsent: false,
+          sources: {
+            local: {
+              kind: 'mounted',
+              cluster: 'alpha',
+              namespace: 'custom-system',
+              name: 'mounted',
+              key: 'mesh-settings',
+              path: '/custom/mesh',
+            },
+          },
+        },
       },
     });
   render(
@@ -104,5 +122,7 @@ it('labels a resolved controller-namespace fallback instead of presenting it as 
     /uses the observed controller namespace after configuration has been resolved/
   );
   expect(screen.getByText('Mesh root namespace: custom-system')).toBeDefined();
+  expect(screen.getByText('Captured mesh configuration sources')).toBeDefined();
+  expect(screen.getByText(/"key":"mesh-settings"/)).toBeDefined();
   expect(screen.queryByText('Pinned Kiali configuration indicator')).toBeNull();
 });

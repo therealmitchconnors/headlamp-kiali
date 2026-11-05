@@ -5,6 +5,7 @@ import {
   VirtualWorkloadRecord,
   virtualWorkloadResources,
 } from '../core/virtualWorkloads';
+import { observedVmAccount } from '../core/workloadAccounts';
 import {
   workloadEntryLabels,
   workloadGroupEntrySelector,
@@ -106,6 +107,7 @@ export async function readVirtualWorkloadSource(
         error: groups.error,
       };
     let entries: VirtualWorkloadRecord[] = [];
+    let entryVersion: { kind: string; apiVersion: string; resourceVersion: string } | undefined;
     if (groups.items.some(group => Object.keys(group.selector).length)) {
       const entryApi = await discoverConfiguration(scope, entryDefinition, signal);
       if (entryApi.available === false)
@@ -125,7 +127,11 @@ export async function readVirtualWorkloadSource(
             throw new InvalidResponseError('Missing WorkloadEntry specification');
           const labels = workloadEntryLabels(value.spec.labels);
           countLabels(labels);
-          return { ...current, labels };
+          return {
+            ...current,
+            labels,
+            serviceAccount: observedVmAccount(value.spec.serviceAccount),
+          };
         },
         signal
       );
@@ -143,12 +149,20 @@ export async function readVirtualWorkloadSource(
         };
       }
       entries = result.items;
+      if (!result.resourceVersion)
+        throw new InvalidResponseError('WorkloadEntry list resource version is missing');
+      entryVersion = {
+        kind: 'WorkloadEntry',
+        apiVersion: entryApi.apiVersion,
+        resourceVersion: result.resourceVersion,
+      };
     }
     return {
       source,
       resources: virtualWorkloadResources(scope, groups.items, entries),
       complete: true,
       resourceVersion: groups.resourceVersion,
+      ...(entryVersion ? { relatedVersions: [entryVersion] } : {}),
     };
   } catch (error) {
     if (signal.aborted) throw error;

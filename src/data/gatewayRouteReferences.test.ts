@@ -193,6 +193,18 @@ it('requires matching cross-namespace Gateway sharing and Service ReferenceGrant
       expect.stringContaining('controller status are not verified'),
     ]),
   });
+  expect(loadValidationSnapshot).toHaveBeenCalledWith(
+    { cluster: 'alpha' },
+    'HTTPRoute',
+    'gateway.networking.k8s.io',
+    routeSpec,
+    null,
+    signal,
+    'bookinfo',
+    undefined,
+    undefined,
+    ['namespaces']
+  );
 
   vi.mocked(loadValidationSnapshot).mockResolvedValue(snapshot({ grant: false }) as never);
   await expect(

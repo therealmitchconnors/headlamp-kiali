@@ -1,5 +1,10 @@
 import { DirectionalRates, WorkloadStatus } from './health';
-import { HealthReporterMode, healthRequestQuery, requestHealthCode } from './healthReporters';
+import {
+  HealthReporterMode,
+  healthRequestQuery,
+  isSupportedHealthProtocol,
+  requestHealthCode,
+} from './healthReporters';
 import { isDnsLabel, isDnsSubdomain, isRecord } from './object';
 import { MetricResult, validateTelemetryScope } from './telemetry';
 
@@ -130,6 +135,7 @@ export function healthRequestRates(result: MetricResult): DirectionalRates {
     const rate = series.samples[0]?.value;
     if (
       !protocol ||
+      !isSupportedHealthProtocol(protocol) ||
       code === undefined ||
       code === '' ||
       series.samples.length !== 1 ||
@@ -139,7 +145,7 @@ export function healthRequestRates(result: MetricResult): DirectionalRates {
       !Number.isFinite(rate)
     )
       throw new Error(
-        'Request health requires protocol, response code and a finite nonnegative instant rate'
+        'Request health requires a supported protocol, response code and a finite nonnegative instant rate'
       );
     let codes = protocols.get(protocol);
     if (!codes) {

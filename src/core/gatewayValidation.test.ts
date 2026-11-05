@@ -66,6 +66,20 @@ it.each(['HTTPRoute', 'GRPCRoute'])(
     ).toEqual({ findings: [], skipped: [] });
   }
 );
+it.each(['TCPRoute', 'TLSRoute', 'UDPRoute'])(
+  'does not activate %s relationship findings without an active pinned caller',
+  kind => {
+    const spec = {
+      parentRefs: [{ name: 'missing' }],
+      rules: [{ backendRefs: [{ name: 'missing' }] }],
+    };
+    expect(gatewayValidationSources(kind, group, 'bookinfo', spec)).toEqual([]);
+    expect(gatewayReferenceValidation(kind, group, 'bookinfo', spec, context)).toEqual({
+      findings: [],
+      skipped: [],
+    });
+  }
+);
 it.each([
   { from: 'All', allowed: true },
   { from: 'Same', allowed: false },

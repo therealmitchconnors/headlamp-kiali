@@ -140,6 +140,7 @@ it('keeps VM group identity separate from entry label provenance in scoped links
         virtualMachine: {
           labelSource: 'entry',
           matchingEntries: 2,
+          selectorEmpty: false,
           entry: { name: 'first-entry', uid: 'entry-uid', resourceVersion: 'entry-version' },
         },
       },

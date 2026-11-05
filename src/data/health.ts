@@ -6,7 +6,7 @@ import {
   HealthRateRule,
   validateHealthRules,
 } from '../core/healthCalculator';
-import { combinedMetricHealth } from '../core/healthReporters';
+import { combinedMetricHealth, HealthDirection } from '../core/healthReporters';
 import { ClusterScope, clusterScope } from '../core/scope';
 import { decodePrometheus } from '../core/telemetry';
 import {
@@ -32,6 +32,7 @@ export interface WorkloadHealthSnapshot {
   resource: { ok: true; result: WorkloadHealthResource } | { ok: false; error: ReadFailure };
   inbound: MetricRead;
   outbound: MetricRead;
+  missingDirections: HealthDirection[];
   calculation: CalculatedHealth | null;
   calculationError?: ReadFailure;
 }
@@ -132,6 +133,10 @@ async function readWorkloadHealth(
     resource,
     inbound,
     outbound,
+    missingDirections: [
+      ...(inbound.ok && !inbound.result.series.length ? (['inbound'] as const) : []),
+      ...(outbound.ok && !outbound.result.series.length ? (['outbound'] as const) : []),
+    ],
     calculation: null,
   };
   if (
@@ -140,9 +145,11 @@ async function readWorkloadHealth(
     !resource.result.stale &&
     inbound.ok &&
     outbound.ok &&
+    snapshot.missingDirections.length === 0 &&
     !inbound.result.warnings.length &&
     !outbound.result.warnings.length &&
-    (inbound.result.series.length || outbound.result.series.length)
+    inbound.result.series.length > 0 &&
+    outbound.result.series.length > 0
   ) {
     try {
       snapshot.calculation = calculateHealth(

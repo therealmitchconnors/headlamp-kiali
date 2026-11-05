@@ -177,6 +177,7 @@ async function reviewGatewayRouteReferences(
     signal,
     namespace,
     undefined,
+    undefined,
     ['namespaces']
   );
   const sources = sourceMap(snapshot.sources);

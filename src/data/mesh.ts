@@ -1,11 +1,14 @@
 import {
   ControlPlaneObservation,
   controlPlaneObservation,
+  emptyMeshNetworks,
   InjectorFields,
   injectorFields,
   mergeMeshFields,
   MeshConfigFields,
   meshConfigFields,
+  MeshConfigMapSource,
+  MeshConfigurationSources,
   namespaceAssociations,
   namespaceDiscovery,
   NamespaceMeshConfiguration,
@@ -30,7 +33,7 @@ import {
 } from './requests';
 
 export type ConfigurationRead<T> =
-  | { status: 'ready'; name: string; value: T }
+  | { status: 'ready'; name: string; value: T; source?: MeshConfigMapSource }
   | { status: 'error'; name: string; error: ReadFailure }
   | { status: 'limited'; name: string };
 export interface MeshControlPlane {
@@ -38,8 +41,14 @@ export interface MeshControlPlane {
   mesh: ConfigurationRead<MeshConfigFields>;
   injector: ConfigurationRead<InjectorFields>;
   shared?: ConfigurationRead<MeshConfigFields>;
+  networks?: ConfigurationRead<'absent-key' | 'empty'>;
   effective?:
-    | { status: 'ready'; value: MeshConfigFields; sharedAbsent: boolean }
+    | {
+        status: 'ready';
+        value: MeshConfigFields;
+        sharedAbsent: boolean;
+        sources?: MeshConfigurationSources;
+      }
     | { status: 'unavailable'; message: string };
 }
 export interface MeshSnapshot {
@@ -82,6 +91,12 @@ export function localManagedNamespaceScope(
   });
   return {
     cluster: snapshot.cluster,
+    configurationSources: snapshot.controlPlanes.map(plane => ({
+      controller: `${plane.controller.namespace}/${plane.controller.name}`,
+      sources: structuredClone(
+        plane.effective?.status === 'ready' ? plane.effective.sources : undefined
+      ),
+    })),
     ...localManagedNamespaceProjection(
       logicalName,
       snapshot.namespaces.items,
@@ -136,7 +151,8 @@ export function namespaceMeshConfiguration(
   return {
     status: 'ready',
     controller: `${plane.controller.namespace}/${plane.controller.name}`,
-    fields: plane.effective.value,
+    fields: structuredClone(plane.effective.value),
+    sources: structuredClone(plane.effective.sources),
     discovery: discovery.basis,
     root: resolvedMeshRoot(plane.effective.value, plane.controller.namespace),
   };
@@ -148,7 +164,8 @@ async function configMap<T>(
   name: string,
   field: string,
   parse: (value: unknown) => T,
-  signal: AbortSignal
+  signal: AbortSignal,
+  validateData?: (data: Record<string, unknown>) => void
 ): Promise<ConfigurationRead<T>> {
   try {
     const response = await readCluster(
@@ -163,11 +180,28 @@ async function configMap<T>(
       !isRecord(response.metadata) ||
       response.metadata.name !== name ||
       response.metadata.namespace !== namespace ||
-      !isRecord(response.data)
+      (response.data !== undefined && response.data !== null && !isRecord(response.data))
     )
       throw new InvalidResponseError('ConfigMap response does not match the requested identity');
+    const data = isRecord(response.data) ? response.data : {};
     try {
-      return { status: 'ready', name, value: parse(response.data[field]) };
+      validateData?.(data);
+      return {
+        status: 'ready',
+        name,
+        value: parse(data[field]),
+        source: {
+          cluster: scope.cluster,
+          namespace,
+          name,
+          key: field,
+          uid: typeof response.metadata.uid === 'string' ? response.metadata.uid : undefined,
+          resourceVersion:
+            typeof response.metadata.resourceVersion === 'string'
+              ? response.metadata.resourceVersion
+              : undefined,
+        },
+      };
     } catch (error) {
       throw new InvalidResponseError(
         error instanceof Error ? error.message : 'Invalid mesh configuration'
@@ -230,7 +264,12 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
     try {
       return {
         controller,
-        mesh: { status: 'limited', name: revisionConfigMapName('istio', controller.revision) },
+        mesh: {
+          status: 'limited',
+          name:
+            controller.meshConfigSource?.name ??
+            revisionConfigMapName('istio', controller.revision),
+        },
         injector: {
           status: 'limited',
           name: revisionConfigMapName('istio-sidecar-injector', controller.revision),
@@ -251,7 +290,10 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
   });
   const meshReads = new Map<string, Promise<ConfigurationRead<MeshConfigFields>>>();
   const injectorReads = new Map<string, Promise<ConfigurationRead<InjectorFields>>>();
+  const networksReads = new Map<string, Promise<ConfigurationRead<'absent-key' | 'empty'>>>();
   for (const plane of controlPlanes) {
+    if (plane.controller.meshNetworksSource)
+      plane.networks = { status: 'limited', name: plane.controller.meshNetworksSource.name };
     const shared = plane.controller.sharedMeshConfig;
     if (!shared) continue;
     plane.shared =
@@ -271,7 +313,8 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
   const tasks = controlPlanes.slice(0, 20).flatMap(plane => [
     async () => {
       if (plane.mesh.status === 'error') return;
-      const key = `${plane.controller.namespace}/${plane.mesh.name}`;
+      const field = plane.controller.meshConfigSource?.key ?? 'mesh';
+      const key = JSON.stringify([plane.controller.namespace, plane.mesh.name, field, false]);
       if (!meshReads.has(key))
         meshReads.set(
           key,
@@ -279,7 +322,7 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
             scope,
             plane.controller.namespace,
             plane.mesh.name,
-            'mesh',
+            field,
             meshConfigFields,
             signal
           )
@@ -305,7 +348,13 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
     },
     async () => {
       if (!plane.shared || plane.shared.status !== 'limited') return;
-      const key = `${plane.controller.namespace}/${plane.shared.name}`;
+      const checkNetworks = plane.controller.meshConfigSource?.kind === 'mounted';
+      const key = JSON.stringify([
+        plane.controller.namespace,
+        plane.shared.name,
+        'mesh',
+        checkNetworks,
+      ]);
       if (!meshReads.has(key))
         meshReads.set(
           key,
@@ -315,10 +364,29 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
             plane.shared.name,
             'mesh',
             meshConfigFields,
-            signal
+            signal,
+            checkNetworks ? data => emptyMeshNetworks(data.meshNetworks) : undefined
           )
         );
       plane.shared = await meshReads.get(key)!;
+    },
+    async () => {
+      const source = plane.controller.meshNetworksSource;
+      if (!source || !plane.networks) return;
+      const key = JSON.stringify([plane.controller.namespace, source.name, source.key]);
+      if (!networksReads.has(key))
+        networksReads.set(
+          key,
+          configMap(
+            scope,
+            plane.controller.namespace,
+            source.name,
+            source.key,
+            emptyMeshNetworks,
+            signal
+          )
+        );
+      plane.networks = await networksReads.get(key)!;
     },
   ]);
   let next = 0;
@@ -329,27 +397,172 @@ async function readMeshSnapshot(scope: ClusterScope, signal: AbortSignal): Promi
     }
   }
   await Promise.all(Array.from({ length: Math.min(3, tasks.length) }, worker));
+  const captureFailures = new Map<MeshControlPlane, string>();
+  const verificationReads = new Map<string, Promise<ConfigurationRead<unknown>>>();
+  const versioned = (source: Pick<MeshConfigMapSource, 'uid' | 'resourceVersion'> | undefined) =>
+    source &&
+    [source.uid, source.resourceVersion].every(
+      value =>
+        typeof value === 'string' &&
+        value.length > 0 &&
+        value.length <= 1024 &&
+        value.trim() === value
+    );
+  async function verifyRead<T>(
+    plane: MeshControlPlane,
+    original: ConfigurationRead<T>,
+    key: string,
+    parse: (value: unknown) => T,
+    checkNetworks = false
+  ) {
+    const absent = original.status === 'error' && original.error.kind === 'not-found';
+    if (!absent && (original.status !== 'ready' || !versioned(original.source)))
+      throw new Error('Mounted mesh configuration requires versioned ConfigMap sources');
+    const identity = JSON.stringify([
+      plane.controller.namespace,
+      original.name,
+      key,
+      parse === emptyMeshNetworks,
+      checkNetworks,
+    ]);
+    if (!verificationReads.has(identity))
+      verificationReads.set(
+        identity,
+        configMap(
+          scope,
+          plane.controller.namespace,
+          original.name,
+          key,
+          parse,
+          signal,
+          checkNetworks ? data => emptyMeshNetworks(data.meshNetworks) : undefined
+        )
+      );
+    const current = await verificationReads.get(identity)!;
+    if (
+      absent
+        ? current.status !== 'error' || current.error.kind !== 'not-found'
+        : JSON.stringify(original) !== JSON.stringify(current)
+    )
+      throw new Error('Mesh configuration source changed or became unavailable during capture');
+  }
+  tasks.push(
+    ...controlPlanes.slice(0, 20).map(plane => async () => {
+      if (
+        !plane.controller.meshConfigSource?.path ||
+        plane.controller.effectiveConfigBlocked ||
+        plane.mesh.status !== 'ready'
+      )
+        return;
+      try {
+        if (
+          !namespaces.complete ||
+          !controllers.complete ||
+          !tags.complete ||
+          !versioned(plane.controller)
+        )
+          throw new Error('Mounted mesh configuration requires complete versioned discovery');
+        await verifyRead(
+          plane,
+          plane.mesh,
+          plane.controller.meshConfigSource.key,
+          meshConfigFields
+        );
+        if (plane.shared)
+          await verifyRead(
+            plane,
+            plane.shared,
+            'mesh',
+            meshConfigFields,
+            plane.controller.meshConfigSource.kind === 'mounted'
+          );
+        if (plane.networks && plane.controller.meshNetworksSource)
+          await verifyRead(
+            plane,
+            plane.networks,
+            plane.controller.meshNetworksSource.key,
+            emptyMeshNetworks
+          );
+        const response = await readCluster(
+          scope,
+          `/apis/apps/v1/namespaces/${encodeURIComponent(
+            plane.controller.namespace
+          )}/deployments/${encodeURIComponent(plane.controller.name)}`,
+          signal
+        );
+        if (
+          !isRecord(response) ||
+          response.apiVersion !== 'apps/v1' ||
+          response.kind !== 'Deployment' ||
+          JSON.stringify(controlPlaneObservation(response)) !== JSON.stringify(plane.controller)
+        )
+          throw new Error('Controller configuration provenance changed during capture');
+      } catch (error) {
+        if (signal.aborted) throw error;
+        captureFailures.set(
+          plane,
+          error instanceof Error ? error.message : 'Mounted configuration capture is unavailable'
+        );
+      }
+    })
+  );
+  await Promise.all(Array.from({ length: Math.min(3, tasks.length - next) }, worker));
+  signal.throwIfAborted();
   for (const plane of controlPlanes) {
     const sharedAbsent =
       plane.shared?.status === 'error' && plane.shared.error.kind === 'not-found';
     if (
       plane.controller.effectiveConfigBlocked ||
+      captureFailures.has(plane) ||
       plane.mesh.status !== 'ready' ||
+      (plane.networks && plane.networks.status !== 'ready') ||
       (plane.shared && plane.shared.status !== 'ready' && !sharedAbsent)
     ) {
       plane.effective = {
         status: 'unavailable',
         message:
+          captureFailures.get(plane) ??
           'Selected merged fields are unavailable because configuration sources or overrides are unresolved',
       };
     } else {
       plane.effective = {
         status: 'ready',
         sharedAbsent,
+        sources: plane.mesh.source
+          ? {
+              local: {
+                ...plane.mesh.source,
+                kind: plane.controller.meshConfigSource?.kind ?? 'standard',
+                path: plane.controller.meshConfigSource?.path,
+              },
+              shared:
+                plane.shared?.status === 'ready' && plane.shared.source
+                  ? { ...plane.shared.source, status: 'ready' }
+                  : sharedAbsent && plane.shared
+                  ? {
+                      cluster: scope.cluster,
+                      namespace: plane.controller.namespace,
+                      name: plane.shared.name,
+                      key: 'mesh',
+                      status: 'not-found',
+                    }
+                  : undefined,
+              networks:
+                plane.networks?.status === 'ready' &&
+                plane.networks.source &&
+                plane.controller.meshNetworksSource
+                  ? {
+                      ...plane.networks.source,
+                      path: plane.controller.meshNetworksSource.path,
+                      content: plane.networks.value,
+                    }
+                  : undefined,
+            }
+          : undefined,
         value:
           plane.shared?.status === 'ready'
             ? mergeMeshFields(plane.mesh.value, plane.shared.value)
-            : plane.mesh.value,
+            : structuredClone(plane.mesh.value),
       };
     }
   }
