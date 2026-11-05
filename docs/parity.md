@@ -20,6 +20,149 @@ against Bookinfo in both stock Headlamp
 independently checked against Go. A subsequent calculator/workload-health
 increment is described below; it is not complete mesh-health integration.
 
+## Current integration — 2026-11-05
+
+The implementation branch integrates validated PRs #4, #6, #11, #13, #37,
+#38 and #39 through `c8128c5be38bf1fd42cdbe41bd70a083a5da2232`.
+The combined implementation passed 23,105 tests in 193 files, type-check,
+lint, build and catalog/resource/dashboard checks after conflict resolution.
+Individual PR heads were also exercised read-only in stock hosted Headlamp
+0.35.0 against `mitch-auto`; the original Docker smoke harness passed.
+
+PRs #12/#19 need Gateway API CRDs and representative route/controller
+resources; #14 needs an approved isolated mutation fixture; #20/#21 need
+a real tracing backend and appropriate trace/Pod identity data; #22 needs
+ztunnel; #27 needs WorkloadGroups and an OpenShift DeploymentConfig API;
+#28 needs multiple real contexts with known shared/isolated telemetry mappings;
+#29 needs Grafana/Perses endpoints and dashboards. They remain partially
+validated, not ready merely because the existing-resource guards render.
+PR #31's combined graph rejects ordinary source/destination policy-label
+differences; #36 rejects Envoy's indented logger names. Neither is integrated.
+
+Prometheus on `mitch-auto` was recovered with an approved persistent
+Deployment memory change to a 2 GiB limit / 1 GiB request. Automatic Pod
+replacement cleared ephemeral data; readiness and queries succeeded with
+zero restarts after 27 minutes. No storage-volume capacity change was made.
+Current live positive-provider, Desktop, mutation and large-browser-scale
+gaps remain open. The 2026-11-03 snapshot below is historical, not the
+current merge or cluster state.
+
+## Historical baseline and issue-linked state — 2026-11-03
+
+This ledger describes the integrated `therealmitchconnors-kiali-plugin` base at
+`655e75109cf27f964f55045bdadfe39c72d22022`, including merged PRs [#1](https://github.com/therealmitchconnors/headlamp-kiali/pull/1)
+and [#2](https://github.com/therealmitchconnors/headlamp-kiali/pull/2). The
+current documentation task targets that branch. At the 2026-11-03 review
+snapshot, the implementation PRs linked in the [portable execution map](../PLAN.md#issue-linked-execution-and-catalog-map)
+remain open and unmerged. Do not import their source or promote their work to
+current behavior until it is integrated and its own evidence is reviewed.
+
+| Assignment | Integrated status in this baseline | Issue / implementation PR |
+| --- | --- | --- |
+| Service-port checks and declared-scope Gateway checks | Code is present from merged #1/#2; the added Gateway/Service inspector browser and live gates remain open | [#1](https://github.com/therealmitchconnors/headlamp-kiali/pull/1), [#2](https://github.com/therealmitchconnors/headlamp-kiali/pull/2) |
+| Effective mesh configuration sources | Current projection is bounded; explicit file/mount overrides and external source resolution remain blocked/unresolved | [#3](https://github.com/therealmitchconnors/headlamp-kiali/issues/3), open [#4](https://github.com/therealmitchconnors/headlamp-kiali/pull/4) |
+| Hosted smoke, workload/account provenance, Gateway attachment, health, and guarded existing-resource workflows | Assigned deliverables are pending; no unmerged behavior is counted | [#5](https://github.com/therealmitchconnors/headlamp-kiali/issues/5) / [#6](https://github.com/therealmitchconnors/headlamp-kiali/pull/6), [#7](https://github.com/therealmitchconnors/headlamp-kiali/issues/7) / [#11](https://github.com/therealmitchconnors/headlamp-kiali/pull/11), [#8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8) / [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12), [#9](https://github.com/therealmitchconnors/headlamp-kiali/issues/9) / [#13](https://github.com/therealmitchconnors/headlamp-kiali/pull/13), [#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10) / [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14) |
+| Gateway API forms, Tempo predicates, trace correlation, proxy metadata | Assigned deliverables are pending; current route schemas, trace filters and bounded Envoy/ztunnel views do not prove these increments complete | [#15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15) / [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19), [#16](https://github.com/therealmitchconnors/headlamp-kiali/issues/16) / [#20](https://github.com/therealmitchconnors/headlamp-kiali/pull/20), [#17](https://github.com/therealmitchconnors/headlamp-kiali/issues/17) / [#21](https://github.com/therealmitchconnors/headlamp-kiali/pull/21), [#18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18) / [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22) |
+| External/VM dashboards and cross-context telemetry stores | External provider discovery, VM/custom attribution, shared-store normalization and full mesh membership remain separate open work | [#23](https://github.com/therealmitchconnors/headlamp-kiali/issues/23) / [#29](https://github.com/therealmitchconnors/headlamp-kiali/pull/29), [#24](https://github.com/therealmitchconnors/headlamp-kiali/issues/24) / [#27](https://github.com/therealmitchconnors/headlamp-kiali/pull/27), [#25](https://github.com/therealmitchconnors/headlamp-kiali/issues/25) / [#28](https://github.com/therealmitchconnors/headlamp-kiali/pull/28) |
+| Mixed-reporter graph, authorized sync/logging, graph appenders, observed security, large inputs | These increments are pending; current bounded graph/security/diagnostic implementations do not close their respective families | [#26](https://github.com/therealmitchconnors/headlamp-kiali/issues/26) / [#31](https://github.com/therealmitchconnors/headlamp-kiali/pull/31), [#30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30) / [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36), [#32](https://github.com/therealmitchconnors/headlamp-kiali/issues/32) / [#37](https://github.com/therealmitchconnors/headlamp-kiali/pull/37), [#33](https://github.com/therealmitchconnors/headlamp-kiali/issues/33) / [#38](https://github.com/therealmitchconnors/headlamp-kiali/pull/38), [#34](https://github.com/therealmitchconnors/headlamp-kiali/issues/34) / [#39](https://github.com/therealmitchconnors/headlamp-kiali/pull/39) |
+
+The older “immediate next task” checkpoint below and in `PLAN.md` is preserved
+as provenance, but it is not a current queue: Service-port source is integrated
+from #1; declared-scope Gateway validation is integrated from #2; the effective
+mesh-source increment remains #3 / PR #4. Effective workload/port/subset mTLS
+and principal-absence checks require both appropriate effective-configuration
+sources and complete caller-specific workload/account evidence. They remain
+blocked; assignment of #3 or #7 alone does not activate them.
+
+## Partial-release readiness
+
+**Release posture: partial implementation, not full parity and not publication
+approval.** The current code supports a bounded native slice. Any partial release
+must state its exact supported views and limitations; do not describe the open
+implementation PRs, source inventories, synthetic fixtures or unit-test count as
+shipped behavior.
+
+### Compatibility and evidence matrix
+
+| Area | Hosted Headlamp (stock 0.35.0) | Desktop (stock 0.35.0) | Current compatibility boundary / evidence state |
+| --- | --- | --- | --- |
+| Runtime imports and contribution | Earlier hosted checks loaded the integrated native slices and inspected plugin execution failures; there is no running host in this checkout, and #5 / PR #6 is still pending | The initial native browsing slice was exercised historically; current CDP target is unavailable, and later Gateway/Service increments have not had this gate | Type-check/build cannot prove runtime-global availability. Use public externalized barrels; recheck the actual route and console before release claims |
+| Kubernetes authentication and API transport | Existing authenticated `K8s`/`ApiProxy` reads have been exercised with real Bookinfo for supported paths; synthetic interception is used for absent/denied/positive CR scenarios | Headlamp owns login and cluster auth; current Desktop rerun is unavailable | No direct API-server calls, token copying, RBAC changes or credential workarounds. Incomplete visibility cannot prove absence |
+| Prometheus | Read-only real Bookinfo request/latency and health reads were observed at historical hosted checkpoints; positive/error/dashboard cases also use intercepted fixtures | Earlier Desktop metrics/API proxy checks exist for the initial slice; no current run | A prior TSDB compaction OOM was mitigated in-place for the then-current Pod after approval, but the Deployment template remains at a 1 GiB memory limit and replacement can recur. No current cluster is assumed; telemetry is not mesh membership or policy proof |
+| Jaeger / Tempo | Search/detail/filter success evidence is fixture-intercepted; no live provider was installed or queried | No current Desktop provider evidence | HTTP integration only where an existing endpoint is configured; gRPC-only, provider authentication and real-provider success remain unsupported/unverified |
+| Envoy / ztunnel / synchronization | Bounded Envoy and pod-log reads were checked live on Bookinfo; ztunnel positives are synthetic and no live ztunnel deployment was observed. `/debug/syncz` returned 401 | No current Desktop diagnostic rerun | Do not infer sync/readiness from admin HTTP success or bypass the 401. Confirmed logging controls and broader metadata are pending #18/#30 |
+| Istio/Gateway configuration and checks | Gateway API CRUD/details and scoped Gateway/Service inspectors have source/unit coverage; the #1/#2 inspector browser/live/positive-resource evidence remains open | No current Desktop verification of these increments | Live Gateway API CRDs/instances were absent in the recorded cluster; no full route attachment, controller, workload or policy verdict |
+| Scope and identity | Pages and reads capture cluster/namespace inputs; logical mesh and telemetry identities are explicit, not inferred from Headlamp context names | No current Desktop scope rerun | The local declared mesh projection is bounded. An explicit-context comparison does not certify mesh membership or allow single-target configuration writes across contexts |
+| Cross-context mesh and telemetry | Bounded explicit-context comparison exists; current values are not normalized as shared/per-context stores | No true multi-context Desktop evidence | #25 remains open; store mapping is not configurable mesh-membership proof. Cross-context graph claims remain blocked |
+| Grafana / Perses | No current endpoint/auth integration; #23 / PR #29 remains open | No current evidence | Kubernetes proxy access does not authenticate a destination app. No arbitrary credential forwarding, CORS/TLS bypass or ConfigStore secrets |
+| Accessibility, i18n and screenshots | Earlier hosted checks recorded named controls, English strings and snapshots for selected scenarios; no current all-route audit | Desktop screenshot capture timed out historically; no new screenshots are available | `docs/OVERVIEW.md` and image evidence are pending. Do not create mock screenshots or infer whole-plugin accessibility from selected checks |
+| Large-scale cost | Pure-core request/cardinality bounds and deterministic tests exist; no current end-to-end host rendering/memory measurement | No large-mesh Desktop measurement | #34 / PR #39 is open. Do not extrapolate unit budgets to browser memory, UI responsiveness or large-cluster readiness |
+| Host diagnostics | Prior consoles included the known Headlamp CRD-v1beta1 discovery 404 and watch-close messages; exercised views had no remaining plugin execution failure | Some prior release-fetch/permission/watch diagnostics; current CDP unavailable | Separate host logs from plugin failures; the absence of a current browser session is not a clean-console result |
+
+### Measured evidence, missing evidence, and closure conditions
+
+Measured or recorded on named earlier checkpoints (not a fresh run for this
+documentation change):
+
+- [x] Kiali is pinned to v2.33.0 / `0e8be887b8217bbcac5e3ae0bfcd258073949cca`;
+  plugin toolchain is `@kinvolk/headlamp-plugin` 0.14.0 and the host target is
+  stock Headlamp 0.35.0.
+- [x] Inventories and generators preserve source blob hashes and stable
+  per-record IDs. The 508-source / 616-record catalogs and 21 routes / 216
+  contracts are coverage inventories, not implementation totals.
+- [x] Existing `package.json` declares Apache-2.0 and packages `LICENSE` and
+  `NOTICE` via `headlamp.extraDist`; the lockfile is committed. A fresh
+  `npm run package`/member check is still required for the exact release commit.
+- [x] Historical hosted Bookinfo checks cover selected native browsing, metrics,
+  health and Envoy reads; evidence and their negative/fixture boundaries are
+  retained in this ledger.
+
+Not measured or not closed for the current candidate:
+
+- [x] Candidate checks passed: `npm run tsc`, `npm run lint`, `CI=1 npm test`
+  (**22,594 tests in 189 files**), `npm run build`, `npm run parity:check`,
+  `npm run resources:check` (23 models) and `npm run dashboards:check`
+  (21 templates / 91 charts).
+- [x] `npm run package` produced `kiali-0.1.0.tar.gz`; archive inspection
+  confirmed `headlamp-kiali/LICENSE`, `NOTICE`, English translation, `main.js`
+  and `package.json`. SHA-256:
+  `c95235c9229a20229adc35c2d39781fec33a74c4c5c4514a72edbae4359c7339`.
+  The artifact is ignored locally, not committed or published.
+- [x] `npm audit --omit=dev` found zero production dependency advisories.
+  `npm ci` reported 53 advisories in the complete installed tree (3 critical,
+  5 high, 38 moderate, 7 low); the pinned development toolchain was not upgraded
+  in this documentation task. Review that development-tree report before a
+  release.
+- [ ] Current stock-host plugin load, actual contribution, English labels,
+  accessible names and console review, including the integrated #1/#2 Gateway
+  and Service inspectors.
+- [ ] Complete hosted browser smoke in an isolated synthetic environment (#5);
+  this does not replace Desktop or real cluster/provider verification.
+- [ ] Desktop 0.35.0 load/console/a11y verification. The user must launch the
+  Desktop CDP target; no target or screenshot evidence is available here.
+- [ ] Authorized live cluster with representative Istio and Gateway resources,
+  real read/permission boundaries, applicable Prometheus/tracing providers and
+  approved fixtures. Existing Bookinfo success is not evidence for empty
+  Gateway/configuration kinds or new writes.
+- [ ] Real Jaeger/Tempo, ztunnel/ambient, Grafana/Perses and authorized
+  synchronization evidence; do not create infrastructure or credentials to
+  close these gaps.
+- [ ] Measured browser/host memory, responsiveness and large-input behavior
+  (#34); pure-core limits do not close this.
+- [ ] `docs/OVERVIEW.md` and the required screenshots. Follow
+  [the document-plugin workflow](../.github/skills/document-plugin/SKILL.md)
+  only after a real running host and seeded/approved resources satisfy its
+  preconditions. Until then, screenshots and per-kind live coverage remain
+  explicitly pending.
+
+Use an approved isolated hosted Headlamp fixture environment for synthetic
+contribution checks; use a separately authorized stock Desktop 0.35.0 session
+for Desktop claims; and use only a confirmed cluster/context/namespace with
+explicit approval for resource application or cleanup. Existing read-only
+provider endpoints may be tested only with authorized access. No step in this
+checklist authorizes an install, fixture write, cleanup, privileged workaround,
+release publication or credential handling.
+
 ## Large-input analysis and rendering budgets
 
 The measured code baseline is PR-base commit
