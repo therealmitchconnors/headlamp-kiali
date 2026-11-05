@@ -2878,7 +2878,8 @@ refresh after every real write is not claimed.
 ## Service-driven routing creation and batch outcomes
 
 `core/serviceTraffic.ts`, `data/serviceTraffic.ts` and `ServiceTrafficWizard.tsx`
-provide a create-only HTTP/gRPC or TCP workflow from the Services table. Pinned
+provide HTTP/gRPC or TCP creation and a bounded existing-pair edit workflow
+from the Services table. Pinned
 `IstioWizards/WizardActions.ts` supplies the source shape and default-weight
 semantics; these tests are source-informed, not a full wizard oracle.
 The workflow requires complete namespace correlation, a versioned selector-based
@@ -2909,8 +2910,37 @@ The review uses a concise weight table and two read-only Monaco JSON previews;
 the original deeply nested table preview was replaced after visual inspection.
 Runtime load and named controls worked in the stock hosted host.
 
-Live controller reconciliation, real write success, existing-resource multi-object
-editing, remaining traffic-policy options, locks and new Desktop checks remain open.
+### Bounded existing VirtualService/DestinationRule edits
+
+The edit proposal requires exactly one captured, namespaced
+`networking.istio.io/v1` VirtualService and DestinationRule, each with UID and
+resourceVersion. The VirtualService must have the exact Service FQDN as its sole
+host, no gateways or only `mesh`, and exactly one HTTP or TCP route whose weighted
+destinations each map one-to-one to an observed Service version through the
+captured DestinationRule subsets. Only the Service-targeting route and the
+existing subset policy controls are edited. Other routes, match alternatives,
+route order, rule fields, metadata and status are preserved. Only objects whose
+spec changes are sent to the mutation batch.
+
+The workflow fails closed before permissions for missing/ambiguous targets,
+mixed existing/new pairs, multiple matching routes, multi-host or
+Gateway-attached resources, TLS routes, incomplete evidence and unsupported
+VM/correlation targets. HTTP match editing retains its existing OR/AND behavior
+and refuses removal of the final predicate. Original objects are deeply frozen
+when the dialog opens; UID/resourceVersion checks and per-object SSAR/dry-run
+still precede the final explicit confirmation. Per-object outcomes and safe
+continuation guidance are retained; there is no retry, rollback or conflict
+overwrite. This is not a transaction and no real cluster write is claimed.
+
+Focused source-fixture, proposal, UI and mutation-adapter tests cover
+preservation, stale/replaced captures, permissions, create SSAR without a name,
+dry-run ordering, denial and mid-batch failure. Runtime contribution, console,
+i18n and accessibility gates were unavailable in this session and remain open.
+Gateway API forms, mixed create/update, broader resource selection and remaining
+traffic-policy options remain out of scope.
+
+Live controller reconciliation, real write success, remaining traffic-policy
+options, locks and new Desktop checks remain open.
 
 ### Explicit TCP Service routing
 
@@ -4539,8 +4569,8 @@ Application and graph candidate tables show first-entry provenance and scoped
 links. WorkloadEntries do not become Pods; a Pod owner reference to a group is
 not adopted as VM ownership. No sidecar, readiness or service-account evidence
 is inferred. VM application health is explicitly unavailable rather than a
-fabricated replica result, and Service traffic creation fails closed before
-permission reviews/writes when VM versions are involved.
+fabricated replica result, and Service traffic creation/editing fails closed
+before permission reviews/writes when VM versions are involved.
 
 Bounds are 1,000 groups and 1,000 entries, four 250-item pages each, 10,000
 selector comparisons and 1,000,000 aggregate label characters. Individual label

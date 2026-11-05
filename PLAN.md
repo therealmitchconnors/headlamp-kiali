@@ -956,10 +956,13 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
   HTTP/TCP/TLS route, requiring integer percentages totaling 100 and preserving
   every other field. It reuses the guarded review path and captures the original
   API object when opening, not after editing. Limits are 100 routes/20
-  destinations. A separate Service workflow now creates namespace-local
-  DestinationRule/VirtualService proposals from observed versions, with
-  guarded two-step execution and per-object partial outcomes. Existing-resource
-  wizard editing and advanced routing controls remain.
+  destinations. The Service workflow creates namespace-local
+  DestinationRule/VirtualService proposals from observed versions and now also
+  edits one uniquely captured, same-namespace existing pair. The edit path
+  updates only changed objects, retains selected originals/UID/resourceVersion,
+  reuses existing route and policy planners, and uses guarded two-step execution
+  with per-object partial outcomes. Mixed create/update, ambiguous targets,
+  Gateway-attached/multi-host resources and unsupported routes remain excluded.
 - Existing HTTP forwarding routes now have keep/set/remove timeout, retry,
   fixed-delay and HTTP-abort controls. They preserve unrelated fields and
   use immutable current/proposed JSON review through the existing guarded
@@ -1441,8 +1444,8 @@ the authority for individual behavior and platform claims.
 | `basic-graph` | Done, bounded | Initial graph plus workload/app/versioned-app/Service projections, history and rate metadata verified hosted; broader pipeline tracked below | `telemetry`, `correlation`, `stock-host-spikes` |
 | `mesh-security` | Partial / open | Local inventory, mounted-source provenance, selected config merge, namespace-selector assessment and observed HTTP/gRPC security labels implemented; full effective configuration and observed-security parity remain ([#3](https://github.com/therealmitchconnors/headlamp-kiali/issues/3), merged PR [#4](https://github.com/therealmitchconnors/headlamp-kiali/pull/4); [#33](https://github.com/therealmitchconnors/headlamp-kiali/issues/33), merged PR [#38](https://github.com/therealmitchconnors/headlamp-kiali/pull/38)) | `correlation`, `config-views`, `telemetry` |
 | `full-validation` | Partial / open | Incremental checker batches are implemented; effective policy context, Gateway API route attachment and broader checkers remain ([#8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8), PR [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12)) | `basic-validation`, `mesh-security` |
-| `basic-wizards` | Partial / open | Existing-route weight editing and Service-driven DR/VS creation with guarded partial outcomes implemented; existing-resource editing and advanced controls remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14)) | `safe-mutations`, `basic-validation` |
-| `full-wizards` | Partial / open | HTTP/TCP Service creation and guarded HTTP/matching/mirroring/DR policy/inbound-mTLS/Gateway-weight/exclusion editors implemented; broader multi-object and Gateway API forms remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14); [#15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15), PR [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19)) | `basic-wizards`, `full-validation` |
+| `basic-wizards` | Partial / open | Existing-route weight editing, Service-driven DR/VS creation and bounded existing-pair updates with guarded partial outcomes implemented; broader routing and advanced controls remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14)) | `safe-mutations`, `basic-validation` |
+| `full-wizards` | Partial / open | HTTP/TCP Service creation and bounded existing-pair updates reuse guarded HTTP/matching/mirroring/DR policy editors; inbound-mTLS/Gateway-weight/exclusion editors exist; broader multi-object and Gateway API forms remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14); [#15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15), PR [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19)) | `basic-wizards`, `full-validation` |
 | `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; metadata projections, authorized synchronization, confirmed logging controls and Desktop checks remain ([#18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18), PR [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22); [#30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30), PR [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36)) | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; Tempo count predicates, trace/workload correlation, external dashboard discovery, live providers and authenticated transports remain ([#16](https://github.com/therealmitchconnors/headlamp-kiali/issues/16), PR [#20](https://github.com/therealmitchconnors/headlamp-kiali/pull/20); [#17](https://github.com/therealmitchconnors/headlamp-kiali/issues/17), PR [#21](https://github.com/therealmitchconnors/headlamp-kiali/pull/21); [#23](https://github.com/therealmitchconnors/headlamp-kiali/issues/23), PR [#29](https://github.com/therealmitchconnors/headlamp-kiali/pull/29)) | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; shared-store normalization, full graph fan-out and configurable mesh membership remain ([#25](https://github.com/therealmitchconnors/headlamp-kiali/issues/25), PR [#28](https://github.com/therealmitchconnors/headlamp-kiali/pull/28)) | `config-views`, `telemetry`, `mesh-security` |
@@ -1661,9 +1664,10 @@ panel and query cardinality limits.
    external configuration mapping remain unsupported. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
 3. Complete health query coverage and supported workload variants.
-   Application/Service consumers are now wired. Extend service-driven traffic
-   workflows using existing correlation and guarded mutation adapters.
-   Multi-object proposals require per-object outcomes; no blind retry or rollback.
+   Application/Service consumers are now wired. Service-driven creation and
+   the bounded existing-pair edit use existing correlation and guarded mutation
+   adapters. Extend only after auditing target selection and field preservation;
+   multi-object proposals require per-object outcomes, with no blind retry or rollback.
 4. Continue tracing workload/graph correlations and remaining
    structural/count intrinsic filters and broader cross-span pipelines. One
    explicit related group with six fixed relationships is implemented.

@@ -56,6 +56,7 @@ it('uses server dry-run and rechecks authorization when executing a reviewed cre
   await executeMutation(prepared, true, signal);
   await executeMutation(prepared, false, signal);
   const calls = vi.mocked(ApiProxy.request).mock.calls;
+  expect(JSON.parse(String(calls[0][1]?.body)).spec.resourceAttributes).not.toHaveProperty('name');
   expect(calls[1][0]).toBe(
     '/apis/networking.istio.io/v1/namespaces/bookinfo/virtualservices?dryRun=All'
   );
