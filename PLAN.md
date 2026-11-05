@@ -8,15 +8,19 @@ database, conversation, or private artifact directory.
 correlation work. An additional increment implements 14 Istio configuration
 models/views, confirmed configuration CRUD, limited checks, traffic charts
 and a basic observed-request graph. Configuration now also includes nine
-Gateway API/inference kinds from pinned upstream schemas. The subsequent health increment adds a
-Go-oracle-backed calculator, per-cluster tolerances and workload health.
+Gateway API/inference kinds from pinned upstream schemas. The health increment
+adds a Go-oracle-backed calculator, per-cluster tolerances and health for
+supported workloads, Applications and inbound-only Services. The 2026-11-03
+increment closes the supported HTTP/gRPC reporter and entity-aggregation
+boundary; TCP health, capability inference, and proxy/ambient/security evidence
+remain explicitly unavailable.
 Hosted live Bookinfo request/latency charts, traffic graph and workload health
 are verified. Native Jaeger/Tempo HTTP trace browsing is implemented with
 hosted fixture-backed checks; live tracing and new Desktop evidence remain open.
 Read-only pod logs and bounded native Envoy server/configuration snapshots are
 also implemented and verified against live Bookinfo in hosted Headlamp.
 
-### Resume status — 2026-10-31
+### Resume status — 2026-11-03
 
 The reboot handoff has been resumed. Istio Gateway KIA0301 and selectorless
 PeerAuthentication KIA0002 checks, trace-wide intrinsic filters, and
@@ -32,6 +36,28 @@ No VM was deployed.
 Positive Pod-account provenance now appears in Applications through captured
 UID owner chains. Missing account fields remain unavailable and no
 account-absence checker or authorization principal is inferred.
+The supported health boundary now requires observed data for every queried
+direction, rejects unsupported request protocols rather than treating them as
+healthy, and distinguishes explicit zero-rate observations from absent vectors.
+A pinned query/aggregation fixture complements the existing Go reporter and
+calculator oracles. No new hosted/real telemetry or Desktop evidence was
+collected for this increment.
+
+**Captured workload/account projection (2026-11-03):** Applications retain their
+existing label grouping and Gateway retains its separate default-workload
+projection. The account path now has a separate bounded projection over complete
+namespace captures, including OpenShift DeploymentConfig discovery, versioned
+source lists and UID/API-version-checked owner chains. It uses only the pinned
+v2.33 default account workload kinds; runtime Kiali `ExcludeWorkloads`, managed
+namespace/cross-context membership and custom controllers are not captured and
+must remain explicit downstream gates. Pod accounts come only from attributed
+Pod specs. Matched WorkloadEntry `spec.serviceAccount` values and UIDs/versions
+are exposed as separate VM provenance, never as Pods or ServiceAccount-object
+existence. No KIA1701/principal/absence checker is enabled. Type-check, lint,
+build and focused tests pass (180 tests in 7 files). The full suite passed
+22,615 of 22,616 tests; one unrelated Traces component test hit its existing
+5-second timeout under full-suite load and passed when run with its neighboring
+component tests. Hosted, Desktop and live checks remain open.
 
 **Prometheus recurrence, 2026-10-29:** the existing Pod again reached its 1 GiB
 cap during TSDB compaction (156 OOM restarts before mitigation). Under the
@@ -55,8 +81,8 @@ discard data to make the template match.
 The current full-parity estimate is **approximately 55%, with roughly +/-10
 percentage points of uncertainty**. This is an engineering estimate across the
 remaining feature families, not a measured catalog coverage score or a claim
-that test counts imply parity. Advanced graphs, full workload/capability
-provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
+that test counts imply parity. Advanced graphs, configured and cross-context
+workload/capability provenance, effective security/ambient semantics, mesh-wide multi-cluster behavior,
 dashboards and integration/live/Desktop closure remain substantial work.
 
 ### Cloud continuation handoff — paused at the user's request
@@ -78,9 +104,10 @@ inspector requiring declared local namespace scope, a complete pooled
 managed-namespace Pod snapshot and complete cluster-wide Deployments. It ports
 the active KIA0601/KIA0602/KIA0701 checks and keeps denied, stale, malformed,
 truncated or unresolved evidence unavailable, using status annotations rather
-than correlation `proxyMode`. Browser, hosted fixture, Desktop and live-cluster
-verification remain open; full Gateway/controller parity is not claimed. See
-`docs/parity.md`.
+than correlation `proxyMode`. The synthetic hosted browser and fixture checks
+are now exercised by the repeatable smoke described below; Desktop and
+live-cluster verification remain open, and full Gateway/controller parity is
+not claimed. See `docs/parity.md`.
 
 Independent cloud work can address advanced graph appenders or external
 dashboard integration, but keep assignments bounded and file ownership distinct.
@@ -88,20 +115,23 @@ Open PRs against the working branch and integrate prerequisite PRs before
 starting dependent tasks. Do not treat a single open-ended prompt as a reliable
 weekend-long completion queue.
 
-The repository is public and `.github/` currently contains skills, not a CI or
-Copilot setup workflow. Cloud agents can install dependencies with `npm ci` and
-use the documented npm gates and committed oracle fixtures. For Actions-based
-agents, an optional `.github/workflows/copilot-setup-steps.yml` must be present
-on the default branch; it does not configure cloud-sandbox sessions. See
+The repository is public and now has a normal CI workflow for plugin checks and
+the hosted smoke, but no Copilot setup workflow. Cloud agents can install
+dependencies with `npm ci` and use the documented npm gates and committed
+oracle fixtures. For Actions-based agents, an optional
+`.github/workflows/copilot-setup-steps.yml` must be present on the default
+branch; it does not configure cloud-sandbox sessions. See
 [GitHub's environment guidance](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment).
 
-The local pinned-source checkout, browser runners/screenshots and kubeconfig
-are not in the repository. Cloud agents must not assume `/Users/...` paths
-exist or copy personal kube credentials. Fetch pinned public references when
-regenerating source evidence. Set up a repeatable hosted Headlamp fixture smoke
-environment in cloud if needed; unit/build success alone is not runtime proof.
-Actual AKS/provider/Desktop gates still require an authorized verification
-environment and approved fixtures. They must remain explicitly open otherwise.
+The local pinned-source checkout, browser runners/screenshots and real kubeconfig
+are not in the repository. Cloud agents must not assume `/Users/...` paths exist
+or copy personal kube credentials. Fetch pinned public references when
+regenerating source evidence. The repeatable synthetic hosted Headlamp smoke is
+`npm run smoke:hosted`; it launches the pinned stock 0.35.0 host and the actual
+built plugin without a real cluster. Unit/build success alone is not runtime
+proof. Actual AKS/provider/Desktop gates still require an authorized
+verification environment and approved fixtures. They must remain explicitly
+open otherwise.
 
 GitHub cloud tasks run without this laptop. Current built-in cloud automations
 are limited to private/internal repositories, so this public repository cannot
@@ -112,6 +142,20 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Hosted Headlamp smoke foundation (2026-11-03):** added a reproducible
+  Docker/Chromium run against the pinned stock Headlamp 0.35.0 image and built
+  plugin, a loopback-only read-only synthetic Kubernetes/Prometheus API, and a
+  GitHub Actions workflow. The smoke exercises real host authentication,
+  contribution/navigation, English labels and named controls, debounced public
+  ConfigStore persistence across reload, Prometheus build-info, and positive,
+  denied, incomplete and stale outcomes for both scoped Gateway and Service
+  port inspectors. The successful run observed 181 authenticated reads and no
+  Kubernetes writes. Exact commands, fixture scope and classified stock-host
+  diagnostics are in `docs/hosted-smoke-tests.md` and `docs/parity.md`. This
+  closes only the synthetic hosted-web smoke gate; Desktop, live-cluster,
+  live-provider and OIDC/authentication evidence remain open. The CI-equivalent
+  local checks passed type-check, lint, build and parity inventory; the full
+  suite passed **22,594 tests in 189 files**.
 - **Scoped Gateway validation (2026-10-31):** added the explicit detail-page
   inspector, active Istio Gateway KIA0302 and captured exact-true controller
   scope semantics. Complete versioned Gateway/default-workload/VM sources are
@@ -149,6 +193,12 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   their exact groups/fields. Inactive kinds no longer get spurious deferrals;
   malformed active selectors defer explicitly. Runtime absence checking remains
   gated on a complete mesh-workload model, not bounded correlation.
+  The separate namespace account projection now requires complete versioned
+  source lists and supported UID owner chains for the pinned default account
+  workload set. It exposes observed Pod accounts and source-aligned VM entry
+  accounts without constructing principals. Custom Kiali exclusions, custom
+  controllers and managed/cross-context membership remain unavailable; KIA1701,
+  KIA0106 and authorization verdicts stay disabled.
   Declared namespace revision selection now has a 1,538-case original-Go oracle
   and visible provenance separate from controller/injection hints. Maistra
   membership cannot be resolved through coincident Istiod labels; assessment
@@ -806,10 +856,18 @@ include them; fetch the latest `therealmitchconnors-kiali-plugin` branch.
   Go cases and a namespace-wide consumer using an explicit controller. It
   suppresses output on partial policy reads, conflicts and unsupported contexts.
   Configured status is kept separate from observed encryption/security.
-- Traffic metrics now also show destination-reported HTTP/gRPC connection
-  security labels and shares. Missing labels stay unknown; zero/non-finite
-  observations do not produce a security verdict. Real Bookinfo traffic
-  reported `mutual_tls`; TCP/ambient and per-edge security enrichment remain.
+- Observed connection security now uses a captured 5/15/60-minute range for
+  destination-reported `istio_requests_total` HTTP/gRPC labels, with a five-minute
+  rate window and 15-second samples. It exposes mTLS-labeled, `none`-labeled,
+  mixed, unknown, unsupported and unavailable categories plus query/range/reporter
+  provenance. The projection bounds results to eight groups, retains unknown
+  labels, summarizes positive categories across that range, and displays rates
+  from the latest aligned sample. Sparse, missing, stale or non-finite samples
+  and warnings withhold shares and mark the evidence partial or unavailable.
+  It does not claim complete traffic coverage, configured policy, proxy sync,
+  certificate validity or authorization. The active Kiali graph appender also
+  consumes message/TCP metrics and has graph-dependent waypoint/ambient paths;
+  those dimensions remain unsupported here pending their required inputs.
 - Tracing adds optional per-cluster Jaeger/Tempo HTTP query endpoints, connection
   probes, service/operation/duration/error searches, trace deep links and native
   span timing/attributes/events/reference inspection. Nanoseconds and OTLP int64
@@ -1171,13 +1229,13 @@ conditional mesh-wide defaults and full workload provenance remain open.
 | Scoped reads | Explicit cluster, namespace validation, abort propagation, structured failures, stale-response suppression | No persistent derived-data cache |
 | Applications | List/detail grouping, versions, related Services, owned pods and native-sidecar detection | One cluster and one explicitly selected namespace |
 | Correlation core | Scoped label postings, selectors, UID owner chains, de-duplication, Service-host resolution | Configuration relationships, not measured traffic |
-| Health | Pinned calculator/reporter combination, cluster rules, five-kind workloads, correlated Applications and inbound-only Services | No proxy/ambient/security assessment; unknown-cluster/external and complete query coverage remain |
+| Health | Pinned calculator/reporter combination, cluster rules, five replica-workload kinds, correlated Applications and inbound-only Services; exact telemetry-cluster selectors and complete HTTP/gRPC direction observations | TCP error health, capability inference, unknown-cluster fallback, external Service discovery, proxy/ambient/security assessment and VM health remain unavailable |
 | Mesh inventory and configured mTLS | Local discovery, selected config merge and namespace-wide policy indicator | Label hints/configuration only; not full effective/observed mesh security |
 | Mesh configuration | 23 schema-derived Istio/Gateway/inference models, list/detail views and references | Gateway success paths fixture-verified only; representative live CR and Desktop checks remain |
 | WorkloadGroup entry inspection and VM correlation | Explicit same-scope spec-label lookup/Map links; complete-evidence first-entry labels feed application and graph candidates | Live inventory empty; positive associations fixture-backed; no VM health or complete workload/account provenance; VM routing guarded unsupported |
 | Configuration actions | Confirmed CRUD, existing-route weights and Service-driven two-object creation | Fixture-backed writes; existing-resource multi-object editing and broader workflows remain |
 | Initial checks | Forty-one bounded codes, including declared-scope Istio Gateway selector/controller checks, Gateway API listeners/status/classes, selectorless PeerAuthentication, host conflicts, AuthorizationPolicy registry, ServiceEntry/DestinationRule/TLS patterns, Service port checks, WorkloadGroup labels, Gateway API collisions/targets, exports and conditions | No full semantic validity verdict; dormant Gateway port-name checks excluded; attachment/per-workload/principal context and remaining checkers are incomplete; Gateway scoped and Service port browser/live verification remain open |
-| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; real Bookinfo hosted check | Full queries/graph enrichments and new Desktop check remain |
+| Telemetry and graph | Bounded Prometheus reads, basic charts, positive-rate workload graph and table; observed connection-security range projection for destination-reported HTTP/gRPC request labels | Full graph security enrichment, gRPC-message/TCP security semantics, waypoint/ambient evidence and new Desktop/live telemetry checks remain |
 | Traffic histograms | Native duration/size average and percentile explorer with historical scope, captured settings and bounded partial results | Real reads had no finite samples; finite charts fixture-backed; custom dashboards remain open |
 | Traffic signals | Eight throughput/message/TCP rate families with explicit raw names, Kiali direction mapping and shared bounded scalar reads | Real throughput was zero; positive/error charts fixture-backed; not active connection counts or full query/default parity |
 | Trace browsing | Jaeger/Tempo HTTP browsing, exact span/scope/link metadata, URL navigation and explicit UID-verified Pod links | Synthetic traces with real Pod verification; live provider, broader correlations/filters/transports and lossless raw viewing remain |
@@ -1269,7 +1327,7 @@ the authority for individual behavior and platform claims.
 | `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; broader metadata formats, authorized synchronization, live ztunnel/ambient coverage, logging controls and Desktop checks remain | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; live-provider checks, correlations, dashboard families and Grafana/Perses remain | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; full graph fan-out, shared-store normalization and mesh membership remain | `config-views`, `telemetry`, `mesh-security` |
-| `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history and edge inspection implemented; mixed reporters, remaining options/appenders, ambient behavior and correlations remain | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
+| `advanced-graph` | Partial / open | Four projections, request/byte/message units, captured history, per-node selected/outside/unknown namespace position, source-aligned table grouping and bounded neighbor focus; appender ledger and limits are in `docs/parity.md` | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |
 | `runtime-hardening` | Partial / open | Captured/deadline-bound validation, telemetry, health, tracing, diagnostic and comparison reads implemented; full query/memory/analysis/rendering budgets and both-mode resilience remain | `advanced-graph`, `diagnostics`, `full-wizards` |
 | `parity-release` | Pending | Close the ledger, verify live, document and package with explicit remaining gaps | `runtime-hardening`, `full-validation`, `full-wizards`, `integrations`, `multi-cluster` |
 
@@ -1394,10 +1452,13 @@ panel and query cardinality limits.
    and defaults. VirtualService destination checks, AuthorizationPolicy host
    registry/exemptions and outbound-policy severity are wired; preserve each
    caller's export filtering for remaining destination/policy checker families.
-   KIA1701 WorkloadGroup service accounts require complete workload-attributed
-   Pod-account evidence: neither ServiceAccount object existence nor raw Pod
-   presence reproduces the pinned input. VM WorkloadEntry accounts are separate.
-   Do not add a shortcut absence checker while that workload boundary is missing.
+   KIA1701 WorkloadGroup service accounts require workload-attributed Pod-account
+   evidence: neither ServiceAccount object existence nor raw Pod presence
+   reproduces the pinned input. The pinned-default namespace projection now
+   exists, but it does not capture runtime Kiali workload exclusions, custom
+   controllers or managed/cross-context membership. VM WorkloadEntry accounts
+   remain separate; do not activate KIA1701 or infer absence until those policy
+   and scope gates are resolved.
 2. Resolve remaining effective mesh configuration sources before extending
    configured mTLS to workloads, ports and subsets. Preserve the distinction
    between configuration, observed connection security and proxy synchronization.
@@ -1579,8 +1640,11 @@ substitute for meaningful detail presentation.
 - Port safe query construction and typed Prometheus-compatible result decoding.
 - Cover HTTP/gRPC/TCP signals, inbound/outbound metrics, reporter selection,
   histograms/quantiles, throughput, missing samples and duplicate-series handling.
-- Complete health thresholds, annotations, protocol semantics and aggregation.
-  Missing telemetry is not zero traffic or healthy status.
+- Health thresholds, annotations, HTTP/gRPC semantics, reporter aggregation and
+  absent-versus-zero handling are source/oracle-backed for supported workloads,
+  Applications and inbound-only Services. TCP byte metrics do not provide
+  request-code health; unsupported protocols, missing directions and unavailable
+  capability evidence stay unavailable rather than healthy.
 - Build a simple deterministic observed graph before advanced decorations.
   Never synthesize traffic edges from ownership/selector relationships.
 - Compare query, health and graph outputs to pinned upstream fixtures.
@@ -1617,12 +1681,44 @@ substitute for meaningful detail presentation.
   explicit mapping rather than assuming names match.
 - Support cluster-group fan-out and shared/per-cluster metric stores without
   double counting or cross-scope cache leakage.
-- Complete application/version/workload/Service/aggregate graph modes, grouping,
-  node-focused views, idle/dead/unknown/outsider nodes, ServiceEntry/WorkloadEntry
-  enrichment, blackhole/passthrough semantics, security/health/config decorations,
-  ambient/waypoint behavior, historical queries and baseline UI interactions.
+- Keep graph coverage at the behavior level. The bounded single-context increment
+  appends selected/outside/unknown namespace position after each of the four
+  projections, groups the node table by none/app/cluster/namespace, and focuses the
+  existing diagram on a selected node and its directly observed neighbors. Grouping
+  and focus carry the exact captured query scope/time and reset on scope changes.
+  These are not Kiali `isBox` graph nodes or node-detail graph requests.
+- Unknown identity remains explicit in projections; it is not an independent
+  appender and does not imply inaccessible or dead. In particular, zero-rate
+  observations are not definition-backed idle nodes, and missing historical
+  samples do not prove dead, missing, or healthy. The full per-appender evidence
+  boundaries are in `docs/parity.md`.
+- Preserve blackhole/passthrough semantics as unsupported; no security/health/config
+  decorations, ambient/waypoint behavior, multi-context graph fan-out, or full
+  upstream option/default parity is inferred from labels or partial inventories.
 - Preserve per-cluster errors and provenance. A graph selection must not silently
   change a mutation target.
+
+#### Current appender coverage
+
+| Appender | Coverage |
+| --- | --- |
+| AggregateNode | Deferred |
+| Ambient | Deferred |
+| DeadNode | Deferred |
+| Extensions | Deferred |
+| Health | Deferred |
+| IdleNode | Deferred |
+| Istio | Deferred |
+| Labeler | Deferred |
+| MeshCheck | Deferred |
+| Outsider | Partial: namespace-name position only |
+| ResponseTime | Deferred |
+| SecurityPolicy | Deferred |
+| ServiceEntry | Deferred |
+| SidecarsCheck | Deferred |
+| Throughput | Partial: separate TCP byte measures only |
+| TrafficGenerator | Deferred |
+| WorkloadEntry | Deferred |
 
 ### Runtime and release closure
 

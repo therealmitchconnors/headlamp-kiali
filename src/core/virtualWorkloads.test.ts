@@ -58,7 +58,28 @@ it('retains group identity, first-entry provenance and separate non-Pod health',
   expect(resource.virtualMachine).toEqual({
     labelSource: 'entry',
     matchingEntries: 2,
+    selectorEmpty: false,
     entry: { name: 'one', uid: 'entry-one', resourceVersion: 'entry-version-one' },
+    accountEntries: [
+      {
+        name: 'one',
+        uid: 'entry-one',
+        resourceVersion: 'entry-version-one',
+        serviceAccount: {
+          ok: false,
+          message: 'WorkloadEntry service account was not collected',
+        },
+      },
+      {
+        name: 'two',
+        uid: 'entry-two',
+        resourceVersion: 'entry-version-two',
+        serviceAccount: {
+          ok: false,
+          message: 'WorkloadEntry service account was not collected',
+        },
+      },
+    ],
   });
   const relation = correlateResources(records);
   expect(relation.workloads[0].pods).toEqual([]);

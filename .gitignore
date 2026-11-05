@@ -5,3 +5,4 @@ dist/
 *.log
 .eslintcache
 .DS_Store
+smoke-artifacts/

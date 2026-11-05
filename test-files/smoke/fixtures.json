@@ -1,0 +1,262 @@
+{
+  "namespaces": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "bookinfo",
+        "uid": "smoke-namespace-bookinfo",
+        "resourceVersion": "10",
+        "labels": {
+          "istio.io/rev": "1-30"
+        }
+      },
+      "spec": {},
+      "status": {
+        "phase": "Active"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "istio-system",
+        "uid": "smoke-namespace-istio-system",
+        "resourceVersion": "10"
+      },
+      "spec": {},
+      "status": {
+        "phase": "Active"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "observability",
+        "uid": "smoke-namespace-observability",
+        "resourceVersion": "10"
+      },
+      "spec": {},
+      "status": {
+        "phase": "Active"
+      }
+    }
+  ],
+  "controller": {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": "istiod-1-30",
+      "namespace": "istio-system",
+      "uid": "smoke-deployment-istiod",
+      "resourceVersion": "20",
+      "labels": {
+        "app": "istiod",
+        "istio.io/rev": "1-30"
+      }
+    },
+    "spec": {
+      "selector": {
+        "matchLabels": {
+          "app": "istiod"
+        }
+      },
+      "template": {
+        "metadata": {
+          "labels": {
+            "app": "istiod",
+            "istio.io/rev": "1-30"
+          }
+        },
+        "spec": {
+          "containers": [
+            {
+              "name": "discovery",
+              "image": "istio/pilot:1.30.0",
+              "env": [
+                {
+                  "name": "CLUSTER_ID",
+                  "value": "smoke-mesh"
+                },
+                {
+                  "name": "EXTERNAL_ISTIOD",
+                  "value": "false"
+                },
+                {
+                  "name": "PILOT_SCOPE_GATEWAY_TO_NAMESPACE",
+                  "value": "true"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "status": {
+      "replicas": 1,
+      "readyReplicas": 1,
+      "updatedReplicas": 1,
+      "availableReplicas": 1
+    }
+  },
+  "meshConfig": {
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+      "name": "istio-1-30",
+      "namespace": "istio-system",
+      "uid": "smoke-configmap-mesh",
+      "resourceVersion": "30"
+    },
+    "data": {
+      "mesh": "rootNamespace: istio-system\n"
+    }
+  },
+  "injectorConfig": {
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+      "name": "istio-sidecar-injector-1-30",
+      "namespace": "istio-system",
+      "uid": "smoke-configmap-injector",
+      "resourceVersion": "30"
+    },
+    "data": {
+      "values": "{\"global\":{}}"
+    }
+  },
+  "gateway": {
+    "apiVersion": "networking.istio.io/v1",
+    "kind": "Gateway",
+    "metadata": {
+      "name": "smoke-gateway",
+      "namespace": "bookinfo",
+      "uid": "smoke-gateway-uid",
+      "resourceVersion": "40",
+      "generation": 1
+    },
+    "spec": {
+      "selector": {
+        "app": "smoke-gateway"
+      },
+      "servers": [
+        {
+          "port": {
+            "number": 80,
+            "name": "http",
+            "protocol": "HTTP"
+          },
+          "hosts": ["bookinfo.example.test"]
+        }
+      ]
+    },
+    "status": {}
+  },
+  "service": {
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+      "name": "reviews",
+      "namespace": "bookinfo",
+      "uid": "smoke-service-reviews",
+      "resourceVersion": "50",
+      "labels": {
+        "app": "reviews"
+      }
+    },
+    "spec": {
+      "selector": {
+        "app": "reviews"
+      },
+      "ports": [
+        {
+          "name": "mystery",
+          "port": 9080,
+          "targetPort": "missing",
+          "protocol": "TCP"
+        }
+      ]
+    }
+  },
+  "pod": {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "name": "reviews-v1-smoke",
+      "namespace": "bookinfo",
+      "uid": "smoke-pod-reviews",
+      "resourceVersion": "60",
+      "labels": {
+        "app": "reviews"
+      },
+      "annotations": {
+        "sidecar.istio.io/status": "{\"containers\":[\"istio-proxy\"]}"
+      }
+    },
+    "spec": {
+      "containers": [
+        {
+          "name": "reviews",
+          "image": "example.invalid/reviews:synthetic"
+        }
+      ]
+    },
+    "status": {
+      "phase": "Running"
+    }
+  },
+  "reviewsDeployment": {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": "reviews-v1",
+      "namespace": "bookinfo",
+      "uid": "smoke-deployment-reviews",
+      "resourceVersion": "70",
+      "labels": {
+        "app": "reviews"
+      }
+    },
+    "spec": {
+      "selector": {
+        "matchLabels": {
+          "app": "reviews"
+        }
+      },
+      "template": {
+        "metadata": {
+          "labels": {
+            "app": "reviews"
+          }
+        },
+        "spec": {
+          "containers": [
+            {
+              "name": "reviews",
+              "image": "example.invalid/reviews:synthetic",
+              "ports": [
+                {
+                  "name": "http",
+                  "containerPort": 9080
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "status": {
+      "replicas": 1,
+      "readyReplicas": 1,
+      "updatedReplicas": 1,
+      "availableReplicas": 1
+    }
+  },
+  "prometheusBuildInfo": {
+    "status": "success",
+    "data": {
+      "version": "smoke-v1"
+    }
+  }
+}
