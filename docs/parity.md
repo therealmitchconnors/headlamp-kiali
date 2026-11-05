@@ -29,9 +29,27 @@ lint, build and catalog/resource/dashboard checks after conflict resolution.
 Individual PR heads were also exercised read-only in stock hosted Headlamp
 0.35.0 against `mitch-auto`; the original Docker smoke harness passed.
 
-PRs #12/#19 need Gateway API CRDs and representative route/controller
-resources; #14 needs an approved isolated mutation fixture; #20/#21 need
-a real tracing backend and appropriate trace/Pod identity data; #22 needs
+Subsequent user-approved Gateway API v1.5.1 installation and isolated fixtures
+in `kiali-validation` / `kiali-validation-backends` unblock the live gates for
+PR #12 at `6ac17bb5bc19651a41186b844e36a410511b00f8` and #14 at
+`8e3019f8e3208e8dd38558d63e85220fb84ec3a5`. Stock hosted Headlamp verifies
+positive cross-namespace references, missing/restored grants, and confirmed
+DR/VS edits with actual v1-to-v2-to-v1 traffic and load-balancer changes.
+The gateway is internal-only, `Programmed=True`, and its HTTPRoute reports
+`Accepted=True` / `ResolvedRefs=True`. These PRs remain unmerged.
+
+PR #19 at `0882c8cc509fdfd1e284946ac786bfc9f8b5a0f4` now has a live failure:
+both HTTPRoute and GRPCRoute forms pass real permission/reference review and
+server dry-run, but confirmation reports "Gateway, Service, namespace or
+ReferenceGrant evidence changed; review the route again" and persists nothing.
+`assertGatewayRouteReferencesFresh` compares collection snapshot resourceVersions
+instead of the captured object set/identities/versions. Browser evidence shows
+all four sets of object UIDs/resourceVersions unchanged while collection
+versions advance (for example Services `26211432` to `26211444`).
+Do not bypass the guard or treat dry-run as successful creation/attachment.
+See the reproducible fixture scenarios in `../test-files/README.md`.
+
+PRs #20/#21 still need a real tracing backend and appropriate trace/Pod identity data; #22 needs
 ztunnel; #27 needs WorkloadGroups and an OpenShift DeploymentConfig API;
 #28 needs multiple real contexts with known shared/isolated telemetry mappings;
 #29 needs Grafana/Perses endpoints and dashboards. They remain partially
@@ -43,7 +61,7 @@ Prometheus on `mitch-auto` was recovered with an approved persistent
 Deployment memory change to a 2 GiB limit / 1 GiB request. Automatic Pod
 replacement cleared ephemeral data; readiness and queries succeeded with
 zero restarts after 27 minutes. No storage-volume capacity change was made.
-Current live positive-provider, Desktop, mutation and large-browser-scale
+Current live positive-provider, Desktop, broader mutation and large-browser-scale
 gaps remain open. The 2026-11-03 snapshot below is historical, not the
 current merge or cluster state.
 

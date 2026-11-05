@@ -7,6 +7,91 @@ infrastructure, not a runtime installation requirement of the plugin.
 
 ## Live AKS Automatic setup
 
+### Isolated Gateway API and traffic-editing fixtures
+
+The user-approved 2026-11-05 validation installed Gateway API **v1.5.1 standard**
+on `mitch-auto`, matching Istio 1.30.5's pinned dependency. The existing managed
+Istio controller accepted the `istio` GatewayClass without a controller restart
+or a second Istio installation. These optional fixtures are isolated from
+Bookinfo in `kiali-validation` and `kiali-validation-backends`; they use reserved
+`.invalid` hostnames and an internal ClusterIP gateway, never a public load
+balancer. Images are `hashicorp/http-echo:1.0.0` and `curlimages/curl:8.12.1`.
+AKS admitted them with advisory image/probe warnings; no policy was bypassed.
+The echo server is HTTP only, not a gRPC test backend.
+
+The Gateway and routing examples follow the
+[Istio Gateway API guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/)
+and [Istio request-routing guide](https://istio.io/latest/docs/tasks/traffic-management/request-routing/).
+Their specifications were accepted by server dry-run against the installed
+schemas before application.
+
+After confirming the context, namespaces and compatible mesh revision, reproduce:
+
+```sh
+kubectl --context mitch-auto apply --server-side \
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+kubectl --context mitch-auto wait --for=condition=Established \
+  crd/gateways.gateway.networking.k8s.io crd/httproutes.gateway.networking.k8s.io \
+  crd/referencegrants.gateway.networking.k8s.io --timeout=90s
+# Namespace creation must precede server dry-run of namespaced resources.
+kubectl --context mitch-auto apply -f test-files/deploy/gateway-running.yaml
+kubectl --context mitch-auto -n kiali-validation wait --for=condition=Programmed \
+  gateway/validation-gateway --timeout=150s
+kubectl --context mitch-auto -n kiali-validation-backends rollout status deployment/echo-v1
+kubectl --context mitch-auto -n kiali-validation-backends rollout status deployment/echo-v2
+kubectl --context mitch-auto -n kiali-validation-backends rollout status deployment/validation-client
+kubectl --context mitch-auto apply --dry-run=server -f test-files/deploy/gateway-reference-denied.yaml
+kubectl --context mitch-auto apply -f test-files/deploy/gateway-reference-denied.yaml
+```
+
+For a full server dry-run before applying workloads, first create just the two
+Namespace documents in `gateway-running.yaml`, then dry-run and apply the whole
+file. Dry-running a new Namespace does not make it available to subsequent
+documents in that dry-run. Reapplying the healthy fixture intentionally resets
+its VirtualService weights and DestinationRule strategy.
+
+| Fixture / action | Produces | Plugin / controller should show |
+| --- | --- | --- |
+| `deploy/gateway-running.yaml` | Ready echo v1/v2, programmed internal gateway, cross-namespace backend authorized by a name-restricted grant | HTTPRoute `Accepted=True`, `ResolvedRefs=True`; initial reference checks have no findings |
+| `deploy/gateway-reference-denied.yaml` | Real Service `echo-denied` not authorized by the grant for `echo` | HTTPRoute `ResolvedRefs=False` / `RefNotPermitted`; plugin reports the missing cross-namespace grant |
+| Remove only `ReferenceGrant/validation-echo`, then reapply the healthy fixture | Temporarily denies the positive route, then restores it | Initial checks report missing grant, then clear after fresh checks; traffic recovers |
+| PR #14 Service traffic form, namespace `kiali-validation-backends`, Service `echo`, DNS suffix `svc.cluster.local` | Existing mesh-only DR/VS pair, initially v1/v2 weights 100/0 | Review two server dry-runs; confirm weights 0/100 plus `LEAST_REQUEST`, observe v2 responses; reverse to 100/0 and `ROUND_ROBIN`, observe v1 |
+| PR #19 HTTPRoute/GRPCRoute form targeting this gateway and `echo` backend | Server dry-run succeeds, but confirmation fails on unchanged objects with advancing list snapshot versions | Explicit stale-evidence message; no route is persisted. This is a reproduced bug, not missing Gateway API/controller support |
+
+With one terminal running:
+
+```sh
+kubectl --context mitch-auto -n kiali-validation port-forward \
+  deployment/validation-gateway-istio 18800:8080 18802:8082 --address 127.0.0.1
+```
+
+Use another terminal to check gateway and mesh traffic:
+
+```sh
+curl --fail -H 'Host: api.validation.invalid' http://127.0.0.1:18800/
+curl --fail -H 'Host: classic.validation.invalid' http://127.0.0.1:18802/
+kubectl --context mitch-auto -n kiali-validation-backends exec \
+  deployment/validation-client -c client -- curl --fail --max-time 10 http://echo/
+```
+
+The classic Istio Gateway shares the owned gateway Pod but listens on 8082,
+which is not exposed by the generated Service. Forward its Deployment/Pod, not
+the Service, for that listener. The Gateway API route balances the Service's
+ready endpoints; the mesh-only VirtualService controls the injected client's
+requests and is the weight-edit verification path.
+
+The fixtures are intentionally left installed. For approved cleanup, first
+verify that these namespaces still contain only owned fixtures, then:
+
+```sh
+kubectl --context mitch-auto delete -f test-files/deploy/gateway-reference-denied.yaml
+kubectl --context mitch-auto delete -f test-files/deploy/gateway-running.yaml
+```
+
+The second command deletes the two dedicated namespaces as well as their
+fixtures. Do not remove the shared Gateway API CRDs or managed Istio controller
+as part of fixture cleanup.
+
 The selected verification context is `mitch-auto`. It runs:
 
 | Component | Namespace | Configuration |

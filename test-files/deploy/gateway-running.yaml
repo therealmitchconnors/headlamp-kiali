@@ -1,0 +1,256 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kiali-validation
+  labels:
+    app.kubernetes.io/part-of: headlamp-kiali-validation
+    istio.io/rev: asm-1-30
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kiali-validation-backends
+  labels:
+    app.kubernetes.io/part-of: headlamp-kiali-validation
+    istio.io/rev: asm-1-30
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-v1
+  namespace: kiali-validation-backends
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validation-echo
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: validation-echo
+        version: v1
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0.0
+          args: ["-listen=:5678", "-text=validation-v1"]
+          ports:
+            - containerPort: 5678
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              port: 5678
+              path: /
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-v2
+  namespace: kiali-validation-backends
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validation-echo
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: validation-echo
+        version: v2
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0.0
+          args: ["-listen=:5678", "-text=validation-v2"]
+          ports:
+            - containerPort: 5678
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              port: 5678
+              path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: kiali-validation-backends
+spec:
+  selector:
+    app: validation-echo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5678
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: validation-gateway
+  namespace: kiali-validation
+  labels:
+    istio.io/rev: asm-1-30
+  annotations:
+    networking.istio.io/service-type: ClusterIP
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 8080
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+        kinds:
+          - kind: HTTPRoute
+          - kind: GRPCRoute
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: validation-route
+  namespace: kiali-validation
+spec:
+  parentRefs:
+    - name: validation-gateway
+      sectionName: http
+  hostnames: ["api.validation.invalid"]
+  rules:
+    - backendRefs:
+        - name: echo
+          namespace: kiali-validation-backends
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: validation-echo
+  namespace: kiali-validation-backends
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: kiali-validation
+    - group: gateway.networking.k8s.io
+      kind: GRPCRoute
+      namespace: kiali-validation
+  to:
+    - group: ""
+      kind: Service
+      name: echo
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: validation-istio-gateway
+  namespace: kiali-validation
+spec:
+  selector:
+    gateway.networking.k8s.io/gateway-name: validation-gateway
+  servers:
+    - port:
+        number: 8082
+        name: http-classic
+        protocol: HTTP
+      hosts: ["classic.validation.invalid"]
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: validation-echo
+  namespace: kiali-validation-backends
+spec:
+  host: echo.kiali-validation-backends.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: validation-echo
+  namespace: kiali-validation-backends
+spec:
+  hosts: ["echo.kiali-validation-backends.svc.cluster.local"]
+  gateways: ["mesh"]
+  http:
+    - route:
+        - destination:
+            host: echo.kiali-validation-backends.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+          weight: 100
+        - destination:
+            host: echo.kiali-validation-backends.svc.cluster.local
+            subset: v2
+            port:
+              number: 80
+          weight: 0
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: validation-classic
+  namespace: kiali-validation-backends
+spec:
+  hosts: ["classic.validation.invalid"]
+  gateways: ["kiali-validation/validation-istio-gateway"]
+  http:
+    - route:
+        - destination:
+            host: echo.kiali-validation-backends.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validation-client
+  namespace: kiali-validation-backends
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validation-client
+  template:
+    metadata:
+      labels:
+        app: validation-client
+        version: v1
+    spec:
+      containers:
+        - name: client
+          image: curlimages/curl:8.12.1
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

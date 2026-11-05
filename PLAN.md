@@ -31,9 +31,16 @@ preserved both source-provenance guards and the newer Service checks;
 the combined implementation passed 23,105 tests in 193 files, type-check,
 lint, build and generated/catalog checks.
 
-Read-only hosted validation used `mitch-auto`. The remaining PRs #12, #14,
-#19, #20, #21, #22, #27, #28 and #29 are only partially validated; #31 and
-#36 have reproducible live failures. See the current integration notes in
+Initial read-only hosted validation used `mitch-auto`. A subsequent approved
+Gateway API v1.5.1 install and isolated fixtures now unblock #12 and #14:
+reference checks handle missing/restored grants, and confirmed DR/VS edits
+shift actual traffic from v1 to v2 and back. #19 dry-runs pass, but confirmation
+incorrectly rejects unchanged reference objects when list snapshot
+resourceVersions advance. It now has a reproducible live failure, not a missing
+API prerequisite. #20, #21, #22, #27, #28 and #29 remain partially validated;
+#31 and #36 retain their earlier live failures. No additional PR was merged.
+Fixtures and the scenario matrix are in `test-files/README.md` and
+`test-files/deploy/gateway-*.yaml`. See the current integration notes in
 `docs/parity.md`. The planning snapshot below is historical and does not
 describe these newer merge states.
 
