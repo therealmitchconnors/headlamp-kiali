@@ -712,6 +712,36 @@ succeeded. No credentials were created and no alternative authorization path
 was attempted. Control-plane synchronization remains an explicit authorization
 gap, separate from the proven Envoy forwarding transport.
 
+The pending issue #30 implementation adds an explicit, read-only sync reader: it targets only a
+selected control-plane Pod's sole declared discovery `http-debug` port through
+Headlamp's authenticated Pod proxy, bounds the response to 256 KiB and rechecks
+Pod UID, discovery restart count and port before and after the request. Its
+projection follows the source-reported proxy ID and sent/acknowledged resource
+versions; it does not join that ID to a Kubernetes Pod or infer sync from server
+state. Denied, unsupported, malformed, oversized, changed-identity and cancelled
+reads remain errors/capability gaps, never a successful or unsynchronized
+finding. The 401 therefore continues to block live sync evidence in this
+environment.
+
+Envoy logging controls use only the existing public Headlamp WebSocket
+port-forward transport to the selected `istio-proxy` loopback admin port 15000.
+Reading logger state is `POST /logging` with no query parameter; a confirmed
+change is `POST /logging?level=<allowlisted-level>` and affects every logger on
+that proxy. Kubernetes authorization is enforced by the actual authenticated
+`create pods/portforward` operation, not a fabricated SSAR or dry-run; Envoy's
+loopback operation has no separate application authorization in this flow. The
+UI captures Pod UID/restart count and all current levels, displays the proposed
+level, all-logger scope and logging-volume/sensitive-detail impact, then requires
+final confirmation. It rereads and compares the captured state before sending,
+and verifies the returned and subsequent logger state. An uncertain post-send
+failure is reported as unknown and requires a fresh read before retry. Tests
+intercept writes and restrict them to the synthetic `bookinfo/reviews-v1`
+fixture; no real logging or cluster state was changed. Focused source-shaped
+fixtures cover accepted/rejected sync records, denial/unsupported transport,
+malformed/oversized input, cancellation/late results, proposal validation,
+stale identity/state and unverified post-confirmation outcomes. Live authorized
+sync/logging, actual Headlamp rendering and Desktop remain unverified.
+
 ### Current Service candidates from Envoy names
 
 `core/proxyService.ts`, `data/proxyService.ts` and `ProxyServiceCandidate.tsx`
@@ -4576,7 +4606,7 @@ verified-parity.
 | Validations, references and ignore annotations | `src/core/validation`, configuration findings | Complete or explicitly partial snapshots | Initial checks implemented-unverified / partial, limited-check fixture verified |
 | Traffic graphs and summaries | `src/core/trafficGraph.ts`, `core/topology.ts`, `Topology.tsx` | Telemetry and explicit metric identity | Bounded four-mode projections verified hosted; broader graph pipeline remains partial |
 | Mesh graph, control planes, Istio status and TLS | `core/mesh.ts`, `data/mesh.ts`, `Mesh.tsx` | Discovery, policy scope and observed data | Inventory unverified in Desktop / bounded real hosted inventory; full mesh graph/security remain |
-| Logs and read-only Envoy observations | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `data/proxyAdmin.ts`, `Diagnostics.tsx` | Pod reads/logs/port-forward permissions; public SDK WebSocket transport | Desktop unverified / hosted live logs, server state and config entries verified; full projections, sync, ztunnel and logging mutations remain |
+| Logs and read-only Envoy observations | `core/diagnostics.ts`, `proxyHttp.ts`, `proxyConfig.ts`, `data/proxyAdmin.ts`, `Diagnostics.tsx` | Pod reads/logs/port-forward permissions; public SDK WebSocket transport | Desktop unverified / hosted live logs, server state and config entries verified; issue #30 adds conditional sync observations (managed endpoint 401) and confirmed logging controls, without live authorized-sync/logging or Desktop evidence |
 | Traces, spans, error traces and tracing diagnostics | `core/tracing.ts`, `data/tracing.ts`, `Traces.tsx`, `TraceMetadata.tsx` | Existing Jaeger/Tempo HTTP query Service | Desktop unverified / hosted search/detail/metadata fixture-verified; live provider, correlations, broader filters and authenticated transport remain |
 | Grafana and Perses | Integration adapters and dashboard links | Existing endpoint and compatible auth | Planned / planned |
 | Cluster aggregation | Scoped data adapters and cluster mapping | Headlamp cluster groups and telemetry labels | Planned / planned |

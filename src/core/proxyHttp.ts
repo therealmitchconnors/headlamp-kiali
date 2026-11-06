@@ -14,7 +14,10 @@ export class ProxyHttpResponse {
   private body: Uint8Array;
   private written = 0;
 
-  constructor(private readonly maxBytes: number) {
+  constructor(
+    private readonly maxBytes: number,
+    private readonly contentType: 'application/json' | 'text/plain' = 'application/json'
+  ) {
     if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 4194304)
       throw new Error('Proxy response bounds must be between 1 byte and 4 MiB');
     this.body = new Uint8Array(maxBytes);
@@ -62,10 +65,12 @@ export class ProxyHttpResponse {
   }
 
   json(): unknown {
+    return JSON.parse(this.text());
+  }
+
+  text(): string {
     if (!this.complete) throw new Error('Incomplete proxy HTTP response');
-    return JSON.parse(
-      new TextDecoder('utf-8', { fatal: true }).decode(this.body.subarray(0, this.written))
-    );
+    return new TextDecoder('utf-8', { fatal: true }).decode(this.body.subarray(0, this.written));
   }
 
   private consumeLine(line: string) {
@@ -107,8 +112,17 @@ export class ProxyHttpResponse {
       if (headers.has(name)) throw new Error('Duplicate proxy HTTP header');
       headers.set(name, match[2].trim());
     }
-    if (!/^application\/json(?:\s*;.*)?$/i.test(headers.get('content-type') ?? ''))
-      throw new Error('Proxy admin did not return JSON content');
+    const responseType = headers.get('content-type') ?? '';
+    const matchesContentType =
+      this.contentType === 'application/json'
+        ? /^application\/json(?:\s*;.*)?$/i.test(responseType)
+        : /^text\/plain(?:\s*;.*)?$/i.test(responseType);
+    if (!matchesContentType)
+      throw new Error(
+        this.contentType === 'application/json'
+          ? 'Proxy admin did not return JSON content'
+          : 'Proxy admin did not return plain text content'
+      );
     const encoding = headers.get('content-encoding');
     if (encoding && encoding.toLowerCase() !== 'identity')
       throw new Error('Compressed proxy responses are not supported');

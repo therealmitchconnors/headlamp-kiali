@@ -2,7 +2,11 @@ import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { DiagnosticPod } from '../core/diagnostics';
 import { clusterScope } from '../core/scope';
 import { loadDiagnosticPod } from './diagnostics';
-import { loadProxySnapshot } from './proxyAdmin';
+import {
+  loadProxySnapshot,
+  readProxyLoggingLevels,
+  setProxyLoggingLevel,
+} from './proxyAdmin';
 
 vi.mock('@kinvolk/headlamp-plugin/lib', () => ({ ApiProxy: { stream: vi.fn() } }));
 vi.mock('./diagnostics', () => ({ loadDiagnosticPod: vi.fn() }));
@@ -55,6 +59,16 @@ function reply(body = '{"version":"test","state":"LIVE"}') {
     0,
     encode(
       `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ${
+        encode(body).length
+      }\r\n\r\n${body}`
+    )
+  );
+}
+function replyText(body = 'active loggers:\nrouter: info\n') {
+  frame(
+    0,
+    encode(
+      `HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: ${
         encode(body).length
       }\r\n\r\n${body}`
     )
@@ -316,4 +330,41 @@ it('rejects ztunnel replacement or format misuse without attributing another con
     loadProxySnapshot(clusterScope('alpha'), ztunnel, 'server-info', new AbortController().signal)
   ).rejects.toThrow('istio-proxy container is required');
   expect(ApiProxy.stream).not.toHaveBeenCalled();
+});
+
+it('reads logger levels through a fixed authenticated POST with no level parameter', async () => {
+  const pending = readProxyLoggingLevels(
+    clusterScope('alpha'),
+    pod,
+    new AbortController().signal
+  );
+  await vi.waitFor(() => expect(ApiProxy.stream).toHaveBeenCalled());
+  greet();
+  expect(new TextDecoder().decode(send.mock.calls[0][0].subarray(1))).toBe(
+    'POST /logging HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\nAccept: text/plain\r\nAccept-Encoding: identity\r\nContent-Length: 0\r\n\r\n'
+  );
+  replyText();
+  await expect(pending).resolves.toBe('active loggers:\nrouter: info\n');
+  expect(ApiProxy.stream).toHaveBeenCalledWith(
+    '/api/v1/namespaces/bookinfo/pods/reviews/portforward?ports=15000',
+    expect.any(Function),
+    expect.objectContaining({ cluster: 'alpha', reconnectOnFailure: false })
+  );
+});
+
+it('sets only a validated global log level with the source-supported POST path', async () => {
+  const pending = setProxyLoggingLevel(
+    clusterScope('alpha'),
+    pod,
+    'warning',
+    new AbortController().signal
+  );
+  await vi.waitFor(() => expect(ApiProxy.stream).toHaveBeenCalled());
+  greet();
+  expect(new TextDecoder().decode(send.mock.calls[0][0].subarray(1))).toContain(
+    'POST /logging?level=warning HTTP/1.1\r\n'
+  );
+  replyText('active loggers:\nrouter: warning\n');
+  await expect(pending).resolves.toBe('active loggers:\nrouter: warning\n');
+  expect(loadDiagnosticPod).not.toHaveBeenCalled();
 });

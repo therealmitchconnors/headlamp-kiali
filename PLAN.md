@@ -1198,6 +1198,27 @@ The pure xDS comparator is **not wired into health or presented as live sync
 evidence**. Live control-plane sync remains blocked on a supported authorized
 endpoint; anonymous Envoy admin access does not solve this boundary.
 
+Issue #30 adds the bounded synchronization reader without relaxing that
+authorization boundary. It uses only the selected discovery container's
+uniquely declared `http-debug` port and Headlamp Pod proxy; it captures and
+rechecks the control-plane Pod UID, restart count and port, caps the body at
+256 KiB, and projects source-reported proxy IDs and sent/acknowledged resource
+versions without Kubernetes identity joins. A denial, unsupported endpoint,
+malformed/oversized response, stale identity or cancelled request is visible as
+a gap/error, never a sync verdict. This does not resolve the observed 401.
+
+The same increment adds confirmed per-`istio-proxy` Envoy logging controls using
+the public Headlamp port-forward operation to port 15000. It reads current
+levels with `POST /logging`, then applies only the allowlisted global logger
+level with `POST /logging?level=...` after an explicit target/current-state
+review and final confirmation; the returned and reread levels must verify.
+Kubernetes authorization is the actual `create pods/portforward` request, not
+an invented SSAR or dry-run. Envoy loopback admin has no separate application
+authorization in this flow; the UI warns that every logger on the proxy is
+affected and logs may grow or expose sensitive details. Fixture tests intercept
+and constrain writes to the synthetic owned target. No real logging change was
+made. Hosted UI, live authorized sync/logging and Desktop checks remain open.
+
 The Istio Gateway reference follow-up passed **7,300 tests in 68 files** and
 normal type/lint/schema/parity/i18n/build/package gates. KIA1102/KIA1108 now
 cover top-level and HTTP/TCP/TLS match references. Current namespace and explicit
@@ -1449,7 +1470,7 @@ the authority for individual behavior and platform claims.
 | `full-validation` | Partial / open | Incremental checker batches are implemented; effective policy context, Gateway API route attachment and broader checkers remain ([#8](https://github.com/therealmitchconnors/headlamp-kiali/issues/8), PR [#12](https://github.com/therealmitchconnors/headlamp-kiali/pull/12)) | `basic-validation`, `mesh-security` |
 | `basic-wizards` | Partial / open | Existing-route weight editing, Service-driven DR/VS creation and bounded existing-pair updates with guarded partial outcomes implemented; broader routing and advanced controls remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14)) | `safe-mutations`, `basic-validation` |
 | `full-wizards` | Partial / open | HTTP/TCP Service creation and bounded existing-pair updates reuse guarded HTTP/matching/mirroring/DR policy editors; inbound-mTLS/Gateway-weight/exclusion editors exist; broader multi-object and Gateway API forms remain ([#10](https://github.com/therealmitchconnors/headlamp-kiali/issues/10), PR [#14](https://github.com/therealmitchconnors/headlamp-kiali/pull/14); [#15](https://github.com/therealmitchconnors/headlamp-kiali/issues/15), PR [#19](https://github.com/therealmitchconnors/headlamp-kiali/pull/19)) | `basic-wizards`, `full-validation` |
-| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel configuration tables implemented; metadata projections, authorized synchronization, confirmed logging controls and Desktop checks remain ([#18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18), PR [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22); [#30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30), PR [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36)) | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
+| `diagnostics` | Partial / open | Bounded logs, Envoy inspection/current-resource candidates and ztunnel tables implemented; PR #36 adds bounded conditional sync observations and confirmed per-proxy logging controls. The managed sync endpoint still returns 401; live authorized sync/logging, live ztunnel/ambient coverage and Desktop checks remain ([#18](https://github.com/therealmitchconnors/headlamp-kiali/issues/18), PR [#22](https://github.com/therealmitchconnors/headlamp-kiali/pull/22); [#30](https://github.com/therealmitchconnors/headlamp-kiali/issues/30), PR [#36](https://github.com/therealmitchconnors/headlamp-kiali/pull/36)) | `resource-views`, `mesh-security`, `safe-mutations`, `stock-host-spikes` |
 | `integrations` | Partial / open | Native Jaeger/Tempo HTTP browsing implemented; Tempo count predicates, trace/workload correlation, external dashboard discovery, live providers and authenticated transports remain ([#16](https://github.com/therealmitchconnors/headlamp-kiali/issues/16), PR [#20](https://github.com/therealmitchconnors/headlamp-kiali/pull/20); [#17](https://github.com/therealmitchconnors/headlamp-kiali/issues/17), PR [#21](https://github.com/therealmitchconnors/headlamp-kiali/pull/21); [#23](https://github.com/therealmitchconnors/headlamp-kiali/issues/23), PR [#29](https://github.com/therealmitchconnors/headlamp-kiali/pull/29)) | `telemetry`, `correlation`, `basic-graph`, `stock-host-spikes` |
 | `multi-cluster` | Partial / open | Explicit saved identities and bounded context comparison implemented; shared-store normalization, full graph fan-out and configurable mesh membership remain ([#25](https://github.com/therealmitchconnors/headlamp-kiali/issues/25), PR [#28](https://github.com/therealmitchconnors/headlamp-kiali/pull/28)) | `config-views`, `telemetry`, `mesh-security` |
 | `advanced-graph` | Partial / open | Four projection modes, request/byte/message units, captured history, per-node namespace position, table grouping, edge inspection and bounded neighbor focus implemented; reporter normalization, remaining appenders, ambient behavior and correlations remain ([#26](https://github.com/therealmitchconnors/headlamp-kiali/issues/26), PR [#31](https://github.com/therealmitchconnors/headlamp-kiali/pull/31); [#32](https://github.com/therealmitchconnors/headlamp-kiali/issues/32), merged PR [#37](https://github.com/therealmitchconnors/headlamp-kiali/pull/37)) | `basic-graph`, `health`, `full-validation`, `mesh-security`, `multi-cluster`, `integrations` |

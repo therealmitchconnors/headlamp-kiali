@@ -18,6 +18,7 @@ import { useRequest } from '../hooks/useRequest';
 import ClusterScope from './ClusterScope';
 import CodeBlock from './configuration/CodeBlock';
 import ProxyDiagnostics from './ProxyDiagnostics';
+import ProxySyncDiagnostics from './ProxySyncDiagnostics';
 import RequestStatus from './RequestStatus';
 
 function Logs({ cluster, query }: { cluster: string; query: PodLogQuery }) {
@@ -206,6 +207,18 @@ function PodDiagnostics({ cluster, pod }: { cluster: string; pod: DiagnosticPod 
         </Stack>
       </SectionBox>
       {query && <Logs cluster={cluster} query={query} />}
+      <ProxySyncDiagnostics
+        key={JSON.stringify([
+          cluster,
+          pod.namespace,
+          pod.name,
+          pod.uid,
+          pod.containers.find(container => container.name === 'discovery')?.restarts,
+          pod.containers.find(container => container.name === 'discovery')?.ports,
+        ])}
+        cluster={cluster}
+        pod={pod}
+      />
       {pod.containers.some(container => ['istio-proxy', 'ztunnel'].includes(container.name)) && (
         <ProxyDiagnostics cluster={cluster} pod={pod} />
       )}
