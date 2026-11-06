@@ -24,6 +24,7 @@ import { ServiceEntry } from '../../resources/service-entry';
 import { VirtualService } from '../../resources/virtual-service';
 import RequestStatus from '../RequestStatus';
 import ScopedGatewayValidation from './ScopedGatewayValidation';
+import StructuredValue from './StructuredValue';
 
 function FindingReferences({
   cluster,
@@ -122,6 +123,18 @@ function Checks({
       const spec = structuredClone(resource.spec);
       const metadata = structuredClone(resource.metadata);
       const status = structuredClone(resource.jsonData.status);
+      const routeTarget =
+        group === 'gateway.networking.k8s.io' && ['HTTPRoute', 'GRPCRoute'].includes(kind)
+          ? {
+              apiVersion: resource.jsonData.apiVersion ?? '',
+              kind,
+              name: metadata.name,
+              namespace,
+              resourceVersion: metadata.resourceVersion ?? '',
+              spec,
+              uid: metadata.uid ?? '',
+            }
+          : undefined;
       const snapshot = await loadValidationSnapshot(
         clusterScope(cluster),
         kind,
@@ -130,11 +143,15 @@ function Checks({
         identityDomain,
         signal,
         namespace,
-        gatewayClasses
+        gatewayClasses,
+        routeTarget
       );
       return {
         skipWildcardGatewayHosts,
         gatewayRegistry: snapshot.context.gatewayClassRegistry,
+        meshSources: [...(snapshot.context.namespaceMesh ?? [])].map(
+          ([namespace, configuration]) => ({ namespace, configuration })
+        ),
         result: initialValidation({
           cluster,
           namespace,
@@ -175,6 +192,19 @@ function Checks({
     <RequestStatus state={state} loadingLabel={t('Running initial configuration checks...')}>
       {data => (
         <>
+          {data.meshSources.length > 0 && (
+            <details>
+              <summary>{t('Captured mesh configuration sources')}</summary>
+              <StructuredValue
+                value={data.meshSources.map(({ namespace, configuration }) => ({
+                  namespace,
+                  ...(configuration.status === 'ready'
+                    ? { controller: configuration.controller, sources: configuration.sources }
+                    : { unavailable: configuration.message }),
+                }))}
+              />
+            </details>
+          )}
           {resource.kind === 'Gateway' && group === 'networking.istio.io' && (
             <Alert severity="info">
               {t(

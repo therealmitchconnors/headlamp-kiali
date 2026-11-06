@@ -250,6 +250,16 @@ and the app was explicitly replica-only; no healthy-request default appeared.
 Application/Service links retained exact targets. No response fixture,
 annotation update or resource mutation was used.
 
+`parity/entity-health-oracle.json` pins the entity query contract and its
+source/destination aggregation examples to Kiali v2.33.0. Its source paths cover
+the upstream health callers, Prometheus label queries and `RequestHealth`
+combiner. Vitest checks the expected workload/Application/Service query strings
+and combined observation output; the separately generated reporter oracle below
+provides the exhaustive original-Go differential check. Unknown/external cluster
+values stay literal. HTTP/gRPC are the only supported request-health protocols;
+TCP and unknown protocols are unavailable, and a missing direction is distinct
+from an explicit zero-rate sample.
+
 ### Request reporter oracle
 
 `parity/health-reporters-oracle.json` executes 372 cases through the original

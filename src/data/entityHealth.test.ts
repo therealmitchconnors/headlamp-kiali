@@ -215,6 +215,76 @@ it('combines both inbound reporters for Services without double-counting request
   expect(expression).toContain('sum by (reporter,');
   expect(expression).not.toContain('reporter=');
 });
+it('does not turn a missing application direction into a zero-rate healthy result', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (!String(path).includes('/proxy/')) return response(String(path));
+    const query = new URL(String(path), 'http://example.test').searchParams.get('query')!;
+    return query.includes('reporter="source"')
+      ? { ...metric, data: { ...metric.data, result: [] } }
+      : metric;
+  });
+  const result = await load();
+  expect(result.missingDirections).toEqual(['outbound']);
+  expect(result.calculation).toBeNull();
+});
+it('keeps an explicit zero-rate Service observation distinct from absent telemetry', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (!String(path).includes('/proxy/')) return service;
+    return {
+      ...metric,
+      data: {
+        ...metric.data,
+        result: metric.data.result.map(series => ({ ...series, value: [10000, '0'] })),
+      },
+    };
+  });
+  const zero = await load(serviceQuery);
+  expect(zero.missingDirections).toEqual([]);
+  expect(zero.calculation).toMatchObject({ status: 'NA', totalRequestRate: 0 });
+
+  vi.mocked(ApiProxy.request).mockImplementation(async path =>
+    !String(path).includes('/proxy/')
+      ? service
+      : { ...metric, data: { ...metric.data, result: [] } }
+  );
+  const absent = await load(serviceQuery);
+  expect(absent.missingDirections).toEqual(['inbound']);
+  expect(absent.calculation).toBeNull();
+});
+it('keeps TCP observations unavailable for Application and Service health', async () => {
+  vi.mocked(ApiProxy.request).mockImplementation(async path => {
+    if (!String(path).includes('/proxy/')) return response(String(path));
+    return {
+      ...metric,
+      data: {
+        ...metric.data,
+        result: [
+          { metric: { request_protocol: 'tcp', response_code: '200' }, value: [10000, '1'] },
+        ],
+      },
+    };
+  });
+  const application = await load();
+  expect(application.calculation).toBeNull();
+  expect(application.inbound).toMatchObject({ ok: false, error: { kind: 'invalid-response' } });
+
+  vi.mocked(ApiProxy.request).mockImplementation(async path =>
+    !String(path).includes('/proxy/')
+      ? service
+      : {
+          ...metric,
+          data: {
+            ...metric.data,
+            result: [
+              { metric: { request_protocol: 'tcp', response_code: '200' }, value: [10000, '1'] },
+            ],
+          },
+        }
+  );
+  const serviceResult = await load(serviceQuery);
+  expect(serviceResult.calculation).toBeNull();
+  expect(serviceResult.inbound).toMatchObject({ ok: false, error: { kind: 'invalid-response' } });
+});
 it('does not read metrics after denied Service access or send requests after abort', async () => {
   vi.mocked(ApiProxy.request).mockRejectedValue({ status: 403, message: 'Service denied' });
   expect((await load(serviceQuery)).resourceError?.kind).toBe('forbidden');

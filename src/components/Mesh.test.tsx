@@ -90,6 +90,68 @@ beforeEach(() => {
   );
   vi.mocked(loadMeshSnapshot).mockReset();
 });
+it('shows the selected mounted file, captured identity and failed refresh without reviving old fields', async () => {
+  const controller = {
+    name: 'istiod',
+    namespace: 'system',
+    uid: 'cp',
+    revision: '',
+    configurationContainer: 'first',
+    meshConfigSource: {
+      kind: 'mounted' as const,
+      name: 'mounted',
+      key: 'config',
+      path: '/custom/mesh',
+    },
+    managesExternal: false,
+    effectiveConfigBlocked: false,
+    replicas: null,
+    stale: false,
+    configurationWarnings: [],
+  };
+  const source = {
+    cluster: 'alpha',
+    namespace: 'system',
+    name: 'mounted',
+    key: 'config',
+    uid: 'map-uid',
+    resourceVersion: 'map-12',
+  };
+  const snapshot: MeshSnapshot = {
+    cluster: 'alpha',
+    namespaces: { complete: true, items: [] },
+    controllers: { complete: true, items: [controller] },
+    tags: { complete: true, items: [] },
+    controlPlanes: [
+      {
+        controller,
+        mesh: { status: 'ready', name: 'mounted', source, value: { hasDiscoverySelectors: false } },
+        injector: { status: 'ready', name: 'injector', value: {} },
+        effective: {
+          status: 'ready',
+          sharedAbsent: true,
+          value: { hasDiscoverySelectors: false, trustDomain: 'captured.test' },
+          sources: { local: { ...source, kind: 'mounted', path: '/custom/mesh' } },
+        },
+      },
+    ],
+  };
+  vi.mocked(loadMeshSnapshot).mockResolvedValue(snapshot);
+  render(<Mesh />);
+  await userEvent.click(screen.getByRole('button', { name: 'Discover mesh' }));
+  await screen.findByRole('heading', { name: 'Mounted mesh configuration' });
+  expect(screen.getByText('Declared mesh file: /custom/mesh')).toBeDefined();
+  expect(
+    screen.getByText('ConfigMap key: config; UID: map-uid; resource version: map-12')
+  ).toBeDefined();
+  expect(screen.getByText(/Only the selected local configuration/)).toBeDefined();
+  expect(screen.getByText('Captured mesh configuration sources')).toBeDefined();
+  expect(screen.getByText('captured.test')).toBeDefined();
+  vi.mocked(loadMeshSnapshot).mockRejectedValue(new Error('Mounted source became denied'));
+  await userEvent.click(screen.getByRole('button', { name: 'Discover mesh' }));
+  await screen.findByText(/Mounted source became denied/);
+  expect(screen.queryByText('captured.test')).toBeNull();
+});
 it('captures only explicit logical identity and invalidates relevant changes without replay or resurrection', async () => {
   const controller = {
     name: 'istiod',

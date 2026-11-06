@@ -13,6 +13,11 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { initialCircuitBreaker, planCircuitBreaker } from '../../core/circuitBreaker';
 import {
+  GatewayRouteKind,
+  planGatewayRouteAttachment,
+  planGatewayRouteCreation,
+} from '../../core/gatewayRouteProposals';
+import {
   gatewayWeightedRules,
   GatewayWeightsDraft,
   planGatewayWeights,
@@ -29,6 +34,7 @@ import { planHttpRouteOrder } from '../../core/httpRouteOrder';
 import { initialLoadBalancer, planLoadBalancer } from '../../core/loadBalancer';
 import { initialOutboundTls, planOutboundTls } from '../../core/outboundTls';
 import { initialPeerMtls, planPeerMtls } from '../../core/peerMtlsEditing';
+import { clusterScope } from '../../core/scope';
 import {
   initialRouteWeights,
   planTrafficWeights,
@@ -42,6 +48,11 @@ import {
   validationExclusionValue,
 } from '../../core/validationAnnotations';
 import {
+  assertGatewayRouteReferencesFresh,
+  GatewayRouteReferenceReview,
+  inspectGatewayRouteReferences,
+} from '../../data/gatewayRouteReferences';
+import {
   executeMutation,
   MutationTarget,
   PreparedMutation,
@@ -52,6 +63,10 @@ import { ConfigurationObject, ConfigurationResource } from '../../resources/comm
 import { ConfigurationDefinition } from '../../resources/registry';
 import CircuitBreakerEditor from './CircuitBreakerEditor';
 import CodeBlock from './CodeBlock';
+import GatewayRouteEditor, {
+  GatewayRouteFormDraft,
+  initialGatewayRouteDraft,
+} from './GatewayRouteEditor';
 import GatewayWeightsEditor, { GatewayWeightsWarning } from './GatewayWeightsEditor';
 import HttpMatchEditEditor, { HttpMatchEditWarning } from './HttpMatchEditEditor';
 import HttpMirroringEditor, { MirroringWarning } from './HttpMirroringEditor';
@@ -75,7 +90,9 @@ type MutationEditorMode =
   | 'balancer'
   | 'tls'
   | 'peer'
-  | 'gatewayWeights';
+  | 'gatewayWeights'
+  | 'gatewayRouteCreate'
+  | 'gatewayRouteAttach';
 
 function MutationDialog({
   target,
@@ -127,6 +144,58 @@ function MutationDialog({
       };
     }
   }, [mode, original?.spec, gatewayDraft, gatewayOptions.error]);
+  const [gatewayRouteDraft, setGatewayRouteDraft] =
+    useState<GatewayRouteFormDraft>(initialGatewayRouteDraft);
+  const gatewayRouteResult = useMemo<{
+    spec?: Record<string, unknown>;
+    name?: string;
+    namespace?: string;
+    error?: string;
+  }>(() => {
+    if (mode !== 'gatewayRouteCreate' && mode !== 'gatewayRouteAttach') return {};
+    try {
+      const kind = target.definition.kind as GatewayRouteKind;
+      if (mode === 'gatewayRouteCreate') {
+        const plan = planGatewayRouteCreation(kind, target.apiVersion, gatewayRouteDraft);
+        return {
+          name: plan.name,
+          namespace: plan.namespace,
+          spec: plan.spec as unknown as Record<string, unknown>,
+        };
+      }
+      if (!original) throw new Error('The original route snapshot is unavailable');
+      const spec = planGatewayRouteAttachment(
+        kind,
+        target.apiVersion,
+        target.namespace,
+        original.spec,
+        {
+          name: gatewayRouteDraft.parentName,
+          namespace: gatewayRouteDraft.parentNamespace,
+          sectionName: gatewayRouteDraft.sectionName,
+          port: gatewayRouteDraft.parentPort,
+        }
+      );
+      return {
+        name: target.name,
+        namespace: target.namespace,
+        spec: spec as Record<string, unknown>,
+      };
+    } catch (error) {
+      return {
+        error:
+          error instanceof Error ? error.message : 'Unable to prepare the Gateway route proposal',
+      };
+    }
+  }, [
+    mode,
+    target.definition.kind,
+    target.apiVersion,
+    target.namespace,
+    target.name,
+    gatewayRouteDraft,
+    original,
+  ]);
   const options = useMemo(() => {
     try {
       return { routes: mode === 'weights' ? weightedRoutes(original?.spec) : [], error: undefined };
@@ -291,6 +360,8 @@ function MutationDialog({
     }
   }, [mode, original?.spec, options.error, weightDraft]);
   const [prepared, setPrepared] = useState<PreparedMutation>();
+  const [gatewayReferenceReview, setGatewayReferenceReview] =
+    useState<GatewayRouteReferenceReview>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const active = useRef<AbortController>();
@@ -310,6 +381,12 @@ function MutationDialog({
         throw new Error(weightResult.error ?? 'Invalid traffic weights');
       if (!commit && mode === 'gatewayWeights' && !gatewayResult.plan)
         throw new Error(gatewayResult.error ?? 'Invalid Gateway backend weight proposal');
+      if (
+        !commit &&
+        (mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach') &&
+        !gatewayRouteResult.spec
+      )
+        throw new Error(gatewayRouteResult.error ?? 'Invalid Gateway route proposal');
       if (!commit && mode === 'http' && !httpResult.plan)
         throw new Error(httpResult.error ?? 'Invalid HTTP behavior proposal');
       if (!commit && mode === 'order' && !orderResult.plan)
@@ -339,8 +416,13 @@ function MutationDialog({
           original
         );
       } else {
+        const routeMutation = mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach';
         mutation = prepareMutation(
-          { ...target, name, namespace },
+          {
+            ...target,
+            name: routeMutation ? gatewayRouteResult.name! : name,
+            namespace: routeMutation ? gatewayRouteResult.namespace! : namespace,
+          },
           action,
           mode === 'weights'
             ? JSON.stringify(weightResult.plan?.spec)
@@ -362,16 +444,48 @@ function MutationDialog({
             ? JSON.stringify(tlsResult.plan?.spec)
             : mode === 'peer'
             ? JSON.stringify(peerResult.plan?.spec)
+            : routeMutation
+            ? JSON.stringify(gatewayRouteResult.spec)
             : text,
           original
         );
       }
       if (!mutation) throw new Error('Review the change before confirming');
-      if (commit) setSent(true);
-      await executeMutation(mutation, !commit, controller.signal);
+      let referenceReview: GatewayRouteReferenceReview | undefined;
+      const routeForm = mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach';
+      if (routeForm) {
+        if (commit) {
+          if (!prepared || !gatewayReferenceReview)
+            throw new Error('Review the Gateway references before confirming this route');
+          await assertGatewayRouteReferencesFresh(
+            clusterScope(target.cluster),
+            target.definition.kind,
+            target.apiVersion,
+            mutation.target.namespace,
+            mutation.spec as Record<string, unknown>,
+            gatewayReferenceReview,
+            controller.signal
+          );
+        } else {
+          referenceReview = await inspectGatewayRouteReferences(
+            clusterScope(target.cluster),
+            target.definition.kind,
+            target.apiVersion,
+            mutation.target.namespace,
+            mutation.spec as Record<string, unknown>,
+            controller.signal
+          );
+        }
+      }
+      await executeMutation(mutation, !commit, controller.signal, () => {
+        if (commit) setSent(true);
+      });
       if (controller.signal.aborted) return;
       if (commit) onDone();
-      else setPrepared(mutation);
+      else {
+        if (referenceReview) setGatewayReferenceReview(referenceReview);
+        setPrepared(mutation);
+      }
     } catch (failure) {
       if (!controller.signal.aborted)
         setError(failure instanceof Error ? failure.message : t('The operation failed.'));
@@ -395,6 +509,10 @@ function MutationDialog({
           ? t('Adjust traffic weights')
           : mode === 'gatewayWeights'
           ? t('Adjust Gateway backend weights')
+          : mode === 'gatewayRouteCreate'
+          ? t('Create Gateway API route')
+          : mode === 'gatewayRouteAttach'
+          ? t('Attach route to Gateway API Gateway')
           : mode === 'http'
           ? t('Edit HTTP route behavior')
           : mode === 'order'
@@ -435,7 +553,7 @@ function MutationDialog({
               )}
             </Alert>
           )}
-          {action === 'create' && !prepared ? (
+          {action === 'create' && !prepared && mode !== 'gatewayRouteCreate' ? (
             <>
               {target.definition.resourceClass.isNamespaced && (
                 <TextField
@@ -452,8 +570,12 @@ function MutationDialog({
                 onChange={event => setName(event.target.value)}
               />
             </>
-          ) : (
-            <Typography>{namespace ? `${namespace}/${name}` : name}</Typography>
+          ) : mode === 'gatewayRouteCreate' && !prepared ? null : (
+            <Typography>
+              {prepared?.target.namespace
+                ? `${prepared.target.namespace}/${prepared.target.name}`
+                : prepared?.target.name ?? (namespace ? `${namespace}/${name}` : name)}
+            </Typography>
           )}
           <Alert severity={action === 'delete' || mode === 'validation' ? 'warning' : 'info'}>
             {mode === 'validation'
@@ -463,6 +585,10 @@ function MutationDialog({
               : action === 'delete'
               ? t(
                   'Deleting this resource changes mesh configuration. Review the exact target before confirming.'
+                )
+              : mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach'
+              ? t(
+                  'Only the proposed HTTPRoute or GRPCRoute is changed. Reference checks and server dry-run run before the final confirmation.'
                 )
               : t(
                   'Only the specification is edited. Review the replacement; server dry-run and permission checks run before confirmation.'
@@ -498,6 +624,18 @@ function MutationDialog({
                 onChange={setGatewayDraft}
                 disabled={busy}
                 error={gatewayResult.error}
+              />
+            </div>
+          )}
+          {(mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach') && (
+            <div hidden={!!prepared}>
+              <GatewayRouteEditor
+                kind={target.definition.kind as GatewayRouteKind}
+                creating={mode === 'gatewayRouteCreate'}
+                draft={gatewayRouteDraft}
+                onChange={setGatewayRouteDraft}
+                disabled={busy}
+                error={gatewayRouteResult.error}
               />
             </div>
           )}
@@ -605,8 +743,27 @@ function MutationDialog({
               {mode === 'order' && <RouteOrderWarning />}
               {mode === 'match' && <HttpMatchEditWarning />}
               <Alert severity="success">
-                {t('Server dry-run succeeded. Confirm to perform this operation.')}
+                {mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach'
+                  ? t(
+                      'The Kubernetes permission review allowed this operation and server dry-run succeeded. Confirm to perform the route operation.'
+                    )
+                  : t('Server dry-run succeeded. Confirm to perform this operation.')}
               </Alert>
+              {(mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach') &&
+                gatewayReferenceReview && (
+                  <>
+                    <Alert severity="warning">
+                      {t(
+                        'Reference checks are partial. Listener protocol/hostname acceptance and controller status are not verified; a parentRef proposal is not proof of attachment.'
+                      )}
+                    </Alert>
+                    {gatewayReferenceReview.uncertainty.map((item, index) => (
+                      <Typography key={`${index}-${item}`} variant="body2">
+                        {t(item)}
+                      </Typography>
+                    ))}
+                  </>
+                )}
               {action !== 'delete' && (
                 <Typography variant="body2">
                   {mode === 'validation'
@@ -692,17 +849,44 @@ function MutationDialog({
                   />
                 </>
               )}
-              {action !== 'delete' && mode !== 'validation' && (
-                <>
-                  <Typography variant="h6" component="h3">
-                    {t('Proposed specification')}
-                  </Typography>
-                  <CodeBlock
-                    value={JSON.stringify(prepared.spec, null, 2)}
-                    label={t('Proposed specification')}
-                  />
-                </>
-              )}
+              {action !== 'delete' &&
+                mode !== 'validation' &&
+                (mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach' ? (
+                  <>
+                    <Typography variant="h6" component="h3">
+                      {t('Complete proposed manifest')}
+                    </Typography>
+                    <CodeBlock
+                      value={JSON.stringify(
+                        {
+                          apiVersion: prepared.target.apiVersion,
+                          kind: prepared.target.definition.kind,
+                          metadata: {
+                            ...(original?.metadata ?? {}),
+                            name: prepared.target.name,
+                            ...(prepared.target.definition.resourceClass.isNamespaced
+                              ? { namespace: prepared.target.namespace }
+                              : {}),
+                          },
+                          spec: prepared.spec,
+                        },
+                        null,
+                        2
+                      )}
+                      label={t('Complete proposed manifest')}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="h6" component="h3">
+                      {t('Proposed specification')}
+                    </Typography>
+                    <CodeBlock
+                      value={JSON.stringify(prepared.spec, null, 2)}
+                      label={t('Proposed specification')}
+                    />
+                  </>
+                ))}
             </>
           )}
           {error && <Alert severity="error">{error}</Alert>}
@@ -720,7 +904,13 @@ function MutationDialog({
           {t('Cancel')}
         </Button>
         {prepared && !sent && (
-          <Button disabled={busy} onClick={() => setPrepared(undefined)}>
+          <Button
+            disabled={busy}
+            onClick={() => {
+              setPrepared(undefined);
+              setGatewayReferenceReview(undefined);
+            }}
+          >
             {t('Back to edit')}
           </Button>
         )}
@@ -740,6 +930,8 @@ function MutationDialog({
             (mode === 'balancer' && !balancerResult.plan) ||
             (mode === 'tls' && !tlsResult.plan) ||
             (mode === 'peer' && !peerResult.plan) ||
+            ((mode === 'gatewayRouteCreate' || mode === 'gatewayRouteAttach') &&
+              !gatewayRouteResult.spec) ||
             (mode === 'validation' && exclusionResult.value === undefined)
           }
           onClick={() => run(!!prepared)}
@@ -852,9 +1044,14 @@ export default function ConfigurationActions({
               )}
             {['HTTPRoute', 'GRPCRoute'].includes(definition.kind) &&
               definition.group === 'gateway.networking.k8s.io' && (
-                <Button onClick={() => start('update', 'gatewayWeights')}>
-                  {t('Adjust Gateway backend weights')}
-                </Button>
+                <>
+                  <Button onClick={() => start('update', 'gatewayWeights')}>
+                    {t('Adjust Gateway backend weights')}
+                  </Button>
+                  <Button onClick={() => start('update', 'gatewayRouteAttach')}>
+                    {t('Attach route to Gateway')}
+                  </Button>
+                </>
               )}
             <Button color="error" onClick={() => start('delete')}>
               {t('Delete configuration')}
@@ -865,7 +1062,15 @@ export default function ConfigurationActions({
               )}
           </>
         ) : (
-          <Button onClick={() => start('create')}>{t('Create configuration')}</Button>
+          <>
+            <Button onClick={() => start('create')}>{t('Create configuration')}</Button>
+            {['HTTPRoute', 'GRPCRoute'].includes(definition.kind) &&
+              definition.group === 'gateway.networking.k8s.io' && (
+                <Button onClick={() => start('create', 'gatewayRouteCreate')}>
+                  {t('Create {{kind}} with form', { kind: definition.kind })}
+                </Button>
+              )}
+          </>
         )}
         <Button onClick={() => window.location.reload()}>{t('Reload page')}</Button>
       </Stack>

@@ -12,11 +12,16 @@ import { useKialiConfig } from '../config';
 import { initialCircuitBreaker } from '../core/circuitBreaker';
 import { getClusterConfig } from '../core/config';
 import { initialHttpBehavior } from '../core/httpRouteBehavior';
+import { editableHttpRoutes } from '../core/httpRouteBehavior';
 import { AppLabels } from '../core/labels';
 import { initialLoadBalancer } from '../core/loadBalancer';
 import { isDnsLabel, isDnsSubdomain } from '../core/object';
 import { initialOutboundTls } from '../core/outboundTls';
 import { ServiceTrafficDraft } from '../core/serviceTraffic';
+import {
+  initialServiceTrafficEditDraft,
+  serviceTrafficEditContext,
+} from '../core/serviceTrafficEdit';
 import {
   commitMutationBatch,
   MutationOutcome,
@@ -28,6 +33,7 @@ import {
   assertTrafficSourceCurrent,
   assertTrafficTargetsAbsent,
   loadServiceTrafficSource,
+  prepareExistingServiceTraffic,
   prepareServiceTraffic,
   ServiceTrafficQuery,
   ServiceTrafficSource,
@@ -37,7 +43,8 @@ import ClusterScope from './ClusterScope';
 import CircuitBreakerEditor from './configuration/CircuitBreakerEditor';
 import CodeBlock from './configuration/CodeBlock';
 import HttpMatchBuilder, { HttpMatchingWarning } from './configuration/HttpMatchBuilder';
-import { MirroringWarning } from './configuration/HttpMirroringEditor';
+import HttpMatchEditEditor from './configuration/HttpMatchEditEditor';
+import HttpMirroringEditor, { MirroringWarning } from './configuration/HttpMirroringEditor';
 import HttpRouteBehaviorEditor, {
   HttpBehaviorWarning,
 } from './configuration/HttpRouteBehaviorEditor';
@@ -45,15 +52,28 @@ import LoadBalancerEditor from './configuration/LoadBalancerEditor';
 import OutboundTlsEditor, { OutboundTlsWarning } from './configuration/OutboundTlsEditor';
 import RequestStatus from './RequestStatus';
 
-function TrafficProposal({
-  source,
-  onBusy,
-}: {
-  source: ServiceTrafficSource;
-  onBusy: (busy: boolean) => void;
-}) {
-  const { t } = useTranslation();
-  const [draft, setDraft] = useState<ServiceTrafficDraft>(() => ({
+function initialTrafficDraft(source: ServiceTrafficSource): ServiceTrafficDraft {
+  if (source.conflicts.length) {
+    try {
+      const context = serviceTrafficEditContext(
+        source.service,
+        source.identityDomain,
+        source.versionLabel,
+        source.versions,
+        source.routingResources
+      );
+      return initialServiceTrafficEditDraft(context, source.service);
+    } catch {
+      return {
+        destinationRuleName: source.service.name,
+        virtualServiceName: source.service.name,
+        port: source.service.ports.find(port => port.protocol === 'TCP')!.port,
+        protocol: 'http',
+        subsets: [],
+      };
+    }
+  }
+  return {
     destinationRuleName: source.service.name,
     virtualServiceName: source.service.name,
     protocol: 'http',
@@ -68,7 +88,39 @@ function TrafficProposal({
     outboundTls: initialOutboundTls(),
     httpBehavior: initialHttpBehavior({ index: 0, value: {} }),
     httpMatches: [],
-  }));
+  };
+}
+
+function TrafficProposal({
+  source,
+  onBusy,
+}: {
+  source: ServiceTrafficSource;
+  onBusy: (busy: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const isEditing = source.conflicts.length > 0;
+  const existing = useMemo(() => {
+    if (!isEditing) return { context: undefined, error: '' };
+    try {
+      return {
+        context: serviceTrafficEditContext(
+          source.service,
+          source.identityDomain,
+          source.versionLabel,
+          source.versions,
+          source.routingResources
+        ),
+        error: '',
+      };
+    } catch (error) {
+      return {
+        context: undefined,
+        error: error instanceof Error ? error.message : 'Existing routing is not supported',
+      };
+    }
+  }, [isEditing, source]);
+  const [draft, setDraft] = useState<ServiceTrafficDraft>(() => initialTrafficDraft(source));
   const [reviewed, setReviewed] = useState<ReviewedMutationBatch>();
   const [outcomes, setOutcomes] = useState<MutationOutcome[]>();
   const [error, setError] = useState('');
@@ -97,14 +149,19 @@ function TrafficProposal({
   }, [busy, sent]);
   const proposal = useMemo(() => {
     try {
-      return { mutations: prepareServiceTraffic(source, draft), error: '' };
+      return {
+        mutations: isEditing
+          ? prepareExistingServiceTraffic(source, draft)
+          : prepareServiceTraffic(source, draft),
+        error: '',
+      };
     } catch (error) {
       return {
         mutations: undefined,
         error: error instanceof Error ? error.message : 'Invalid traffic proposal',
       };
     }
-  }, [source, draft]);
+  }, [source, draft, isEditing]);
   const guard = (signal: AbortSignal) => assertTrafficSourceCurrent(source.service, signal);
   async function run(commit: boolean) {
     if (inFlight.current || sent) return;
@@ -115,16 +172,16 @@ function TrafficProposal({
     active.current = controller;
     try {
       if (commit) {
-        if (!reviewed) throw new Error(t('Review both changes before confirming'));
+        if (!reviewed) throw new Error(t('Review the proposed changes before confirming'));
         setSent(true);
         await assertTrafficProposalFresh(source, controller.signal);
-        await assertTrafficTargetsAbsent(reviewed.mutations, controller.signal);
+        if (!isEditing) await assertTrafficTargetsAbsent(reviewed.mutations, controller.signal);
         const result = await commitMutationBatch(reviewed, controller.signal, guard);
         if (!controller.signal.aborted) setOutcomes(result);
       } else {
         if (!proposal.mutations) throw new Error(proposal.error);
         await assertTrafficProposalFresh(source, controller.signal);
-        await assertTrafficTargetsAbsent(proposal.mutations, controller.signal);
+        if (!isEditing) await assertTrafficTargetsAbsent(proposal.mutations, controller.signal);
         const batch = await reviewMutationBatch(proposal.mutations, controller.signal, guard);
         if (!controller.signal.aborted) setReviewed(batch);
       }
@@ -142,6 +199,12 @@ function TrafficProposal({
     blocked: t('Blocked before writing'),
     'failed-or-unknown': t('Failed or outcome unknown'),
   };
+  const existingHttpRoutes =
+    existing.context?.route.protocol === 'http'
+      ? editableHttpRoutes(existing.context.virtualService.object.spec).filter(
+          route => route.index === existing.context?.route.index
+        )
+      : [];
   return (
     <SectionBox title={t('Traffic routing proposal')}>
       <Stack spacing={2}>
@@ -157,9 +220,19 @@ function TrafficProposal({
         </Typography>
         <Alert severity="warning">
           {t(
-            'This creates a namespace-local DestinationRule followed by a VirtualService for one TCP Service port. It does not install a gateway or prove backend readiness. TLS policy is included only when explicitly selected below. Existing or potentially overlapping routing must be edited separately.'
+            isEditing
+              ? 'This edits one existing namespace-local DestinationRule and VirtualService pair. Only one unambiguous HTTP/TCP route targeting this Service is supported; other routes, matches, policy fields and metadata are preserved.'
+              : 'This creates a namespace-local DestinationRule followed by a VirtualService for one TCP Service port. It does not install a gateway or prove backend readiness. TLS policy is included only when explicitly selected below. Existing or potentially overlapping routing must be edited separately.'
           )}
         </Alert>
+        {isEditing && existing.error && <Alert severity="error">{existing.error}</Alert>}
+        {isEditing && existing.context && (
+          <Typography>
+            {t('Editing')} DestinationRule {existing.context.destinationRule.namespace}/
+            {existing.context.destinationRule.name} and VirtualService{' '}
+            {existing.context.virtualService.namespace}/{existing.context.virtualService.name}
+          </Typography>
+        )}
         <Typography>
           {t('Routing protocol: {{protocol}}', {
             protocol: draft.protocol === 'tcp' ? 'TCP' : 'HTTP/gRPC',
@@ -191,90 +264,94 @@ function TrafficProposal({
             { label: t('Matching workloads'), getter: item => item.workloads.join(', ') },
           ]}
         />
-        {!reviewed && !sent && (
+        {!reviewed && !sent && (!isEditing || !!existing.context) && (
           <>
-            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+            {!isEditing && (
+              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                <TextField
+                  select
+                  label={t('Routing protocol')}
+                  value={draft.protocol ?? 'http'}
+                  disabled={busy}
+                  helperText={t(
+                    'Choose explicitly; protocol is not inferred from the Service port. Existing draft settings are retained when switching.'
+                  )}
+                  onChange={event => {
+                    const protocol = event.target.value;
+                    if (protocol === 'http' || protocol === 'tcp')
+                      setDraft(value => ({ ...value, protocol }));
+                  }}
+                >
+                  <MenuItem value="http">HTTP/gRPC</MenuItem>
+                  <MenuItem value="tcp">TCP</MenuItem>
+                </TextField>
+                <TextField
+                  label={t('DestinationRule name')}
+                  value={draft.destinationRuleName}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, destinationRuleName: event.target.value }))
+                  }
+                />
+                <TextField
+                  label={t('VirtualService name')}
+                  value={draft.virtualServiceName}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, virtualServiceName: event.target.value }))
+                  }
+                />
+                <TextField
+                  select
+                  label={t('Service port')}
+                  value={draft.port}
+                  disabled={busy}
+                  onChange={event =>
+                    setDraft(value => ({ ...value, port: Number(event.target.value) }))
+                  }
+                >
+                  {source.service.ports
+                    .filter(port => port.protocol === 'TCP')
+                    .map(port => (
+                      <MenuItem key={port.port} value={port.port}>
+                        {port.name ? `${port.name}: ` : ''}
+                        {port.port}
+                      </MenuItem>
+                    ))}
+                </TextField>
+              </Stack>
+            )}
+            {!isEditing && (
               <TextField
                 select
-                label={t('Routing protocol')}
-                value={draft.protocol ?? 'http'}
-                disabled={busy}
+                label={t('Mirrored version')}
+                value={
+                  draft.mirror
+                    ? draft.subsets.findIndex(item => item.version === draft.mirror?.version)
+                    : -1
+                }
+                disabled={busy || (draft.protocol === 'tcp' && !draft.mirror)}
                 helperText={t(
-                  'Choose explicitly; protocol is not inferred from the Service port. Existing draft settings are retained when switching.'
+                  'The mirrored version is excluded from forwarding in this generated rule, not from other or default routing. Set the remaining forwarding weights to total 100; no automatic redistribution is performed.'
                 )}
                 onChange={event => {
-                  const protocol = event.target.value;
-                  if (protocol === 'http' || protocol === 'tcp')
-                    setDraft(value => ({ ...value, protocol }));
+                  const subset = draft.subsets[Number(event.target.value)];
+                  setDraft(value => ({
+                    ...value,
+                    mirror: subset
+                      ? { version: subset.version, percentage: value.mirror?.percentage ?? '100' }
+                      : undefined,
+                  }));
                 }}
               >
-                <MenuItem value="http">HTTP/gRPC</MenuItem>
-                <MenuItem value="tcp">TCP</MenuItem>
+                <MenuItem value={-1}>{t('No mirrored version')}</MenuItem>
+                {draft.subsets.map((subset, index) => (
+                  <MenuItem key={subset.version} value={index}>
+                    {subset.version || t('Empty label')}
+                  </MenuItem>
+                ))}
               </TextField>
-              <TextField
-                label={t('DestinationRule name')}
-                value={draft.destinationRuleName}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, destinationRuleName: event.target.value }))
-                }
-              />
-              <TextField
-                label={t('VirtualService name')}
-                value={draft.virtualServiceName}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, virtualServiceName: event.target.value }))
-                }
-              />
-              <TextField
-                select
-                label={t('Service port')}
-                value={draft.port}
-                disabled={busy}
-                onChange={event =>
-                  setDraft(value => ({ ...value, port: Number(event.target.value) }))
-                }
-              >
-                {source.service.ports
-                  .filter(port => port.protocol === 'TCP')
-                  .map(port => (
-                    <MenuItem key={port.port} value={port.port}>
-                      {port.name ? `${port.name}: ` : ''}
-                      {port.port}
-                    </MenuItem>
-                  ))}
-              </TextField>
-            </Stack>
-            <TextField
-              select
-              label={t('Mirrored version')}
-              value={
-                draft.mirror
-                  ? draft.subsets.findIndex(item => item.version === draft.mirror?.version)
-                  : -1
-              }
-              disabled={busy || (draft.protocol === 'tcp' && !draft.mirror)}
-              helperText={t(
-                'The mirrored version is excluded from forwarding in this generated rule, not from other or default routing. Set the remaining forwarding weights to total 100; no automatic redistribution is performed.'
-              )}
-              onChange={event => {
-                const subset = draft.subsets[Number(event.target.value)];
-                setDraft(value => ({
-                  ...value,
-                  mirror: subset
-                    ? { version: subset.version, percentage: value.mirror?.percentage ?? '100' }
-                    : undefined,
-                }));
-              }}
-            >
-              <MenuItem value={-1}>{t('No mirrored version')}</MenuItem>
-              {draft.subsets.map((subset, index) => (
-                <MenuItem key={subset.version} value={index}>
-                  {subset.version || t('Empty label')}
-                </MenuItem>
-              ))}
-            </TextField>
+            )}
             {draft.mirror && (
               <TextField
                 label={t('Mirror percentage')}
@@ -296,21 +373,23 @@ function TrafficProposal({
             {draft.subsets.map((subset, index) => (
               <Stack key={subset.version} direction="row" spacing={2} alignItems="center">
                 <Typography>{subset.version || t('Empty label')}</Typography>
-                <TextField
-                  label={t('Subset name for version {{version}}', {
-                    version: subset.version || t('Empty label'),
-                  })}
-                  value={subset.name}
-                  disabled={busy}
-                  onChange={event =>
-                    setDraft(value => ({
-                      ...value,
-                      subsets: value.subsets.map((item, position) =>
-                        position === index ? { ...item, name: event.target.value } : item
-                      ),
-                    }))
-                  }
-                />
+                {!isEditing && (
+                  <TextField
+                    label={t('Subset name for version {{version}}', {
+                      version: subset.version || t('Empty label'),
+                    })}
+                    value={subset.name}
+                    disabled={busy}
+                    onChange={event =>
+                      setDraft(value => ({
+                        ...value,
+                        subsets: value.subsets.map((item, position) =>
+                          position === index ? { ...item, name: event.target.value } : item
+                        ),
+                      }))
+                    }
+                  />
+                )}
                 <TextField
                   type="number"
                   label={t('Weight for version {{version}}', {
@@ -341,42 +420,70 @@ function TrafficProposal({
               </Stack>
             ))}
             <CircuitBreakerEditor
-              creating
+              creating={!isEditing}
               draft={draft.circuitBreaker ?? initialCircuitBreaker()}
               onChange={circuitBreaker => setDraft(value => ({ ...value, circuitBreaker }))}
               disabled={busy}
             />
-            <HttpRouteBehaviorEditor
-              creating
-              routes={[]}
-              draft={draft.httpBehavior ?? initialHttpBehavior({ index: 0, value: {} })}
-              onChange={httpBehavior => setDraft(value => ({ ...value, httpBehavior }))}
-              disabled={busy}
-            />
-            <HttpMatchBuilder
-              conditions={draft.httpMatches ?? []}
-              onChange={httpMatches => setDraft(value => ({ ...value, httpMatches }))}
-              disabled={busy}
-            />
+            {(draft.protocol !== 'tcp' || !isEditing) && (
+              <HttpRouteBehaviorEditor
+                creating={!isEditing}
+                routes={existingHttpRoutes}
+                draft={draft.httpBehavior ?? initialHttpBehavior({ index: 0, value: {} })}
+                onChange={httpBehavior => setDraft(value => ({ ...value, httpBehavior }))}
+                disabled={busy}
+              />
+            )}
+            {isEditing && existingHttpRoutes.length > 0 ? (
+              <>
+                <HttpMatchingWarning />
+                <HttpMatchEditEditor
+                  routes={existingHttpRoutes}
+                  draft={draft.httpMatchEdit!}
+                  onChange={httpMatchEdit => setDraft(value => ({ ...value, httpMatchEdit }))}
+                  disabled={busy}
+                />
+                <HttpMirroringEditor
+                  routes={existingHttpRoutes}
+                  draft={draft.httpMirroring!}
+                  onChange={httpMirroring => setDraft(value => ({ ...value, httpMirroring }))}
+                  disabled={busy}
+                />
+              </>
+            ) : (
+              !isEditing && (
+                <HttpMatchBuilder
+                  conditions={draft.httpMatches ?? []}
+                  onChange={httpMatches => setDraft(value => ({ ...value, httpMatches }))}
+                  disabled={busy}
+                />
+              )
+            )}
             <LoadBalancerEditor
-              creating
+              creating={!isEditing}
               draft={draft.loadBalancer ?? initialLoadBalancer()}
               onChange={loadBalancer => setDraft(value => ({ ...value, loadBalancer }))}
               disabled={busy}
             />
             <OutboundTlsEditor
-              creating
+              creating={!isEditing}
               draft={draft.outboundTls ?? initialOutboundTls()}
               onChange={outboundTls => setDraft(value => ({ ...value, outboundTls }))}
               disabled={busy}
             />
-            {proposal.error && <Alert severity="warning">{proposal.error}</Alert>}
+            {proposal.error && !existing.error && (
+              <Alert severity="warning">{proposal.error}</Alert>
+            )}
             <Button
               variant="contained"
               disabled={busy || !proposal.mutations}
               onClick={() => run(false)}
             >
-              {t('Review and dry-run both changes')}
+              {t(
+                isEditing
+                  ? 'Review and dry-run selected changes'
+                  : 'Review and dry-run both changes'
+              )}
             </Button>
           </>
         )}
@@ -385,10 +492,12 @@ function TrafficProposal({
             {draft.outboundTls && <OutboundTlsWarning draft={draft.outboundTls} />}
             {draft.httpBehavior && <HttpBehaviorWarning draft={draft.httpBehavior} />}
             {!!draft.httpMatches?.length && <HttpMatchingWarning />}
+            {draft.httpMirroring?.mode === 'set' && <MirroringWarning />}
             {!sent && (
               <Alert severity="success">
                 {t(
-                  'Both server dry-runs succeeded. No configuration has been persisted by this review.'
+                  'All {{count}} server dry-runs succeeded. No configuration has been persisted by this review.',
+                  { count: reviewed.mutations.length }
                 )}
               </Alert>
             )}
@@ -411,33 +520,51 @@ function TrafficProposal({
                 },
               ]}
             />
-            {reviewed.mutations.map(mutation => (
-              <SectionBox
-                key={mutation.target.definition.kind}
-                title={`${mutation.target.definition.kind}: ${mutation.target.namespace}/${mutation.target.name}`}
-              >
-                <Typography>{mutation.target.apiVersion}</Typography>
-                <CodeBlock
-                  label={t('Proposed {{kind}}', { kind: mutation.target.definition.kind })}
-                  value={JSON.stringify(
-                    {
-                      apiVersion: mutation.target.apiVersion,
-                      kind: mutation.target.definition.kind,
-                      metadata: {
-                        namespace: mutation.target.namespace,
-                        name: mutation.target.name,
-                      },
-                      spec: mutation.spec,
-                    },
-                    null,
-                    2
+            {reviewed.mutations.map(mutation => {
+              const original = source.routingResources.find(
+                resource =>
+                  resource.kind === mutation.target.definition.kind &&
+                  resource.namespace === mutation.target.namespace &&
+                  resource.name === mutation.target.name
+              )?.object;
+              return (
+                <SectionBox
+                  key={mutation.target.definition.kind}
+                  title={`${mutation.action === 'update' ? t('Update') : t('Create')} ${
+                    mutation.target.definition.kind
+                  }: ${mutation.target.namespace}/${mutation.target.name}`}
+                >
+                  <Typography>{mutation.target.apiVersion}</Typography>
+                  {mutation.action === 'update' && (
+                    <CodeBlock
+                      label={t('Captured original {{kind}}', {
+                        kind: mutation.target.definition.kind,
+                      })}
+                      value={JSON.stringify(original, null, 2)}
+                    />
                   )}
-                />
-              </SectionBox>
-            ))}
+                  <CodeBlock
+                    label={t('Proposed {{kind}}', { kind: mutation.target.definition.kind })}
+                    value={JSON.stringify(
+                      {
+                        apiVersion: mutation.target.apiVersion,
+                        kind: mutation.target.definition.kind,
+                        metadata: original?.metadata ?? {
+                          namespace: mutation.target.namespace,
+                          name: mutation.target.name,
+                        },
+                        spec: mutation.spec,
+                      },
+                      null,
+                      2
+                    )}
+                  />
+                </SectionBox>
+              );
+            })}
             <Alert severity="warning">
               {t(
-                'These are two separate writes, not a transaction. Execution stops at the first failure; earlier changes remain. There is no automatic retry or rollback. Workload membership may change as labels and controllers change. Inspect both resources after any interrupted or uncertain attempt.'
+                'These are separate writes, not a transaction. Execution stops at the first failure; earlier changes remain. There is no automatic retry or rollback. Inspect every selected resource after an interrupted or uncertain attempt.'
               )}
             </Alert>
             {!sent && (
@@ -451,7 +578,11 @@ function TrafficProposal({
                   disabled={busy}
                   onClick={() => run(true)}
                 >
-                  {t('Confirm creation of both resources')}
+                  {t(
+                    isEditing
+                      ? 'Confirm updates to selected resources'
+                      : 'Confirm creation of both resources'
+                  )}
                 </Button>
               </Stack>
             )}
@@ -473,7 +604,8 @@ function TrafficProposal({
           >
             {outcomes.every(result => result.status === 'succeeded')
               ? t(
-                  'Both API operations completed. Controller acceptance and actual traffic are not verified.'
+                  'All {{count}} API operations completed. Controller acceptance and actual traffic are not verified.',
+                  { count: outcomes.length }
                 )
               : t(
                   'The attempt stopped. Earlier successful changes remain; inspect every outcome before making further changes.'

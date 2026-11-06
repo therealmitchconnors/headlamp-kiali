@@ -275,11 +275,23 @@ export interface TopologyNode {
   cluster: string;
   namespace: string;
   kind: 'workload' | 'app' | 'service' | 'unknown';
+  namespacePosition?: 'selected' | 'outside' | 'unknown';
   label: string;
   workloads: string[];
   apps: string[];
   versions: string[];
 }
+
+export type TopologyGraphScope = Pick<
+  TopologyQuery,
+  | 'namespace'
+  | 'telemetryCluster'
+  | 'reporter'
+  | 'windowSeconds'
+  | 'end'
+  | 'measure'
+  | 'includeIdle'
+>;
 
 export function topologyNamespacePosition(
   node: Pick<TopologyNode, 'kind' | 'namespace'>,
@@ -289,6 +301,65 @@ export function topologyNamespacePosition(
     throw new Error('Graph namespace membership requires an explicit namespace');
   if (node.kind === 'unknown' || !known(node.namespace)) return 'unknown';
   return node.namespace === selectedNamespace ? 'selected' : 'outside';
+}
+
+export function appendTopologyNodeStates(
+  graph: TopologyGraph,
+  query: TopologyGraphScope
+): TopologyGraph {
+  topologyQueries(query);
+  const scope = Object.freeze({ ...query });
+  return {
+    ...graph,
+    scope,
+    nodes: graph.nodes.map(node => ({
+      ...node,
+      namespacePosition: topologyNamespacePosition(node, scope.namespace),
+    })),
+  };
+}
+
+export type TopologyGroupBy = 'none' | 'app' | 'cluster' | 'namespace';
+
+export interface TopologyNodeGroup {
+  key: string;
+  value: string;
+  nodes: TopologyNode[];
+}
+
+export function groupTopologyNodes(
+  nodes: readonly TopologyNode[],
+  groupBy: TopologyGroupBy
+): TopologyNodeGroup[] {
+  if (!['none', 'app', 'cluster', 'namespace'].includes(groupBy))
+    throw new Error('Unsupported topology grouping');
+  const groups = new Map<string, TopologyNodeGroup>();
+  for (const node of nodes) {
+    const value =
+      groupBy === 'none'
+        ? 'all'
+        : groupBy === 'cluster'
+        ? known(node.cluster)
+          ? node.cluster
+          : 'unknown'
+        : groupBy === 'namespace'
+        ? known(node.namespace)
+          ? node.namespace
+          : 'unknown'
+        : node.apps.length === 1
+        ? node.apps[0]
+        : node.apps.length > 1
+        ? 'multiple'
+        : 'unknown';
+    const key = JSON.stringify([groupBy, value]);
+    const group = groups.get(key) ?? { key, value, nodes: [] };
+    group.nodes.push(node);
+    groups.set(key, group);
+  }
+  const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  return [...groups.values()]
+    .map(group => ({ ...group, nodes: [...group.nodes].sort((a, b) => compare(a.id, b.id)) }))
+    .sort((a, b) => compare(a.value, b.value) || compare(a.key, b.key));
 }
 
 export interface TopologyEdge {
@@ -308,6 +379,38 @@ export interface TopologyGraph {
   nodes: TopologyNode[];
   edges: TopologyEdge[];
   warnings: TopologyWarning[];
+  scope?: TopologyGraphScope;
+}
+
+function sameTopologyScope(left: TopologyGraphScope, right: TopologyGraphScope) {
+  return (
+    left.namespace === right.namespace &&
+    left.telemetryCluster === right.telemetryCluster &&
+    left.reporter === right.reporter &&
+    left.windowSeconds === right.windowSeconds &&
+    left.end === right.end &&
+    left.measure === right.measure &&
+    left.includeIdle === right.includeIdle
+  );
+}
+
+export function focusTopology(
+  graph: TopologyGraph,
+  nodeId: string,
+  query: TopologyGraphScope
+): TopologyGraph {
+  topologyQueries(query);
+  if (!graph.scope || !sameTopologyScope(graph.scope, query))
+    throw new Error('Graph focus does not match the captured scope and time');
+  if (!graph.nodes.some(node => node.id === nodeId))
+    throw new Error('Graph focus node is not present in the captured projection');
+  const edges = graph.edges.filter(edge => edge.source === nodeId || edge.target === nodeId);
+  const visible = new Set([nodeId, ...edges.flatMap(edge => [edge.source, edge.target])]);
+  return {
+    ...graph,
+    nodes: graph.nodes.filter(node => visible.has(node.id)),
+    edges,
+  };
 }
 export function projectTopology(input: TopologyObservations, mode: TopologyMode): TopologyGraph {
   if (input.observations.length > 4000) throw new Error('Topology exceeds 4000 observations');

@@ -66,6 +66,7 @@ function result(): Awaited<ReturnType<typeof loadServicePortValidation>> {
     },
     managed: {
       cluster: 'alpha',
+      configurationSources: [],
       logicalName: 'logical',
       visibility: 'pinned-default-system-exclusion',
       membership: [{ namespace: 'bookinfo', controllers: [] }],

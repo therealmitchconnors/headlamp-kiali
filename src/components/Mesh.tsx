@@ -57,6 +57,15 @@ function ConfigRead<T>({
       ) : (
         t('Configuration name unresolved')
       )}
+      {read.status === 'ready' && read.source && (
+        <Typography variant="body2">
+          {t('ConfigMap key: {{key}}; UID: {{uid}}; resource version: {{version}}', {
+            key: read.source.key,
+            uid: read.source.uid ?? t('Not reported'),
+            version: read.source.resourceVersion ?? t('Not reported'),
+          })}
+        </Typography>
+      )}
       {read.status === 'ready' ? (
         children(read.value)
       ) : read.status === 'error' ? (
@@ -226,7 +235,7 @@ export function MeshResults({
       <SectionBox title={t('Local control planes')}>
         <Typography variant="body2">
           {t(
-            'Discovery selects Deployments labeled app=istiod. Configuration observations use the first declared container, matching pinned Kiali discovery, not a search for a discovery-named container. Standard revision ConfigMaps are inspected without applying Istio defaults or reading Secrets.'
+            'Discovery selects Deployments labeled app=istiod. Configuration observations use the first declared container, matching pinned Kiali discovery, not a search for a discovery-named container. Standard revision or supported mounted ConfigMaps are inspected without applying Istio defaults or reading Secrets.'
           )}
         </Typography>
         <Typography variant="body2">
@@ -332,9 +341,21 @@ export function MeshResults({
             ))}
             <Typography>
               {t(
-                'Standard and local shared sources are shown below. Only selected fields are merged, without Istio defaults; mounted and external overrides remain unresolved. These are not effective-security findings.'
+                'The selected local and optional shared sources are shown below. A supported mounted mesh file replaces the standard source; local fields take precedence over shared fields. Only selected fields are merged, without Istio defaults. Unsupported overrides and external topology remain unresolved. These are not effective-security findings.'
               )}
             </Typography>
+            <Typography variant="h6">
+              {plane.controller.meshConfigSource?.kind === 'mounted'
+                ? t('Mounted mesh configuration')
+                : t('Standard mesh configuration')}
+            </Typography>
+            {plane.controller.meshConfigSource?.kind === 'mounted' && (
+              <Typography>
+                {t('Declared mesh file: {{path}}', {
+                  path: plane.controller.meshConfigSource.path,
+                })}
+              </Typography>
+            )}
             <ConfigRead
               read={plane.mesh}
               namespace={plane.controller.namespace}
@@ -362,9 +383,15 @@ export function MeshResults({
                 {plane.effective.sharedAbsent && (
                   <Alert severity="warning">
                     {t(
-                      'The referenced shared ConfigMap is absent. Only the standard configuration contributes to the selected fields.'
+                      'The referenced shared ConfigMap is absent. Only the selected local configuration contributes to the selected fields.'
                     )}
                   </Alert>
+                )}
+                {plane.effective.sources && (
+                  <details>
+                    <summary>{t('Captured mesh configuration sources')}</summary>
+                    <StructuredValue value={plane.effective.sources} />
+                  </details>
                 )}
                 {meshFields(plane.effective.value)}
               </>

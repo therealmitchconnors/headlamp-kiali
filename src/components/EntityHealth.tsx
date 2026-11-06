@@ -78,6 +78,13 @@ export default function EntityHealthResults({
                 {message}
               </Alert>
             ))}
+            {snapshot.missingDirections.map(direction => (
+              <Alert severity="warning" key={direction}>
+                {direction === 'inbound'
+                  ? t('Inbound request telemetry is missing; health cannot be assessed.')
+                  : t('Outbound request telemetry is missing; health cannot be assessed.')}
+              </Alert>
+            ))}
             {snapshot.calculation ? (
               <HealthSummary
                 calculation={snapshot.calculation}

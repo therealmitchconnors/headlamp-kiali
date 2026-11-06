@@ -49,6 +49,7 @@ export interface ValidationRecord {
   name: string;
   namespace: string;
   uid?: string;
+  resourceVersion?: string;
   labels: Readonly<Record<string, string>>;
   spec: Record<string, unknown>;
   exportToAnnotation?: string;
