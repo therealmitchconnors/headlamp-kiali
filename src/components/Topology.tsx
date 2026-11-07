@@ -446,12 +446,15 @@ function TopologyResultsSnapshot({
                     .sort((a, b) => (a === 'source' ? -1 : 1) - (b === 'source' ? -1 : 1))
                     .map(reporter => t(reporter === 'source' ? 'Source' : 'Destination'))
                     .join(', '),
-                  count: edge.observations.length,
+                  count: edge.observations.reduce(
+                    (total, observation) => total + observation.reporterIdentities.length,
+                    0
+                  ),
                 })}
               </Typography>
               <Alert severity="info">
                 {t(
-                  'Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.'
+                  'Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.'
                 )}
               </Alert>
               <Distribution

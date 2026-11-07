@@ -494,18 +494,25 @@ ambient/waypoint traffic, and does not issue extra requests for a mixed batch.
 The query preserves canonical labels, protocol, response code/status, flags and
 connection-security labels.
 
-Combined observations are paired before any of the four projections. Exact
-reporter-independent metric-label identities are retained on each projected
-edge, together with the reporters that supplied them. A pair contributes once
-only when both sides have the same identity and rate; the source observation is
-the representative. Protocols remain separate. A metric/endpoint/protocol
-bucket reported by only one reporter remains visible. If both reporters appear
-in a bucket, their complete response/status/flag/security identity sets and rates
-must agree; partial sets and conflicting labels/rates fail closed rather than
-choosing an arbitrary side or adding both.
-Missing labels remain distinct from explicit `unknown` values in identity
-matching; missing endpoint values still display as unknown and retain their
-existing warnings. Duplicate same-reporter series still fail.
+Combined observations are paired before any of the four projections. Pairing
+requires exact agreement on every requested traffic identity except `reporter`
+and `connection_security_policy`; response/status/flag, protocol, endpoint,
+cluster, and other label conflicts remain distinct and partial reporter identity
+sets fail closed. Policy-label partitions are aggregated within each reporter
+before pairing, matching Kiali's graph query grouping, which does not group by
+`connection_security_policy`.
+
+For a paired identity, the destination rate is the deterministic representative.
+This follows pinned Kiali's namespace caller order: it processes destination
+ingress before source egress, and its edge time-series hash deduplicates matching
+endpoint/response tuples on first insertion without comparing reporter rates.
+Thus rate differences are not summed or treated as an identity conflict. Every
+exact source/destination series identity, rate, and raw policy label (including
+missing versus explicit `unknown`) remains in the projected edge provenance;
+the selected reporter alone supplies the edge's displayed rate/security
+distribution. Single-reporter buckets remain visible, and duplicate same-reporter
+series, incomplete non-policy identity sets, and invalid/overflowing aggregates
+still fail closed.
 
 The supported metric directions follow Kiali's graph selection: requests use
 `istio_requests_total`; TCP sent bytes use `istio_tcp_received_bytes_total` and
@@ -4438,7 +4445,7 @@ beyond Services and complete semantic Gateway checks remain open.
 | Structural Map | `mapView.tsx` | Grouped parent with 23 registered leaf sources; target Service inclusion and edge de-duplication tested | Populated live CR graph and reference edge families beyond Services |
 | Traffic metrics | `core/telemetry.ts`, `data/telemetry.ts`, `Traffic.tsx` | Query escaping, scoping, bounds, partial errors, fixture charts plus real hosted Bookinfo request/p95 data | Live TCP series, custom dashboards, full upstream query/default parity |
 | Basic request graph | `core/trafficGraph.ts`, `TrafficGraph.tsx` | Positive-rate edges, keyboard node selection, companion table and six real Bookinfo edges | Original request-only view; advanced work is on the separate topology route |
-| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections; source/destination/combined modes; combined pairs retain every exact non-policy traffic label and match across `connection_security_policy` differences, count equal-rate source/destination observations once using the source as deterministic representative, and retain both reporter identities and raw policy labels (including missing vs explicit unknown); one-sided observations remain; source-aligned unserviced ingress, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; namespace-position stage, source-aligned table grouping and neighbor focus; 1,728 Go identity cases; hosted Bookinfo single-reporter and negative fixtures | Complete upstream query/default/missing-report parity; ambiguous same-reporter policy partitions and mismatched overlapping rates fail closed; complete appender parity (per-appender ledger above), upstream graph boxes/node-detail routes, ambient/waypoint, historical resource identity/trace links, mixed-mode hosted/console/i18n/a11y verification and Desktop |
+| Traffic topology | `core/topology.ts`, `data/topology.ts`, `Topology.tsx`, graph resource candidates | Four projections; source/destination/combined modes; combined pairs require exact non-policy traffic identities, aggregate policy partitions per reporter, then count paired rates once using Kiali's destination-first namespace graph deduplication; retain every original reporter identity, rate, and raw policy label including missing vs explicit unknown; one-sided observations remain; source-aligned unserviced ingress, separate request/byte/message units, captured history, filtering, edge metadata and explicit current-resource candidates; namespace-position stage, source-aligned table grouping and neighbor focus; 1,728 Go identity cases; hosted Bookinfo single-reporter and negative fixtures | Complete upstream query/default/missing-report parity; incomplete non-policy identities, duplicate series and invalid/overflowing aggregates fail closed; complete appender parity (per-appender ledger above), upstream graph boxes/node-detail routes, ambient/waypoint, historical resource identity/trace links, mixed-mode hosted/console/i18n/a11y verification and Desktop |
 
 These are **partial implementations**, not closure of their corresponding full
 milestones. The captured Istio kinds are VirtualService, DestinationRule, Gateway,

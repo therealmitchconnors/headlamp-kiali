@@ -306,21 +306,14 @@ it('distinguishes missing from explicit unknown labels and rejects an ambiguous 
   expect(mixed.observations[0].identity).not.toBe(mixed.observations[1].identity);
   expect(() => projectTopology(mixed, 'workload')).toThrow(/Conflicting source\/destination/);
 });
-it.each([
-  ['rate', undefined],
-  ['response code', { response_code: '503' }],
-])('rejects conflicting paired reporter %s instead of choosing one', (conflict, labels) => {
+it('rejects a paired reporter with a conflicting response-code identity', () => {
   const data = result();
   data.series = data.series.slice(0, 1);
   const destinationLabels = { ...data.series[0].labels, reporter: 'destination' };
-  if (conflict === 'rate') data.series[0].samples[0].value = 1;
-  if (conflict === 'rate')
-    data.series.push({
-      ...data.series[0],
-      labels: destinationLabels,
-      samples: [{ timestamp: query.end, value: 2 }],
-    });
-  else data.series.push({ ...data.series[0], labels: { ...destinationLabels, ...labels } });
+  data.series.push({
+    ...data.series[0],
+    labels: { ...destinationLabels, response_code: '503' },
+  });
   expect(() =>
     projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
   ).toThrow(/Conflicting source\/destination/);
@@ -354,10 +347,10 @@ it.each([
       const graph = projectTopology(decoded, mode);
       expect(graph.edges).toHaveLength(1);
       expect(graph.edges[0].rate).toBe(2);
-      expect(graph.edges[0].security).toEqual({ [sourcePolicy ?? 'unknown']: 2 });
+      expect(graph.edges[0].security).toEqual({ [destinationPolicy ?? 'unknown']: 2 });
       expect(graph.edges[0].observations).toEqual([
         {
-          identity: sourceIdentity,
+          identity: destinationIdentity,
           reporters: ['source', 'destination'],
           reporterIdentities: [
             { reporter: 'source', identity: sourceIdentity },
@@ -394,6 +387,56 @@ it.each([
     );
   }
 );
+it('uses destination-first deduplication for unequal reporter rates and retains both rates', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].labels.connection_security_policy = 'unknown';
+  data.series[0].samples[0].value = 3;
+  data.series.push({
+    ...data.series[0],
+    labels: {
+      ...data.series[0].labels,
+      reporter: 'destination',
+      connection_security_policy: 'mutual_tls',
+    },
+    samples: [{ timestamp: query.end, value: 2 }],
+  });
+
+  const decoded = decode(data, { ...query, reporter: 'combined' });
+  const sourceIdentity = decoded.observations.find(row => row.reporter === 'source')!.identity;
+  const destinationIdentity = decoded.observations.find(
+    row => row.reporter === 'destination'
+  )!.identity;
+  const graph = projectTopology(decoded, 'workload');
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].id).toBe(
+    JSON.stringify([
+      '["wl","Kubernetes","bookinfo","productpage-v1"]',
+      '["wl","Kubernetes","bookinfo","reviews-v1"]',
+      'http',
+    ])
+  );
+  expect(graph.edges[0].rate).toBe(2);
+  expect(graph.edges[0].security).toEqual({ mutual_tls: 2 });
+  expect(graph.edges[0].observations).toEqual([
+    {
+      identity: destinationIdentity,
+      reporters: ['source', 'destination'],
+      reporterIdentities: [
+        { reporter: 'source', identity: sourceIdentity },
+        { reporter: 'destination', identity: destinationIdentity },
+      ],
+    },
+  ]);
+  expect(graph.edges[0].securityObservations).toEqual([
+    { reporter: 'source', identity: sourceIdentity, value: 'unknown', rate: 3 },
+    { reporter: 'destination', identity: destinationIdentity, value: 'mutual_tls', rate: 2 },
+  ]);
+});
 it.each([
   [
     'workload',
@@ -435,7 +478,7 @@ it.each([
     expect(graph.nodes.map(node => node.id)).toContain(otherNode);
   }
 );
-it('fails closed when one reporter splits one traffic identity across security policies', () => {
+it('aggregates policy partitions independently for each reporter before destination-first deduplication', () => {
   const data = result();
   data.series = data.series.slice(0, 1);
   data.series[0].labels.connection_security_policy = 'unknown';
@@ -448,21 +491,36 @@ it('fails closed when one reporter splits one traffic identity across security p
         reporter: 'destination',
         connection_security_policy: 'mutual_tls',
       },
-      samples: [{ timestamp: query.end, value: 2 }],
+      samples: [{ timestamp: query.end, value: 1.5 }],
     },
     {
       ...data.series[0],
       labels: {
         ...data.series[0].labels,
         reporter: 'destination',
-        connection_security_policy: 'none',
+        connection_security_policy: 'unknown',
       },
-      samples: [{ timestamp: query.end, value: 1 }],
+      samples: [{ timestamp: query.end, value: 0.25 }],
     }
   );
-  expect(() =>
-    projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
-  ).toThrow(/Ambiguous topology reporter policy partitions/);
+  const graph = projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload');
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].rate).toBe(1.75);
+  expect(graph.edges[0].security).toEqual({ mutual_tls: 1.5, unknown: 0.25 });
+  expect(
+    graph.edges[0].securityObservations.map(({ reporter, value, rate }) => [reporter, value, rate])
+  ).toEqual([
+    ['source', 'unknown', 2],
+    ['destination', 'mutual_tls', 1.5],
+    ['destination', 'unknown', 0.25],
+  ]);
+  expect(graph.edges[0].observations[0].reporterIdentities).toEqual(
+    graph.edges[0].securityObservations.map(({ reporter, identity }) => ({ reporter, identity }))
+  );
 });
 it('fails closed when a reporter is missing one same-protocol response series', () => {
   const data = result();
@@ -495,15 +553,42 @@ it('keeps zero observations distinct from absent reporter observations', () => {
   expect(projectTopology(mixed, 'workload').edges[0].rate).toBe(0);
 
   data.series[1].samples[0].value = 1;
-  expect(() =>
-    projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
-  ).toThrow(/Conflicting source\/destination topology reporter rates/);
+  const differingRates = projectTopology(
+    decode(data, { ...query, reporter: 'combined', includeIdle: true }),
+    'workload'
+  );
+  expect(differingRates.edges[0].rate).toBe(1);
+  expect(differingRates.edges[0].securityObservations.map(row => row.rate)).toEqual([0, 1]);
   data.series[1].samples[0].value = 0;
   data.series.pop();
   const oneSided = decode(data, { ...query, reporter: 'combined', includeIdle: true });
   expect(projectTopology(oneSided, 'workload').edges[0].observations[0].reporters).toEqual([
     'source',
   ]);
+});
+it('treats a zero-rate reporter as absent when idle edges are excluded', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].samples[0].value = 3;
+  data.series.push({
+    ...data.series[0],
+    labels: { ...data.series[0].labels, reporter: 'destination' },
+    samples: [{ timestamp: query.end, value: 0 }],
+  });
+  const graph = projectTopology(
+    decode(data, { ...query, reporter: 'combined', includeIdle: false }),
+    'workload'
+  );
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].rate).toBe(3);
+  expect(graph.edges[0].observations[0].reporters).toEqual(['source']);
+  expect(graph.edges[0].securityObservations.map(({ reporter, rate }) => [reporter, rate])).toEqual(
+    [['source', 3]]
+  );
 });
 it('does not split one workload into spurious versioned nodes or invent a source service label', () => {
   const data = result();

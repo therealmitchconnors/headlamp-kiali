@@ -208,6 +208,17 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Mixed-reporter rate reconciliation (2026-11-06):** aligned graph dedup to
+  Kiali v2.33's namespace caller: destination ingress is processed before source
+  egress, and duplicate endpoint/response identities keep the first rate without
+  comparing reporter samples. Policy-label partitions aggregate within each
+  reporter before matching; destination is the deterministic representative for
+  paired traffic, while all original rates, identities and raw policy labels
+  remain available. Exact non-policy identities, duplicate series, partial
+  reporter identity sets and invalid/overflowing rates still fail closed.
+  Reporter regression cases, topology core/data/component tests (1,817 passed),
+  type-check, lint, formatting, parity check and production build pass. Hosted
+  live Combined/Source/Destination evidence remains unavailable here.
 - **Mixed-reporter security-label reconciliation (2026-11-05):** compatible
   source/destination series pair when all requested traffic labels except
   `reporter` and `connection_security_policy` match, preserving missing versus

@@ -521,7 +521,12 @@ function reporterPairIdentity(observation: TopologyObservation) {
 }
 
 type ReporterIdentity = { reporter: TopologyReporter; identity: string };
-type ReporterSecurity = { reporter: TopologyReporter; identity: string; value: string };
+type ReporterSecurity = {
+  reporter: TopologyReporter;
+  identity: string;
+  value: string;
+  rate: number;
+};
 
 function reporterSecurity(observation: TopologyObservation): ReporterSecurity {
   return {
@@ -530,6 +535,7 @@ function reporterSecurity(observation: TopologyObservation): ReporterSecurity {
     value: Object.prototype.hasOwnProperty.call(observation.labels, 'connection_security_policy')
       ? observation.labels.connection_security_policy
       : 'missing',
+    rate: observation.rate,
   };
 }
 
@@ -542,15 +548,19 @@ function normalizeReporters(input: TopologyObservations) {
       securityObservations: [reporterSecurity(observation)],
     }));
 
-  const buckets = new Map<string, Map<TopologyReporter, Map<string, TopologyObservation>>>();
+  const buckets = new Map<string, Map<TopologyReporter, Map<string, TopologyObservation[]>>>();
   for (const observation of input.observations) {
+    if (!input.includeIdle && observation.rate === 0) continue;
     const bucketId = reporterBucketIdentity(observation);
     const bucket =
-      buckets.get(bucketId) ?? new Map<TopologyReporter, Map<string, TopologyObservation>>();
-    const series = bucket.get(observation.reporter) ?? new Map<string, TopologyObservation>();
+      buckets.get(bucketId) ?? new Map<TopologyReporter, Map<string, TopologyObservation[]>>();
+    const series = bucket.get(observation.reporter) ?? new Map<string, TopologyObservation[]>();
     const pairIdentity = reporterPairIdentity(observation);
-    if (series.has(pairIdentity)) throw new Error('Ambiguous topology reporter policy partitions');
-    series.set(pairIdentity, observation);
+    const partitions = series.get(pairIdentity) ?? [];
+    if (partitions.some(partition => partition.identity === observation.identity))
+      throw new Error('Duplicate topology reporter series identity');
+    partitions.push(observation);
+    series.set(pairIdentity, partitions);
     bucket.set(observation.reporter, series);
     buckets.set(bucketId, bucket);
   }
@@ -566,13 +576,14 @@ function normalizeReporters(input: TopologyObservations) {
     const destination = bucket.get('destination');
     if (!source || !destination) {
       for (const [reporter, series] of bucket)
-        for (const observation of series.values())
-          normalized.push({
-            observation,
-            reporters: [reporter],
-            reporterIdentities: [{ reporter, identity: observation.identity }],
-            securityObservations: [reporterSecurity(observation)],
-          });
+        for (const partitions of series.values())
+          for (const observation of partitions)
+            normalized.push({
+              observation,
+              reporters: [reporter],
+              reporterIdentities: [{ reporter, identity: observation.identity }],
+              securityObservations: [reporterSecurity(observation)],
+            });
       continue;
     }
     if (
@@ -580,20 +591,29 @@ function normalizeReporters(input: TopologyObservations) {
       [...source.keys()].some(identity => !destination.has(identity))
     )
       throw new Error('Conflicting source/destination topology reporter identities');
-    for (const [pairIdentity, observation] of source) {
-      const counterpart = destination.get(pairIdentity)!;
-      if (!Object.is(observation.rate, counterpart.rate))
-        throw new Error('Conflicting source/destination topology reporter rates');
-      // Match Kiali's traffic identity without the reporter-specific security label.
-      // Source is the deterministic representative; both exact reporter records survive below.
+    for (const [pairIdentity, sourcePartitions] of source) {
+      const sourceRows = sourcePartitions.sort((a, b) => a.identity.localeCompare(b.identity));
+      const destinationRows = destination
+        .get(pairIdentity)!
+        .sort((a, b) => a.identity.localeCompare(b.identity));
+      const rate = (rows: TopologyObservation[]) => {
+        const total = rows.reduce((sum, row) => sum + row.rate, 0);
+        if (!Number.isFinite(total)) throw new Error('Topology rate exceeded numeric limits');
+        return total;
+      };
+      // Kiali queries destination ingress before source egress and deduplicates
+      // matching endpoint/response series on first insertion, without comparing rates.
       normalized.push({
-        observation,
+        observation: { ...destinationRows[0], rate: rate(destinationRows) },
         reporters: ['source', 'destination'],
         reporterIdentities: [
-          { reporter: 'source', identity: observation.identity },
-          { reporter: 'destination', identity: counterpart.identity },
+          ...sourceRows.map(row => ({ reporter: 'source' as const, identity: row.identity })),
+          ...destinationRows.map(row => ({
+            reporter: 'destination' as const,
+            identity: row.identity,
+          })),
         ],
-        securityObservations: [reporterSecurity(observation), reporterSecurity(counterpart)],
+        securityObservations: [...sourceRows, ...destinationRows].map(reporterSecurity),
       });
     }
   }
@@ -714,7 +734,11 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     edge.inferred ||= inferred;
     if (observation.code !== undefined) sum(edge.responses, observation.code, observation.rate);
     sum(edge.flags, observation.responseFlags, observation.rate);
-    sum(edge.security, observation.security, observation.rate);
+    const selectedReporter = reporters.includes('destination') ? 'destination' : reporters[0];
+    for (const policy of securityObservations) {
+      if (policy.reporter === selectedReporter)
+        sum(edge.security, policy.value === 'missing' ? 'unknown' : policy.value, policy.rate);
+    }
     if (!edge.hosts.includes(observation.host)) edge.hosts.push(observation.host);
     if (!edge.metrics.includes(observation.metric)) edge.metrics.push(observation.metric);
     edge.observations.push({
@@ -725,7 +749,6 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     for (const policy of securityObservations) {
       edge.securityObservations.push({
         ...policy,
-        rate: observation.rate,
       });
     }
   }

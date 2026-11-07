@@ -230,7 +230,7 @@ it('shows differing source and destination security labels without summing their
         result: {
           warnings: [],
           series: [
-            { labels: sourceLabels, samples: [{ timestamp: query.end, value: 2 }] },
+            { labels: sourceLabels, samples: [{ timestamp: query.end, value: 3 }] },
             {
               labels: {
                 ...sourceLabels,
@@ -253,6 +253,9 @@ it('shows differing source and destination security labels without summing their
   );
   const inspected = within(screen.getByRole('region', { name: 'Selected graph connection' }));
   expect(inspected.getByText(/2\.0000\s+Requests \/ second/)).toBeDefined();
+  expect(
+    inspected.getByText('Reporter provenance: Source, Destination across 2 exact series')
+  ).toBeDefined();
   const policyTable = within(
     inspected.getByRole('region', { name: 'Reporter-specific connection-security labels' })
   );
@@ -260,10 +263,11 @@ it('shows differing source and destination security labels without summing their
   expect(policyTable.getByText('mutual_tls')).toBeDefined();
   expect(policyTable.getByText('Source')).toBeDefined();
   expect(policyTable.getByText('Destination')).toBeDefined();
-  expect(policyTable.getAllByText('2.0000')).toHaveLength(2);
+  expect(policyTable.getByText('3.0000')).toBeDefined();
+  expect(policyTable.getByText('2.0000')).toBeDefined();
   expect(
     inspected.getByText(
-      'Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.'
+      'Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.'
     )
   ).toBeDefined();
 });

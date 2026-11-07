@@ -1642,7 +1642,7 @@
   "WorkloadGroup label match (not ownership)": "WorkloadGroup label match (not ownership)",
   "Configuration reference": "Configuration reference",
   "Incomplete {{kind}} topology": "Incomplete {{kind}} topology",
-  "Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.": "Source reports are the deterministic representative for equal-rate reporter pairs; destination-only reports remain. Security labels stay separate by reporter and are not additive or proof of enforcement.",
+  "Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.": "Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.",
   "Reporter-specific connection-security labels": "Reporter-specific connection-security labels",
   "Reported by": "Reported by",
   "Connection-security label": "Connection-security label"
