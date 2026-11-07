@@ -213,7 +213,63 @@ it('exposes keyboard node inspection, edge response/security distributions and n
   expect(inspected.getByText('503')).toBeDefined();
   expect(inspected.getByText('UF')).toBeDefined();
   expect(inspected.getByText('none')).toBeDefined();
+  expect(inspected.getByText('Reporter provenance: Source across 1 exact series')).toBeDefined();
   expect(screen.queryByText('Reported revisions: v3')).toBeNull();
+});
+it('shows differing source and destination security labels without summing their rate', async () => {
+  const combinedQuery = { ...query, reporter: 'combined' as const };
+  const sourceLabels = {
+    ...fixture.labels,
+    reporter: 'source',
+    connection_security_policy: 'unknown',
+  };
+  const paired = decodeTopology(
+    [
+      {
+        metric: 'istio_requests_total',
+        result: {
+          warnings: [],
+          series: [
+            { labels: sourceLabels, samples: [{ timestamp: query.end, value: 3 }] },
+            {
+              labels: {
+                ...sourceLabels,
+                reporter: 'destination',
+                connection_security_policy: 'mutual_tls',
+              },
+              samples: [{ timestamp: query.end, value: 2 }],
+            },
+          ],
+        },
+      },
+    ],
+    combinedQuery
+  );
+  render(<TopologyResults snapshot={{ ...paired, query: combinedQuery }} />);
+  await userEvent.click(
+    screen.getByRole('button', {
+      name: 'Inspect http connection from Kubernetes / bookinfo / productpage-v1 to Kubernetes / bookinfo / reviews-v1',
+    })
+  );
+  const inspected = within(screen.getByRole('region', { name: 'Selected graph connection' }));
+  expect(inspected.getByText(/2\.0000\s+Requests \/ second/)).toBeDefined();
+  expect(
+    inspected.getByText('Reporter provenance: Source, Destination across 2 exact series')
+  ).toBeDefined();
+  const policyTable = within(
+    inspected.getByRole('region', { name: 'Reporter-specific connection-security labels' })
+  );
+  expect(policyTable.getByText('unknown')).toBeDefined();
+  expect(policyTable.getByText('mutual_tls')).toBeDefined();
+  expect(policyTable.getByText('Source')).toBeDefined();
+  expect(policyTable.getByText('Destination')).toBeDefined();
+  expect(policyTable.getByText('3.0000')).toBeDefined();
+  expect(policyTable.getByText('2.0000')).toBeDefined();
+  expect(
+    inspected.getByText(
+      'Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.'
+    )
+  ).toBeDefined();
 });
 it('focuses the diagram on a selected node without changing the full graph tables', async () => {
   render(<TopologyResults snapshot={snapshot} />);
@@ -269,6 +325,8 @@ it('renders total-byte metadata with byte units, never request units', () => {
           },
         ],
         warnings: [],
+        reporterMode: 'source',
+        includeIdle: false,
       }}
     />
   );
@@ -291,12 +349,30 @@ it('requires explicit loading, captures historical time, and clears snapshots im
   await userEvent.type(input, '2026-01-02T03:04');
   await userEvent.click(screen.getByRole('button', { name: 'Load graph snapshot' }));
   await screen.findByRole('group', { name: 'Observed traffic graph' });
+  expect(vi.mocked(loadTopology).mock.calls[0][2].reporter).toBe('combined');
   expect(vi.mocked(loadTopology).mock.calls[0][2].end).toBe(
     Math.floor(new Date('2026-01-02T03:04').getTime() / 1000)
   );
   await userEvent.type(screen.getByRole('textbox', { name: 'Namespace' }), '-other');
   expect(screen.queryByRole('group', { name: 'Observed traffic graph' })).toBeNull();
   expect(vi.mocked(loadTopology).mock.calls[0][3].aborted).toBe(true);
+});
+it('retains explicit single-reporter selection in the query form', async () => {
+  render(
+    <MemoryRouter>
+      <TopologyScope cluster="alpha" />
+    </MemoryRouter>
+  );
+  await userEvent.type(screen.getByRole('textbox', { name: 'Namespace' }), 'bookinfo');
+  await userEvent.type(
+    screen.getByRole('textbox', { name: 'Istio metric cluster label' }),
+    'Kubernetes'
+  );
+  await userEvent.click(screen.getByRole('combobox', { name: 'Telemetry reporter' }));
+  await userEvent.click(screen.getByRole('option', { name: 'Destination' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load graph snapshot' }));
+  await screen.findByRole('group', { name: 'Observed traffic graph' });
+  expect(vi.mocked(loadTopology).mock.calls[0][2].reporter).toBe('destination');
 });
 it('suppresses late cross-cluster data and exposes denied reads rather than an empty success', async () => {
   let resolve: (value: typeof snapshot) => void = () => {};

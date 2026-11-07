@@ -208,6 +208,38 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
 
 ### Latest verified checkpoint
 
+- **Mixed-reporter rate reconciliation (2026-11-06):** aligned graph dedup to
+  Kiali v2.33's namespace caller: destination ingress is processed before source
+  egress, and duplicate endpoint/response identities keep the first rate without
+  comparing reporter samples. Policy-label partitions aggregate within each
+  reporter before matching; destination is the deterministic representative for
+  paired traffic, while all original rates, identities and raw policy labels
+  remain available. Exact non-policy identities, duplicate series, partial
+  reporter identity sets and invalid/overflowing rates still fail closed.
+  Reporter regression cases, topology core/data/component tests (1,817 passed),
+  type-check, lint, formatting, parity check and production build pass. Hosted
+  live Combined/Source/Destination evidence remains unavailable here.
+- **Mixed-reporter security-label reconciliation (2026-11-05):** compatible
+  source/destination series pair when all requested traffic labels except
+  `reporter` and `connection_security_policy` match, preserving missing versus
+  explicit policy values and each exact reporter identity. Equal-rate pairs count
+  once using the source series as deterministic representative; one-sided rows
+  remain, while mismatched rates, non-policy identities, and ambiguous
+  same-reporter policy partitions fail closed. Focused topology core/adapter/UI
+  tests passed (**1,815 tests in three files**), as did formatting, type-check,
+  lint and production build. No live Headlamp/Bookinfo access is available here,
+  so the reproduced hosted Combined failure remains to be rechecked.
+- **Mixed-reporter topology (2026-11-03):** the advanced traffic graph now
+  defaults to source-aligned combined mode while retaining explicit source and
+  destination modes. Combined selectors cover selected-namespace source egress,
+  destination workload ingress and source-reported unserviced ingress. Exact
+  paired identities count once only when rates/labels agree; single-reporter
+  buckets remain, and partial/conflicting overlapping buckets fail closed.
+  Kiali's reversed TCP sent/received counter mapping is applied. Focused graph
+  core/adapter/UI gates passed
+  **1,802 tests in three files**; TypeScript, lint and production build passed.
+  Mixed-mode hosted/console/i18n/a11y, Desktop and live-cluster evidence remain
+  open; no real traffic or cluster fixtures were changed. See `docs/parity.md`.
 - **Issue #3 completion audit (2026-11-01):** the existing mounted-source batch
   retains its no-fallback, bounded-read and source-revalidation guards. Fixed
   silent omission of protobuf snake_case names for the nine projected mesh
@@ -371,8 +403,12 @@ and [automation prerequisites](https://docs.github.com/en/copilot/how-tos/use-co
   trace metadata and explicit UID-verified trace-to-Pod links.
 - Separate traffic topology page with workload/application/versioned-application/
   Service projections, captured historical windows, request/byte/message units,
-  local filtering and edge metadata. Source/destination reporters are explicit,
-  not combined; Service adjacency is marked as derived.
+  local filtering and edge metadata. Explicit single-reporter modes remain
+  available; combined mode source-aligns egress, destination ingress and
+  source-reported unserviced ingress, deduplicating only exact equal-rate reporter
+  pairs and retaining their identities/provenance. Conflicting pairs fail closed.
+  TCP sent/received measures follow Kiali's reversed Istio L4 counter mapping.
+  Service adjacency is marked as derived.
 - Exact trace string-tag filters, historical search end time, a 24-hour range
   option and a captured 15-second search deadline are also implemented.
   Six hosted intercepted scenarios passed and tracing fixture settings were
@@ -1708,9 +1744,12 @@ panel and query cardinality limits.
    Backend service names are not automatically Kubernetes identities.
    Existing HTTP search/detail needs no reimplementation. Live-provider success
    requires an existing backend or separately approved test infrastructure.
-   The traffic graph now has its own verified bounded projection/query surface;
-   preserve its explicit single-reporter limitation and do not infer Kubernetes
-   identity, resource health or policy enforcement from metric labels.
+   The traffic graph has a bounded source-aligned mixed-reporter projection/query
+   surface as well as explicit single-reporter modes. Preserve exact identity,
+   missing-label and conflict semantics; broader upstream query/default,
+   ambient/waypoint, appender and missing-report reconciliation remains open.
+   Do not infer Kubernetes identity, resource health or policy enforcement from
+   metric labels.
 5. Preserve all 23 generated models and checksum-bound schema captures. Read
    the focused skills for any new resource/detail/settings work rather than
    invoking the whole operator-installing build workflow.

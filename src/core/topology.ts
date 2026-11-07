@@ -3,6 +3,7 @@ import { isDnsLabel } from './object';
 import { MetricResult, metricSelector } from './telemetry';
 
 export type TopologyMode = 'workload' | 'app' | 'versionedApp' | 'service';
+export type TopologyReporter = 'source' | 'destination';
 export type TopologyMeasure =
   | 'requests'
   | 'tcpSent'
@@ -14,7 +15,7 @@ export type TopologyMeasure =
 export interface TopologyQuery {
   namespace: string;
   telemetryCluster: string;
-  reporter: 'source' | 'destination';
+  reporter: TopologyReporter | 'combined';
   windowSeconds: 60 | 300 | 600 | 900 | 3600;
   end: number;
   measure: TopologyMeasure;
@@ -22,9 +23,9 @@ export interface TopologyQuery {
 }
 const METRICS: Record<TopologyMeasure, readonly string[]> = {
   requests: ['istio_requests_total'],
-  tcpSent: ['istio_tcp_sent_bytes_total'],
-  tcpReceived: ['istio_tcp_received_bytes_total'],
-  tcpTotal: ['istio_tcp_sent_bytes_total', 'istio_tcp_received_bytes_total'],
+  tcpSent: ['istio_tcp_received_bytes_total'],
+  tcpReceived: ['istio_tcp_sent_bytes_total'],
+  tcpTotal: ['istio_tcp_received_bytes_total', 'istio_tcp_sent_bytes_total'],
   grpcSent: ['istio_request_messages_total'],
   grpcReceived: ['istio_response_messages_total'],
   grpcTotal: ['istio_request_messages_total', 'istio_response_messages_total'],
@@ -56,7 +57,7 @@ export function topologyQueries(query: TopologyQuery): { metric: string; query: 
     query.namespace.trim() !== query.namespace ||
     !query.telemetryCluster.trim() ||
     query.telemetryCluster.length > 256 ||
-    !['source', 'destination'].includes(query.reporter) ||
+    !['source', 'destination', 'combined'].includes(query.reporter) ||
     ![60, 300, 600, 900, 3600].includes(query.windowSeconds) ||
     !Number.isSafeInteger(query.end) ||
     query.end <= 0 ||
@@ -65,23 +66,51 @@ export function topologyQueries(query: TopologyQuery): { metric: string; query: 
     typeof query.includeIdle !== 'boolean'
   )
     throw new Error('Invalid topology scope, reporter, measure or captured time');
-  const scopes = [
-    { source_cluster: query.telemetryCluster, source_workload_namespace: query.namespace },
-    {
-      destination_cluster: query.telemetryCluster,
-      destination_workload_namespace: query.namespace,
-    },
-    { destination_cluster: query.telemetryCluster, destination_service_namespace: query.namespace },
-  ];
-  return METRICS[query.measure].map(metric => ({
-    metric,
-    query: scopes
-      .map(
-        scope =>
-          `(sum by (${LABELS.join(',')}) (rate(${metric}{${metricSelector({
+  const selectors =
+    query.reporter === 'combined'
+      ? [
+          metricSelector({
+            reporter: 'source',
+            source_cluster: query.telemetryCluster,
+            source_workload_namespace: query.namespace,
+          }),
+          metricSelector({
+            reporter: 'destination',
+            destination_cluster: query.telemetryCluster,
+            destination_workload_namespace: query.namespace,
+          }),
+          [
+            metricSelector({
+              reporter: 'source',
+              destination_cluster: query.telemetryCluster,
+              destination_workload_namespace: 'unknown',
+            }),
+            `source_workload_namespace!=${JSON.stringify(query.namespace)}`,
+            `destination_service=~${JSON.stringify(`^.+\\.${query.namespace}\\..+$`)}`,
+          ].join(','),
+        ]
+      : [
+          { source_cluster: query.telemetryCluster, source_workload_namespace: query.namespace },
+          {
+            destination_cluster: query.telemetryCluster,
+            destination_workload_namespace: query.namespace,
+          },
+          {
+            destination_cluster: query.telemetryCluster,
+            destination_service_namespace: query.namespace,
+          },
+        ].map(scope =>
+          metricSelector({
             reporter: query.reporter,
             ...scope,
-          })}}[${query.windowSeconds}s])))`
+          })
+        );
+  return METRICS[query.measure].map(metric => ({
+    metric,
+    query: selectors
+      .map(
+        selector =>
+          `(sum by (${LABELS.join(',')}) (rate(${metric}{${selector}}[${query.windowSeconds}s])))`
       )
       .join(' or '),
   }));
@@ -99,6 +128,9 @@ export interface TopologyEndpoint {
   service: string;
 }
 export interface TopologyObservation {
+  reporter: TopologyReporter;
+  identity: string;
+  labels: Readonly<Record<string, string>>;
   source: TopologyEndpoint;
   destination: TopologyEndpoint;
   protocol: string;
@@ -112,6 +144,8 @@ export interface TopologyObservation {
 export interface TopologyObservations {
   observations: TopologyObservation[];
   warnings: TopologyWarning[];
+  reporterMode: TopologyQuery['reporter'];
+  includeIdle: boolean;
 }
 export type TopologyWarning =
   | { code: 'prometheus'; message: string }
@@ -181,6 +215,7 @@ export function decodeTopology(
   const observations: TopologyObservation[] = [];
   const warnings: TopologyWarning[] = [];
   const seen = new Set<string>();
+  let identitySize = 0;
   let count = 0;
   for (const { metric, result } of results) {
     if (result.warnings.length > 100 || result.warnings.some(value => value.length > 4096))
@@ -196,9 +231,14 @@ export function decodeTopology(
         entries.some(([key, value]) => key.length > 128 || value.length > 4096)
       )
         throw new Error('Topology metric labels exceed the bounded label size');
-      const identity = JSON.stringify([metric, entries.sort(([a], [b]) => a.localeCompare(b))]);
-      if (seen.has(identity)) throw new Error('Duplicate topology metric series');
-      seen.add(identity);
+      entries.sort(([a], [b]) => a.localeCompare(b));
+      const seriesIdentity = JSON.stringify([metric, entries]);
+      if (seen.has(seriesIdentity)) throw new Error('Duplicate topology metric series');
+      seen.add(seriesIdentity);
+      const identity = JSON.stringify([metric, entries.filter(([name]) => name !== 'reporter')]);
+      identitySize += identity.length;
+      if (identitySize > 4_000_000)
+        throw new Error('Topology reporter identities exceed the 4,000,000-character limit');
       const sample = series.samples[0];
       if (
         series.samples.length !== 1 ||
@@ -211,18 +251,37 @@ export function decodeTopology(
       )
         throw new Error('Topology requires fresh finite nonnegative instant rates');
       const labels = series.labels;
-      if (labels.reporter !== query.reporter)
+      const reporter =
+        labels.reporter === 'source' || labels.reporter === 'destination'
+          ? labels.reporter
+          : undefined;
+      if (!reporter || (query.reporter !== 'combined' && reporter !== query.reporter))
         throw new Error('Topology reporter differs from the requested reporter');
+      const sourceIngress =
+        reporter === 'source' &&
+        labels.destination_cluster === query.telemetryCluster &&
+        labels.destination_workload_namespace === 'unknown' &&
+        labels.source_workload_namespace !== query.namespace &&
+        typeof labels.destination_service === 'string' &&
+        new RegExp(`^.+\\.${query.namespace}\\..+$`).test(labels.destination_service);
       const scoped =
-        (labels.source_cluster === query.telemetryCluster &&
-          labels.source_workload_namespace === query.namespace) ||
-        (labels.destination_cluster === query.telemetryCluster &&
-          [labels.destination_workload_namespace, labels.destination_service_namespace].includes(
-            query.namespace
-          ));
+        query.reporter === 'combined'
+          ? reporter === 'source'
+            ? (labels.source_cluster === query.telemetryCluster &&
+                labels.source_workload_namespace === query.namespace) ||
+              sourceIngress
+            : labels.destination_cluster === query.telemetryCluster &&
+              labels.destination_workload_namespace === query.namespace
+          : (labels.source_cluster === query.telemetryCluster &&
+              labels.source_workload_namespace === query.namespace) ||
+            (labels.destination_cluster === query.telemetryCluster &&
+              [
+                labels.destination_workload_namespace,
+                labels.destination_service_namespace,
+              ].includes(query.namespace));
       if (!scoped)
         throw new Error('Topology observation is outside the captured cluster/namespace scope');
-      if (!query.includeIdle && sample.value === 0) continue;
+      if (!query.includeIdle && query.reporter !== 'combined' && sample.value === 0) continue;
       const label = (name: string) => {
         if (!Object.prototype.hasOwnProperty.call(labels, name))
           warnings.push({ code: 'missing-label', label: name });
@@ -255,6 +314,9 @@ export function decodeTopology(
       )
         throw new Error('Topology protocol conflicts with the selected metric family');
       observations.push({
+        reporter,
+        identity,
+        labels: series.labels,
         source: endpoint('source'),
         destination: endpoint('destination'),
         protocol,
@@ -267,7 +329,12 @@ export function decodeTopology(
       });
     }
   }
-  return { observations, warnings: uniqueWarnings(warnings) };
+  return {
+    observations,
+    warnings: uniqueWarnings(warnings),
+    reporterMode: query.reporter,
+    includeIdle: query.includeIdle,
+  };
 }
 
 export interface TopologyNode {
@@ -372,8 +439,19 @@ export interface TopologyEdge {
   responses: Record<string, number>;
   flags: Record<string, number>;
   security: Record<string, number>;
+  securityObservations: {
+    identity: string;
+    reporter: TopologyReporter;
+    value: string;
+    rate: number;
+  }[];
   hosts: string[];
   metrics: string[];
+  observations: {
+    identity: string;
+    reporters: TopologyReporter[];
+    reporterIdentities: { reporter: TopologyReporter; identity: string }[];
+  }[];
 }
 export interface TopologyGraph {
   nodes: TopologyNode[];
@@ -412,8 +490,139 @@ export function focusTopology(
     edges,
   };
 }
+const REPORTER_VARIANT_LABELS = new Set([
+  'reporter',
+  'response_code',
+  'grpc_response_status',
+  'response_flags',
+  'connection_security_policy',
+]);
+
+function reporterBucketIdentity(observation: TopologyObservation) {
+  const labels = LABELS.filter(name => !REPORTER_VARIANT_LABELS.has(name)).map(name => [
+    name,
+    observation.labels[name] && observation.labels[name] !== 'unknown'
+      ? observation.labels[name]
+      : null,
+  ]);
+  return JSON.stringify([observation.metric, labels]);
+}
+
+function reporterPairIdentity(observation: TopologyObservation) {
+  const labels = LABELS.filter(
+    name => name !== 'reporter' && name !== 'connection_security_policy'
+  ).map(name => [
+    name,
+    Object.prototype.hasOwnProperty.call(observation.labels, name)
+      ? observation.labels[name]
+      : null,
+  ]);
+  return JSON.stringify([observation.metric, labels]);
+}
+
+type ReporterIdentity = { reporter: TopologyReporter; identity: string };
+type ReporterSecurity = {
+  reporter: TopologyReporter;
+  identity: string;
+  value: string;
+  rate: number;
+};
+
+function reporterSecurity(observation: TopologyObservation): ReporterSecurity {
+  return {
+    reporter: observation.reporter,
+    identity: observation.identity,
+    value: Object.prototype.hasOwnProperty.call(observation.labels, 'connection_security_policy')
+      ? observation.labels.connection_security_policy
+      : 'missing',
+    rate: observation.rate,
+  };
+}
+
+function normalizeReporters(input: TopologyObservations) {
+  if (input.reporterMode !== 'combined')
+    return input.observations.map(observation => ({
+      observation,
+      reporters: [observation.reporter],
+      reporterIdentities: [{ reporter: observation.reporter, identity: observation.identity }],
+      securityObservations: [reporterSecurity(observation)],
+    }));
+
+  const buckets = new Map<string, Map<TopologyReporter, Map<string, TopologyObservation[]>>>();
+  for (const observation of input.observations) {
+    if (!input.includeIdle && observation.rate === 0) continue;
+    const bucketId = reporterBucketIdentity(observation);
+    const bucket =
+      buckets.get(bucketId) ?? new Map<TopologyReporter, Map<string, TopologyObservation[]>>();
+    const series = bucket.get(observation.reporter) ?? new Map<string, TopologyObservation[]>();
+    const pairIdentity = reporterPairIdentity(observation);
+    const partitions = series.get(pairIdentity) ?? [];
+    if (partitions.some(partition => partition.identity === observation.identity))
+      throw new Error('Duplicate topology reporter series identity');
+    partitions.push(observation);
+    series.set(pairIdentity, partitions);
+    bucket.set(observation.reporter, series);
+    buckets.set(bucketId, bucket);
+  }
+
+  const normalized: {
+    observation: TopologyObservation;
+    reporters: TopologyReporter[];
+    reporterIdentities: ReporterIdentity[];
+    securityObservations: ReporterSecurity[];
+  }[] = [];
+  for (const bucket of buckets.values()) {
+    const source = bucket.get('source');
+    const destination = bucket.get('destination');
+    if (!source || !destination) {
+      for (const [reporter, series] of bucket)
+        for (const partitions of series.values())
+          for (const observation of partitions)
+            normalized.push({
+              observation,
+              reporters: [reporter],
+              reporterIdentities: [{ reporter, identity: observation.identity }],
+              securityObservations: [reporterSecurity(observation)],
+            });
+      continue;
+    }
+    if (
+      source.size !== destination.size ||
+      [...source.keys()].some(identity => !destination.has(identity))
+    )
+      throw new Error('Conflicting source/destination topology reporter identities');
+    for (const [pairIdentity, sourcePartitions] of source) {
+      const sourceRows = sourcePartitions.sort((a, b) => a.identity.localeCompare(b.identity));
+      const destinationRows = destination
+        .get(pairIdentity)!
+        .sort((a, b) => a.identity.localeCompare(b.identity));
+      const rate = (rows: TopologyObservation[]) => {
+        const total = rows.reduce((sum, row) => sum + row.rate, 0);
+        if (!Number.isFinite(total)) throw new Error('Topology rate exceeded numeric limits');
+        return total;
+      };
+      // Kiali queries destination ingress before source egress and deduplicates
+      // matching endpoint/response series on first insertion, without comparing rates.
+      normalized.push({
+        observation: { ...destinationRows[0], rate: rate(destinationRows) },
+        reporters: ['source', 'destination'],
+        reporterIdentities: [
+          ...sourceRows.map(row => ({ reporter: 'source' as const, identity: row.identity })),
+          ...destinationRows.map(row => ({
+            reporter: 'destination' as const,
+            identity: row.identity,
+          })),
+        ],
+        securityObservations: [...sourceRows, ...destinationRows].map(reporterSecurity),
+      });
+    }
+  }
+  return input.includeIdle ? normalized : normalized.filter(row => row.observation.rate !== 0);
+}
+
 export function projectTopology(input: TopologyObservations, mode: TopologyMode): TopologyGraph {
   if (input.observations.length > 4000) throw new Error('Topology exceeds 4000 observations');
+  const observations = normalizeReporters(input);
   const nodes = new Map<string, TopologyNode>();
   const edges = new Map<string, TopologyEdge>();
   const warnings = [...input.warnings];
@@ -454,7 +663,8 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     unique(node.versions, endpoint.version);
     return node;
   }
-  const rows = input.observations.map(observation => {
+  const rows = observations.map(row => {
+    const { observation } = row;
     if (!Number.isFinite(observation.rate) || observation.rate < 0)
       throw new Error('Invalid projected topology rate');
     const source = node(observation.source);
@@ -478,7 +688,7 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
       values.add(service.id);
       parents.set(destination.id, values);
     }
-    return { observation, source, destination, service };
+    return { ...row, source, destination, service };
   });
   function sum(values: Record<string, number>, key: string, rate: number) {
     const next = (Object.prototype.hasOwnProperty.call(values, key) ? values[key] : 0) + rate;
@@ -493,9 +703,10 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
   function add(
     source: TopologyNode,
     target: TopologyNode,
-    observation: TopologyObservation,
+    row: (typeof rows)[number],
     inferred: boolean
   ) {
+    const { observation, reporters, reporterIdentities, securityObservations } = row;
     if (++contributions > 20000) throw new Error('Topology exceeds 20000 projected contributions');
     const id = JSON.stringify([source.id, target.id, observation.protocol]);
     let edge = edges.get(id);
@@ -511,8 +722,10 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
         responses: {},
         flags: {},
         security: {},
+        securityObservations: [],
         hosts: [],
         metrics: [],
+        observations: [],
       };
       edges.set(id, edge);
     }
@@ -521,14 +734,28 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     edge.inferred ||= inferred;
     if (observation.code !== undefined) sum(edge.responses, observation.code, observation.rate);
     sum(edge.flags, observation.responseFlags, observation.rate);
-    sum(edge.security, observation.security, observation.rate);
+    const selectedReporter = reporters.includes('destination') ? 'destination' : reporters[0];
+    for (const policy of securityObservations) {
+      if (policy.reporter === selectedReporter)
+        sum(edge.security, policy.value === 'missing' ? 'unknown' : policy.value, policy.rate);
+    }
     if (!edge.hosts.includes(observation.host)) edge.hosts.push(observation.host);
     if (!edge.metrics.includes(observation.metric)) edge.metrics.push(observation.metric);
+    edge.observations.push({
+      identity: observation.identity,
+      reporters,
+      reporterIdentities,
+    });
+    for (const policy of securityObservations) {
+      edge.securityObservations.push({
+        ...policy,
+      });
+    }
   }
   let omitted = 0;
   for (const row of rows) {
     if (mode !== 'service') {
-      add(row.source, row.destination, row.observation, false);
+      add(row.source, row.destination, row, false);
       continue;
     }
     const target =
@@ -540,9 +767,9 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     const mapped = parents.get(row.source.id);
     if (mapped?.size) {
       if (mapped.size > 1) warnings.push({ code: 'service-aliases' });
-      for (const parent of mapped) add(nodes.get(parent)!, target, row.observation, true);
+      for (const parent of mapped) add(nodes.get(parent)!, target, row, true);
     } else if (!incoming.has(row.source.id) || row.source.kind === 'service') {
-      add(row.source, target, row.observation, false);
+      add(row.source, target, row, false);
     } else omitted++;
   }
   if (mode === 'service') {
@@ -550,6 +777,17 @@ export function projectTopology(input: TopologyObservations, mode: TopologyMode)
     if (omitted) warnings.push({ code: 'omitted-paths', count: omitted });
   }
   const visible = new Set([...edges.values()].flatMap(edge => [edge.source, edge.target]));
+  for (const edge of edges.values()) {
+    edge.observations.sort((a, b) => a.identity.localeCompare(b.identity));
+    edge.securityObservations.sort(
+      (a, b) =>
+        (a.reporter === 'source' ? -1 : 1) - (b.reporter === 'source' ? -1 : 1) ||
+        a.identity.localeCompare(b.identity)
+    );
+    edge.observations.forEach(observation =>
+      observation.reporters.sort((a, b) => (a === 'source' ? -1 : 1) - (b === 'source' ? -1 : 1))
+    );
+  }
   for (const node of nodes.values()) {
     node.workloads.sort();
     node.apps.sort();

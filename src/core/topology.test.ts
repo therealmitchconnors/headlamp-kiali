@@ -36,6 +36,12 @@ const result = (): MetricResult => ({
 });
 const decode = (value = result(), request = query) =>
   decodeTopology([{ metric: 'istio_requests_total', result: value }], request);
+const projectionInput = (observations: ReturnType<typeof decode>['observations']) => ({
+  observations,
+  warnings: [],
+  reporterMode: 'source' as const,
+  includeIdle: false,
+});
 const oracle: {
   cases: {
     input: { mode: TopologyMode; endpoint: TopologyEndpoint };
@@ -78,9 +84,9 @@ it('keeps tuple identities collision-free when upstream delimiter IDs collide', 
 });
 it.each([
   ['requests', ['istio_requests_total'], 'requests'],
-  ['tcpSent', ['istio_tcp_sent_bytes_total'], 'bytes'],
-  ['tcpReceived', ['istio_tcp_received_bytes_total'], 'bytes'],
-  ['tcpTotal', ['istio_tcp_sent_bytes_total', 'istio_tcp_received_bytes_total'], 'bytes'],
+  ['tcpSent', ['istio_tcp_received_bytes_total'], 'bytes'],
+  ['tcpReceived', ['istio_tcp_sent_bytes_total'], 'bytes'],
+  ['tcpTotal', ['istio_tcp_received_bytes_total', 'istio_tcp_sent_bytes_total'], 'bytes'],
   ['grpcSent', ['istio_request_messages_total'], 'messages'],
   ['grpcReceived', ['istio_response_messages_total'], 'messages'],
   ['grpcTotal', ['istio_request_messages_total', 'istio_response_messages_total'], 'messages'],
@@ -96,6 +102,26 @@ it.each([
     expect(item.query.match(/reporter="source"/g)?.length).toBe(3);
     expect(item.query).not.toContain('source_app');
   }
+});
+it('aligns combined query selectors to source egress, destination ingress and unserviced ingress', () => {
+  const expressions = topologyQueries({ ...query, reporter: 'combined' });
+  expect(expressions).toHaveLength(1);
+  const expression = expressions[0].query;
+  expect(expression.match(/reporter="source"/g)).toHaveLength(2);
+  expect(expression.match(/reporter="destination"/g)).toHaveLength(1);
+  expect(expression).toContain('source_cluster="Kubernetes",source_workload_namespace="bookinfo"');
+  expect(expression).toContain(
+    'destination_cluster="Kubernetes",destination_workload_namespace="bookinfo"'
+  );
+  expect(expression).toContain('destination_workload_namespace="unknown"');
+  expect(expression).toContain('source_workload_namespace!="bookinfo"');
+  expect(expression).toContain('destination_service=~"^.+\\\\.bookinfo\\\\..+$"');
+  expect(expression).toContain('sum by (reporter,');
+});
+it('preserves explicit single-reporter query construction', () => {
+  const expression = topologyQueries(query)[0].query;
+  expect(expression.match(/reporter="source"/g)).toHaveLength(3);
+  expect(expression).not.toContain('destination_service=~');
 });
 it.each([
   { namespace: '../ns' },
@@ -135,6 +161,434 @@ it('projects workload, canonical-app, versioned-app and inferred service adjacen
   expect(graph.warnings).toContainEqual({ code: 'service-projection' });
   expect(filterTopology(graph, 'ratings').edges).toHaveLength(1);
   expect(filterTopology(graph, 'missing').nodes).toHaveLength(0);
+});
+it('pairs exact reporter series once, records both identities and retains one-sided reports in every projection', () => {
+  const data = result();
+  const sourceSeries = data.series.slice(0, 5);
+  data.series = [
+    ...sourceSeries,
+    ...sourceSeries.map(series => ({
+      ...series,
+      labels: { ...series.labels, reporter: 'destination' },
+      samples: series.samples.map(sample => ({ ...sample })),
+    })),
+  ];
+  const mixed = decode(data, { ...query, reporter: 'combined' });
+  expect(mixed.observations).toHaveLength(10);
+  expect(mixed.observations[0].identity).toBe(mixed.observations[5].identity);
+  for (const mode of ['workload', 'app', 'versionedApp', 'service'] as const) {
+    const graph = projectTopology(mixed, mode);
+    expect(graph.edges.reduce((total, edge) => total + edge.rate, 0)).toBe(11);
+    expect(
+      graph.edges
+        .flatMap(edge => edge.observations)
+        .every(
+          observation =>
+            observation.reporters.includes('source') &&
+            observation.reporters.includes('destination')
+        )
+    ).toBe(true);
+    expect(graph.edges.map(edge => edge.protocol)).toContain('grpc');
+    expect(graph.edges.map(edge => edge.protocol)).toContain('http');
+  }
+
+  data.series = sourceSeries;
+  const sourceOnly = decode(data, { ...query, reporter: 'combined' });
+  expect(projectTopology(sourceOnly, 'workload').edges[0].observations[0].reporters).toEqual([
+    'source',
+  ]);
+
+  const destinationSeries = sourceSeries.map(series => ({
+    ...series,
+    labels: { ...series.labels, reporter: 'destination' },
+  }));
+  data.series = destinationSeries;
+  const destinationOnly = decode(data, { ...query, reporter: 'combined' });
+  expect(projectTopology(destinationOnly, 'workload').edges[0].observations[0].reporters).toEqual([
+    'destination',
+  ]);
+  expect(decode(data, { ...query, reporter: 'destination' }).observations).toHaveLength(
+    destinationSeries.length
+  );
+});
+it.each([
+  ['requests', ['istio_requests_total'], 'http', 2],
+  ['tcpSent', ['istio_tcp_received_bytes_total'], 'tcp', 2],
+  ['tcpReceived', ['istio_tcp_sent_bytes_total'], 'tcp', 2],
+  ['tcpTotal', ['istio_tcp_received_bytes_total', 'istio_tcp_sent_bytes_total'], 'tcp', 5],
+  ['grpcSent', ['istio_request_messages_total'], 'grpc', 2],
+  ['grpcReceived', ['istio_response_messages_total'], 'grpc', 2],
+  ['grpcTotal', ['istio_request_messages_total', 'istio_response_messages_total'], 'grpc', 5],
+] as const)(
+  'normalizes paired %s reporter observations once in every projection',
+  (measure, metrics, protocol, total) => {
+    const request = { ...query, reporter: 'combined' as const, measure };
+    const reads = metrics.map((metric, index) => ({
+      metric,
+      result: {
+        warnings: [],
+        series: ['source', 'destination'].map(reporter => ({
+          labels: {
+            ...fixture.labels,
+            reporter,
+            ...(measure === 'requests'
+              ? { request_protocol: 'http', response_code: '200', response_flags: '-' }
+              : { request_protocol: protocol }),
+          },
+          samples: [{ timestamp: request.end, value: index === 0 ? 2 : 3 }],
+        })),
+      },
+    }));
+    const decoded = decodeTopology(reads, request);
+    expect(decoded.observations).toHaveLength(metrics.length * 2);
+    for (const mode of ['workload', 'app', 'versionedApp', 'service'] as const) {
+      const graph = projectTopology(decoded, mode);
+      expect(graph.edges.reduce((sum, edge) => sum + edge.rate, 0)).toBe(total);
+      expect(graph.edges.every(edge => edge.protocol === protocol)).toBe(true);
+      expect(
+        graph.edges
+          .flatMap(edge => edge.observations)
+          .every(
+            observation =>
+              observation.reporters.includes('source') &&
+              observation.reporters.includes('destination')
+          )
+      ).toBe(true);
+    }
+  }
+);
+it('retains source-reported unserviced ingress and unknown endpoints without inventing a destination report', () => {
+  const data = result();
+  data.series = [
+    {
+      labels: {
+        reporter: 'source',
+        source_cluster: 'edge-cluster',
+        source_workload_namespace: 'ingress',
+        source_workload: 'gateway',
+        source_canonical_service: 'gateway',
+        source_canonical_revision: 'v1',
+        destination_cluster: 'Kubernetes',
+        destination_workload_namespace: 'unknown',
+        destination_workload: 'unknown',
+        destination_service_namespace: 'unknown',
+        destination_service: 'reviews.bookinfo.svc.cluster.local',
+        destination_service_name: 'reviews',
+        destination_canonical_service: 'unknown',
+        destination_canonical_revision: 'unknown',
+        request_protocol: 'http',
+        response_code: '503',
+        response_flags: 'UF',
+        connection_security_policy: 'unknown',
+      },
+      samples: [{ timestamp: query.end, value: 2 }],
+    },
+  ];
+  const decoded = decode(data, { ...query, reporter: 'combined' });
+  const graph = projectTopology(decoded, 'workload');
+  expect(graph.edges[0].rate).toBe(2);
+  expect(graph.nodes.some(node => node.kind === 'service')).toBe(true);
+  expect(graph.edges[0].observations[0].reporters).toEqual(['source']);
+});
+it('distinguishes missing from explicit unknown labels and rejects an ambiguous cross-reporter pair', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  delete data.series[0].labels.source_canonical_revision;
+  data.series.push({
+    ...data.series[0],
+    labels: {
+      ...data.series[0].labels,
+      source_canonical_revision: 'unknown',
+      reporter: 'destination',
+    },
+  });
+  const mixed = decode(data, { ...query, reporter: 'combined' });
+  expect(mixed.observations[0].identity).not.toBe(mixed.observations[1].identity);
+  expect(() => projectTopology(mixed, 'workload')).toThrow(/Conflicting source\/destination/);
+});
+it('rejects a paired reporter with a conflicting response-code identity', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  const destinationLabels = { ...data.series[0].labels, reporter: 'destination' };
+  data.series.push({
+    ...data.series[0],
+    labels: { ...destinationLabels, response_code: '503' },
+  });
+  expect(() =>
+    projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
+  ).toThrow(/Conflicting source\/destination/);
+});
+it.each([
+  ['different policies', 'unknown', 'mutual_tls'],
+  ['missing versus explicit unknown', undefined, 'unknown'],
+])(
+  'deduplicates %s while preserving reporter identities and policy labels',
+  (_, sourcePolicy, destinationPolicy) => {
+    const data = result();
+    data.series = data.series.slice(0, 1);
+    data.series[0].samples[0].value = 2;
+    if (sourcePolicy === undefined) delete data.series[0].labels.connection_security_policy;
+    else data.series[0].labels.connection_security_policy = sourcePolicy;
+    data.series.push({
+      ...data.series[0],
+      labels: { ...data.series[0].labels, reporter: 'destination' },
+      samples: [{ timestamp: query.end, value: 2 }],
+    });
+    if (destinationPolicy === undefined) delete data.series[1].labels.connection_security_policy;
+    else data.series[1].labels.connection_security_policy = destinationPolicy;
+
+    const decoded = decode(data, { ...query, reporter: 'combined' });
+    expect(decoded.observations[0].identity).not.toBe(decoded.observations[1].identity);
+    const sourceIdentity = decoded.observations.find(row => row.reporter === 'source')!.identity;
+    const destinationIdentity = decoded.observations.find(
+      row => row.reporter === 'destination'
+    )!.identity;
+    for (const mode of ['workload', 'app', 'versionedApp', 'service'] as const) {
+      const graph = projectTopology(decoded, mode);
+      expect(graph.edges).toHaveLength(1);
+      expect(graph.edges[0].rate).toBe(2);
+      expect(graph.edges[0].security).toEqual({ [destinationPolicy ?? 'unknown']: 2 });
+      expect(graph.edges[0].observations).toEqual([
+        {
+          identity: destinationIdentity,
+          reporters: ['source', 'destination'],
+          reporterIdentities: [
+            { reporter: 'source', identity: sourceIdentity },
+            { reporter: 'destination', identity: destinationIdentity },
+          ],
+        },
+      ]);
+      expect(graph.edges[0].securityObservations).toEqual([
+        {
+          reporter: 'source',
+          identity: sourceIdentity,
+          value: sourcePolicy ?? 'missing',
+          rate: 2,
+        },
+        {
+          reporter: 'destination',
+          identity: destinationIdentity,
+          value: destinationPolicy ?? 'missing',
+          rate: 2,
+        },
+      ]);
+    }
+    const graph = projectTopology(decoded, 'workload');
+    expect(graph.nodes.map(node => node.id)).toEqual([
+      '["wl","Kubernetes","bookinfo","productpage-v1"]',
+      '["wl","Kubernetes","bookinfo","reviews-v1"]',
+    ]);
+    expect(graph.edges[0].id).toBe(
+      JSON.stringify([
+        '["wl","Kubernetes","bookinfo","productpage-v1"]',
+        '["wl","Kubernetes","bookinfo","reviews-v1"]',
+        'http',
+      ])
+    );
+  }
+);
+it('uses destination-first deduplication for unequal reporter rates and retains both rates', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].labels.connection_security_policy = 'unknown';
+  data.series[0].samples[0].value = 3;
+  data.series.push({
+    ...data.series[0],
+    labels: {
+      ...data.series[0].labels,
+      reporter: 'destination',
+      connection_security_policy: 'mutual_tls',
+    },
+    samples: [{ timestamp: query.end, value: 2 }],
+  });
+
+  const decoded = decode(data, { ...query, reporter: 'combined' });
+  const sourceIdentity = decoded.observations.find(row => row.reporter === 'source')!.identity;
+  const destinationIdentity = decoded.observations.find(
+    row => row.reporter === 'destination'
+  )!.identity;
+  const graph = projectTopology(decoded, 'workload');
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].id).toBe(
+    JSON.stringify([
+      '["wl","Kubernetes","bookinfo","productpage-v1"]',
+      '["wl","Kubernetes","bookinfo","reviews-v1"]',
+      'http',
+    ])
+  );
+  expect(graph.edges[0].rate).toBe(2);
+  expect(graph.edges[0].security).toEqual({ mutual_tls: 2 });
+  expect(graph.edges[0].observations).toEqual([
+    {
+      identity: destinationIdentity,
+      reporters: ['source', 'destination'],
+      reporterIdentities: [
+        { reporter: 'source', identity: sourceIdentity },
+        { reporter: 'destination', identity: destinationIdentity },
+      ],
+    },
+  ]);
+  expect(graph.edges[0].securityObservations).toEqual([
+    { reporter: 'source', identity: sourceIdentity, value: 'unknown', rate: 3 },
+    { reporter: 'destination', identity: destinationIdentity, value: 'mutual_tls', rate: 2 },
+  ]);
+});
+it.each([
+  [
+    'workload',
+    { source_workload: 'other-productpage' },
+    '["wl","Kubernetes","bookinfo","other-productpage"]',
+  ],
+  [
+    'cluster',
+    { source_cluster: 'remote-east' },
+    '["wl","remote-east","bookinfo","productpage-v1"]',
+  ],
+])(
+  'retains separate source and destination edges when %s identity differs',
+  (_, labels, otherNode) => {
+    const data = result();
+    data.series = data.series.slice(0, 1);
+    const source = data.series[0];
+    source.samples[0].value = 2;
+    source.labels.connection_security_policy = 'unknown';
+    data.series.push({
+      ...source,
+      labels: {
+        ...source.labels,
+        reporter: 'destination',
+        ...labels,
+        connection_security_policy: 'mutual_tls',
+      },
+      samples: [{ timestamp: query.end, value: 2 }],
+    });
+    const graph = projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload');
+    expect(graph.edges).toHaveLength(2);
+    expect(graph.edges.map(edge => edge.rate)).toEqual([2, 2]);
+    expect(
+      graph.edges
+        .flatMap(edge => edge.observations)
+        .map(observation => observation.reporters[0])
+        .sort()
+    ).toEqual(['destination', 'source']);
+    expect(graph.nodes.map(node => node.id)).toContain(otherNode);
+  }
+);
+it('aggregates policy partitions independently for each reporter before destination-first deduplication', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].labels.connection_security_policy = 'unknown';
+  data.series[0].samples[0].value = 2;
+  data.series.push(
+    {
+      ...data.series[0],
+      labels: {
+        ...data.series[0].labels,
+        reporter: 'destination',
+        connection_security_policy: 'mutual_tls',
+      },
+      samples: [{ timestamp: query.end, value: 1.5 }],
+    },
+    {
+      ...data.series[0],
+      labels: {
+        ...data.series[0].labels,
+        reporter: 'destination',
+        connection_security_policy: 'unknown',
+      },
+      samples: [{ timestamp: query.end, value: 0.25 }],
+    }
+  );
+  const graph = projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload');
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].rate).toBe(1.75);
+  expect(graph.edges[0].security).toEqual({ mutual_tls: 1.5, unknown: 0.25 });
+  expect(
+    graph.edges[0].securityObservations.map(({ reporter, value, rate }) => [reporter, value, rate])
+  ).toEqual([
+    ['source', 'unknown', 2],
+    ['destination', 'mutual_tls', 1.5],
+    ['destination', 'unknown', 0.25],
+  ]);
+  expect(graph.edges[0].observations[0].reporterIdentities).toEqual(
+    graph.edges[0].securityObservations.map(({ reporter, identity }) => ({ reporter, identity }))
+  );
+});
+it('fails closed when a reporter is missing one same-protocol response series', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  const source = data.series[0];
+  data.series.push({
+    ...source,
+    labels: { ...source.labels, reporter: 'destination' },
+    samples: source.samples.map(sample => ({ ...sample })),
+  });
+  data.series.push({
+    ...source,
+    labels: { ...source.labels, response_code: '503' },
+    samples: [{ timestamp: query.end, value: 2 }],
+  });
+  expect(() =>
+    projectTopology(decode(data, { ...query, reporter: 'combined' }), 'workload')
+  ).toThrow(/Conflicting source\/destination topology reporter identities/);
+});
+it('keeps zero observations distinct from absent reporter observations', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].samples[0].value = 0;
+  data.series.push({
+    ...data.series[0],
+    labels: { ...data.series[0].labels, reporter: 'destination' },
+    samples: data.series[0].samples.map(sample => ({ ...sample })),
+  });
+  const mixed = decode(data, { ...query, reporter: 'combined', includeIdle: true });
+  expect(projectTopology(mixed, 'workload').edges[0].rate).toBe(0);
+
+  data.series[1].samples[0].value = 1;
+  const differingRates = projectTopology(
+    decode(data, { ...query, reporter: 'combined', includeIdle: true }),
+    'workload'
+  );
+  expect(differingRates.edges[0].rate).toBe(1);
+  expect(differingRates.edges[0].securityObservations.map(row => row.rate)).toEqual([0, 1]);
+  data.series[1].samples[0].value = 0;
+  data.series.pop();
+  const oneSided = decode(data, { ...query, reporter: 'combined', includeIdle: true });
+  expect(projectTopology(oneSided, 'workload').edges[0].observations[0].reporters).toEqual([
+    'source',
+  ]);
+});
+it('treats a zero-rate reporter as absent when idle edges are excluded', () => {
+  const data = result();
+  data.series = data.series.slice(0, 1);
+  data.series[0].samples[0].value = 3;
+  data.series.push({
+    ...data.series[0],
+    labels: { ...data.series[0].labels, reporter: 'destination' },
+    samples: [{ timestamp: query.end, value: 0 }],
+  });
+  const graph = projectTopology(
+    decode(data, { ...query, reporter: 'combined', includeIdle: false }),
+    'workload'
+  );
+  expect(graph.nodes.map(node => node.id)).toEqual([
+    '["wl","Kubernetes","bookinfo","productpage-v1"]',
+    '["wl","Kubernetes","bookinfo","reviews-v1"]',
+  ]);
+  expect(graph.edges).toHaveLength(1);
+  expect(graph.edges[0].rate).toBe(3);
+  expect(graph.edges[0].observations[0].reporters).toEqual(['source']);
+  expect(graph.edges[0].securityObservations.map(({ reporter, rate }) => [reporter, rate])).toEqual(
+    [['source', 3]]
+  );
 });
 it('does not split one workload into spurious versioned nodes or invent a source service label', () => {
   const data = result();
@@ -237,25 +691,31 @@ it('rejects unexpected dimensions instead of double-counting supposedly aggregat
   });
   expect(() => decode(data)).toThrow(/outside the requested aggregation/);
 });
+it('bounds retained exact reporter identities independently of series cardinality', () => {
+  const data = result();
+  data.series = Array.from({ length: 1001 }, (_, index) => ({
+    labels: {
+      ...fixture.labels,
+      response_code: String(index).padStart(4096, '0'),
+    },
+    samples: [{ timestamp: query.end, value: 1 }],
+  }));
+  expect(() => decode(data)).toThrow(/4,000,000-character limit/);
+});
 it('bounds nodes, observations, filters and overflowing aggregated rates', () => {
   const sample = decode().observations[0];
   const observations = Array.from({ length: 1001 }, (_, index) => ({
     ...sample,
     source: { ...sample.source, workload: `w-${index}` },
   }));
-  expect(() => projectTopology({ observations, warnings: [] }, 'workload')).toThrow(/1000/);
-  expect(() =>
-    projectTopology({ observations: Array(4001).fill(sample), warnings: [] }, 'app')
-  ).toThrow(/4000/);
+  expect(() => projectTopology(projectionInput(observations), 'workload')).toThrow(/1000/);
+  expect(() => projectTopology(projectionInput(Array(4001).fill(sample)), 'app')).toThrow(/4000/);
   expect(() =>
     projectTopology(
-      {
-        observations: [
-          { ...sample, rate: Number.MAX_VALUE },
-          { ...sample, rate: Number.MAX_VALUE },
-        ],
-        warnings: [],
-      },
+      projectionInput([
+        { ...sample, rate: Number.MAX_VALUE },
+        { ...sample, rate: Number.MAX_VALUE },
+      ]),
       'app'
     )
   ).toThrow(/numeric/);
@@ -268,22 +728,15 @@ it('accepts the exact node/edge budgets and rejects the next distinct identity',
     ...sample,
     source: { ...sample.source, workload: `w-${index}` },
   }));
-  expect(projectTopology({ observations: nodes, warnings: [] }, 'workload').nodes).toHaveLength(
-    1000
-  );
+  expect(projectTopology(projectionInput(nodes), 'workload').nodes).toHaveLength(1000);
   const edges = Array.from({ length: 2000 }, (_, index) => ({
     ...sample,
     source: { ...sample.source, workload: `s-${index % 20}` },
     destination: { ...sample.destination, workload: `d-${Math.floor(index / 20)}` },
   }));
-  expect(projectTopology({ observations: edges, warnings: [] }, 'workload').edges).toHaveLength(
-    2000
-  );
+  expect(projectTopology(projectionInput(edges), 'workload').edges).toHaveLength(2000);
   expect(() =>
-    projectTopology(
-      { observations: [...edges, { ...edges[0], protocol: 'grpc' }], warnings: [] },
-      'workload'
-    )
+    projectTopology(projectionInput([...edges, { ...edges[0], protocol: 'grpc' }]), 'workload')
   ).toThrow(/2000/);
 });
 
@@ -304,11 +757,11 @@ it('bounds Service alias expansion by contributions rather than only final edge 
     },
   };
   const children = Array.from({ length: 999 }, (_, index) => ({ ...child, code: `code-${index}` }));
-  expect(
-    projectTopology({ observations: [...parents, ...children], warnings: [] }, 'service').edges
-  ).toHaveLength(40);
+  expect(projectTopology(projectionInput([...parents, ...children]), 'service').edges).toHaveLength(
+    40
+  );
   expect(() =>
-    projectTopology({ observations: [...parents, ...children, child], warnings: [] }, 'service')
+    projectTopology(projectionInput([...parents, ...children, child]), 'service')
   ).toThrow(/20000/);
 });
 

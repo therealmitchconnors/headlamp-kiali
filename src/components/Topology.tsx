@@ -158,6 +158,12 @@ function TopologyResultsSnapshot({
       : unitKind === 'bytes'
       ? t('Bytes / second')
       : t('Messages / second');
+  const reporterName =
+    snapshot.query.reporter === 'combined'
+      ? t('Combined source + destination')
+      : snapshot.query.reporter === 'source'
+      ? t('Source')
+      : t('Destination');
   const node =
     selection?.kind === 'node' ? graph?.nodes.find(node => node.id === selection.id) : undefined;
   const edge =
@@ -180,7 +186,7 @@ function TopologyResultsSnapshot({
           {
             namespace: snapshot.query.namespace,
             cluster: snapshot.query.telemetryCluster,
-            reporter: snapshot.query.reporter,
+            reporter: reporterName,
             seconds: snapshot.query.windowSeconds,
             time: new Date(snapshot.query.end * 1000).toISOString(),
           }
@@ -432,9 +438,23 @@ function TopologyResultsSnapshot({
               <Typography>
                 {t('Metric sources: {{values}}', { values: edge.metrics.join(', ') })}
               </Typography>
+              <Typography>
+                {t('Reporter provenance: {{reporters}} across {{count}} exact series', {
+                  reporters: [
+                    ...new Set(edge.observations.flatMap(observation => observation.reporters)),
+                  ]
+                    .sort((a, b) => (a === 'source' ? -1 : 1) - (b === 'source' ? -1 : 1))
+                    .map(reporter => t(reporter === 'source' ? 'Source' : 'Destination'))
+                    .join(', '),
+                  count: edge.observations.reduce(
+                    (total, observation) => total + observation.reporterIdentities.length,
+                    0
+                  ),
+                })}
+              </Typography>
               <Alert severity="info">
                 {t(
-                  'Response codes and flags are observations, not the configurable health calculation. Reported security policy is not proof of enforcement.'
+                  'Paired reports use destination-first deduplication (rates are not added); unmatched reports remain. Reporter-specific rates and security labels are retained as observations, not proof of enforcement.'
                 )}
               </Alert>
               <Distribution
@@ -443,11 +463,26 @@ function TopologyResultsSnapshot({
                 unit={unit}
               />
               <Distribution title={t('Response flags')} rates={edge.flags} unit={unit} />
-              <Distribution
-                title={t('Reported connection security')}
-                rates={edge.security}
-                unit={unit}
-              />
+              <SectionBox title={t('Reporter-specific connection-security labels')}>
+                <SimpleTable
+                  data={edge.securityObservations}
+                  emptyMessage={t('Not reported for this measure')}
+                  columns={[
+                    {
+                      label: t('Reported by'),
+                      getter: ({ reporter }) => t(reporter === 'source' ? 'Source' : 'Destination'),
+                    },
+                    {
+                      label: t('Connection-security label'),
+                      getter: ({ value }) => value || t('Empty reported value'),
+                    },
+                    {
+                      label: unit,
+                      getter: ({ rate }) => rate.toPrecision(5),
+                    },
+                  ]}
+                />
+              </SectionBox>
               <Button onClick={() => setSelection(undefined)}>
                 {t('Close connection inspection')}
               </Button>
@@ -510,7 +545,7 @@ export function TopologyScope({ cluster }: { cluster: string }) {
   const [namespace, setNamespace] = useState(
     new URLSearchParams(location.search).get('namespace') ?? ''
   );
-  const [reporter, setReporter] = useState<TopologyQuery['reporter']>('source');
+  const [reporter, setReporter] = useState<TopologyQuery['reporter']>('combined');
   const [windowSeconds, setWindow] = useState<TopologyQuery['windowSeconds']>(600);
   const [measure, setMeasure] = useState<TopologyQuery['measure']>('requests');
   const [includeIdle, setIdle] = useState(false);
@@ -535,7 +570,7 @@ export function TopologyScope({ cluster }: { cluster: string }) {
         <Stack spacing={2}>
           <Alert severity="info">
             {t(
-              'Choose the exact Istio metric cluster label, not a Headlamp context name. This snapshot uses one reporter and includes traffic touching the reported workload or destination Service namespace. Missing source/destination reports, unserviced ingress and ambient waypoint deduplication are not reconstructed.'
+              'Choose the exact Istio metric cluster label, not a Headlamp context name. Combined mode pairs exact source/destination observations without adding them twice, retains buckets reported by only one side, and includes source-reported unserviced ingress. Partial or conflicting overlapping buckets fail closed. Ambient and waypoint behavior is not inferred.'
             )}
           </Alert>
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
@@ -564,12 +599,13 @@ export function TopologyScope({ cluster }: { cluster: string }) {
               value={reporter}
               onChange={event => {
                 const value = event.target.value;
-                if (value === 'source' || value === 'destination') {
+                if (value === 'source' || value === 'destination' || value === 'combined') {
                   setReporter(value);
                   setQuery(undefined);
                 }
               }}
             >
+              <MenuItem value="combined">{t('Combined source + destination')}</MenuItem>
               <MenuItem value="source">{t('Source')}</MenuItem>
               <MenuItem value="destination">{t('Destination')}</MenuItem>
             </TextField>
@@ -601,6 +637,13 @@ export function TopologyScope({ cluster }: { cluster: string }) {
               select
               label={t('Traffic measure')}
               value={measure}
+              helperText={
+                measure.startsWith('tcp')
+                  ? t(
+                      'TCP direction follows Kiali; Istio sent/received byte counters are reversed.'
+                    )
+                  : undefined
+              }
               onChange={event => {
                 const value = event.target.value;
                 if (
